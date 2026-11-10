@@ -80,6 +80,14 @@ class Settings(BaseSettings):
     mail_catchall_domain: str | None = None  # domain of inbound aliases and reply+ addresses
     mail_inbound_token: str | None = None  # shared secret for POST /api/v1/chatter/inbound (MTA webhook)
 
+    # OAuth clients of calendar sync (a company setting ``calendar.<provider>_client_id`` / ``_client_secret``
+    # overrides these for that company's users)
+    google_oauth_client_id: str | None = None
+    google_oauth_client_secret: str | None = None
+    microsoft_oauth_client_id: str | None = None
+    microsoft_oauth_client_secret: str | None = None
+    microsoft_oauth_tenant: str = "common"
+
     # AI gateway
     ai_gateway_url: str = "http://localhost:8100"
     ai_gateway_token: str = "dev-only-gateway-token"  # noqa: S105 - rejected by check() in production

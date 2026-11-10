@@ -122,6 +122,26 @@ def test_fanout_to_50_connected_members_under_a_second(env: Any) -> None:
     assert elapsed < 1.0
 
 
+def test_presence_endpoint_answers_for_every_process(admin, monkeypatch) -> None:  # type: ignore[no-untyped-def]
+    """With the Redis backend, ``/presence`` lists users connected to any API process."""
+    import time as _time
+
+    from tessera.config import get_settings
+    from tessera.orm.registry import Registry
+    from tessera.realtime.hub import PRESENCE_KEY, PRESENCE_TTL, hub
+    from tessera.realtime.tests.memory_redis import MemoryRedis
+
+    redis = MemoryRedis()
+    monkeypatch.setattr(hub, "_redis", redis)
+    monkeypatch.setattr(get_settings(), "realtime_backend", "redis")
+    key = PRESENCE_KEY.format(db=Registry.get(get_settings().database_url).dbname)
+    now = _time.time()
+    redis.zadd(key, {"41:conn-on-process-b": now + PRESENCE_TTL, "42:stale-conn": now - 1})  # another process
+    assert admin.get("/api/v1/discuss/presence").json() == {"online": [41]}
+    monkeypatch.setattr(get_settings(), "realtime_backend", "memory")
+    assert 41 not in admin.get("/api/v1/discuss/presence").json()["online"]  # in-process: this process only
+
+
 def test_api_flow(admin, app) -> None:  # type: ignore[no-untyped-def]
     from fastapi.testclient import TestClient
 

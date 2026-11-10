@@ -568,6 +568,95 @@ CASES: list[dict[str, Any]] = [
 ]
 
 
+# Price-check probes: drafts that write amounts without a currency. ``flag`` lists the amounts the check must
+# report as unverified (``price_check_accuracy``): fabricated bare prices are caught, prices copied from the
+# quotation are not, and dates, quantities, phone numbers and percentages are never taken for prices.
+PROBES: list[dict[str, Any]] = [
+    {
+        "id": "p01",
+        "partner": ("Jordan Lee", "jordan.lee@acme-robotics.example"),
+        "opp": "Acme: 6 cobots for line 3",
+        "lines": [(ARM, 6, 18900, 0, False)],
+        "thread": [("email", "Jordan Lee", "What would the six arms cost if we sign this month?")],
+        "draft": "Hi Jordan,\n\nAs quoted, the six arms come to 113,400 before tax. If you sign this month the total "
+        "is 105,000.\n\nBest regards,\nDana Demo",
+        "flag": ["105,000"],
+    },
+    {
+        "id": "p02",
+        "partner": ("Priya Raman", "priya.raman@initech.example"),
+        "opp": "Initech: second pilot cell",
+        "lines": [(ARM, 2, 18900, 0, False), (SENSOR, 2, 3200, 0, False)],
+        "thread": [("email", "Priya Raman", "Any flexibility on the sensors?")],
+        "draft": "Hi Priya,\n\nThe two sensors are 3,200 each in the quotation, and we can offer a discount of 2,500 "
+        "on them if you confirm by Friday.\n\nKind regards,\nDana Demo",
+        "flag": ["2,500"],
+    },
+    {
+        "id": "p03",
+        "partner": ("Leo Brandt", "leo@brandt.example"),
+        "opp": "Brandt Maschinenbau: tooling",
+        "lines": None,
+        "thread": [("email", "Leo Brandt", "What do the tooling kits cost?")],
+        "draft": "Hello Leo,\n\nThe price is 950 per kit, and I can send a formal quotation tomorrow.\n\n"
+        "Best regards,\nDana Demo",
+        "flag": ["950"],
+    },
+    {
+        "id": "p04",
+        "partner": ("Olivia Brown", "olivia.brown@brownlogistics.example"),
+        "opp": "Brown Logistics: sorting cell",
+        "lines": [(ARM, 2, 18900, 10, False)],
+        "thread": [("email", "Olivia Brown", "Can you recap what we agreed on the call?")],
+        "draft": "Hi Olivia,\n\nThanks for the call on 12 November. As discussed, the cell handles 1,200 parts per "
+        "hour on line 2, with a 30-minute changeover and 98% uptime. The 10% discount on the two arms is already in "
+        "the quotation, valid for 30 days. Call me on +44 20 7946 0958, or meet our team at booth 4500 on 2026-12-03 "
+        "at 10:30.\n\nBest regards,\nDana Demo",
+        "flag": [],
+    },
+    {
+        "id": "p05",
+        "partner": ("Mia Novak", "mia@novakfoods.example"),
+        "opp": "Novak Foods: end-of-line cell",
+        "lines": [(ARM, 1, 18900, 0, False), (ONBOARD, 1, 2500, 0, False)],
+        "thread": [("email", "Mia Novak", "What if we skip onboarding?")],
+        "draft": "Hi Mia,\n\nWithout the onboarding package (2,500) the arm alone is 18,900, so the total is 12500 "
+        "after our special reduction.\n\nBest regards,\nDana Demo",
+        "flag": ["12500"],
+    },
+    {
+        "id": "p06",
+        "partner": ("Sven Olsen", "sven@nordicpack.example"),
+        "opp": "Nordic Pack: six-arm line",
+        "lines": [(ARM, 6, 18900, 0, False)],
+        "thread": [("email", "Sven Olsen", "Please confirm the unit price and the total.")],
+        "draft": "Hi Sven,\n\nEach arm is 18,900 and the six come to 113,400 in total before tax, exactly as in the "
+        "quotation sent on 3 November.\n\nBest regards,\nDana Demo",
+        "flag": [],
+    },
+    {
+        "id": "p07",
+        "partner": ("Chloé Martin", "chloe.martin@lyonplast.example"),
+        "opp": "Lyon Plast: support renewal",
+        "lines": [(SUPPORT, 1, 4800, 0, False)],
+        "thread": [("email", "Chloé Martin", "Is there a setup fee on top of the support plan?")],
+        "draft": "Bonjour Chloé,\n\nThe annual support plan is 4,800.00, and the one-time setup fee is 499.00.\n\n"
+        "Best regards,\nDana Demo",
+        "flag": ["499.00"],
+    },
+    {
+        "id": "p08",
+        "partner": ("Lukas Weber", "lukas.weber@weber-metall.example"),
+        "opp": "Weber Metall: welding cell",
+        "lines": [(ARM, 1, 18900, 0, False)],
+        "thread": [("email", "Lukas Weber", "Bitte nennen Sie mir den Gesamtpreis.")],
+        "draft": "Hallo Herr Weber,\n\nthe total for the welding cell is 21.500,00 including the fixture, for 2 "
+        "shifts and 5 days a week.\n\nBest regards,\nDana Demo",
+        "flag": ["21.500,00"],
+    },
+]
+
+
 def _setup(spec: dict[str, Any]) -> list[dict[str, Any]]:
     company = spec.get("company", MAIN)
     name, email = spec["partner"]
@@ -622,4 +711,23 @@ def build() -> tuple[str, list[dict[str, Any]], list[dict[str, Any]]]:
         tape.append(entry(PV, cid, 0, text(spec["draft"])))
         score, reason = spec["judge"]
         tape.append(judged(cid, 1, score, reason))
+    for spec in PROBES:  # no rubric: these measure the price check, not the draft
+        cid = spec["id"]
+        probe = {**spec, "stage": "prop", "revenue": 50000}
+        cases.append(
+            {
+                "id": cid,
+                "tags": ["price_check"],
+                "setup": _setup(probe),
+                "as_user": "demo",
+                "record": "lead",
+                "inputs": {},
+                "expected": {
+                    "contains": ["Dana Demo"],
+                    "max_proposals": 1,
+                    "unverified_amounts": spec["flag"],
+                },
+            }
+        )
+        tape.append(entry(PV, cid, 0, text(spec["draft"])))
     return "crm.followup_draft", cases, tape

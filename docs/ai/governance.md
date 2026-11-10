@@ -80,7 +80,9 @@ Each feature has a golden set (`ai/evals/<feature>.jsonl`, at least 30 cases, 10
 forecasting) with thresholds in `ai/features.yaml`. CI replays recorded responses
 (`ai/cassettes/<feature>.jsonl`) and fails when a threshold is not met; `tessera ai eval report --strict`
 fails when any declared feature lacks a prompt, flag, thresholds, cases, cassettes or prompt-injection
-cases.
+cases. Evaluation runs only see their own corpus (the case records and the module records the cases name):
+the target database's business data is hidden for the duration of the run, which is rolled back, so the
+scores do not depend on the database they run against.
 
 ## Known limitations (Phase 1.5)
 

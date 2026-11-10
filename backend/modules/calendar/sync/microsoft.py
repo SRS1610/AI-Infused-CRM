@@ -10,6 +10,7 @@ import httpx
 
 from modules.calendar.ics import RemoteEvent
 from modules.calendar.sync.base import SyncConflict
+from modules.calendar.sync.oauth import BearerAuth, TokenSource
 
 GRAPH = "https://graph.microsoft.com"
 DAYS = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"]
@@ -101,19 +102,22 @@ def to_body(event: RemoteEvent) -> dict[str, Any]:
 
 
 class MicrosoftAdapter:
-    def __init__(self, token: str, calendar_id: str | None = None, client: httpx.Client | None = None) -> None:
+    def __init__(
+        self, token: str | TokenSource, calendar_id: str | None = None, client: httpx.Client | None = None
+    ) -> None:
         cal = f"calendars/{calendar_id}" if calendar_id and calendar_id != "primary" else "calendar"
         self.events = f"{GRAPH}/v1.0/me/{cal}/events"
         self.delta = f"{GRAPH}/beta/me/{cal}/events/delta"
         self.client = client or httpx.Client(timeout=20)
-        self.headers = {"Authorization": f"Bearer {token}", "Prefer": 'outlook.timezone="UTC"'}
+        self.auth = BearerAuth(token)  # refreshes an expired OAuth token once on 401
+        self.headers = {"Prefer": 'outlook.timezone="UTC"'}
 
     def changes(self, sync_token: str | None) -> tuple[list[RemoteEvent], list[str], str | None]:
         url = sync_token or self.delta
         changed: list[RemoteEvent] = []
         deleted: list[str] = []
         while True:
-            resp = self.client.get(url, headers=self.headers)
+            resp = self.client.get(url, headers=self.headers, auth=self.auth)
             if resp.status_code == 410 and sync_token:
                 return self.changes(None)
             resp.raise_for_status()
@@ -133,9 +137,9 @@ class MicrosoftAdapter:
         if remote_id:
             if etag:
                 headers["If-Match"] = etag
-            resp = self.client.patch(f"{self.events}/{remote_id}", json=to_body(event), headers=headers)
+            resp = self.client.patch(f"{self.events}/{remote_id}", json=to_body(event), headers=headers, auth=self.auth)
         else:
-            resp = self.client.post(self.events, json=to_body(event), headers=headers)
+            resp = self.client.post(self.events, json=to_body(event), headers=headers, auth=self.auth)
         if resp.status_code == 412:
             raise SyncConflict(remote_id)
         resp.raise_for_status()
@@ -143,6 +147,6 @@ class MicrosoftAdapter:
         return data["id"], data.get("changeKey")
 
     def delete(self, remote_id: str, etag: str | None) -> None:
-        resp = self.client.delete(f"{self.events}/{remote_id}", headers=self.headers)
+        resp = self.client.delete(f"{self.events}/{remote_id}", headers=self.headers, auth=self.auth)
         if resp.status_code not in (200, 204, 404):
             resp.raise_for_status()

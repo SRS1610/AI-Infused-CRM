@@ -10,6 +10,7 @@ import httpx
 
 from modules.calendar.ics import RemoteEvent
 from modules.calendar.sync.base import SyncConflict
+from modules.calendar.sync.oauth import BearerAuth, TokenSource
 
 API = "https://www.googleapis.com/calendar/v3"
 
@@ -77,10 +78,13 @@ def to_body(event: RemoteEvent) -> dict[str, Any]:
 
 
 class GoogleAdapter:
-    def __init__(self, token: str, calendar_id: str = "primary", client: httpx.Client | None = None) -> None:
+    def __init__(
+        self, token: str | TokenSource, calendar_id: str = "primary", client: httpx.Client | None = None
+    ) -> None:
         self.base = f"{API}/calendars/{urllib.parse.quote(calendar_id, safe='')}/events"
         self.client = client or httpx.Client(timeout=20)
-        self.headers = {"Authorization": f"Bearer {token}"}
+        self.auth = BearerAuth(token)  # refreshes an expired OAuth token once on 401
+        self.headers: dict[str, str] = {}
 
     def changes(self, sync_token: str | None) -> tuple[list[RemoteEvent], list[str], str | None]:
         changed: list[RemoteEvent] = []
@@ -89,7 +93,7 @@ class GoogleAdapter:
         if sync_token:
             params["syncToken"] = sync_token
         while True:
-            resp = self.client.get(self.base, params=params, headers=self.headers)
+            resp = self.client.get(self.base, params=params, headers=self.headers, auth=self.auth)
             if resp.status_code == 410:  # token invalidated: full resync
                 return self.changes(None)
             resp.raise_for_status()
@@ -109,9 +113,9 @@ class GoogleAdapter:
         if remote_id:
             if etag:
                 headers["If-Match"] = etag
-            resp = self.client.put(f"{self.base}/{remote_id}", json=to_body(event), headers=headers)
+            resp = self.client.put(f"{self.base}/{remote_id}", json=to_body(event), headers=headers, auth=self.auth)
         else:
-            resp = self.client.post(self.base, json=to_body(event), headers=headers)
+            resp = self.client.post(self.base, json=to_body(event), headers=headers, auth=self.auth)
         if resp.status_code == 412:
             raise SyncConflict(remote_id)
         resp.raise_for_status()
@@ -119,6 +123,6 @@ class GoogleAdapter:
         return data["id"], data.get("etag")
 
     def delete(self, remote_id: str, etag: str | None) -> None:
-        resp = self.client.delete(f"{self.base}/{remote_id}", headers=self.headers)
+        resp = self.client.delete(f"{self.base}/{remote_id}", headers=self.headers, auth=self.auth)
         if resp.status_code not in (200, 204, 404, 410):
             resp.raise_for_status()

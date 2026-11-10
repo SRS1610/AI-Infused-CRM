@@ -108,6 +108,13 @@ messages are chunked and embedded by background jobs after each change; `retriev
 returns only chunks of records the user can read, ranked by vector similarity fused with trigram
 similarity.
 
+Archived records leave the index, except those matching the model's `_ai_index_archived` domain:
+`crm.lead` keeps lost opportunities (`[("type", "=", "opportunity"), ("lost", "=", True)]`) so objection
+handling learns from them. They are returned only by searches that include archived records
+(`retrieval.search(env.with_context(active_test=False), …)`), still filtered by the user's record rules
+before ranking. An optional `_ai_index_header()` method adds a first line to a record's indexed text
+(`Outcome: LOST (reason: Too expensive)`).
+
 ## 6. Evaluate
 
 A case in `ai/evals/<feature>.jsonl`:
@@ -124,6 +131,13 @@ A case in `ai/evals/<feature>.jsonl`:
 - `tessera ai eval run <feature> --mode record` records cassettes against the configured providers;
   CI uses `--mode replay` (deterministic, no keys). `--mode live` runs without recording.
 - `tessera ai eval report --strict` lists what any declared feature still lacks.
+- **Corpus isolation.** Each feature's cases run in an evaluation sandbox (`tessera.orm.sandbox`): the
+  business records already in the target database — leads, contacts, messages, activities, meetings,
+  channels, quotations, every `_ai_index` model and any model listed in the feature's `eval.isolate` — are
+  invisible to searches, retrieval and the features' queries, except the records the cases name with
+  `$xml:`. The run is rolled back, so `tessera ai eval run` gives the same scores on a production, demo
+  or test database and writes nothing (only `--save` stores the report). Hand-written SQL over a
+  sandboxed table appends `sandbox.sql_filter(env.cr, model, column)`.
 
 ## 7. Client
 

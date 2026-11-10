@@ -11,6 +11,7 @@ from tessera.exceptions import ValidationError
 from tessera.orm import Model, api, fields
 from tessera.security import crypto
 
+SECRET_FIELDS = ("secret", "refresh_token", "access_token")
 DEFAULT_AVAILABILITY = [{"weekday": d, "start": "09:00", "end": "17:00"} for d in range(5)]
 
 
@@ -94,28 +95,50 @@ class SyncAccount(Model):
     url = fields.Char(help="CalDAV collection URL")
     username = fields.Char()
     secret = fields.Char(
-        help="Password (CalDAV) or OAuth refresh/access token; stored encrypted", groups="core.group_system"
+        help="Password (CalDAV); for Google / Microsoft accounts connected before OAuth refresh, their access "
+        "token. Stored encrypted",
+        groups="core.group_system",
     )
+    refresh_token = fields.Char(
+        help="OAuth refresh token (Google, Microsoft); stored encrypted", groups="core.group_system", copy=False
+    )
+    access_token = fields.Char(
+        help="Current OAuth access token, refreshed automatically; stored encrypted",
+        groups="core.group_system",
+        copy=False,
+    )
+    token_expiry = fields.Datetime(readonly=True, copy=False, help="When the current access token expires")
     calendar_id = fields.Char(help="Remote calendar id (Google, Microsoft); default 'primary'")
     sync_token = fields.Char(readonly=True, copy=False)
     last_sync = fields.Datetime(readonly=True)
     last_error = fields.Text(readonly=True)
     state = fields.Selection(
-        [("active", "Active"), ("error", "Error"), ("paused", "Paused")], default="active", required=True
+        [("active", "Active"), ("error", "Error"), ("reconnect", "Needs reconnection"), ("paused", "Paused")],
+        default="active",
+        required=True,
     )
     link_ids = fields.One2many("calendar.sync_link", "account_id", "Synchronised events")
 
+    @staticmethod
+    def _encrypt_secrets(vals: dict[str, Any]) -> dict[str, Any]:
+        for name in SECRET_FIELDS:
+            if vals.get(name) and not crypto.is_encrypted(vals[name]):
+                vals[name] = crypto.encrypt(vals[name])
+        return vals
+
     def create(self, vals_list):  # type: ignore[no-untyped-def]
         batch = [dict(vals_list)] if isinstance(vals_list, dict) else [dict(v) for v in vals_list]
-        for vals in batch:
-            if vals.get("secret") and not crypto.is_encrypted(vals["secret"]):
-                vals["secret"] = crypto.encrypt(vals["secret"])
-        return super().create(batch)
+        return super().create([self._encrypt_secrets(vals) for vals in batch])
 
     def write(self, vals):  # type: ignore[no-untyped-def]
-        vals = dict(vals)
-        if vals.get("secret") and not crypto.is_encrypted(vals["secret"]):
-            vals["secret"] = crypto.encrypt(vals["secret"])
+        vals = self._encrypt_secrets(dict(vals))
+        if "state" not in vals and (vals.get("refresh_token") or vals.get("secret")):
+            # new credentials entered by a person: an account waiting for reconnection syncs again
+            reconnect = self.filtered(lambda a: a.state == "reconnect")
+            if reconnect:
+                reconnect.write({**vals, "state": "active", "last_error": None})
+                rest = self - reconnect
+                return rest.write(vals) if rest else True
         return super().write(vals)
 
     @api.expose

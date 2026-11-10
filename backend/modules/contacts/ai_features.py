@@ -282,7 +282,15 @@ def same_value(field: str, a: Any, b: Any) -> bool:
         return bool(a) and D.website_domain(str(a)) == D.website_domain(str(b))
     if field in ("vat", "zip"):
         return bool(a) and re.sub(r"\W", "", str(a)).upper() == re.sub(r"\W", "", str(b or "")).upper()
+    if field == "logo_url":
+        return bool(a) and _link(str(a)) == _link(str(b or ""))
+    if field == "social_links":
+        return bool(a) and {_link(x) for x in str(a).split()} == {_link(x) for x in str(b or "").split()}
     return bool(a) and _fold(a) == _fold(b)
+
+
+def _link(url: str) -> str:
+    return re.sub(r"^https?://(www\.)?", "", url.strip().lower()).rstrip("/")
 
 
 TARGET = {"country": "country_id", "industry": "industry_id"}
@@ -300,6 +308,9 @@ def _current(record: Model, field: str) -> str:
 def _convert(env: Environment, field: str, value: str) -> Any:
     if field == "country":
         country = env["core.country"].search([("code", "=", value.strip().upper())], limit=1)
+        if not country and len(value.strip()) > 2:  # websites often give the country's name
+            named = env["core.country"].search([("name", "ilike", value.strip())], limit=5)
+            country = named.filtered(lambda c: _fold(c.name) == _fold(value))[:1]
         return country.ids[0] if country else None
     if field == "industry":
         industry = env["contacts.industry"].search([("name", "=", value.strip())], limit=1)

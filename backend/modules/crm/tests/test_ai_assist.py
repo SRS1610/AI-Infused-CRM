@@ -209,6 +209,37 @@ def test_price_grounding_check() -> None:
     assert ungrounded_amounts("We met 6 people on 2026-11-10 at 10:30.", pricing) == []
 
 
+@pytest.mark.parametrize(
+    ("draft", "flagged"),
+    [
+        ("Hi Jordan, the total is 12,500.", ["12,500"]),
+        ("The total is 12500 if we drop the onboarding.", ["12500"]),
+        ("Price: 950 per unit.", ["950"]),
+        ("We can offer a discount of 2,000 on the cell.", ["2,000"]),
+        ("That leaves 1.500,00 off the quotation.", ["1.500,00"]),
+        ("The setup fee is 499.00.", ["499.00"]),
+        ("Budget around 12 500 for this.", ["12 500"]),
+        ("the total is 2000.", ["2000"]),
+        ("The price would be 12k.", ["12k"]),
+        # grounded in the quotation: never flagged, with or without separators
+        ("Each arm is 18,900 and the six come to 113,400 in total (136,080.00 with tax).", []),
+        ("Each arm is 18900.", []),
+        # dates, times, quantities, phone numbers, percentages, identifiers, years
+        ("We met 6 people on 2026-11-10 at 10:30 and again on 7 December or December 14, 2026.", []),
+        ("Our line produces 1,200 parts per hour on line 2, with a 30-minute changeover.", []),
+        ("Call me on +44 20 7946 0958, 020 7946 0958, 555-123-4567 or (555) 123 4567.", []),
+        ("A 15% discount, or 10 percent off, and 98 % uptime.", []),
+        ("Ticket #4500, order 12,345, booth 4500, HW-ARM6 v2.10, Q4 2026 and 12/03/2026 at 9am.", []),
+        ("In 2026 the price list stays the same; the quotation is valid for 30 days.", []),
+        ("We delivered 12 500 units last year to 75001 Paris; rated 4.5 stars.", []),
+        ("Install 6 arms with 3 shifts and 14 months payback; we can do 12k parts.", []),
+    ],
+)
+def test_price_check_flags_bare_amounts(draft: str, flagged: list[str]) -> None:
+    pricing = ["- 6 x [HW-ARM6] Collaborative robot arm at 18,900.00 USD each = 113,400.00 USD\nTotal: 136,080.00 USD"]
+    assert ungrounded_amounts(draft, pricing) == flagged
+
+
 def test_followup_draft_streams_a_message_proposal_with_price_check(env: Any) -> None:
     opp = env.ref("crm.opp_1")  # Acme: quotation with arms, grippers (10% off), onboarding, optional support
     _script(env, "crm.followup_draft", {"text": "Hi Jordan,\n\nThe arms are USD 18,900 each as quoted. We can also "
@@ -429,6 +460,50 @@ def test_eval_isolation_and_injection_cases_inspected(env: Any) -> None:
         assert "Confidential Holdings" not in run.input_text  # never reached the prompt
         denied = [(c.name, c.error) for c in run.tool_call_ids]
         assert denied in ([], [("records.read", "access_denied")])
+
+
+def test_lost_opportunities_stay_in_the_retrieval_index(env: Any, env_for: Any) -> None:
+    """Lost deals are archived but indexed with their outcome and lost reason, their discussion included;
+    retrieval returns them only to searches over archived records, and only to users who may read them."""
+    from modules.ai_core.hooks import index_messages_job, index_records_job
+
+    main, eu = env.ref("core.main_company").ids[0], env.ref("core.demo_company_eu").ids[0]
+    leads = env["crm.lead"].elevated()
+    story = "They kept repeating that the quotation was far above the budget of the plant."
+    lost = leads.create({"name": "Dunmore: line 4", "type": "opportunity", "company_id": eu})
+    other = leads.create({"name": "Elsewhere Ltd: line 9", "type": "opportunity", "company_id": main})
+    archived = leads.create({"name": "Old duplicate", "type": "opportunity", "company_id": eu,
+                             "description": f"<p>{story}</p>"})  # fmt: skip
+    msgs = env["chatter.message"].elevated()
+    for deal in (lost, other):
+        msgs.create({"model": "crm.lead", "res_id": deal.ids[0], "message_type": "comment", "body": f"<p>{story}</p>"})
+        deal.action_set_lost(env.ref("crm.lost_price").ids[0], "Went with the cheapest offer")
+    archived.write({"active": False})  # archived without being lost: leaves the index
+    ids = [lost.ids[0], other.ids[0], archived.ids[0]]
+    index_records_job(env.elevated(), "crm.lead", ids)  # what the after-write hook queues
+    index_messages_job(env.elevated(), msgs.search([("model", "=", "crm.lead"), ("res_id", "in", ids)]).ids)
+    rows = env.cr.fetchall(
+        "SELECT res_id, source_kind, content FROM ai_core_embedding WHERE res_model = 'crm.lead' AND res_id = ANY(:i)",
+        {"i": ids},
+    )
+    record_chunk = next(c for r, k, c in rows if r == lost.ids[0] and k == "record")
+    assert "Outcome: LOST (reason: Too expensive)" in record_chunk and "cheapest offer" in record_chunk
+    assert {(r, k) for r, k, _ in rows} == {(d.ids[0], k) for d in (lost, other) for k in ("record", "message")}
+
+    marie = env_for("marie").with_company(eu)
+    query = "the quotation is above our budget"
+    assert not [h for h in R.search(marie, query, models=["crm.lead"]) if h.res_id == lost.ids[0]]  # open deals only
+    found = {h.res_id for h in R.search(marie.with_context(active_test=False), query, models=["crm.lead"])}
+    assert lost.ids[0] in found and other.ids[0] not in found  # the other company's lost deal: filtered first
+    # objection handling finds it through retrieval: the objection's words appear only in its discussion
+    kwargs = HANDLERS["crm.objections"](marie, None, {"objection": "Honestly the quotation is above our budget"})
+    source = next(s for s in kwargs["sources"] if s.id == f"crm.lead:{lost.ids[0]}")
+    assert source.text.startswith("Outcome: LOST (reason: Too expensive)") and "far above the budget" in source.text
+    assert f"crm.lead:{other.ids[0]}" not in [s.id for s in kwargs["sources"]]
+    # restored, it is an open deal again: indexed, and visible to ordinary searches
+    lost.action_restore()
+    index_records_job(env.elevated(), "crm.lead", [lost.ids[0]])
+    assert lost.ids[0] in {h.res_id for h in R.search(marie, query, models=["crm.lead"])}
 
 
 # ------------------------------------------------------------------------------------------- NL search

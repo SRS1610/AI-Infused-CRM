@@ -26,6 +26,7 @@
      {"kind": "notebook", "pages": [
        {"kind": "page", "name": "page_contacts", "title": "Contacts & addresses", "invisible": ["is_company", "=", false], "children": [{"kind": "field", "name": "child_ids"}]},
        {"kind": "page", "name": "page_sales", "title": "Sales", "children": [{"kind": "field", "name": "user_id"}, {"kind": "field", "name": "industry_id"}, {"kind": "field", "name": "ref"}, {"kind": "field", "name": "lang"}, {"kind": "field", "name": "company_id"}]},
+       {"kind": "page", "name": "page_profile", "title": "Public profile", "invisible": ["is_company", "=", false], "children": [{"kind": "field", "name": "description"}, {"kind": "field", "name": "social_links"}, {"kind": "field", "name": "logo_url", "widget": "url"}]},
        {"kind": "page", "name": "page_notes", "title": "Notes", "children": [{"kind": "field", "name": "comment"}]}
      ]}
    ]}},

@@ -3,7 +3,10 @@
 Indexing: models opt in with ``_ai_index = ["name", "description", ...]``; record text is chunked
 (~400 tokens with overlap), unchanged chunks are skipped by content hash, and vectors come from the
 company's embedding route through the gateway. Chatter messages are indexed under their parent
-record, so their visibility follows the record (D-036).
+record, so their visibility follows the record (D-036). Archived records leave the index unless they
+match the model's ``_ai_index_archived`` domain (lost opportunities stay: objection handling learns from
+them); they are then found only by searches that include archived records (``active_test=False``).
+A model can prefix its indexed text with ``_ai_index_header()`` (e.g. the outcome of a deal).
 
 Searching filters by access **before** ranking: for every model in scope the user's own accessible
 id query (the ORM's record-rule compiler) is joined into the vector query, together with the
@@ -58,8 +61,19 @@ def chunk(text: str, size: int = CHUNK_CHARS, overlap: int = OVERLAP) -> list[st
     return [c for c in out if c]
 
 
+def keeps_archived(rec: Model) -> bool:
+    """Whether the archived record ``rec`` stays in the index (its model's ``_ai_index_archived`` domain)."""
+    from tessera.orm.domain import evaluate, parse
+
+    domain = getattr(type(rec), "_ai_index_archived", None)
+    return bool(domain) and evaluate(parse(domain), rec)
+
+
 def record_text(rec: Model) -> str:
     parts = [rec.display_name or ""]
+    header = getattr(rec, "_ai_index_header", None)
+    if callable(header) and (line := header()):
+        parts.append(str(line))
     for name in indexed_fields(rec):
         f = rec._fields.get(name)
         if f is None:
@@ -141,7 +155,7 @@ def index_records(records: Model) -> int:
         return 0
     items = []
     for rec in records.elevated("ai index").with_context(active_test=False):
-        if "active" in rec._fields and not rec.active:
+        if "active" in rec._fields and not rec.active and not keeps_archived(rec):
             remove(rec.env, rec._name, rec.ids)
             continue
         company = rec.company_id.ids[0] if "company_id" in rec._fields and rec.company_id else None
@@ -165,8 +179,8 @@ def index_messages(env: Environment, messages: Model) -> int:
         cls = env.registry.models.get(msg.model)
         if cls is None or not indexed_fields(cls) or msg.message_type in ("notification", "system"):
             continue
-        parent = env[msg.model].elevated().browse([msg.res_id]).exists()
-        if not parent:
+        parent = env[msg.model].elevated().with_context(active_test=False).browse([msg.res_id]).exists()
+        if not parent or ("active" in parent._fields and not parent.active and not keeps_archived(parent)):
             continue
         company = parent.company_id.ids[0] if "company_id" in parent._fields and parent.company_id else None
         text = html_to_text(msg.body or "")

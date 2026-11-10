@@ -30,6 +30,7 @@ from tessera.ai.tools import PendingProposal, ToolContext
 from tessera.exceptions import AccessError, MissingError, UserError
 from tessera.jobs import job
 from tessera.logging import get_logger
+from tessera.orm.sandbox import sql_filter
 
 if TYPE_CHECKING:
     from tessera.orm.environment import Environment
@@ -414,11 +415,12 @@ def validate_slot(env: Environment, partner_ids: list[int], c: S.Constraints, st
     pad = dt.timedelta(minutes=c.buffer_minutes)
     sys_env = env.elevated("slot validation")
     rows = env.cr.fetchall(
-        "SELECT DISTINCT e.id FROM calendar_event e "
+        "SELECT DISTINCT e.id FROM calendar_event e "  # noqa: S608 - the sandbox filter holds integers only
         "LEFT JOIN calendar_event__partner_ids rel ON rel.event_id = e.id "
         "LEFT JOIN core_user u ON u.id = e.user_id "
         "WHERE e.active AND e.show_as = 'busy' AND (e.id != :ex) AND "
-        "(rel.partner_id = ANY(:p) OR u.partner_id = ANY(:p) OR e.room_id = :room)",
+        "(rel.partner_id = ANY(:p) OR u.partner_id = ANY(:p) OR e.room_id = :room)"
+        + sql_filter(env.cr, "calendar.event", "e.id"),
         {"p": partner_ids, "room": c.room_id or 0, "ex": c.exclude_event_id or 0},
     )
     for (eid,) in rows:
@@ -548,8 +550,9 @@ def _close_matches(env: Environment, name: str) -> list[Model]:
     from modules.contacts.duplicates import name_similarity
 
     rows = env.cr.fetchall(
-        "SELECT id FROM contacts_partner WHERE active AND NOT is_company AND name IS NOT NULL "
-        "AND similarity(name, :n) > 0.3 ORDER BY similarity(name, :n) DESC LIMIT 10",
+        "SELECT id FROM contacts_partner WHERE active AND NOT is_company AND name IS NOT NULL "  # noqa: S608
+        f"AND similarity(name, :n) > 0.3{sql_filter(env.cr, 'contacts.partner')} "
+        "ORDER BY similarity(name, :n) DESC LIMIT 10",
         {"n": name},
     )
     visible = env["contacts.partner"].search([("id", "in", [r[0] for r in rows])]) if rows else []

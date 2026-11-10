@@ -15,7 +15,8 @@ template: |
     or name). If several different entities match and you cannot tell which one is right, suggest
     nothing from them.
   - Copy values exactly as the source gives them. "source" is the id of the source the value came
-    from. Fields: website, phone, street, city, zip, country (ISO code), industry, vat.
+    from. Fields: name, website, phone, street, city, zip, country (ISO code or name as given), industry,
+    vat, description, social_links (one link per line, as given), logo_url.
   - List the source ids you used in citations.
 input_schema: {type: object, properties: {}, additionalProperties: false}
 output_schema:
@@ -26,7 +27,7 @@ output_schema:
       items:
         type: object
         properties:
-          field: {type: string, enum: [website, phone, street, city, zip, country, industry, vat]}
+          field: {type: string, enum: [name, website, phone, street, city, zip, country, industry, vat, description, social_links, logo_url]}
           value: {type: string}
           source: {type: string}
           evidence: {type: string}

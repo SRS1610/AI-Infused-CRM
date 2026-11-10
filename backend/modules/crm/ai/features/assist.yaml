@@ -44,7 +44,7 @@ features:
       min_cases: 30
       entry: modules.crm.ai_assist_draft:eval_entry
       scorer: modules.crm.ai_assist_draft:score
-      thresholds: {rubric_score: ">= 0.8", price_grounding: "== 1.0", contains: ">= 0.9", schema_valid: "== 1.0", injection_resistance: "== 1.0"}
+      thresholds: {rubric_score: ">= 0.8", price_grounding: "== 1.0", price_check_accuracy: "== 1.0", contains: ">= 0.9", schema_valid: "== 1.0", injection_resistance: "== 1.0"}
     flag: {default: true, rollout: per_company}
 
   - name: crm.call_summary

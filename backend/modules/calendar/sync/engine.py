@@ -6,6 +6,9 @@
 * Deletions propagate both ways (local deletions are archived events with a link).
 * Modified single occurrences (RECURRENCE-ID / exceptions) are not synchronised yet; cancelled
   occurrences (EXDATE) are.
+* Google and Microsoft accounts refresh their OAuth access token before it expires or when the provider
+  answers 401 (``sync/oauth.py``). When the provider refuses the refresh token the account is set to
+  *Needs reconnection*, skipped by the scheduled sync, and its owner is notified once.
 """
 
 from __future__ import annotations
@@ -13,8 +16,11 @@ from __future__ import annotations
 import datetime as dt
 from typing import Any
 
+import httpx
+
 from modules.calendar.ics import RemoteEvent, content_hash, from_event
 from modules.calendar.sync.base import CalendarAdapter, SyncConflict
+from modules.calendar.sync.oauth import AccountTokens, ReconnectRequired
 from tessera.jobs import job
 from tessera.logging import get_logger
 from tessera.security import crypto
@@ -22,19 +28,42 @@ from tessera.security import crypto
 log = get_logger(__name__)
 
 
-def make_adapter(account: Any) -> CalendarAdapter:
-    secret = crypto.decrypt(account.elevated().secret) if account.elevated().secret else None
-    if account.provider == "caldav":
+def make_adapter(account: Any, client: httpx.Client | None = None) -> CalendarAdapter:
+    """The provider adapter of ``account``; ``client`` (tests) carries both API and token requests."""
+    acc = account.elevated()
+    if acc.provider == "caldav":
         from modules.calendar.sync.caldav import CalDavAdapter
 
-        return CalDavAdapter(account.url, account.username, secret)
-    if account.provider == "google":
+        secret = crypto.decrypt(acc.secret) if acc.secret else None
+        return CalDavAdapter(acc.url, acc.username, secret, client=client)
+    tokens = AccountTokens(acc, client)
+    if acc.provider == "google":
         from modules.calendar.sync.google import GoogleAdapter
 
-        return GoogleAdapter(secret or "", account.calendar_id or "primary")
+        return GoogleAdapter(tokens, acc.calendar_id or "primary", client=client)
     from modules.calendar.sync.microsoft import MicrosoftAdapter
 
-    return MicrosoftAdapter(secret or "", account.calendar_id)
+    return MicrosoftAdapter(tokens, acc.calendar_id, client=client)
+
+
+def needs_reconnection(account: Any, reason: str) -> None:
+    """Stop syncing ``account`` until its owner connects it again, and tell them (once)."""
+    acc = account.elevated()
+    already = acc.state == "reconnect"
+    acc.write({"state": "reconnect", "last_error": reason[:2000]})
+    log.warning("calendar account needs reconnection", account=acc.ids[0], reason=reason[:200])
+    if already or not acc.user_id:
+        return
+    acc.env["core.notification"].notify(
+        [acc.user_id.ids[0]],
+        f"Reconnect your calendar: {acc.name}",
+        "Tessera can no longer synchronise this calendar because the provider refused its access. "
+        "Connect the account again under Calendar → External calendars.",
+        kind="system",
+        model="calendar.sync_account",
+        res_id=acc.ids[0],
+        url=f"/m/calendar.sync_account/{acc.ids[0]}",
+    )
 
 
 def _values(remote: RemoteEvent) -> dict[str, Any]:
@@ -154,6 +183,9 @@ def sync_account(account: Any, adapter: CalendarAdapter | None = None) -> dict[s
             stats["pushed"] += 1
         # our pushes come back in the next pull with the etag we stored, and are skipped there
         account.write({"sync_token": token, "last_sync": env.now(), "last_error": None, "state": "active"})
+    except ReconnectRequired as exc:
+        needs_reconnection(account, str(exc))
+        raise
     except Exception as exc:
         account.write({"last_error": str(exc)[:2000], "state": "error"})
         log.warning("calendar sync failed", account=account.ids[0], error=str(exc)[:200])

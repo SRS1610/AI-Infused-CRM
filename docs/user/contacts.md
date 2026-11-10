@@ -13,5 +13,10 @@ Discuss) uses the same address book.
   leads, quotations, meetings, messages, attachments — moves to the kept one; the others are archived.
   You can **undo** a merge for 7 days (Contacts → Configuration → Merge history, or the Undo button
   right after merging).
+- **Enrichment.** On a company, *Find missing details* looks the company up in the sources your administrator
+  approved and suggests missing fields — each with a link to where it was found. Nothing changes until
+  you accept the suggestions. With the *Company website* source, Tessera reads the public home page of
+  the company's website (or e-mail domain) for its name, description, phone, address, social profiles
+  and logo (shown on the *Public profile* tab).
 - **Customer portal.** On a contact with an email address, **Grant portal access** sends an invitation
   to set a password. **Revoke portal access** signs them out and disables the account.

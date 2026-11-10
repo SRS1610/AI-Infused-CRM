@@ -55,6 +55,22 @@ ledger (`ai_gateway.ledger`) and the run audit.
 the decision taken on its proposals; **Proposals** lists every proposed change. Prompt inputs and
 outputs are purged after the company's retention period (default 90 days).
 
+## Enrichment sources
+
+**Contacts → Configuration → Enrichment sources** decides which outside sources *Find missing details* may
+query; a source is used only when a row approves it, for one company or for all (a company's own row wins,
+so a company can also switch a source off).
+
+| Adapter key | Source | What leaves the deployment |
+|---|---|---|
+| `fixture` | Offline registry shipped for the demo and tests | nothing |
+| `company_website` | The company's public home page (`https://<website or e-mail domain>/`), read for schema.org Organization data, OpenGraph and meta tags: name, description, phone, address, social profiles, logo URL | the domain, in an HTTPS request to the company's own site |
+
+The website source needs no key. It only fetches `https://` addresses on port 443 whose host name resolves
+to public addresses only (never private, loopback, link-local or reserved ranges; IP literals are refused),
+connects to the address it checked, follows at most three redirects (each checked again), reads at most
+1 MB of HTML and gives up after 8 seconds. Each suggestion links to the page it was read on.
+
 ## Running the gateway
 
 The gateway is its own service (`gateway serve`, port 8100) sharing the application database

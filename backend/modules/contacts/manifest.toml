@@ -1,5 +1,5 @@
 name = "contacts"
-version = "1.0.0"
+version = "1.1.0"
 summary = "Companies and people: hierarchy, addresses, tags, duplicate detection and merge"
 category = "Sales"
 phase = 1

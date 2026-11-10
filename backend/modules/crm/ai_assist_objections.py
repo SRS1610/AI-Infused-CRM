@@ -2,11 +2,12 @@
 
 Candidate deals are gathered **as the requesting user**, so record rules and the multi-company rule
 filter them before anything is ranked: hybrid retrieval over the ``crm.lead`` index (record text and
-chatter, vector + trigram, access-filtered by ``tessera.ai.retrieval``) plus a keyword search of closed
-deals (lost deals are archived, and the platform does not index archived records, so their lost
-reason and feedback are found through the ORM). Only won or lost opportunities are kept; each becomes
-a ``crm.lead:<id>`` source, and every citation in the answer is verified against those sources, so a
-suggestion can only cite a deal the user can open.
+chatter, vector + trigram, access-filtered by ``tessera.ai.retrieval``) — which keeps lost opportunities
+although they are archived, with their outcome, lost reason and feedback (``_ai_index_archived``) —
+plus a keyword search of closed deals through the ORM (it also finds deals closed since the last index
+run). Only won or lost opportunities are kept; each becomes a ``crm.lead:<id>`` source, and every
+citation in the answer is verified against those sources, so a suggestion can only cite a deal the user
+can open.
 """
 
 from __future__ import annotations

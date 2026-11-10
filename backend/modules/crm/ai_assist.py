@@ -31,10 +31,23 @@ FEATURES = ("crm.lead_extract", "crm.followup_draft", "crm.call_summary", "crm.o
 
 
 class LeadRetrieval(Model):
-    """Leads and their chatter are indexed for retrieval (objection handling cites past deals)."""
+    """Leads and their chatter are indexed for retrieval (objection handling cites past deals). Lost
+    opportunities are archived but stay in the index, with their outcome and lost reason, so objection
+    handling learns from them too; only searches that include archived records (``active_test=False``)
+    find them, so other features never see them."""
 
     _extend = "crm.lead"
     _ai_index = ["partner_id", "partner_name", "stage_id", "tag_ids", "lost_reason_id", "lost_feedback", "description"]
+    _ai_index_archived = [("type", "=", "opportunity"), ("lost", "=", True)]
+
+    def _ai_index_header(self) -> str:
+        """First line of the indexed text: the deal's outcome (a lost deal's stage is where it stopped)."""
+        if self.lost:
+            reason = self.lost_reason_id.name if self.lost_reason_id else "not recorded"
+            return f"Outcome: LOST (reason: {reason})"
+        if self.is_won:
+            return "Outcome: WON"
+        return ""
 
 
 # ---------------------------------------------------------------------------------------------- helpers
