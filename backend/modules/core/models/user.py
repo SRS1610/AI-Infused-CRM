@@ -11,9 +11,12 @@ from argon2.exceptions import VerifyMismatchError
 from tessera.config import get_settings
 from tessera.exceptions import AccessDenied, ValidationError
 from tessera.i18n import _
+from tessera.logging import get_logger
 from tessera.orm import Model, api, fields
+from tessera.runtime import current_remote_ip
 
 _hasher = PasswordHasher()
+log = get_logger(__name__)
 MIN_PASSWORD_LENGTH = 8
 
 
@@ -202,23 +205,45 @@ class User(Model):
         ``login_lockout_minutes``. Failures are recorded in their own transaction so they
         survive the rollback of the failed request.
         """
-        settings = get_settings()
         users = self.elevated("authenticate")
         user = users.search([("login", "=", (login or "").strip().lower()), ("active", "=", True)], limit=1)
         now = self.env.now()
         if user and user.locked_until and user.locked_until > now:
+            log.warning("login refused: account locked", user_id=user.ids[0], ip=current_remote_ip())
             raise AccessDenied(_("Too many failed attempts; this account is temporarily locked"), locked=True)
-        if not user or not user.check_password(password):
-            if user:
-                _record_failed_login(
-                    self.env, user.ids[0], settings.login_lockout_attempts, settings.login_lockout_minutes
-                )
+        if not user:
+            _equalize_timing(password)  # an unknown login costs as much as a wrong password
+            log.warning("login failed: unknown account", ip=current_remote_ip())
+            raise AccessDenied(_("Invalid login or password"))
+        if not user.check_password(password):
+            user.record_failed_login()
+            log.warning("login failed: wrong password", user_id=user.ids[0], ip=current_remote_ip())
             raise AccessDenied(_("Invalid login or password"))
         vals: dict[str, Any] = {"last_login": now}
-        if user.failed_login_count or user.locked_until:
+        # with a second factor the failure counter is cleared once the code is accepted (``login_succeeded``),
+        # so wrong codes keep counting towards the lockout however often the password is entered again
+        if (user.failed_login_count or user.locked_until) and not user.totp_enabled:
             vals.update({"failed_login_count": 0, "locked_until": None})
         user.with_context(_recompute_write=True)._write_columns(vals)
         return self.browse(user.ids)
+
+    def record_failed_login(self) -> None:
+        """Count a failed password or second-factor attempt (locks the account after too many)."""
+        settings = get_settings()
+        for user in self:
+            log.info("failed authentication attempt counted", user_id=user.ids[0], ip=current_remote_ip())
+            _record_failed_login(self.env, user.ids[0], settings.login_lockout_attempts, settings.login_lockout_minutes)
+
+    def is_locked(self) -> bool:
+        self.ensure_one()
+        locked_until = self.elevated("lockout").locked_until
+        return bool(locked_until and locked_until > self.env.now())
+
+    def login_succeeded(self) -> None:
+        """Both factors accepted: clear the failure counter."""
+        me = self.elevated("lockout")
+        if any(u.failed_login_count or u.locked_until for u in me):
+            self.unlock()
 
     def unlock(self) -> None:
         self.elevated("unlock").with_context(_recompute_write=True)._write_columns(
@@ -255,6 +280,20 @@ class User(Model):
     def all_group_ids(self) -> list[int]:
         self.ensure_one()
         return list(self.elevated().group_ids.transitive_implied().ids)
+
+
+_DUMMY_HASH: str | None = None
+
+
+def _equalize_timing(password: str) -> None:
+    """Run one Argon2 verification against a throw-away hash."""
+    global _DUMMY_HASH
+    if _DUMMY_HASH is None:
+        _DUMMY_HASH = _hasher.hash(secrets.token_urlsafe(16))
+    try:
+        _hasher.verify(_DUMMY_HASH, password or "")
+    except Exception:
+        return
 
 
 def _record_failed_login(env: Any, user_id: int, max_attempts: int, lock_minutes: int) -> None:

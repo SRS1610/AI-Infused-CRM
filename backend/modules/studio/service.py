@@ -527,9 +527,31 @@ def create_view(
 # ----------------------------------------------------------------------------- automations and workflows
 
 
+ADMIN_GROUP = "core.group_system"
+
+
+def _check_automation_scope(env: Any, values: dict[str, Any]) -> None:
+    """Automations run with system rights, so a designer who is not an administrator may only automate
+    models Studio can customise, outside the platform's own ``core.*`` models (users, groups, API keys,
+    companies …), and may only create records of such models. Otherwise an automation would be a way to
+    grant oneself rights (e.g. create an API key for the administrator, or add a user to a group)."""
+    if env.is_system or env.registry.security.has_groups(env, [ADMIN_GROUP]):
+        return
+    model_name = str(values.get("model_name") or "")
+    targets = [model_name]
+    for action in values.get("actions") or []:
+        if isinstance(action, dict) and action.get("type") == "create_record":
+            targets.append(str(action.get("model") or model_name))
+    for target in targets:
+        _model_cls(env, target)
+        if target.startswith("core."):
+            raise AccessError(_("Only administrators can automate '{model}'", model=target), model=target)
+
+
 def add_automation(env: Any, values: dict[str, Any]) -> Any:
     check_designer(env)
     _model_cls(env, values.get("model_name", ""))
+    _check_automation_scope(env, values)
     auto = _sys(env)["workflow.automation"].create(values)
     return _record_change(
         env,

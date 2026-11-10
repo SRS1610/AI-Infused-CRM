@@ -19,6 +19,7 @@ DEFAULT_AVAILABILITY = [{"weekday": d, "start": "09:00", "end": "17:00"} for d i
 class BookingLink(Model):
     _name = "calendar.booking_link"
     _description = "Scheduling link"
+    _rule_check_after_write = True  # owner-scoped: cannot be handed to another user
     _order = "name"
 
     name = fields.Char(required=True, help="What people book, e.g. '30 min intro call'")
@@ -88,6 +89,7 @@ class BookingLink(Model):
 class SyncAccount(Model):
     _name = "calendar.sync_account"
     _description = "External calendar"
+    _rule_check_after_write = True  # owner-scoped: cannot be handed to another user
     _order = "user_id, provider"
 
     user_id = fields.Many2one(

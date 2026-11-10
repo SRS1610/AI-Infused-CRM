@@ -15,6 +15,7 @@ import httpx
 
 from tessera.jobs import enqueue, job
 from tessera.logging import get_logger
+from tessera.net import check_outbound_url
 from tessera.orm import Model, api, fields
 from tessera.orm.domain import Domain
 from tessera.orm.hooks import hook
@@ -141,6 +142,7 @@ class WebhookDelivery(Model):
             headers["X-Tessera-Signature"] = crypto.sign_payload(secret, body)
         vals: dict[str, Any] = {"attempts": (self.attempts or 0) + 1}
         try:
+            check_outbound_url(webhook.url)
             resp = httpx.post(webhook.url, content=body, headers=headers, timeout=timeout)
             vals.update({"response_status": resp.status_code, "response_body": resp.text[:2000]})
             if 200 <= resp.status_code < 300:

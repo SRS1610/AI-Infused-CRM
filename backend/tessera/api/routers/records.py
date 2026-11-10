@@ -50,13 +50,34 @@ class ReadGroupBody(BaseModel):
     orderby: str | None = None
 
 
+CLIENT_CONTEXT_KEYS = frozenset({"lang", "tz", "active_test", "include_deleted"})
+CLIENT_CONTEXT_PREFIXES = ("default_", "search_default_")
+
+
+def client_context(context: dict[str, Any]) -> dict[str, Any]:
+    """The part of a caller-supplied context the server honours.
+
+    Only presentation keys and creation defaults pass. Every other key is dropped: the context also carries
+    server decisions (``allowed_company_ids``/``company_id`` scope the multi-company record rules,
+    ``workflow_transition`` lifts the strict-workflow guard, ``automation_disable``/``tracking_disable``
+    silence automations and the audit trail, ``force_delete`` bypasses the trash) that a client must not
+    be able to set. The company scope comes from the ``X-Tessera-Companies`` header, checked against the
+    user's allowed companies."""
+    return {
+        k: v
+        for k, v in context.items()
+        if isinstance(k, str) and (k in CLIENT_CONTEXT_KEYS or k.startswith(CLIENT_CONTEXT_PREFIXES))
+    }
+
+
 def get_model(ctx: RequestContext, model_name: str, context: dict[str, Any] | None = None) -> Model:
     if model_name not in ctx.registry.models:
         raise MissingError(_("Unknown model '{model_name}'", model_name=model_name), model=model_name)
     model = ctx.env[model_name]
     if context:
-        safe = {k: v for k, v in context.items() if not k.startswith("_")}
-        model = model.with_context(**safe)
+        safe = client_context(context)
+        if safe:
+            model = model.with_context(**safe)
     return model
 
 
@@ -260,6 +281,9 @@ def _call(records: Model, method: str, args: list[Any], kwargs: dict[str, Any]) 
         raise AccessError(
             _("Method '{method}' is not exposed on {name}", method=method, name=records._name), method=method
         )
+    if records:
+        # exposed methods often elevate internally: the caller must at least be able to read the records
+        records.check_access("read")
     result = getattr(records, method)(*args, **kwargs)
     if isinstance(result, Model):
         return {"model": result._name, "ids": result.ids}

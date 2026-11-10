@@ -10,6 +10,12 @@ import httpx
 
 from modules.calendar.ics import RemoteEvent, from_ics, to_ics
 from modules.calendar.sync.base import SyncConflict
+from tessera.net import check_outbound_url
+
+
+def _guard_request(request: httpx.Request) -> None:
+    check_outbound_url(str(request.url))
+
 
 NS = {"d": "DAV:", "c": "urn:ietf:params:xml:ns:caldav"}
 SYNC_BODY = """<?xml version="1.0" encoding="utf-8"?>
@@ -22,7 +28,11 @@ class CalDavAdapter:
         self, url: str, username: str | None, password: str | None, client: httpx.Client | None = None
     ) -> None:
         self.url = url if url.endswith("/") else url + "/"
+        check_outbound_url(self.url)
         self.client = client or httpx.Client(auth=(username, password or "") if username else None, timeout=20)
+        # the server's answers name the resources to fetch (absolute hrefs allowed): every request is checked,
+        # so neither the configured address nor a reply can point the server at its own network
+        self.client.event_hooks.setdefault("request", []).append(_guard_request)
 
     def _abs(self, href: str) -> str:
         return urllib.parse.urljoin(self.url, href)

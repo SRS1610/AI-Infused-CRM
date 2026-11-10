@@ -71,6 +71,10 @@ class Model:
     _studio: ClassVar[bool] = True
     _transient: ClassVar[bool] = False
     _audit: ClassVar[bool] = False
+    # Record rules are checked on the records *before* a write. Models whose rules scope records to an
+    # owner (``user_id = $uid``) set this so the rules are checked again *after* the write: a user may not
+    # hand a record over to someone else (e.g. re-point an API key at another user).
+    _rule_check_after_write: ClassVar[bool] = False
     _indexes: ClassVar[list[tuple[str, list[str]]]] = []
     _sql_constraints: ClassVar[list[tuple[str, str, str]]] = []
     _global_search: ClassVar[list[str]] = []
@@ -640,7 +644,11 @@ class Model:
                 )
         stored = [n for n in names if n != "id" and self._fields[n].store and not isinstance(self._fields[n], F.Binary)]
         if stored:
-            self._fetch(stored)
+            self._fetch(stored)  # applies the read rules in SQL
+        else:
+            # only computed / non-stored values asked for: their compute methods may read through an elevated
+            # environment, so the read rules are checked here instead
+            self.check_access_rule("read")
         out: list[dict[str, Any]] = []
         for rec in self:
             row: dict[str, Any] = {"id": rec._ids[0]}
@@ -785,7 +793,10 @@ class Model:
             missing = [n for n in self._fields if n not in vals]
             defaults = self.default_get(missing)
             vals = {**defaults, **vals}
-            columns, x2many, inverse = self._split_vals(vals, defaulted=set(defaults))
+            # a field's own default is the model's decision; a ``default_<field>`` context key is the caller's,
+            # so it stays subject to field access like any other value
+            model_defaults = {n for n in defaults if f"default_{n}" not in self.env.context}
+            columns, x2many, inverse = self._split_vals(vals, defaulted=model_defaults)
             self._round_monetary(columns)
             for field in self._fields.values():
                 if field.required and not field.compute and field.store and field.name != "id":
@@ -840,6 +851,7 @@ class Model:
         self.check_access_rights("write")
         self.check_access_rule("write")
         columns, x2many, inverse = self._split_vals(vals)
+        self._check_company_target(columns)
         self._round_monetary(columns)
         for name, value in columns.items():
             self._fields[name].validate(value, self)
@@ -856,9 +868,31 @@ class Model:
             self._run_inverses(inverse)
         self.modified(list(vals))
         self.env.flush()
+        if self._rule_check_after_write:
+            self.check_access_rule("write")
         self._validate_constraints(list(vals))
         self.env.registry.run_hooks("after_write", self, vals, old_values)
         return True
+
+    def _check_company_target(self, columns: Vals) -> None:
+        """A record may only be moved to one of the caller's companies (or to none): the company rules are
+        checked before a write, so without this a user could hand a record over to a company they do not
+        belong to."""
+        if self.env.is_system or "company_id" not in columns:
+            return
+        field = self._fields.get("company_id")
+        if (
+            field is None
+            or not field.store
+            or not isinstance(field, F.Many2one)
+            or field.comodel_name != "core.company"
+        ):
+            return
+        target = columns["company_id"]
+        if target and int(target) not in set(self.env.companies.ids):
+            raise AccessError(
+                _("You cannot move records to a company you do not work in"), model=self._name, field="company_id"
+            )
 
     def _columns_to_row(self, columns: Vals, *, create: bool) -> dict[str, Any]:
         row: dict[str, Any] = {}

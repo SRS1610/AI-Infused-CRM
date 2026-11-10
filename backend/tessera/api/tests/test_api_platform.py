@@ -141,6 +141,7 @@ def test_oidc_login_provisions_user(app, admin: Session) -> None:  # type: ignor
                 "aud": "tessera",
                 "sub": _uniq("sub"),
                 "email": email,
+                "email_verified": True,
                 "name": "SSO Person",
                 "nonce": query["nonce"],
                 "iat": now,

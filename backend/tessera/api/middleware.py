@@ -3,11 +3,14 @@
 from __future__ import annotations
 
 import hashlib
+import ipaddress
 import math
+import re
 import threading
 import time
 from collections import defaultdict, deque
 from collections.abc import Awaitable, Callable
+from functools import lru_cache
 
 from fastapi import Request, Response
 from starlette.middleware.base import BaseHTTPMiddleware
@@ -23,14 +26,53 @@ log = get_logger(__name__)
 
 Next = Callable[[Request], Awaitable[Response]]
 
+_REQUEST_ID = re.compile(r"^[A-Za-z0-9._:-]{1,64}$")
+
+
+@lru_cache(maxsize=8)
+def _networks(entries: tuple[str, ...]) -> tuple[ipaddress.IPv4Network | ipaddress.IPv6Network, ...]:
+    nets = []
+    for entry in entries:
+        try:
+            nets.append(ipaddress.ip_network(entry.strip(), strict=False))
+        except ValueError:
+            log.warning("ignoring invalid TESSERA_TRUSTED_PROXIES entry", entry=entry)
+    return tuple(nets)
+
+
+def _trusted(address: str, nets: tuple[ipaddress.IPv4Network | ipaddress.IPv6Network, ...]) -> bool:
+    try:
+        ip = ipaddress.ip_address(address.split("%", 1)[0])
+    except ValueError:
+        return False
+    return any(ip in net for net in nets)
+
+
+def client_ip(request: Request) -> str | None:
+    """The caller's address. ``X-Forwarded-For`` is only believed when the connection comes from a trusted
+    proxy, and then read from the right: the first hop that is not itself a trusted proxy is the client
+    (entries further left were written by the client and prove nothing)."""
+    peer = request.client.host if request.client else None
+    forwarded = request.headers.get("x-forwarded-for")
+    if not peer or not forwarded:
+        return peer
+    nets = _networks(tuple(get_settings().trusted_proxies))
+    if not _trusted(peer, nets):
+        return peer
+    hops = [h.strip() for h in forwarded.split(",") if h.strip()]
+    for hop in reversed(hops):
+        if not _trusted(hop, nets):
+            return hop[:64]
+    return hops[0][:64] if hops else peer
+
 
 class RequestContextMiddleware(BaseHTTPMiddleware):
     """Assign a request id, bind it to logs, record client ip / user agent, time the request."""
 
     async def dispatch(self, request: Request, call_next: Next) -> Response:
-        rid = request.headers.get("x-request-id") or new_request_id()
-        forwarded = request.headers.get("x-forwarded-for")
-        ip = forwarded.split(",")[0].strip() if forwarded else (request.client.host if request.client else None)
+        supplied = request.headers.get("x-request-id") or ""
+        rid = supplied if _REQUEST_ID.match(supplied) else new_request_id()  # no log forging through the header
+        ip = client_ip(request)
         remote_ip_var.set(ip)
         user_agent_var.set(request.headers.get("user-agent"))
         client_id_var.set((request.headers.get("x-tessera-client") or "")[:64] or None)
@@ -56,9 +98,21 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
         response.headers.setdefault("Permissions-Policy", "camera=(self), microphone=(self), geolocation=(self)")
         if get_settings().is_production:
             response.headers.setdefault("Strict-Transport-Security", "max-age=63072000; includeSubDomains")
-        if request.url.path.startswith("/api/"):
+        path = request.url.path
+        if path.startswith("/api/"):
             response.headers.setdefault("Cache-Control", "no-store")
+            kind = response.headers.get("content-type", "").split(";")[0].strip().lower()
+            if kind in ACTIVE_CONTENT_TYPES and not path.startswith(DOCS_PATHS):
+                # HTML the API renders (report previews, RSVP pages …) may carry user data: no script runs in it
+                response.headers.setdefault("Content-Security-Policy", API_HTML_CSP)
         return response
+
+
+ACTIVE_CONTENT_TYPES = frozenset({"text/html", "application/xhtml+xml", "image/svg+xml", "text/xml", "application/xml"})
+API_HTML_CSP = (
+    "default-src 'none'; style-src 'unsafe-inline'; img-src data:; frame-ancestors 'self'; form-action 'none'"
+)
+DOCS_PATHS = ("/api/docs", "/api/redoc")
 
 
 class SlidingWindowLimiter:
@@ -107,10 +161,7 @@ _LOGIN_PATHS = ("/api/v1/auth/login", "/api/v1/auth/totp", "/api/v1/auth/oidc/")
 class RateLimitMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next: Next) -> Response:
         settings = get_settings()
-        ip = request.client.host if request.client else "unknown"
-        forwarded = request.headers.get("x-forwarded-for")
-        if forwarded:
-            ip = forwarded.split(",")[0].strip()
+        ip = client_ip(request) or "unknown"
         path = request.url.path
         if path.startswith(_LOGIN_PATHS) and request.method == "POST":
             if not limiter.allow(f"login:{ip}", settings.login_rate_limit_per_minute):

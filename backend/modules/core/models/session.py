@@ -30,6 +30,7 @@ class Session(Model):
 class ApiKey(Model):
     _name = "core.api_key"
     _description = "API key"
+    _rule_check_after_write = True  # owner-scoped: cannot be handed to another user
     _order = "id desc"
     _audit = True
 
