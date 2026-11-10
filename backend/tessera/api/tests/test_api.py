@@ -311,6 +311,11 @@ def test_webhook_delivery_with_signature(admin: Session) -> None:
     ).json()
     name = _uniq("hooked")
     tag = admin.post("/api/v1/models/ktest.tag", json={"values": {"name": name}}).json()
+    assert not route.called  # delivery is a background job, dispatched after commit
+    from tessera.config import get_settings
+    from tessera.jobs import run_now
+
+    assert set(run_now(get_settings().database_url).values()) == {"done"}
     assert route.called
     request = route.calls.last.request
     body = json.loads(request.content)

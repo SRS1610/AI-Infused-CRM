@@ -36,6 +36,7 @@ class Settings(BaseSettings):
     # redis
     redis_url: str = "redis://localhost:6379/0"
     realtime_backend: Literal["memory", "redis"] = "memory"
+    jobs_backend: Literal["celery", "inline", "manual"] = "inline"  # inline: thread in the web process (dev)
 
     # web
     secret_key: str = "dev-only-secret-key-change-me-please-32b"  # noqa: S105 - rejected by check() in production

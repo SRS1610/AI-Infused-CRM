@@ -12,12 +12,13 @@ application = false
 post_init = "hooks:post_init"
 
 [load]
-security = ["security/groups.json", "security/access.json", "security/access_api.json"]
+security = ["security/groups.json", "security/access.json", "security/access_api.json", "security/access_platform.json"]
 data = [
   "data/languages.json",
   "data/currencies.json",
   "data/countries.json",
   "data/companies.json",
   "data/users.json",
+  "data/scheduled_jobs.json",
 ]
 demo = ["data/demo/users.json"]

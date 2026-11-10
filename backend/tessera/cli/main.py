@@ -34,11 +34,13 @@ def _root(
 
 
 from tessera.cli import db as _db  # noqa: E402
+from tessera.cli import jobs as _jobs  # noqa: E402
 from tessera.cli import module as _module  # noqa: E402
 from tessera.cli import run as _run  # noqa: E402
 
 app.add_typer(_db.app, name="db", help="Database: init, migrate, check, reset")
 app.add_typer(_module.app, name="module", help="Modules: scaffold, install, upgrade, uninstall, list")
+app.add_typer(_jobs.app, name="jobs", help="Background jobs: run, list, requeue, tick")
 app.command("serve")(_run.serve)
 app.command("worker")(_run.worker)
 app.command("scheduler")(_run.scheduler)

@@ -1,0 +1,17 @@
+[
+  {"id": "access_job_user", "model": "core.model_access", "values": {"name": "job: user read own", "model_name": "core.job", "group_id": "core.group_user", "perm_read": true}},
+  {"id": "access_job_system", "model": "core.model_access", "values": {"name": "job: admin", "model_name": "core.job", "group_id": "core.group_system", "perm_read": true, "perm_write": true, "perm_create": true, "perm_unlink": true}},
+  {"id": "rule_job_own", "model": "core.record_rule", "values": {"name": "Users see the jobs they started", "model_name": "core.job", "group_ids": ["core.group_user"], "domain": [["user_id", "=", "$uid"]]}},
+  {"id": "rule_job_admin", "model": "core.record_rule", "values": {"name": "Administrators see every job", "model_name": "core.job", "group_ids": ["core.group_system"], "domain": {"all": []}}},
+  {"id": "access_job_attempt_system", "model": "core.model_access", "values": {"name": "job attempt: admin", "model_name": "core.job_attempt", "group_id": "core.group_system", "perm_read": true, "perm_unlink": true}},
+  {"id": "access_scheduled_job_system", "model": "core.model_access", "values": {"name": "scheduled job: admin", "model_name": "core.scheduled_job", "group_id": "core.group_system", "perm_read": true, "perm_write": true, "perm_create": true, "perm_unlink": true}},
+  {"id": "access_notification_user", "model": "core.model_access", "values": {"name": "notification: user", "model_name": "core.notification", "group_id": "core.group_user", "perm_read": true, "perm_write": true, "perm_unlink": true}},
+  {"id": "access_notification_portal", "model": "core.model_access", "values": {"name": "notification: portal", "model_name": "core.notification", "group_id": "core.group_portal", "perm_read": true, "perm_write": true}},
+  {"id": "rule_notification_own", "model": "core.record_rule", "values": {"name": "Users see their own notifications", "model_name": "core.notification", "group_ids": [], "domain": [["user_id", "=", "$uid"]]}},
+  {"id": "access_push_subscription_user", "model": "core.model_access", "values": {"name": "push subscription: user", "model_name": "core.push_subscription", "group_id": "core.group_user", "perm_read": true, "perm_write": true, "perm_create": true, "perm_unlink": true}},
+  {"id": "rule_push_subscription_own", "model": "core.record_rule", "values": {"name": "Own push subscriptions", "model_name": "core.push_subscription", "group_ids": [], "domain": [["user_id", "=", "$uid"]]}},
+  {"id": "access_mail_server_system", "model": "core.model_access", "values": {"name": "mail server: admin", "model_name": "core.mail_server", "group_id": "core.group_system", "perm_read": true, "perm_write": true, "perm_create": true, "perm_unlink": true}},
+  {"id": "access_mail_alias_user", "model": "core.model_access", "values": {"name": "mail alias: user read", "model_name": "core.mail_alias", "group_id": "core.group_user", "perm_read": true}},
+  {"id": "access_mail_alias_system", "model": "core.model_access", "values": {"name": "mail alias: admin", "model_name": "core.mail_alias", "group_id": "core.group_system", "perm_read": true, "perm_write": true, "perm_create": true, "perm_unlink": true}},
+  {"id": "access_mail_queue_system", "model": "core.model_access", "values": {"name": "mail queue: admin", "model_name": "core.mail_queue", "group_id": "core.group_system", "perm_read": true, "perm_write": true, "perm_create": true, "perm_unlink": true}}
+]

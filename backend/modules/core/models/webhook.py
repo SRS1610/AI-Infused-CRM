@@ -1,19 +1,19 @@
 """Outbound webhooks on create / write / delete, with HMAC signatures and a delivery log.
 
-Deliveries are created inside the transaction and dispatched after commit (never for rolled-back
-work). Phase 1.2 dispatches from a background thread; Phase 1.3 moves dispatch to the job queue
-with retry policies.
+Deliveries are created inside the transaction; each one gets a ``core.webhook_deliver`` job that is
+dispatched after commit (never for rolled-back work). Failed deliveries are re-sent by the scheduled
+``core.webhook_retry`` sweep with exponential backoff (2^attempts minutes, capped at 2 hours).
 """
 
 from __future__ import annotations
 
 import datetime as dt
 import json
-import threading
 from typing import Any
 
 import httpx
 
+from tessera.jobs import enqueue, job
 from tessera.logging import get_logger
 from tessera.orm import Model, api, fields
 from tessera.orm.domain import Domain
@@ -209,31 +209,28 @@ def _queue_deliveries(records: Model, event: str, changed: list[str] | None = No
                 }
             )
             created_ids.extend(delivery.ids)
-    if created_ids:
-        db_url = records.env.registry.db_url
-        records.env.cr.after_commit(lambda: dispatch_deliveries(db_url, created_ids))
+    for delivery_id in created_ids:
+        enqueue(
+            records.env.elevated("webhook delivery"),
+            "core.webhook_deliver",
+            {"delivery_id": delivery_id},
+            idempotency_key=f"webhook:{delivery_id}",
+            description=f"Webhook delivery {delivery_id}",
+        )
 
 
-def dispatch_deliveries(db_url: str, delivery_ids: list[int]) -> None:
-    """Deliver after commit, off the request thread (replaced by a job in Phase 1.3).
-    Runs inline in the test environment so tests can assert on the outcome."""
+@job("core.webhook_deliver", queue="webhooks", max_attempts=1, as_system=True)
+def deliver_job(env: Any, delivery_id: int) -> dict[str, Any]:
+    """One delivery attempt. A failed attempt is recorded on the delivery and retried by the sweep."""
+    delivery = env["core.webhook_delivery"].browse([delivery_id]).exists()
+    if not delivery or delivery.status == "sent":
+        return {"skipped": True}
+    return {"sent": delivery.deliver()}
 
-    def run() -> None:
-        from tessera.orm.environment import environment_for
 
-        try:
-            with environment_for(db_url, uid=1, su=True) as env:
-                for delivery in env["core.webhook_delivery"].browse(delivery_ids):
-                    delivery.deliver()
-        except Exception:
-            log.exception("webhook dispatch failed")
-
-    from tessera.config import get_settings
-
-    if get_settings().env == "test":
-        run()
-        return
-    threading.Thread(target=run, name="webhook-dispatch", daemon=True).start()
+@job("core.webhook_retry", queue="webhooks", max_attempts=1, as_system=True)
+def retry_job(env: Any, limit: int = 100) -> dict[str, Any]:
+    return {"retried": env["core.webhook_delivery"].retry_due(limit)}
 
 
 @hook("after_create")

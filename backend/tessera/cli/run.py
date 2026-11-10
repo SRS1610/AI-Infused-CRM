@@ -34,7 +34,7 @@ def serve(
 
 
 def worker(
-    queues: str = typer.Option("default,mail,reports,ai,imports", "--queues", "-Q"),
+    queues: str = typer.Option("default,mail,webhooks,reports,ai,imports", "--queues", "-Q"),
     concurrency: int = typer.Option(4, "--concurrency", "-c"),
 ) -> None:
     """Run a Celery worker."""
