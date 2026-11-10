@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import contextlib
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 
@@ -26,6 +27,11 @@ async def _lifespan(app: FastAPI) -> AsyncIterator[None]:
     from tessera.realtime.hub import hub
 
     await hub.start_listener()
+    if get_settings().ai_gateway_url.strip().lower() == "inprocess":
+        # the gateway and its provider SDKs take ~1.5 s to import: pay it at startup, not on the first
+        # user's AI request (first-token budget, 1.5-l)
+        with contextlib.suppress(ImportError):  # reported on first use instead
+            import gateway.service  # noqa: F401
     yield
 
 

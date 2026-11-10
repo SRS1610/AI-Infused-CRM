@@ -460,7 +460,7 @@ export function StudioApp() {
         <h1>{t("Studio")}</h1>
         <label className="field inline">
           <span>{t("Model")}</span>
-          <select className="input" value={model} onChange={(e) => setModel(e.target.value)}>
+          <select className="input" aria-label={t("Model")} value={model} onChange={(e) => setModel(e.target.value)}>
             {(models.data ?? []).map((m) => (
               <option key={m.model} value={m.model}>
                 {m.description} ({m.model})

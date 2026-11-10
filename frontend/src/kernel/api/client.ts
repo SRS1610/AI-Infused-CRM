@@ -14,10 +14,13 @@ import type {
 export class ApiError extends Error {
   readonly status: number;
   readonly body: ApiErrorBody;
-  constructor(status: number, body: ApiErrorBody) {
+  /** Seconds the server asked us to wait before retrying (429, 503), when it said so. */
+  readonly retryAfter: number | undefined;
+  constructor(status: number, body: ApiErrorBody, retryAfter?: number) {
     super(body.message || `HTTP ${status}`);
     this.status = status;
     this.body = body;
+    this.retryAfter = retryAfter;
   }
   get isConflict(): boolean {
     return this.status === 409;
@@ -84,7 +87,12 @@ export async function request<T>(
   const data = text ? JSON.parse(text) : undefined;
   if (!response.ok) {
     if (response.status === 401 && state.onUnauthorized && !path.startsWith("/auth/")) state.onUnauthorized();
-    throw new ApiError(response.status, (data as ApiErrorBody) ?? { error: "HttpError", message: response.statusText });
+    const retryAfter = Number(response.headers?.get?.("Retry-After")) || undefined;
+    throw new ApiError(
+      response.status,
+      (data as ApiErrorBody) ?? { error: "HttpError", message: response.statusText },
+      retryAfter,
+    );
   }
   return data as T;
 }

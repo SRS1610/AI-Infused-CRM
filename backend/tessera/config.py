@@ -51,7 +51,8 @@ class Settings(BaseSettings):
     login_rate_limit_per_minute: int = 10
     login_lockout_attempts: int = 5
     login_lockout_minutes: int = 15
-    api_rate_limit_per_minute: int = 600
+    api_rate_limit_per_minute: int = 600  # per session or API key
+    api_ip_rate_limit_per_minute: int = 6000  # per client address (many users can share one)
 
     # modules
     module_paths: Annotated[list[Path], NoDecode] = Field(default_factory=lambda: [DEFAULT_MODULE_PATH])

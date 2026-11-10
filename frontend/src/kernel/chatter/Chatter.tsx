@@ -514,7 +514,7 @@ export function ActivityRow({
 }) {
   return (
     <div className={`activity-row ${a.state}`}>
-      <span className={`state-dot ${a.state}`} aria-label={activityStateLabel(a.state)} />
+      <span className={`state-dot ${a.state}`} role="img" aria-label={activityStateLabel(a.state)} />
       <div className="activity-main">
         <strong>{a.type.name}</strong> {a.summary && <span>— {a.summary}</span>}
         {showRecord && a.res_name && (

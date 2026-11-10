@@ -18,7 +18,13 @@ export function createQueryClient(): QueryClient {
     defaultOptions: {
       queries: {
         staleTime: 15_000,
-        retry: (count, error: any) => count < 2 && !(error?.status >= 400 && error?.status < 500),
+        // client errors are final, except "too many requests": wait as the server asks, then retry
+        retry: (count, error: any) =>
+          error?.status === 429 ? count < 3 : count < 2 && !(error?.status >= 400 && error?.status < 500),
+        retryDelay: (count, error: any) =>
+          error?.status === 429 && error.retryAfter
+            ? Math.min(error.retryAfter, 30) * 1000
+            : Math.min(1000 * 2 ** count, 30_000),
         refetchOnWindowFocus: false,
       },
     },

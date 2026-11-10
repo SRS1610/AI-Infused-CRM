@@ -37,6 +37,26 @@ describe("api client", () => {
     expect(onUnauthorized).toHaveBeenCalledTimes(1);
   });
 
+  it("keeps Retry-After on 429 so queries wait as the server asks before retrying", async () => {
+    mockFetch({
+      "GET /api/v1/web/menus": () =>
+        new Response(JSON.stringify({ error: "RateLimited", message: "Rate limit exceeded" }), {
+          status: 429,
+          headers: { "Retry-After": "7" },
+        }),
+    });
+    const limited = await api.menus().catch((e) => e);
+    expect(limited).toMatchObject({ status: 429, retryAfter: 7 });
+    const { createQueryClient } = await import("../../App");
+    const { retry, retryDelay } = createQueryClient().getDefaultOptions().queries as {
+      retry: (n: number, e: unknown) => boolean;
+      retryDelay: (n: number, e: unknown) => number;
+    };
+    expect(retry(0, limited)).toBe(true);
+    expect(retryDelay(0, limited)).toBe(7000);
+    expect(retry(0, new ApiError(403, { error: "AccessDenied", message: "no" }))).toBe(false);
+  });
+
   it("reads ETags", async () => {
     mockFetch({ "GET /api/v1/models/x/3": () => ({ id: 3, name: "n" }) });
     const { record, etag } = await api.getWithEtag("x", 3, ["name"]);

@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import hashlib
+import math
 import threading
 import time
 from collections import defaultdict, deque
@@ -73,8 +75,25 @@ class SlidingWindowLimiter:
             hits.append(now)
             return True
 
+    def retry_after(self, key: str, window: float = 60.0) -> int:
+        """Seconds until ``key`` may be allowed again."""
+        with self._lock:
+            hits = self._hits.get(key)
+            if not hits:
+                return 1
+            return max(1, math.ceil(window - (time.monotonic() - hits[0])))
+
 
 limiter = SlidingWindowLimiter()
+
+
+def _limited(key: str, message: str) -> JSONResponse:
+    return JSONResponse(
+        status_code=429,
+        content={"error": "RateLimited", "message": message},
+        headers={"Retry-After": str(limiter.retry_after(key))},
+    )
+
 
 _LOGIN_PATHS = ("/api/v1/auth/login", "/api/v1/auth/totp", "/api/v1/auth/oidc/")
 
@@ -89,10 +108,20 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
         path = request.url.path
         if path.startswith(_LOGIN_PATHS) and request.method == "POST":
             if not limiter.allow(f"login:{ip}", settings.login_rate_limit_per_minute):
-                return JSONResponse(status_code=429, content={"error": "RateLimited", "message": "Too many attempts"})
+                return _limited(f"login:{ip}", "Too many attempts")
         elif path.startswith("/api/"):
-            auth = request.headers.get("authorization", "")
-            key = f"api:{auth[-16:]}" if auth else f"api:{ip}"
-            if not limiter.allow(key, settings.api_rate_limit_per_minute):
-                return JSONResponse(status_code=429, content={"error": "RateLimited", "message": "Rate limit exceeded"})
+            # per credential (API key or browser session), so people sharing an address (an office behind
+            # one NAT) do not share a budget; plus a higher per-address ceiling against credential rotation
+            credential = request.headers.get("authorization", "") or request.cookies.get(
+                settings.session_cookie_name, ""
+            )
+            if credential:
+                digest = hashlib.sha256(credential.encode()).hexdigest()[:24]
+                checks = [(f"api:{digest}", settings.api_rate_limit_per_minute)]
+                checks.append((f"api-ip:{ip}", settings.api_ip_rate_limit_per_minute))
+            else:
+                checks = [(f"api-anon:{ip}", settings.api_rate_limit_per_minute)]
+            for key, limit in checks:
+                if not limiter.allow(key, limit):
+                    return _limited(key, "Rate limit exceeded")
         return await call_next(request)

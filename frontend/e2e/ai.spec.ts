@@ -34,6 +34,12 @@ test("CRM follow-up draft streams with the AI-drafted label until edited, then i
   page,
 }) => {
   await login(page);
+  // an interrupted earlier run of the kill-switch test below may have left the feature switched off
+  const session = await (await page.request.get("/api/v1/auth/session")).json();
+  await page.request.put("/api/v1/ai/admin/features/crm.followup_draft/flag", {
+    headers: { "X-CSRF-Token": session.csrf_token },
+    data: { enabled: true, company_id: session.company.id },
+  });
   const id = await newLead(page);
   await page.goto(`/m/crm.lead/${id}`);
   const chatter = page.getByRole("complementary", { name: "Discussion" });

@@ -140,10 +140,10 @@ test("Contacts: merge two duplicates from the list and undo", async ({ page, isM
   await page.keyboard.press("Enter");
   await expect(page.getByRole("cell", { name: `Dup Co ${tag} Ltd` }).first()).toBeVisible();
   await page.getByRole("checkbox", { name: /Select all/ }).check();
-  await page.getByRole("button", { name: "Merge" }).click();
+  await page.getByRole("button", { name: "Merge", exact: true }).click();
   const dialog = page.getByRole("dialog", { name: "Merge contacts" });
   await expect(dialog).toBeVisible();
-  await dialog.getByRole("button", { name: "Merge" }).click();
+  await dialog.getByRole("button", { name: "Merge", exact: true }).click();
   await expect(dialog.getByText("Contacts merged.")).toBeVisible();
   await dialog.getByRole("button", { name: "Undo" }).click();
 });

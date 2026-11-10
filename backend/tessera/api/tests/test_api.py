@@ -54,7 +54,31 @@ def test_login_logout_and_csrf(client: TestClient) -> None:
 def test_login_rate_limit(client: TestClient) -> None:
     for _ in range(10):
         client.post("/api/v1/auth/login", json={"login": "nobody-here", "password": "wrong"})
-    assert client.post("/api/v1/auth/login", json={"login": "nobody-here", "password": "wrong"}).status_code == 429
+    limited = client.post("/api/v1/auth/login", json={"login": "nobody-here", "password": "wrong"})
+    assert limited.status_code == 429
+    assert 1 <= int(limited.headers["Retry-After"]) <= 60
+
+
+def test_api_rate_limit_is_per_session_with_a_higher_ceiling_per_address(
+    client: TestClient,
+    app,  # type: ignore[no-untyped-def]
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    from tessera.config import get_settings
+
+    settings = get_settings()
+    monkeypatch.setattr(settings, "api_rate_limit_per_minute", 3)
+    monkeypatch.setattr(settings, "api_ip_rate_limit_per_minute", 6)
+    alice = TestClient(app, base_url="http://localhost", cookies={settings.session_cookie_name: "alice"})
+    bob = TestClient(app, base_url="http://localhost", cookies={settings.session_cookie_name: "bob"})
+    assert [alice.get("/api/v1/auth/session").status_code for _ in range(3)] == [401] * 3
+    over = alice.get("/api/v1/auth/session")
+    assert over.status_code == 429 and int(over.headers["Retry-After"]) >= 1
+    # the same address, another session: its own budget...
+    assert [bob.get("/api/v1/auth/session").status_code for _ in range(3)] == [401] * 3
+    # ...until the address ceiling (6 accepted requests from this address)
+    carol = TestClient(app, base_url="http://localhost", cookies={settings.session_cookie_name: "carol"})
+    assert carol.get("/api/v1/auth/session").status_code == 429
 
 
 def test_password_change_revokes_other_sessions(client: TestClient, app) -> None:  # type: ignore[no-untyped-def]

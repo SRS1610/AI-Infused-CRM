@@ -138,6 +138,10 @@ class Cursor:
         else:
             if nested.is_active:
                 nested.commit()
+            # released: its work now belongs to the enclosing level, and so do its undo callbacks (left at
+            # this depth, a later sibling savepoint's rollback would run them)
+            parent = self._savepoint_depth - 1
+            self._undo = [(min(d, parent), cb) for d, cb in self._undo]
         finally:
             self._savepoint_depth -= 1
 

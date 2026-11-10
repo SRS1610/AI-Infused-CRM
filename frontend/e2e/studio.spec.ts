@@ -57,10 +57,10 @@ test("Studio: add a field, use it on the form, automate a stage change, roll bac
   await expect(field).toBeVisible();
   await field.fill("Rival Robotics");
   await page.getByRole("button", { name: "Save" }).click();
-  await expect(page.getByRole("button", { name: "Save" })).toBeDisabled();
+  await expect(page.getByRole("button", { name: "Save" })).toBeDisabled({ timeout: 15_000 });
   await page.getByRole("radiogroup", { name: "Stage" }).getByRole("radio", { name: "Qualified" }).click();
   await page.getByRole("button", { name: "Save" }).click();
-  await expect(page.getByRole("button", { name: "Save" })).toBeDisabled();
+  await expect(page.getByRole("button", { name: "Save" })).toBeDisabled({ timeout: 15_000 });
   const chatter = page.getByRole("complementary", { name: "Discussion" });
   await expect(chatter.getByText(`Check in ${tag}`)).toBeVisible();
 

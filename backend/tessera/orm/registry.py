@@ -12,6 +12,7 @@ One registry exists per database. Building it:
 
 from __future__ import annotations
 
+import copy
 import threading
 from collections import defaultdict
 from collections.abc import Callable, Iterable
@@ -189,110 +190,128 @@ class Registry:
     # -- building ----------------------------------------------------------------------------
     def build(self, dynamic: list[type[Model]] | None = None) -> None:
         """(Re)compose every model from the fragments of ``module_order`` plus this database's dynamic
-        fragments (``dynamic`` when given, else whatever the ``before_build`` hooks provide)."""
+        fragments (``dynamic`` when given, else whatever the ``before_build`` hooks provide).
+
+        The models are composed on a staging copy and published in one step: requests running
+        meanwhile (a Studio change rebuilds a live registry) see the previous models or the new ones,
+        never a half-built registry."""
         with self.lock:
-            from tessera.orm.model import Model
-
-            if dynamic is None:
-                self.dynamic_fragments = []
-                for hook in self.hooks.get("before_build", ()):
-                    hook(self)
-            else:
-                self.dynamic_fragments = list(dynamic)
-
-            self.models.clear()
-            self.abstract.clear()
-            self.metadata = MetaData()
-            self.tables.clear()
-            self.m2m_tables.clear()
-            self.triggers.clear()
-
-            # collect every fragment first: within a module, import order (alphabetical files) must
-            # not matter, so an extension may be registered before the fragment that defines the model
-            fragments: dict[str, list[type[Model]]] = defaultdict(list)
-            order: list[str] = []
-            extension_owner: dict[str, str] = {}
-            for module in self.module_order:
-                for frag in fragments_for(module):
-                    name = frag.__dict__.get("_name") or frag.__dict__.get("_extend")
-                    if not name:
-                        raise RegistryError(f"{frag.__module__}.{frag.__name__} has neither _name nor _extend")
-                    if "_extend" in frag.__dict__:
-                        extension_owner.setdefault(name, module)
-                    if name not in fragments:
-                        order.append(name)
-                    fragments[name].append(frag)
-            for frag in self.dynamic_fragments:
-                target = frag.__dict__.get("_extend")
-                if target in fragments:
-                    fragments[target].append(frag)
-                else:
-                    log.warning("dynamic fragment for an unknown model ignored", model=target)
-            for name, frags in fragments.items():
-                bases = [f for f in frags if "_name" in f.__dict__]
-                if not bases:
-                    raise RegistryError(f"Module '{extension_owner.get(name, '?')}' extends unknown model '{name}'")
-                # base definition(s) first, then extensions, each group in registration order
-                fragments[name] = bases + [f for f in frags if "_name" not in f.__dict__]
-
-            composed: dict[str, type[Model]] = {}
-
-            def compose(name: str) -> type[Model]:
-                if name in composed:
-                    return composed[name]
-                frags = fragments[name]
-                mixin_names: list[str] = []
-                for frag in frags:
-                    for m in frag.__dict__.get("_inherit", ()):
-                        if m not in fragments:
-                            raise RegistryError(f"Model '{name}' inherits unknown mixin '{m}'")
-                        if m not in mixin_names:
-                            mixin_names.append(m)
-                mixins = [compose(m) for m in mixin_names]
-                bases: tuple[type, ...] = (*reversed(frags), *mixins, Model)
-                attrs: dict[str, Any] = {
-                    "_register": False,
-                    "_name": name,
-                    "_abstract": any(f.__dict__.get("_abstract", False) for f in frags if "_name" in f.__dict__),
-                    "_fragments": tuple(frags),
-                    "_mixin_names": tuple(mixin_names),
-                    "__module__": "tessera.orm.registry",
-                    "__qualname__": name,
+            stage = copy.copy(self)
+            stage.models, stage.abstract, stage.tables, stage.m2m_tables = {}, {}, {}, {}
+            stage.triggers = defaultdict(list)
+            stage.metadata = MetaData()
+            stage._compose(dynamic)
+            for cls in (*stage.models.values(), *stage.abstract.values()):
+                cls._registry = self
+            self.__dict__.update(
+                {
+                    "dynamic_fragments": stage.dynamic_fragments,
+                    "models": stage.models,
+                    "abstract": stage.abstract,
+                    "metadata": stage.metadata,
+                    "tables": stage.tables,
+                    "m2m_tables": stage.m2m_tables,
+                    "triggers": stage.triggers,
+                    "ready": True,
                 }
-                cls = type(name.replace(".", "_"), bases, attrs)
-                composed[name] = cls
-                return cls
-
-            for name in order:
-                compose(name)
-
-            for name, cls in composed.items():
-                if cls._abstract:
-                    self.abstract[name] = cls
-                else:
-                    self.models[name] = cls
-
-            for cls in composed.values():
-                self._setup_class_metadata(cls)
-            for cls in composed.values():
-                self._collect_fields(cls)
-            for cls in composed.values():
-                self._resolve_related(cls)
-            for cls in self.models.values():
-                self._link_inverses(cls)
-            for cls in self.models.values():
-                self._build_table(cls)
-            for cls in self.models.values():
-                self._build_triggers(cls)
-            for cls in composed.values():
-                self._collect_methods(cls)
-            self.ready = True
+            )
             for hook in self.hooks.get("registry_built", ()):
                 hook(self)
             from tessera.api.app import mount_new_routers
 
             mount_new_routers()
             log.info("registry built", db=self.dbname, models=len(self.models), modules=len(self.module_order))
+
+    def _compose(self, dynamic: list[type[Model]] | None) -> None:
+        """Compose the models into this (staging) registry's empty containers."""
+        from tessera.orm.model import Model
+
+        if dynamic is None:
+            self.dynamic_fragments = []
+            for hook in self.hooks.get("before_build", ()):
+                hook(self)
+        else:
+            self.dynamic_fragments = list(dynamic)
+
+        # collect every fragment first: within a module, import order (alphabetical files) must
+        # not matter, so an extension may be registered before the fragment that defines the model
+        fragments: dict[str, list[type[Model]]] = defaultdict(list)
+        order: list[str] = []
+        extension_owner: dict[str, str] = {}
+        for module in self.module_order:
+            for frag in fragments_for(module):
+                name = frag.__dict__.get("_name") or frag.__dict__.get("_extend")
+                if not name:
+                    raise RegistryError(f"{frag.__module__}.{frag.__name__} has neither _name nor _extend")
+                if "_extend" in frag.__dict__:
+                    extension_owner.setdefault(name, module)
+                if name not in fragments:
+                    order.append(name)
+                fragments[name].append(frag)
+        for frag in self.dynamic_fragments:
+            target = frag.__dict__.get("_extend")
+            if target in fragments:
+                fragments[target].append(frag)
+            else:
+                log.warning("dynamic fragment for an unknown model ignored", model=target)
+        for name, frags in fragments.items():
+            bases = [f for f in frags if "_name" in f.__dict__]
+            if not bases:
+                raise RegistryError(f"Module '{extension_owner.get(name, '?')}' extends unknown model '{name}'")
+            # base definition(s) first, then extensions, each group in registration order
+            fragments[name] = bases + [f for f in frags if "_name" not in f.__dict__]
+
+        composed: dict[str, type[Model]] = {}
+
+        def compose(name: str) -> type[Model]:
+            if name in composed:
+                return composed[name]
+            frags = fragments[name]
+            mixin_names: list[str] = []
+            for frag in frags:
+                for m in frag.__dict__.get("_inherit", ()):
+                    if m not in fragments:
+                        raise RegistryError(f"Model '{name}' inherits unknown mixin '{m}'")
+                    if m not in mixin_names:
+                        mixin_names.append(m)
+            mixins = [compose(m) for m in mixin_names]
+            bases: tuple[type, ...] = (*reversed(frags), *mixins, Model)
+            attrs: dict[str, Any] = {
+                "_register": False,
+                "_name": name,
+                "_abstract": any(f.__dict__.get("_abstract", False) for f in frags if "_name" in f.__dict__),
+                "_fragments": tuple(frags),
+                "_mixin_names": tuple(mixin_names),
+                "__module__": "tessera.orm.registry",
+                "__qualname__": name,
+            }
+            cls = type(name.replace(".", "_"), bases, attrs)
+            composed[name] = cls
+            return cls
+
+        for name in order:
+            compose(name)
+
+        for name, cls in composed.items():
+            if cls._abstract:
+                self.abstract[name] = cls
+            else:
+                self.models[name] = cls
+
+        for cls in composed.values():
+            self._setup_class_metadata(cls)
+        for cls in composed.values():
+            self._collect_fields(cls)
+        for cls in composed.values():
+            self._resolve_related(cls)
+        for cls in self.models.values():
+            self._link_inverses(cls)
+        for cls in self.models.values():
+            self._build_table(cls)
+        for cls in self.models.values():
+            self._build_triggers(cls)
+        for cls in composed.values():
+            self._collect_methods(cls)
 
     def _setup_class_metadata(self, cls: type[Model]) -> None:
         cls._table = cls.__dict__.get("_table") or cls._name.replace(".", "_")

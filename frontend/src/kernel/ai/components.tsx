@@ -189,7 +189,9 @@ export function ProposalCard({ proposal, onDecided }: { proposal: Proposal; onDe
           </tbody>
         </table>
       ) : (
-        <pre className="ai-payload">{JSON.stringify(proposal.payload, null, 2)}</pre>
+        <pre className="ai-payload" tabIndex={0}>
+          {JSON.stringify(proposal.payload, null, 2)}
+        </pre>
       )}
       {current.state === "failed" && current.reason && <div className="alert error">{current.reason}</div>}
       {error && <div className="alert error">{error}</div>}
