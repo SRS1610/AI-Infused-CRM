@@ -352,3 +352,69 @@ def test_imap_fetch_processes_unseen(users: SimpleNamespace, monkeypatch: pytest
     assert server.fetch() == {"processed": 2, "failed": 0}
     assert [n for n, _ in stored] == [b"1", b"2"]
     assert env["ktest.book"].search_count([("name", "like", "via imap")]) == 2
+
+
+@pytest.mark.parametrize(
+    ("utc_moment", "expected"),
+    [
+        # 03:00 UTC on 2 March: still 1 March in Los Angeles, already 2 March in Kolkata
+        ("2026-03-02T03:00:00+00:00", {"UTC": "today", "America/Los_Angeles": "planned", "Asia/Kolkata": "today"}),
+        # 20:00 UTC on 2 March: 3 March in Kolkata, 2 March in Los Angeles
+        ("2026-03-02T20:00:00+00:00", {"UTC": "today", "America/Los_Angeles": "today", "Asia/Kolkata": "overdue"}),
+    ],
+)
+def test_activity_buckets_follow_the_user_timezone(env: Any, utc_moment: str, expected: dict[str, str]) -> None:
+    """1.3-d: overdue / today / planned are computed in each viewer's own timezone."""
+    from freezegun import freeze_time
+
+    group = env.ref("core.group_user").ids[0]
+    with freeze_time(utc_moment):
+        for tz, bucket in expected.items():
+            user = env["core.user"].create(
+                {"login": f"tz-{tz.lower().replace('/', '-')}", "name": tz, "tz": tz, "group_ids": [("set", [group])]}
+            )
+            user_env = env.with_user(user.ids[0])
+            act = env["chatter.activity"].create(
+                {
+                    "model": "ktest.book",
+                    "res_id": 1,
+                    "activity_type_id": env.ref("chatter.activity_type_todo").ids[0],
+                    "date_deadline": "2026-03-02",
+                    "user_id": user.ids[0],
+                }
+            )
+            mine = user_env["chatter.activity"].browse(act.ids)
+            assert mine.state == bucket, tz
+            assert user_env["chatter.activity"].search([("state", "=", bucket), ("id", "=", act.ids[0])]), tz
+
+
+def test_bounce_marks_queued_mail(users: SimpleNamespace) -> None:
+    env = users.admin
+    mail = env["core.mail_queue"].queue({"email_to": "gone@example.test", "subject": "T-bounce", "body_text": "x"})
+    dsn = f"""From: MAILER-DAEMON@example.test
+To: noreply@tessera.local
+Subject: Undelivered Mail Returned to Sender
+Message-ID: <dsn-1@example.test>
+MIME-Version: 1.0
+Content-Type: multipart/report; report-type=delivery-status; boundary="r"
+
+--r
+Content-Type: text/plain
+
+The mail could not be delivered.
+--r
+Content-Type: message/delivery-status
+
+Final-Recipient: rfc822; gone@example.test
+Action: failed
+Status: 5.1.1
+--r
+Content-Type: text/rfc822-headers
+
+Message-ID: {mail.message_id}
+Subject: T-bounce
+--r--
+"""
+    result = process_email(env, dsn)
+    assert result == {"status": "bounce", "message_id": mail.message_id, "matched": True}
+    assert mail.state == "bounced"

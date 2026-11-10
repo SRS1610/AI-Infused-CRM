@@ -1,0 +1,5 @@
+[
+  {"id": "action_workflows", "name": "Workflows", "model": "workflow.definition", "views": ["list", "form"], "groups": ["core.group_system"]},
+  {"id": "action_automations", "name": "Automations", "model": "workflow.automation", "views": ["list", "form"], "groups": ["core.group_system"]},
+  {"id": "action_automation_runs", "name": "Automation runs", "model": "workflow.automation_run", "views": ["list", "form"], "groups": ["core.group_system"]}
+]

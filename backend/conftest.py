@@ -29,7 +29,7 @@ _settings = get_settings()
 os.environ["TESSERA_DATABASE_URL"] = _settings.test_database_url
 reset_settings_cache()
 
-KERNEL_TEST_MODULES = ["core", "web", "kernel_test_a", "kernel_test_b", "chatter", "chatter_test"]
+KERNEL_TEST_MODULES = ["core", "web", "kernel_test_a", "kernel_test_b", "chatter", "chatter_test", "workflow"]
 
 
 def pytest_configure(config: pytest.Config) -> None:

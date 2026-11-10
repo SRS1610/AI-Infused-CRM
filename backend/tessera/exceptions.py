@@ -54,7 +54,13 @@ class MissingError(UserError):
     http_status = 404
 
 
-class ConcurrencyError(UserError):
+class ConflictError(UserError):
+    """The request conflicts with the record's current state (e.g. a workflow transition that is not allowed)."""
+
+    http_status = 409
+
+
+class ConcurrencyError(ConflictError):
     """Optimistic concurrency conflict (stale ETag / write_date)."""
 
     http_status = 409

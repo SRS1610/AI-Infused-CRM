@@ -1,0 +1,15 @@
+name = "workflow"
+version = "1.0.0"
+summary = "State machines as data (states, guarded transitions, status bar) and automated actions"
+category = "Platform"
+phase = 1
+depends = ["core", "web", "chatter"]
+license = "Apache-2.0"
+installable = true
+auto_install = true
+
+[load]
+security = ["security/access.json"]
+data = ["data/scheduled_jobs.json"]
+actions = "actions.json"
+menus = "menus.json"

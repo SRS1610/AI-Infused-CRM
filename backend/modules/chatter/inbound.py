@@ -42,7 +42,9 @@ def parse_email(raw: bytes | str) -> dict[str, Any]:
     headers = [str(msg.get(h)) for h in ("To", "Cc", "Delivered-To") if msg.get(h)]  # strict parser: no empties
     recipients = [a for _, a in email.utils.getaddresses(headers) if a]
     references = " ".join(str(msg.get(h, "")) for h in ("In-Reply-To", "References")).split()
+    bounced_id = _bounced_message_id(msg)
     return {
+        "bounce_of": bounced_id,
         "message_id": str(msg.get("Message-ID", "")).strip() or email.utils.make_msgid(),
         "subject": str(msg.get("Subject", "")).strip(),
         "from": from_addr.lower(),
@@ -53,6 +55,25 @@ def parse_email(raw: bytes | str) -> dict[str, Any]:
         "attachments": attachments,
         "auto_submitted": str(msg.get("Auto-Submitted", "no")).lower() != "no" or bool(msg.get("X-Autoreply")),
     }
+
+
+def _bounced_message_id(msg: EmailMessage) -> str | None:
+    """Message-ID of the original email when ``msg`` is a delivery status notification (RFC 3464)."""
+    if msg.get_content_type() != "multipart/report" or msg.get_param("report-type") != "delivery-status":
+        return None
+    for part in msg.walk():
+        ctype = part.get_content_type()
+        if ctype in ("message/rfc822", "text/rfc822-headers"):
+            payload = part.get_payload()
+            if isinstance(payload, list) and payload:
+                original = payload[0].get("Message-ID")
+            else:
+                text = payload if isinstance(payload, str) else part.get_content()
+                match = re.search(r"^Message-ID:\s*(<[^>]+>)", str(text), flags=re.I | re.M)
+                original = match.group(1) if match else None
+            if original:
+                return str(original).strip()
+    return None
 
 
 def _text_to_html(text: str) -> str:
@@ -94,6 +115,11 @@ def process_email(env: Environment, raw: bytes | str) -> dict[str, Any]:
     """Process one inbound email as the system. Returns what happened (for logs and the API)."""
     sys_env = env.elevated("inbound mail")
     msg = parse_email(raw)
+    if msg["bounce_of"]:
+        queued = sys_env["core.mail_queue"].search([("message_id", "=", msg["bounce_of"])], limit=1)
+        if queued:
+            queued.write({"state": "bounced", "error": "Delivery failed (bounce received)"})
+        return {"status": "bounce", "message_id": msg["bounce_of"], "matched": bool(queued)}
     if msg["auto_submitted"]:
         return {"status": "ignored", "reason": "auto-submitted"}
     messages = sys_env["chatter.message"]

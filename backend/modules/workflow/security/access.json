@@ -1,0 +1,10 @@
+[
+  {"id": "access_definition_user", "model": "core.model_access", "values": {"name": "workflow: user read", "model_name": "workflow.definition", "group_id": "core.group_user", "perm_read": true}},
+  {"id": "access_definition_system", "model": "core.model_access", "values": {"name": "workflow: admin", "model_name": "workflow.definition", "group_id": "core.group_system", "perm_read": true, "perm_write": true, "perm_create": true, "perm_unlink": true}},
+  {"id": "access_state_user", "model": "core.model_access", "values": {"name": "workflow state: user read", "model_name": "workflow.state", "group_id": "core.group_user", "perm_read": true}},
+  {"id": "access_state_system", "model": "core.model_access", "values": {"name": "workflow state: admin", "model_name": "workflow.state", "group_id": "core.group_system", "perm_read": true, "perm_write": true, "perm_create": true, "perm_unlink": true}},
+  {"id": "access_transition_user", "model": "core.model_access", "values": {"name": "workflow transition: user read", "model_name": "workflow.transition", "group_id": "core.group_user", "perm_read": true}},
+  {"id": "access_transition_system", "model": "core.model_access", "values": {"name": "workflow transition: admin", "model_name": "workflow.transition", "group_id": "core.group_system", "perm_read": true, "perm_write": true, "perm_create": true, "perm_unlink": true}},
+  {"id": "access_automation_system", "model": "core.model_access", "values": {"name": "automation: admin", "model_name": "workflow.automation", "group_id": "core.group_system", "perm_read": true, "perm_write": true, "perm_create": true, "perm_unlink": true}},
+  {"id": "access_automation_run_system", "model": "core.model_access", "values": {"name": "automation run: admin", "model_name": "workflow.automation_run", "group_id": "core.group_system", "perm_read": true, "perm_unlink": true}}
+]
