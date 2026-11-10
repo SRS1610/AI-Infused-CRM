@@ -324,7 +324,11 @@ class Product(Model):
     def _variant_copied_fields(self) -> list[str]:
         """The shared fields that are copied: those stored on the record (an attachment-backed image has no
         column; it is refused on variants like every shared field but not copied)."""
-        return [n for n in self._variant_shared_fields() if self._fields[n].store]
+        return [
+            n
+            for n in self._variant_shared_fields()
+            if self._fields[n].store or isinstance(self._fields[n], F.Many2many)
+        ]
 
     def _template_values(self, template: Model, names: Iterable[str]) -> dict[str, Any]:
         """Values of ``names`` on ``template`` in write format (current language for translated fields)."""
@@ -335,6 +339,8 @@ class Product(Model):
             value = tmpl[name]
             if isinstance(field, F.Many2one):
                 value = value.ids[0] if value else None
+            elif isinstance(field, F.Many2many):
+                value = [("set", value.ids)]
             out[name] = value
         return out
 
@@ -384,6 +390,19 @@ class Product(Model):
                 continue
             for name in shared:
                 field = self._fields[name]
+                if isinstance(field, F.Many2many):
+                    commands = F._X2many.normalize_commands(vals[name])
+                    same = len(commands) == 1 and commands[0][0] == "set" and set(commands[0][1]) == set(p[name].ids)
+                    if not same:
+                        raise UserError(
+                            _(
+                                "'{field}' is shared by every variant of '{template}': change it on the template",
+                                field=translatable(field.label),
+                                template=p.template_id.display_name,
+                            ),
+                            field=name,
+                        )
+                    continue
                 new = field.convert_to_cache(vals[name], p)
                 old = p[name]
                 if isinstance(old, Model):

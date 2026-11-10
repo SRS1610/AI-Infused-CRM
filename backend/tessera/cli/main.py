@@ -33,6 +33,7 @@ def _root(
     """Tessera developer and operations CLI."""
 
 
+from tessera.cli import account as _account  # noqa: E402
 from tessera.cli import ai as _ai  # noqa: E402
 from tessera.cli import db as _db  # noqa: E402
 from tessera.cli import i18n as _i18n  # noqa: E402
@@ -49,6 +50,7 @@ app.add_typer(_jobs.app, name="jobs", help="Background jobs: run, list, requeue,
 app.add_typer(_seed.app, name="seed", help="Demo data: install a phase's scenario")
 app.add_typer(_ai.app, name="ai", help="AI: evaluations, completeness report, classification, re-index")
 app.add_typer(_perf.app, name="perf", help="Performance checks: list views at volume (U-6)")
+app.add_typer(_account.app, name="account", help="Accounting: charts of accounts, ledger integrity")
 app.command("serve")(_run.serve)
 app.command("worker")(_run.worker)
 app.command("scheduler")(_run.scheduler)

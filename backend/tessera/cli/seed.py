@@ -14,6 +14,8 @@ PHASE_MODULES = {
         "discuss", "calendar", "ai_core", "studio",
     ],
 }  # fmt: skip
+# each phase's scenario includes the previous ones
+PHASE_MODULES[2] = [*PHASE_MODULES[1], "account"]
 
 
 @app.command("demo")

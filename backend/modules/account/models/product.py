@@ -33,6 +33,16 @@ class ProductAccounting(Model):
     property_account_expense_id = fields.Many2one("account.account", "Expense account", ondelete="set_null")
     purchase_ok = fields.Boolean("Can be purchased", default=True)
 
+    def _variant_shared_fields(self) -> list[str]:
+        return [
+            *super()._variant_shared_fields(),
+            "taxes_id",
+            "supplier_taxes_id",
+            "property_account_income_id",
+            "property_account_expense_id",
+            "purchase_ok",
+        ]
+
     def _default_taxes(self, use: str) -> list[int]:
         company = self.env.company
         if not company:
