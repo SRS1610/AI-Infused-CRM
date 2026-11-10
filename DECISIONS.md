@@ -109,6 +109,16 @@ Format: `D-nnn · date · status (Proposed | Accepted | Superseded)`
 - **Decision:** `check_untyped_defs` across kernel and modules; `strict = true` only for stable, non-dynamic packages (`orm.domain`, `orm.cache`, `modules.graph`, `modules.manifest`, `exceptions`, `config`). `Model.__getattr__` is typed `Any` so `record.<field>` access type-checks. Strictness is tightened per package as APIs stabilise.
 - **Rationale:** Fields are descriptors composed at runtime; demanding strict typing of every dynamic attribute would cost `# type: ignore` noise without catching real defects. Correctness of the dynamic parts is covered by the kernel test modules instead.
 
+### D-026 · 2026-11-10 · Accepted — REST paths are `/api/v1/models/{model}`
+- **Decision:** Generated REST endpoints live under `/api/v1/models/` instead of directly under `/api/v1/` (ARCHITECTURE §4.16 and BUILD_PLAN 1.2-c wrote `/api/v1/<model>`).
+- **Rationale:** Keeps model routes from shadowing (or being shadowed by) fixed routes such as `/auth`, `/web`, `/jsonrpc`, and makes API gateways/ingress rules simpler.
+
+### D-027 · 2026-11-10 · Accepted — Auth hardening defaults
+- **Decision:** 5 consecutive failed passwords lock the account for 15 minutes (counted in an independent transaction so the failed request's rollback does not erase it); 10 one-time TOTP recovery codes (stored as SHA-256) are issued on enrolment; login/logout with a stale session cookie and no CSRF token proceed anonymously instead of failing; anonymous callers without a `public` user get uid 0 (no rights), never the system user.
+
+### D-028 · 2026-11-10 · Accepted — Realtime hub backends
+- **Decision:** In-process fan-out by default (`TESSERA_REALTIME_BACKEND=memory`); Redis pub/sub (`redis`) for multi-process deployments. Events are published only after commit. Replies (`subscribed`, `pong`) share the per-connection queue so they are ordered after already-published events.
+
 ### D-023 · 2026-11-09 · Proposed — Public web surfaces before Phase 7 use `*_website` bridge modules
 - **Decision:** Modules that need a public page before the `website` builder exists (recruitment job postings, event pages, eLearning courses, blog, forum, survey invitations) depend only on `portal` for their minimal public rendering in their own phase; `recruitment_website`, `events_website`, `elearning_website`, `blog_website`, `forum_website` bridge modules (auto-installed when `website` is present) move those pages into the website builder in Phase 7.
 - **Rationale:** Preserves the layering rule (no dependency on a later phase) while still shipping usable public pages when each module lands.

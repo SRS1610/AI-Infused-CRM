@@ -53,8 +53,8 @@ def test_login_logout_and_csrf(client: TestClient) -> None:
 
 def test_login_rate_limit(client: TestClient) -> None:
     for _ in range(10):
-        client.post("/api/v1/auth/login", json={"login": "admin", "password": "wrong"})
-    assert client.post("/api/v1/auth/login", json={"login": "admin", "password": "wrong"}).status_code == 429
+        client.post("/api/v1/auth/login", json={"login": "nobody-here", "password": "wrong"})
+    assert client.post("/api/v1/auth/login", json={"login": "nobody-here", "password": "wrong"}).status_code == 429
 
 
 def test_password_change_revokes_other_sessions(client: TestClient, app) -> None:  # type: ignore[no-untyped-def]

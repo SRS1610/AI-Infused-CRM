@@ -22,8 +22,11 @@ from tessera.orm.environment import SYSTEM_UID, Environment
 from tessera.orm.model import Model
 from tessera.orm.registry import Registry
 from tessera.security.auth import API_KEY_PREFIX, resolve_api_key, resolve_session
+from tessera.security.crypto import constant_time_equals
 
 SAFE_METHODS = {"GET", "HEAD", "OPTIONS"}
+ANONYMOUS_UID = 0
+CSRF_EXEMPT_ANONYMOUS = {"/api/v1/auth/login", "/api/v1/auth/totp", "/api/v1/auth/logout"}
 
 
 @dataclass
@@ -104,19 +107,21 @@ def _authenticate(ctx: RequestContext) -> None:
     token = request.cookies.get(get_settings().session_cookie_name)
     if token:
         session = resolve_session(sys_env, token)
-        if session is not None:
-            if request.method not in SAFE_METHODS:
-                csrf = request.headers.get("x-csrf-token")
-                if not csrf or csrf != session.csrf_token:
+        if session is not None and request.method not in SAFE_METHODS:
+            csrf = request.headers.get("x-csrf-token")
+            if not csrf or not constant_time_equals(csrf, str(session.csrf_token)):
+                if request.url.path not in CSRF_EXEMPT_ANONYMOUS:
                     raise AccessError("Missing or invalid CSRF token", csrf=True)
+                # logging in again with a stale cookie: proceed as anonymous instead of failing
+                token, session = None, None
+        if session is not None:
             user = session.user_id
             ctx.env = Environment(ctx.env.transaction, user.ids[0], _user_context(sys_env, request, user))
             ctx.auth_kind, ctx.session, ctx.session_token = "session", session, token
             return
     public = sys_env["core.user"].with_context(active_test=False).search([("login", "=", "public")], limit=1)
-    ctx.env = Environment(ctx.env.transaction, public.ids[0] if public else SYSTEM_UID, {})
-    if not public:
-        ctx.env = Environment(ctx.env.transaction, SYSTEM_UID, {}, su=False)
+    # never fall back to the system user: without a public user, anonymous callers get uid 0 (no rights)
+    ctx.env = Environment(ctx.env.transaction, public.ids[0] if public else ANONYMOUS_UID, {})
     ctx.auth_kind = "anonymous"
 
 

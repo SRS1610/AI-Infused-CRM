@@ -51,15 +51,52 @@ def validate_definition(view_type: str, definition: Any) -> None:
     _validate_nodes(definition)
 
 
-def _validate_nodes(node: Any) -> None:
+NODE_KINDS = frozenset(
+    {
+        "sheet",
+        "header",
+        "footer",
+        "group",
+        "row",
+        "column",
+        "field",
+        "label",
+        "separator",
+        "notebook",
+        "page",
+        "buttons",
+        "button",
+        "status_bar",
+        "smart_buttons",
+        "card",
+        "badge",
+        "avatar",
+        "image",
+        "alert",
+        "html",
+        "spacer",
+        "chatter",
+        "component",  # "component": client extension registered under node["component"]
+    }
+)
+
+
+def _validate_nodes(node: Any, pointer: str = "") -> None:
+    """Validate node kinds recursively; errors name the JSON pointer of the offending node."""
     if isinstance(node, dict):
-        if "kind" in node and not isinstance(node["kind"], str):
-            raise ValidationError("node 'kind' must be a string")
-        for value in node.values():
-            _validate_nodes(value)
+        if "kind" in node:
+            kind = node["kind"]
+            if not isinstance(kind, str):
+                raise ValidationError(f"node 'kind' must be a string at {pointer or '/'}", pointer=pointer or "/")
+            if kind not in NODE_KINDS:
+                raise ValidationError(f"Unknown view node kind '{kind}' at {pointer or '/'}", pointer=pointer or "/")
+            if kind == "component" and not node.get("component"):
+                raise ValidationError(f"component node needs 'component' at {pointer or '/'}", pointer=pointer or "/")
+        for key, value in node.items():
+            _validate_nodes(value, f"{pointer}/{key}")
     elif isinstance(node, list):
-        for item in node:
-            _validate_nodes(item)
+        for index, item in enumerate(node):
+            _validate_nodes(item, f"{pointer}/{index}")
 
 
 def validate_operations(operations: Any) -> None:
@@ -77,6 +114,8 @@ def validate_operations(operations: Any) -> None:
             raise ValidationError(f"Operation {op['op']} needs a node")
         if op["op"] == "set_attr" and not isinstance(op.get("attrs"), dict):
             raise ValidationError("set_attr needs attrs")
+        if "node" in op:
+            _validate_nodes(op["node"], f"/operations/{operations.index(op)}/node")
 
 
 # -- anchors ---------------------------------------------------------------------------------------

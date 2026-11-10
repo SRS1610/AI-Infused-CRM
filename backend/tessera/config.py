@@ -35,6 +35,7 @@ class Settings(BaseSettings):
 
     # redis
     redis_url: str = "redis://localhost:6379/0"
+    realtime_backend: Literal["memory", "redis"] = "memory"
 
     # web
     secret_key: str = "dev-only-secret-key-change-me-please-32b"  # noqa: S105 - rejected by check() in production
@@ -47,6 +48,8 @@ class Settings(BaseSettings):
     session_idle_minutes: int = 60 * 8
     session_absolute_hours: int = 24 * 7
     login_rate_limit_per_minute: int = 10
+    login_lockout_attempts: int = 5
+    login_lockout_minutes: int = 15
     api_rate_limit_per_minute: int = 600
 
     # modules

@@ -1,11 +1,14 @@
 from __future__ import annotations
 
+import hashlib
+import secrets
 from collections.abc import Sequence
 from typing import Any
 
 from argon2 import PasswordHasher
 from argon2.exceptions import VerifyMismatchError
 
+from tessera.config import get_settings
 from tessera.exceptions import AccessDenied, ValidationError
 from tessera.orm import Model, api, fields
 
@@ -100,6 +103,9 @@ class User(Model):
     totp_secret = fields.Char(groups="core.group_system", copy=False)
     totp_enabled = fields.Boolean(default=False)
     last_login = fields.Datetime(readonly=True, copy=False)
+    failed_login_count = fields.Integer(default=0, readonly=True, copy=False, groups="core.group_system")
+    locked_until = fields.Datetime(readonly=True, copy=False, groups="core.group_system")
+    totp_recovery_hashes = fields.Json(copy=False, groups="core.group_system", help="SHA-256 of unused recovery codes")
     signature = fields.Html()
     notification_preference = fields.Selection([("inbox", "In-app"), ("email", "Email")], default="inbox")
 
@@ -170,13 +176,56 @@ class User(Model):
             return False
 
     def authenticate(self, login: str, password: str) -> Model:
-        """Return the user record for valid credentials; raise ``AccessDenied`` otherwise."""
+        """Return the user record for valid credentials; raise ``AccessDenied`` otherwise.
+
+        After ``login_lockout_attempts`` consecutive failures the account is locked for
+        ``login_lockout_minutes``. Failures are recorded in their own transaction so they
+        survive the rollback of the failed request.
+        """
+        settings = get_settings()
         users = self.elevated("authenticate")
         user = users.search([("login", "=", (login or "").strip().lower()), ("active", "=", True)], limit=1)
+        now = self.env.now()
+        if user and user.locked_until and user.locked_until > now:
+            raise AccessDenied("Too many failed attempts; this account is temporarily locked", locked=True)
         if not user or not user.check_password(password):
+            if user:
+                _record_failed_login(
+                    self.env, user.ids[0], settings.login_lockout_attempts, settings.login_lockout_minutes
+                )
             raise AccessDenied("Invalid login or password")
-        user.write({"last_login": self.env.now()})
+        vals: dict[str, Any] = {"last_login": now}
+        if user.failed_login_count or user.locked_until:
+            vals.update({"failed_login_count": 0, "locked_until": None})
+        user.with_context(_recompute_write=True)._write_columns(vals)
         return self.browse(user.ids)
+
+    def unlock(self) -> None:
+        self.elevated("unlock").with_context(_recompute_write=True)._write_columns(
+            {"failed_login_count": 0, "locked_until": None}
+        )
+
+    # -- TOTP recovery codes ----------------------------------------------------------------
+    def generate_recovery_codes(self, count: int = 10) -> list[str]:
+        """Replace the user's recovery codes; the plain codes are returned exactly once."""
+        self.ensure_one()
+        codes = ["-".join(secrets.token_hex(3) for _ in range(2)) for _ in range(count)]
+        hashes = [hashlib.sha256(c.encode()).hexdigest() for c in codes]
+        self.elevated("recovery codes").with_context(_recompute_write=True)._write_columns(
+            {"totp_recovery_hashes": hashes}
+        )
+        return codes
+
+    def consume_recovery_code(self, code: str) -> bool:
+        self.ensure_one()
+        me = self.elevated("recovery codes")
+        digest = hashlib.sha256((code or "").strip().lower().encode()).hexdigest()
+        remaining = list(me.totp_recovery_hashes or [])
+        if digest not in remaining:
+            return False
+        remaining.remove(digest)
+        me.with_context(_recompute_write=True)._write_columns({"totp_recovery_hashes": remaining})
+        return True
 
     # -- groups ----------------------------------------------------------------------------
     def has_group(self, external_id: str) -> bool:
@@ -186,3 +235,24 @@ class User(Model):
     def all_group_ids(self) -> list[int]:
         self.ensure_one()
         return list(self.elevated().group_ids.transitive_implied().ids)
+
+
+def _record_failed_login(env: Any, user_id: int, max_attempts: int, lock_minutes: int) -> None:
+    """Increment the failure counter in an independent transaction (and lock if needed).
+
+    ``SKIP LOCKED``: if the request's own transaction already holds the row, the attempt is not
+    counted rather than deadlocking against ourselves."""
+    from tessera.db.engine import Cursor
+
+    cr = Cursor(env.cr.engine)
+    try:
+        cr.execute(
+            """UPDATE core_user SET failed_login_count = COALESCE(failed_login_count, 0) + 1,
+                   locked_until = CASE WHEN COALESCE(failed_login_count, 0) + 1 >= :max
+                                       THEN now() + make_interval(mins => :mins) ELSE locked_until END
+               WHERE id = (SELECT id FROM core_user WHERE id = :id FOR UPDATE SKIP LOCKED)""",
+            {"max": max_attempts, "mins": lock_minutes, "id": user_id},
+        )
+        cr.commit()
+    finally:
+        cr.close()

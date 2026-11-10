@@ -28,7 +28,7 @@ class LoginRequest(BaseModel):
 
 class TotpRequest(BaseModel):
     pre_auth_token: str
-    code: str = Field(min_length=6, max_length=10)
+    code: str = Field(min_length=6, max_length=20, description="TOTP code or a recovery code")
 
 
 class TotpEnableRequest(BaseModel):
@@ -118,7 +118,8 @@ def login(body: LoginRequest, response: Response, ctx: RequestContext = Depends(
 def login_totp(body: TotpRequest, response: Response, ctx: RequestContext = Depends(request_context)) -> dict[str, Any]:
     sys_env = ctx.system_env()
     user = auth_lib.consume_pre_auth(sys_env, body.pre_auth_token)
-    if not auth_lib.totp_verify(user.elevated().totp_secret, body.code):
+    code = body.code.strip()
+    if not auth_lib.totp_verify(user.elevated().totp_secret, code) and not user.consume_recovery_code(code):
         raise AccessDenied("Invalid authentication code")
     return _finish_login(ctx, response, user, totp_verified=True)
 
@@ -168,7 +169,7 @@ def totp_enable(body: TotpEnableRequest, ctx: RequestContext = Depends(authentic
     if not auth_lib.totp_verify(user.totp_secret, body.code):
         raise UserError("The code does not match; scan the QR code again and retry")
     user.write({"totp_enabled": True})
-    return {"ok": True}
+    return {"ok": True, "recovery_codes": user.generate_recovery_codes()}
 
 
 @router.post("/totp/disable")

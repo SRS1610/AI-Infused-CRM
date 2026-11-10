@@ -106,6 +106,25 @@ class WebhookDelivery(Model):
     next_attempt_at = fields.Datetime()
     sent_at = fields.Datetime()
 
+    MAX_ATTEMPTS = 8
+
+    @api.model
+    def retry_due(self, limit: int = 100) -> int:
+        """Re-send failed deliveries whose backoff has elapsed (called by the scheduler).
+        Backoff is 2^attempts minutes, capped at 2 hours; after MAX_ATTEMPTS a delivery stays failed."""
+        due = self.elevated().search(
+            [
+                ("status", "=", "failed"),
+                ("attempts", "<", self.MAX_ATTEMPTS),
+                ("next_attempt_at", "<=", self.env.now()),
+            ],
+            limit=limit,
+            order="next_attempt_at, id",
+        )
+        for delivery in due:
+            delivery.deliver()
+        return len(due)
+
     def deliver(self, timeout: float = 10.0) -> bool:
         """Send one delivery synchronously and record the outcome."""
         self.ensure_one()

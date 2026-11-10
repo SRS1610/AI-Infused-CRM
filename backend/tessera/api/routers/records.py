@@ -14,6 +14,7 @@ from pydantic import BaseModel, ConfigDict, Field
 from tessera.api.deps import RequestContext, authenticated_any
 from tessera.api.serializers import clean_input_values, default_read_fields, etag_for, parse_fields_param
 from tessera.exceptions import AccessError, ConcurrencyError, MissingError, ValidationError
+from tessera.orm import fields as F
 from tessera.orm.model import Model
 
 router = APIRouter(prefix="/models", tags=["records"])
@@ -92,19 +93,48 @@ def list_records(
     order: str | None = None,
     limit: int = Query(80, ge=1, le=MAX_LIMIT),
     offset: int = Query(0, ge=0),
+    after: int | None = Query(None, description="Keyset cursor: return records with id > after (order must be by id)"),
+    expand: str | None = Query(None, description="Comma-separated many2one fields to expand into nested records"),
     context: str | None = Query(None, description="Context as JSON"),
     count: bool = Query(True, description="Include the total count"),
 ) -> dict[str, Any]:
     model = get_model(ctx, model_name, _parse_context(context))
     node = _parse_domain(domain)
-    records = model.search(node, offset=offset, limit=limit, order=order)
+    search_node = node
+    if after is not None:
+        if order not in (None, "", "id", "id asc"):
+            raise ValidationError("Keyset pagination ('after') requires order=id")
+        order, offset = "id", 0
+        search_node = {"all": [node, ["id", ">", after]]} if node else [["id", ">", after]]
+    records = model.search(search_node, offset=offset, limit=limit, order=order)
     total = model.search_count(node) if count else None
+    items = _serialize(records, parse_fields_param(fields, model))
+    if expand:
+        _expand(model, items, [e.strip() for e in expand.split(",") if e.strip()])
     return {
-        "items": _serialize(records, parse_fields_param(fields, model)),
+        "items": items,
         "total": total,
         "limit": limit,
         "offset": offset,
+        "next_cursor": records.ids[-1] if after is not None and len(records) == limit else None,
     }
+
+
+def _expand(model: Model, items: list[dict[str, Any]], names: list[str]) -> None:
+    """Replace ``{"id", "display_name"}`` of many2one values by the full (readable) target record."""
+    for name in names:
+        field = model._fields.get(name)
+        if not isinstance(field, F.Many2one):
+            raise ValidationError(f"Only many2one fields can be expanded ('{name}')")
+        ids = sorted({item[name]["id"] for item in items if isinstance(item.get(name), dict)})
+        if not ids:
+            continue
+        comodel = model.env[field.comodel_name or ""]
+        by_id = {row["id"]: row for row in _serialize(comodel.browse(ids), None)}
+        for item in items:
+            value = item.get(name)
+            if isinstance(value, dict) and value["id"] in by_id:
+                item[name] = by_id[value["id"]]
 
 
 @router.post("/{model_name}", status_code=201)
