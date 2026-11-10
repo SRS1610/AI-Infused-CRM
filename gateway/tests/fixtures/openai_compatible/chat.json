@@ -1,0 +1,27 @@
+{
+  "id": "chatcmpl-CZf0aR7d1kQb2",
+  "object": "chat.completion",
+  "created": 1762761600,
+  "model": "meta-llama/Llama-3.3-70B-Instruct",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "Acme Corp renewed its annual contract and asked for a pricing review in Q3.",
+        "reasoning_content": null,
+        "tool_calls": []
+      },
+      "logprobs": null,
+      "finish_reason": "stop",
+      "stop_reason": null
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 1600,
+    "completion_tokens": 18,
+    "total_tokens": 1618,
+    "prompt_tokens_details": null
+  },
+  "prompt_logprobs": null
+}

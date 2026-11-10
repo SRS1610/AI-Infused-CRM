@@ -184,6 +184,34 @@ Format: `D-nnn · date · status (Proposed | Accepted | Superseded)`
 ### D-045 · 2026-11-10 · Accepted — Installing modules ensures PostgreSQL extensions first
 - **Decision:** `install_modules` and `drop_everything` create the extensions modules rely on (`vector`, `pg_trgm`, `unaccent`, `btree_gin`, `pgcrypto`) before schema sync, so a brand-new database installs without a manual step; extensions the server lacks are reported, not fatal. The installer test (1.4-a) installs `crm` with its dependencies on an empty database and asserts no schema drift.
 
+### D-046 · 2026-11-10 · Accepted — Gateway adapters: official SDKs for Anthropic and OpenAI, REST for Gemini and Voyage; breakers per process
+- **Decision:** The Anthropic adapter uses the `anthropic` SDK (Messages API, beta endpoint so Opus 5.5 / Sonnet 5.5 get the provider's server-side refusal fallback); OpenAI, Azure OpenAI and OpenAI-compatible servers use the `openai` SDK; Gemini and Voyage are called over their REST APIs with `httpx2`. Circuit breakers and the response cache's memory variant live in each gateway process. Contract-test fixtures are hand-written in each provider's documented wire format until the nightly live run records real ones.
+- **Rationale:** SDKs for the two providers with the richest features (strict tools, structured outputs, streaming helpers); REST keeps the dependency set small where an SDK adds little. Per-process breakers are enough for Phase 1 deployments (one gateway replica).
+
+### D-047 · 2026-11-10 · Accepted — One embedding size (1024) for the whole platform
+- **Decision:** `ai_core.embedding.vector` is `vector(1024)` with an HNSW cosine index. Adapters request 1024 dimensions where the provider supports it (OpenAI `dimensions`, Voyage `output_dimension`, Gemini `outputDimensionality`) and otherwise zero-pad or truncate-and-renormalise.
+- **Rationale:** HNSW needs a fixed size; one size keeps switching embedding providers a re-index job rather than a schema change.
+
+### D-048 · 2026-11-10 · Accepted — Rule-based PII redaction plus names known from the context (no NER model in Phase 1)
+- **Decision:** The gateway redacts e-mail addresses, phone numbers, IBANs, Luhn-valid card numbers, US SSNs, honorific-prefixed names and the names the runtime passes in (people and companies linked to the record, `pii=True` text fields, the user). Placeholders are stable per request and restored in the answer and in streamed text.
+- **Rationale:** Settles the open item in the AI note §8. Known names catch the people that matter in business records with no model to run; free-text names typed into descriptions are a documented gap (docs/ai/governance.md).
+
+### D-049 · 2026-11-10 · Accepted — In-process gateway mode
+- **Decision:** `TESSERA_AI_GATEWAY_URL=inprocess` runs the gateway library inside the API process, reading its configuration through the ORM and writing the ledger through the caller's cursor. Tests, the end-to-end suite and single-process installations use it; the backend depends on `tessera-gateway` only in its dev group.
+- **Rationale:** Tests see uncommitted configuration and run without a second service, while exercising the same routing, budget, redaction and validation code as production.
+
+### D-050 · 2026-11-10 · Accepted — Evaluation cassettes keyed by prompt version, case and call index
+- **Decision:** Replay cassettes (`ai/cassettes/<feature>.jsonl`) store the gateway response for each (prompt version, eval case, call index). A changed prompt has a new version and therefore needs re-recording. Cassettes may refer to setup records symbolically (`$id:ref`, `{{src:ref}}`). Until provider keys are available, cassettes are hand-authored, so replay measures the platform's handling (validation, citations, access control, proposals), not model quality.
+- **Rationale:** Deterministic CI with no secrets (D-017) and keys that survive the changing record ids of fresh fixtures.
+
+### D-051 · 2026-11-10 · Accepted — Tools run in rolled-back savepoints; proposals are signed and owned
+- **Decision:** Every tool call executes in a savepoint that is always rolled back; `writes=True` tools can only queue proposals. Proposals store an HMAC of their payload, may only be decided by the user who asked, expire after 7 days and are applied as that user in a fresh access check. Accepting a message proposal posts it as the user, linked to the run (`chatter.message.ai_run_id`); the AI-drafted label disappears once a person edits or accepts.
+- **Rationale:** Makes "0 records mutated without a proposal" hold by construction, whatever the model does (prompt-injection corpus, 1.5-g).
+
+### D-052 · 2026-11-10 · Accepted — Uninstall moves indexes and join tables aside with the tables
+- **Decision:** Uninstalling a module without `--drop-data` renames its tables *and* their indexes (to short hashed names) and treats its many2many join tables as owned. Found while uninstalling and reinstalling `ai_core`: the old indexes blocked the reinstall and the join table showed as drift.
+- **Rationale:** U-2 requires a clean `tessera db check` after uninstalling a leaf module, and reinstalling must work.
+
 ### D-023 · 2026-11-09 · Proposed — Public web surfaces before Phase 7 use `*_website` bridge modules
 - **Decision:** Modules that need a public page before the `website` builder exists (recruitment job postings, event pages, eLearning courses, blog, forum, survey invitations) depend only on `portal` for their minimal public rendering in their own phase; `recruitment_website`, `events_website`, `elearning_website`, `blog_website`, `forum_website` bridge modules (auto-installed when `website` is present) move those pages into the website builder in Phase 7.
 - **Rationale:** Preserves the layering rule (no dependency on a later phase) while still shipping usable public pages when each module lands.

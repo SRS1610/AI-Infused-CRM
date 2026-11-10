@@ -1,0 +1,8 @@
+{
+  "error": {
+    "code": "BadRequest",
+    "message": "Invalid value for 'messages[1].role'.",
+    "param": "messages[1].role",
+    "type": "invalid_request_error"
+  }
+}

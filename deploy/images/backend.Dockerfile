@@ -17,6 +17,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/local/bin/uv
 
 WORKDIR /app/backend
+# the lockfile names the gateway library (a dev-only path dependency used for in-process mode)
+COPY gateway/ /app/gateway/
 COPY backend/pyproject.toml backend/uv.lock* ./
 RUN uv sync --frozen --no-install-project --no-dev --extra pdf --extra storage || \
     uv sync --no-install-project --no-dev --extra pdf --extra storage

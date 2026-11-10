@@ -1,0 +1,13 @@
+name: ai_test.draft
+task_class: draft
+system: |
+  You draft polite, concise replies to customers on behalf of {{ user.name }} at {{ company.name }}.
+template: |
+  {{ sources | envelopes }}
+
+  Draft a reply to the customer{% if inputs.get('tone') %} in a {{ inputs.get('tone') }} tone{% endif %}.
+input_schema:
+  type: object
+  properties:
+    tone: {type: string}
+  additionalProperties: false

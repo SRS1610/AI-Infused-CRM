@@ -20,6 +20,7 @@ os.environ.setdefault("TESSERA_ENV", "test")
 os.environ["TESSERA_MODULE_PATHS"] = f"{BACKEND / 'modules'}:{TEST_MODULE_PATH}"
 os.environ.setdefault("TESSERA_STORAGE_BACKEND", "filesystem")
 os.environ["TESSERA_JOBS_BACKEND"] = "manual"
+os.environ["TESSERA_AI_GATEWAY_URL"] = "inprocess"  # the gateway library runs in the test process (D-049)
 os.environ.setdefault("TESSERA_STORAGE_PATH", str(BACKEND / "var" / "test-storage"))
 
 from tessera.config import get_settings, reset_settings_cache
@@ -46,6 +47,8 @@ KERNEL_TEST_MODULES = [
     "portal",
     "discuss",
     "calendar",
+    "ai_core",
+    "ai_test",
 ]
 
 

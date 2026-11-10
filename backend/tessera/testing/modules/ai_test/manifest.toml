@@ -1,0 +1,9 @@
+name = "ai_test"
+version = "1.0.0"
+summary = "Test module: support tickets with a thread and three AI features that exercise the AI platform end to end"
+category = "Testing"
+phase = 0
+depends = ["ai_core"]
+
+[load]
+security = ["security/access.json"]

@@ -1,0 +1,7 @@
+{
+  "object": "error",
+  "message": "Engine loop has died",
+  "type": "InternalServerError",
+  "param": null,
+  "code": 500
+}

@@ -1,0 +1,8 @@
+data: {"candidates":[{"content":{"parts":[{"text":"Acme Corp renewed"}],"role":"model"},"index":0}],"usageMetadata":{"promptTokenCount":1650,"totalTokenCount":1650,"promptTokensDetails":[{"modality":"TEXT","tokenCount":1650}]},"modelVersion":"gemini-2.5-flash","responseId":"qOYVdCj7GuKd1Q2T4hG08Uo"}
+
+data: {"candidates":[{"content":{"parts":[{"text":" its annual contract"}],"role":"model"},"index":0}],"usageMetadata":{"promptTokenCount":1650,"totalTokenCount":1650,"promptTokensDetails":[{"modality":"TEXT","tokenCount":1650}]},"modelVersion":"gemini-2.5-flash","responseId":"qOYVdCj7GuKd1Q2T4hG08Uo"}
+
+data: {"candidates":[{"content":{"parts":[{"text":" and asked for a"}],"role":"model"},"index":0}],"usageMetadata":{"promptTokenCount":1650,"totalTokenCount":1650,"promptTokensDetails":[{"modality":"TEXT","tokenCount":1650}]},"modelVersion":"gemini-2.5-flash","responseId":"qOYVdCj7GuKd1Q2T4hG08Uo"}
+
+data: {"candidates":[{"content":{"parts":[{"text":" pricing review in Q3."}],"role":"model"},"index":0,"finishReason":"STOP"}],"usageMetadata":{"promptTokenCount":1650,"totalTokenCount":1764,"candidatesTokenCount":18,"promptTokensDetails":[{"modality":"TEXT","tokenCount":1650}],"thoughtsTokenCount":96,"cachedContentTokenCount":1024,"cacheTokensDetails":[{"modality":"TEXT","tokenCount":1024}]},"modelVersion":"gemini-2.5-flash","responseId":"qOYVdCj7GuKd1Q2T4hG08Uo"}
+

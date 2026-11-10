@@ -1,0 +1,16 @@
+data: {"id":"chatcmpl-CZf0eW8h6kPp6","object":"chat.completion.chunk","created":1762761601,"model":"gpt-4.1-mini-2025-04-14","choices":[{"index":0,"delta":{"role":"assistant","content":"","refusal":null},"logprobs":null,"finish_reason":null}],"system_fingerprint":"fp_6f2eabb9a5","service_tier":"default","usage":null}
+
+data: {"id":"chatcmpl-CZf0eW8h6kPp6","object":"chat.completion.chunk","created":1762761601,"model":"gpt-4.1-mini-2025-04-14","choices":[{"index":0,"delta":{"content":"Acme Corp renewed"},"logprobs":null,"finish_reason":null}],"system_fingerprint":"fp_6f2eabb9a5","service_tier":"default","usage":null}
+
+data: {"id":"chatcmpl-CZf0eW8h6kPp6","object":"chat.completion.chunk","created":1762761601,"model":"gpt-4.1-mini-2025-04-14","choices":[{"index":0,"delta":{"content":" its annual contract"},"logprobs":null,"finish_reason":null}],"system_fingerprint":"fp_6f2eabb9a5","service_tier":"default","usage":null}
+
+data: {"id":"chatcmpl-CZf0eW8h6kPp6","object":"chat.completion.chunk","created":1762761601,"model":"gpt-4.1-mini-2025-04-14","choices":[{"index":0,"delta":{"content":" and asked for a"},"logprobs":null,"finish_reason":null}],"system_fingerprint":"fp_6f2eabb9a5","service_tier":"default","usage":null}
+
+data: {"id":"chatcmpl-CZf0eW8h6kPp6","object":"chat.completion.chunk","created":1762761601,"model":"gpt-4.1-mini-2025-04-14","choices":[{"index":0,"delta":{"content":" pricing review in Q3."},"logprobs":null,"finish_reason":null}],"system_fingerprint":"fp_6f2eabb9a5","service_tier":"default","usage":null}
+
+data: {"id":"chatcmpl-CZf0eW8h6kPp6","object":"chat.completion.chunk","created":1762761601,"model":"gpt-4.1-mini-2025-04-14","choices":[{"index":0,"delta":{},"logprobs":null,"finish_reason":"stop"}],"system_fingerprint":"fp_6f2eabb9a5","service_tier":"default","usage":null}
+
+data: {"id":"chatcmpl-CZf0eW8h6kPp6","object":"chat.completion.chunk","created":1762761601,"model":"gpt-4.1-mini-2025-04-14","choices":[],"system_fingerprint":"fp_6f2eabb9a5","service_tier":"default","usage":{"prompt_tokens":1600,"completion_tokens":18,"total_tokens":1618,"prompt_tokens_details":{"cached_tokens":1536,"audio_tokens":0},"completion_tokens_details":{"reasoning_tokens":0,"audio_tokens":0,"accepted_prediction_tokens":0,"rejected_prediction_tokens":0}}}
+
+data: [DONE]
+

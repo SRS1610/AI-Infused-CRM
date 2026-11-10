@@ -1,0 +1,36 @@
+{
+  "id": "chatcmpl-CZf0bT2e9hLm3",
+  "object": "chat.completion",
+  "created": 1762761600,
+  "model": "meta-llama/Llama-3.3-70B-Instruct",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": null,
+        "reasoning_content": null,
+        "tool_calls": [
+          {
+            "id": "call_Vq3mWc8yPZ1tJ0a4sQhX2nLk",
+            "type": "function",
+            "function": {
+              "name": "lookup_account",
+              "arguments": "{\"name\": \"Acme Corp\"}"
+            }
+          }
+        ]
+      },
+      "logprobs": null,
+      "finish_reason": "tool_calls",
+      "stop_reason": null
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 310,
+    "completion_tokens": 19,
+    "total_tokens": 329,
+    "prompt_tokens_details": null
+  },
+  "prompt_logprobs": null
+}

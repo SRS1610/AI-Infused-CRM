@@ -1,0 +1,29 @@
+{
+  "candidates": [
+    {
+      "content": {
+        "parts": [
+          {
+            "text": "Acme Corp is an enterprise-tier account (ID 42) owned by Dana Kim."
+          }
+        ],
+        "role": "model"
+      },
+      "index": 0,
+      "finishReason": "STOP"
+    }
+  ],
+  "usageMetadata": {
+    "promptTokenCount": 330,
+    "totalTokenCount": 349,
+    "candidatesTokenCount": 19,
+    "promptTokensDetails": [
+      {
+        "modality": "TEXT",
+        "tokenCount": 330
+      }
+    ]
+  },
+  "modelVersion": "gemini-2.5-flash",
+  "responseId": "oMWTbAh5EsIb9O0R2fEy6Sm"
+}

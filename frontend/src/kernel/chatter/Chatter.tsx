@@ -1,6 +1,9 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useCallback, useId, useRef, useState } from "react";
+import { ai, aiCodeMessage, aiErrorMessage, streamFeature } from "../ai/api";
+import { AiLabel, AiUnavailable, Feedback, useAiFeature } from "../ai/components";
 import { chatter, type Activity, type ChatterMessage } from "../api/platform";
+import { aiDraftFeature } from "../extensions";
 import { formatDate, formatDatetime } from "../format";
 import { useRealtime } from "../realtime";
 
@@ -269,6 +272,42 @@ export function Composer({
   const [busy, setBusy] = useState(false);
   const area = useRef<HTMLTextAreaElement>(null);
   const id = useId();
+  const draftFeature = internal ? undefined : aiDraftFeature(model);
+  const aiFeature = useAiFeature(draftFeature);
+  // the AI draft currently in the box: its proposal is accepted (as is or edited) when the user sends
+  const [aiDraft, setAiDraft] = useState<{ runId: number; proposalId: number | null; text: string } | null>(null);
+  const [drafting, setDrafting] = useState(false);
+  const aiUntouched = aiDraft !== null && text === aiDraft.text;
+
+  const draftWithAi = async () => {
+    if (!draftFeature) return;
+    setDrafting(true);
+    setError(null);
+    setText("");
+    let streamed = "";
+    try {
+      const result = await streamFeature(draftFeature, { res_model: model, res_id: resId }, (ev) => {
+        if (ev.event === "delta") {
+          streamed += ev.text;
+          setText(streamed);
+        } else if (ev.event === "error") setError(aiCodeMessage(ev.error.code, ev.error.message));
+      });
+      if (result) {
+        const proposal = result.proposals.find((p) => p.kind === "message");
+        setText(result.text);
+        setAiDraft({ runId: result.run_id, proposalId: proposal?.id ?? null, text: result.text });
+      }
+    } catch (e) {
+      setError(aiErrorMessage(e));
+    } finally {
+      setDrafting(false);
+    }
+  };
+  const discardDraft = async () => {
+    if (aiDraft?.proposalId) await ai.reject(aiDraft.proposalId, "discarded in composer").catch(() => undefined);
+    setAiDraft(null);
+    setText("");
+  };
 
   const onInput = async (value: string) => {
     setText(value);
@@ -292,12 +331,19 @@ export function Composer({
         .split(/\n{2,}/)
         .map((p) => `<p>${p.replace(/\n/g, "<br/>")}</p>`)
         .join("");
-      await chatter.post(model, resId, {
-        body,
-        internal,
-        attachment_ids: files.map((f) => f.id),
-        mention_user_ids: picked.filter((p) => text.includes(`@${p.login}`)).map((p) => p.id),
-      });
+      if (aiDraft?.proposalId && files.length === 0) {
+        // the human takes ownership: accepting posts the message (linked to the AI run) as this user
+        await ai.accept(aiDraft.proposalId, aiUntouched ? undefined : { body });
+      } else {
+        if (aiDraft?.proposalId) await ai.reject(aiDraft.proposalId, "sent manually").catch(() => undefined);
+        await chatter.post(model, resId, {
+          body,
+          internal,
+          attachment_ids: files.map((f) => f.id),
+          mention_user_ids: picked.filter((p) => text.includes(`@${p.login}`)).map((p) => p.id),
+        });
+      }
+      setAiDraft(null);
       setText("");
       setFiles([]);
       setPicked([]);
@@ -313,9 +359,15 @@ export function Composer({
       <label htmlFor={id} className="sr-only">
         {internal ? "Internal note" : "Message to followers"}
       </label>
+      {aiUntouched && (
+        <div className="composer-ai">
+          <AiLabel /> <Feedback runId={aiDraft.runId} />
+        </div>
+      )}
       <textarea
         id={id}
         ref={area}
+        aria-busy={drafting}
         className="input"
         rows={3}
         placeholder={internal ? "Log an internal note… (@ to mention)" : "Send a message to followers… (@ to mention)"}
@@ -365,6 +417,25 @@ export function Composer({
             }}
           />
         </label>
+        {draftFeature &&
+          aiFeature.enabled &&
+          (aiFeature.available ? (
+            <button
+              type="button"
+              className="btn small ghost"
+              disabled={drafting || busy}
+              onClick={() => void draftWithAi()}
+            >
+              {drafting ? "Drafting…" : "✦ Draft with AI"}
+            </button>
+          ) : (
+            <AiUnavailable />
+          ))}
+        {aiDraft && (
+          <button type="button" className="btn small ghost" onClick={() => void discardDraft()}>
+            Discard draft
+          </button>
+        )}
         <span className="muted small">Ctrl+Enter to send</span>
       </div>
     </div>

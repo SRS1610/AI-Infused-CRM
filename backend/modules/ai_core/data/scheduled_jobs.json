@@ -1,0 +1,4 @@
+[
+  {"id": "sched_expire_proposals", "model": "core.scheduled_job", "noupdate": true, "values": {"name": "Expire AI proposals", "job_name": "ai_core.expire_proposals", "cron": "17 * * * *"}},
+  {"id": "sched_purge_run_content", "model": "core.scheduled_job", "noupdate": true, "values": {"name": "Purge AI run content past retention", "job_name": "ai_core.purge_run_content", "cron": "43 2 * * *"}}
+]

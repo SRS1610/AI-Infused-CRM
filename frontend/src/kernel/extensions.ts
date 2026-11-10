@@ -28,3 +28,14 @@ export function registerClientAction(tag: string, render: () => ReactElement): v
 export function clientAction(tag: string | null | undefined): (() => ReactElement) | undefined {
   return tag ? clientActions.get(tag) : undefined;
 }
+
+const aiDrafts = new Map<string, string>();
+
+/** The AI feature that drafts a reply in the chatter composer of ``model`` (streamed, reviewed, sent by the user). */
+export function registerAiDraft(model: string, feature: string): void {
+  aiDrafts.set(model, feature);
+}
+
+export function aiDraftFeature(model: string): string | undefined {
+  return aiDrafts.get(model);
+}

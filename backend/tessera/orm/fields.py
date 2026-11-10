@@ -507,6 +507,36 @@ class Json(Field):
         return value
 
 
+class Vector(Field):
+    """pgvector embedding (``vector(N)``). Never sent through the generic API (``convert_to_read``
+    returns None); ``index="hnsw"`` creates an HNSW cosine index."""
+
+    type_name = "vector"
+    column_type = "vector"
+
+    def __init__(self, string: str | None = None, *, dimensions: int = 1024, **kw: Any) -> None:
+        super().__init__(string, **_explicit(dimensions=dimensions), **kw)
+        self.dimensions = dimensions
+
+    @property
+    def sql_type(self) -> str | None:
+        return f"vector({self.dimensions})"
+
+    def convert_to_cache(self, value: Any, record: Model | None = None) -> Any:
+        if value is None or value is False:
+            return None
+        values = [float(x) for x in value]
+        if len(values) != self.dimensions:
+            raise ValidationError(
+                f"Vector for field '{self.name}' must have {self.dimensions} dimensions, got {len(values)}",
+                field=self.name,
+            )
+        return values
+
+    def convert_to_read(self, value: Any, record: Model) -> Any:
+        return None
+
+
 class Binary(Field):
     """Binary content. Stored inline (``bytea``) when ``attachment=False``; otherwise the column
     holds nothing and the content lives in ``core.attachment`` (resolved by the ``core`` module)."""

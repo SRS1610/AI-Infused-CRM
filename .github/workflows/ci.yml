@@ -75,6 +75,8 @@ jobs:
           PGPASSWORD=tessera psql -h localhost -U tessera -d tessera_test -c "CREATE EXTENSION IF NOT EXISTS vector; CREATE EXTENSION IF NOT EXISTS pg_trgm; CREATE EXTENSION IF NOT EXISTS unaccent; CREATE EXTENSION IF NOT EXISTS btree_gin; CREATE EXTENSION IF NOT EXISTS pgcrypto;"
       # serial: the suite builds one shared test database and some API tests commit
       - run: uv run pytest --cov --cov-report=xml --cov-report=term
+      # every declared AI feature has its prompt, flag, thresholds, eval cases, cassettes and guardrail cases (1.6-a)
+      - run: uv run tessera ai eval report --strict
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -88,6 +90,18 @@ jobs:
     defaults:
       run:
         working-directory: gateway
+    services:
+      postgres:
+        image: pgvector/pgvector:pg16
+        env:
+          POSTGRES_USER: tessera
+          POSTGRES_PASSWORD: tessera
+          POSTGRES_DB: postgres
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U tessera" --health-interval 5s --health-timeout 3s --health-retries 20
+    env:
+      GATEWAY_TEST_ADMIN_URL: postgresql://tessera:tessera@localhost:5432/postgres
     steps:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v5
@@ -96,7 +110,7 @@ jobs:
           cache-dependency-glob: gateway/uv.lock
       - run: uv python install 3.12
       - run: uv sync --frozen
-      - run: uv run ruff check . && uv run mypy gateway
+      - run: uv run ruff check . && uv run ruff format --check . && uv run mypy gateway
       - run: uv run pytest --cov --cov-report=term
 
   frontend:
@@ -136,6 +150,7 @@ jobs:
       TESSERA_ENV: development
       TESSERA_DATABASE_URL: postgresql://tessera:tessera@localhost:5432/tessera
       TESSERA_LOGIN_RATE_LIMIT_PER_MINUTE: "200"
+      TESSERA_AI_GATEWAY_URL: inprocess
     steps:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v5
@@ -144,7 +159,7 @@ jobs:
           node-version: 22
           cache: npm
           cache-dependency-path: frontend/package-lock.json
-      - run: cd backend && uv sync --frozen && uv run tessera db init --modules core,web --demo
+      - run: cd backend && uv sync --frozen && uv run tessera db init --modules core,web,contacts,crm,sale,portal,discuss,calendar,ai_core --demo
       - run: cd backend && (uv run tessera serve --port 8000 &) && sleep 5
       - run: cd frontend && npm ci && npx playwright install --with-deps chromium
       - run: cd frontend && (npx vite --port 5173 --strictPort &) && sleep 5 && npx playwright test

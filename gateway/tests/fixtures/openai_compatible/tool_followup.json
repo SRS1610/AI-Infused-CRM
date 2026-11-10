@@ -1,0 +1,27 @@
+{
+  "id": "chatcmpl-CZf0cU4f8iNn4",
+  "object": "chat.completion",
+  "created": 1762761600,
+  "model": "meta-llama/Llama-3.3-70B-Instruct",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "Acme Corp is an enterprise-tier account (ID 42) owned by Dana Kim.",
+        "reasoning_content": null,
+        "tool_calls": []
+      },
+      "logprobs": null,
+      "finish_reason": "stop",
+      "stop_reason": null
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 365,
+    "completion_tokens": 20,
+    "total_tokens": 385,
+    "prompt_tokens_details": null
+  },
+  "prompt_logprobs": null
+}

@@ -33,6 +33,7 @@ def _root(
     """Tessera developer and operations CLI."""
 
 
+from tessera.cli import ai as _ai  # noqa: E402
 from tessera.cli import db as _db  # noqa: E402
 from tessera.cli import jobs as _jobs  # noqa: E402
 from tessera.cli import module as _module  # noqa: E402
@@ -41,6 +42,7 @@ from tessera.cli import run as _run  # noqa: E402
 app.add_typer(_db.app, name="db", help="Database: init, migrate, check, reset")
 app.add_typer(_module.app, name="module", help="Modules: scaffold, install, upgrade, uninstall, list")
 app.add_typer(_jobs.app, name="jobs", help="Background jobs: run, list, requeue, tick")
+app.add_typer(_ai.app, name="ai", help="AI: evaluations, completeness report, classification, re-index")
 app.command("serve")(_run.serve)
 app.command("worker")(_run.worker)
 app.command("scheduler")(_run.scheduler)

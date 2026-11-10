@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import hashlib
+
 import importlib
 import importlib.util
 import time
@@ -21,6 +23,7 @@ from tessera.modules.graph import auto_install_candidates, dependants_of, resolv
 from tessera.modules.loader import discover, load_module_code
 from tessera.modules.manifest import Manifest
 from tessera.orm.environment import SYSTEM_UID, Environment
+from tessera.orm.fields import Many2many
 from tessera.orm.registry import Registry
 from tessera.orm.schema import Drift, check_drift, sync_schema
 
@@ -355,6 +358,7 @@ def uninstall_modules(
         env = Environment.new(registry, cr, SYSTEM_UID, su=True)
         order = [m for m in reversed(resolve_order(manifests, list(installed))) if m in names]
         owned_tables: list[str] = []
+        owned_m2m: set[str] = set()
         owned_columns: list[tuple[str, str]] = []
         for name in order:
             manifest = manifests[name]
@@ -375,12 +379,15 @@ def uninstall_modules(
                         rec.unlink()
             cr.execute("DELETE FROM core_module_record WHERE module = :m", {"m": name})
             for cls in registry.models.values():
-                if cls._module == name and cls._auto:
+                owned_model = cls._module == name and cls._auto
+                if owned_model:
                     owned_tables.append(cls._table)
-                else:
-                    for fld in cls._fields.values():
-                        if fld.module == name and fld.store and fld.sql_type and fld.name != "id":
-                            owned_columns.append((cls._table, fld.column_name))
+                for fld in cls._fields.values():
+                    relation = getattr(fld, "relation", None)
+                    if isinstance(fld, Many2many) and relation and (owned_model or fld.module == name):
+                        owned_m2m.add(relation)
+                    elif not owned_model and fld.module == name and fld.store and fld.sql_type and fld.name != "id":
+                        owned_columns.append((cls._table, fld.column_name))
             env["core.module"].search([("name", "=", name)]).write({"state": "uninstalled", "installed_version": None})
             result.uninstalled.append(name)
         env.flush()
@@ -390,11 +397,30 @@ def uninstall_modules(
                 cr.execute(f'ALTER TABLE "{table}" DROP COLUMN IF EXISTS "{column}"')
             else:
                 cr.execute(f'ALTER TABLE "{table}" RENAME COLUMN "{column}" TO "_removed_{stamp}_{column}"'[:200])
-        for table in owned_tables:
+        # join tables still used by a field of a remaining module stay
+        remaining = {
+            getattr(f, "relation", None)
+            for cls in registry.models.values()
+            if not (cls._module in result.uninstalled and cls._auto)
+            for f in cls._fields.values()
+            if isinstance(f, Many2many) and f.module not in result.uninstalled
+        }
+        tables = owned_tables + sorted(owned_m2m - remaining - set(owned_tables))
+        existing = {r[0] for r in cr.fetchall("SELECT tablename FROM pg_tables WHERE schemaname = current_schema()")}
+        for table in tables:
+            if table not in existing:
+                continue
             if drop_data:
                 cr.execute(f'DROP TABLE IF EXISTS "{table}" CASCADE')
-            else:
-                cr.execute(f'ALTER TABLE "{table}" RENAME TO "_removed_{stamp}_{table}"'[:200])
+                continue
+            # indexes (and the constraints they back) keep their names across a rename: move them aside too,
+            # so installing the module again can create its own
+            for (index,) in cr.fetchall(
+                "SELECT indexname FROM pg_indexes WHERE schemaname = current_schema() AND tablename = :t", {"t": table}
+            ):
+                digest = hashlib.sha1(index.encode(), usedforsecurity=False).hexdigest()[:10]
+                cr.execute(f'ALTER INDEX "{index}" RENAME TO "_removed_{stamp}_{digest}"')
+            cr.execute(f'ALTER TABLE "{table}" RENAME TO "_removed_{stamp}_{table}"'[:200])
         cr.commit()
     except BaseException:
         cr.rollback()

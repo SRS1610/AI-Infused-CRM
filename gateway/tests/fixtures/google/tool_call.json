@@ -1,0 +1,35 @@
+{
+  "candidates": [
+    {
+      "content": {
+        "parts": [
+          {
+            "functionCall": {
+              "name": "lookup_account",
+              "args": {
+                "name": "Acme Corp"
+              }
+            }
+          }
+        ],
+        "role": "model"
+      },
+      "index": 0,
+      "finishReason": "STOP"
+    }
+  ],
+  "usageMetadata": {
+    "promptTokenCount": 288,
+    "totalTokenCount": 358,
+    "candidatesTokenCount": 16,
+    "promptTokensDetails": [
+      {
+        "modality": "TEXT",
+        "tokenCount": 288
+      }
+    ],
+    "thoughtsTokenCount": 54
+  },
+  "modelVersion": "gemini-2.5-flash",
+  "responseId": "nLVSaZg4DrHa8N9Q1eDx5Rl"
+}

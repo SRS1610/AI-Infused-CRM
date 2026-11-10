@@ -232,7 +232,7 @@ class SchemaSync:
                 )
 
     def _index_name(self, table: str, column: str, kind: str) -> str:
-        suffix = {"btree": "idx", "unique": "uniq", "trigram": "trgm"}[kind]
+        suffix = {"btree": "idx", "unique": "uniq", "trigram": "trgm", "hnsw": "hnsw"}[kind]
         return f"{table}_{column}_{suffix}"[:63]
 
     def _sync_indexes(self, cls: type[Model]) -> None:
@@ -243,7 +243,7 @@ class SchemaSync:
             kind = fld.index if isinstance(fld.index, str) else "btree"
             if kind == "btree_not_null":
                 kind = "btree"
-            if kind not in ("btree", "unique", "trigram"):
+            if kind not in ("btree", "unique", "trigram", "hnsw"):
                 continue
             name = self._index_name(cls._table, fld.column_name, kind)
             if name in existing:
@@ -253,6 +253,8 @@ class SchemaSync:
                 col = f"(({col} ->> '{self.registry.default_lang}'))"
             if kind == "trigram":
                 self.cr.execute(f'CREATE INDEX "{name}" ON "{cls._table}" USING gin ({col} gin_trgm_ops)')
+            elif kind == "hnsw":
+                self.cr.execute(f'CREATE INDEX "{name}" ON "{cls._table}" USING hnsw ({col} vector_cosine_ops)')
             elif kind == "unique":
                 where = ' WHERE "deleted_at" IS NULL' if cls._soft_delete and "deleted_at" in cls._fields else ""
                 self.cr.execute(f'CREATE UNIQUE INDEX "{name}" ON "{cls._table}" ({col}){where}')
@@ -321,7 +323,7 @@ class SchemaSync:
                 if kind == "btree_not_null":
                     kind = "btree"
                 if (
-                    kind in ("btree", "unique", "trigram")
+                    kind in ("btree", "unique", "trigram", "hnsw")
                     and self._index_name(cls._table, fld.column_name, kind) not in indexes
                 ):
                     out.append(Drift("missing_index", f"{cls._table}.{fld.column_name}", kind))

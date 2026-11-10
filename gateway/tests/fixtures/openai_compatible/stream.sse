@@ -1,0 +1,16 @@
+data: {"id":"chatcmpl-CZf0eW8h6kPp6","object":"chat.completion.chunk","created":1762761601,"model":"meta-llama/Llama-3.3-70B-Instruct","choices":[{"index":0,"delta":{"role":"assistant","content":""},"logprobs":null,"finish_reason":null}],"usage":null}
+
+data: {"id":"chatcmpl-CZf0eW8h6kPp6","object":"chat.completion.chunk","created":1762761601,"model":"meta-llama/Llama-3.3-70B-Instruct","choices":[{"index":0,"delta":{"content":"Acme Corp renewed"},"logprobs":null,"finish_reason":null}],"usage":null}
+
+data: {"id":"chatcmpl-CZf0eW8h6kPp6","object":"chat.completion.chunk","created":1762761601,"model":"meta-llama/Llama-3.3-70B-Instruct","choices":[{"index":0,"delta":{"content":" its annual contract"},"logprobs":null,"finish_reason":null}],"usage":null}
+
+data: {"id":"chatcmpl-CZf0eW8h6kPp6","object":"chat.completion.chunk","created":1762761601,"model":"meta-llama/Llama-3.3-70B-Instruct","choices":[{"index":0,"delta":{"content":" and asked for a"},"logprobs":null,"finish_reason":null}],"usage":null}
+
+data: {"id":"chatcmpl-CZf0eW8h6kPp6","object":"chat.completion.chunk","created":1762761601,"model":"meta-llama/Llama-3.3-70B-Instruct","choices":[{"index":0,"delta":{"content":" pricing review in Q3."},"logprobs":null,"finish_reason":null}],"usage":null}
+
+data: {"id":"chatcmpl-CZf0eW8h6kPp6","object":"chat.completion.chunk","created":1762761601,"model":"meta-llama/Llama-3.3-70B-Instruct","choices":[{"index":0,"delta":{},"logprobs":null,"finish_reason":"stop"}],"usage":null}
+
+data: {"id":"chatcmpl-CZf0eW8h6kPp6","object":"chat.completion.chunk","created":1762761601,"model":"meta-llama/Llama-3.3-70B-Instruct","choices":[],"usage":{"prompt_tokens":1600,"completion_tokens":18,"total_tokens":1618}}
+
+data: [DONE]
+

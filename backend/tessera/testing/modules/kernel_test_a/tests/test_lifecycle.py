@@ -14,6 +14,7 @@ import pytest
 from tessera.config import get_settings
 from tessera.exceptions import ModuleError
 from tessera.modules.installer import (
+    check_schema,
     install_modules,
     module_states,
     uninstall_modules,
@@ -190,3 +191,45 @@ def test_data_loader_edge_cases(env):  # type: ignore[no-untyped-def]
         loader.load_entry({"model": "ktest.tag", "values": {"nope": 1}})
     with pytest.raises(ModuleError, match="no model"):
         loader.load_entry({"id": "x", "values": {}})
+
+
+def test_uninstall_keeping_data_then_reinstall_leaves_no_drift(registry, database_url: str, temp_module_path: Path):  # type: ignore[no-untyped-def]
+    """Renamed tables take their indexes and many2many join tables with them, so the module installs again."""
+    name = "ktest_reinstall"
+    module_dir = scaffold_module(name, path=temp_module_path, summary="Reinstall", depends=["core"])
+    item_py = module_dir / "models" / "item.py"
+    item_py.write_text(
+        item_py.read_text()
+        .replace('_inherit = ["chatter.thread", "core.multi_company"]', '_inherit = ["core.multi_company"]')
+        .replace(
+            "    description = fields.Text()",
+            '    description = fields.Text()\n    group_ids = fields.Many2many("core.group")',
+        )
+    )
+    manifest = module_dir / "manifest.toml"
+    manifest.write_text(
+        manifest.read_text()
+        .replace('views = ["views/ktest_reinstall.json"]\n', "")
+        .replace('menus = "menus.json"\n', "")
+        .replace('actions = "actions.json"\n', "")
+        .replace('ai = "ai/features.yaml"\n', "")
+    )
+    clear_discovery_cache()
+    try:
+        install_modules([name], database_url=database_url)
+        uninstall_modules([name], database_url=database_url)
+        assert [d for d in check_schema(database_url=database_url) if "ktest_reinstall" in d.object] == []
+        install_modules([name], database_url=database_url)
+        assert [d for d in check_schema(database_url=database_url) if "ktest_reinstall" in d.object] == []
+        with environment_for(database_url, uid=1, su=True) as env:
+            renamed = env.cr.fetchall(
+                "SELECT tablename FROM pg_tables WHERE tablename LIKE '\\_removed\\_%ktest_reinstall%'"
+            )
+            assert len(renamed) == 2  # the model table and its join table
+            for (table,) in renamed:
+                env.cr.execute(f'DROP TABLE "{table}" CASCADE')
+    finally:
+        uninstall_modules([name], database_url=database_url, drop_data=True)
+        Registry.forget(database_url)
+        Registry.get(database_url)
+        forget_module_fragments(name)

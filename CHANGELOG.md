@@ -4,6 +4,30 @@ All notable changes are recorded here, grouped by phase. Format follows [Keep a 
 
 ## [Unreleased] — Phase 1 in progress
 
+### Sub-phase 1.5 — AI platform
+- AI gateway service (`gateway/`): provider adapters for Anthropic, OpenAI, Azure OpenAI, Google Gemini,
+  OpenAI-compatible self-hosted servers (vLLM, Ollama), Voyage embeddings and a deterministic mock;
+  per-company routing by task class with fallback and circuit breakers; budgets and per-user quotas;
+  PII redaction with re-hydration (also in streams); JSON Schema validation with one repair; output
+  screening; kill switches; residency and PII-approval policies; response cache; usage and cost ledger;
+  SSE streaming; Prometheus metrics; `gateway serve`.
+- `ai_core` module and `tessera.ai` runtime: providers, routes, budgets and company settings for
+  administrators; feature manifests (`ai/features.yaml`) and a versioned prompt registry; tool framework
+  with permission-scoped built-in tools; retrieval over pgvector with access filtering before ranking and
+  hybrid ranking; proposals with signed payloads and accept / edit / reject; run, tool-call, citation and
+  feedback audit; retention purge; evaluation harness with replay cassettes (`tessera ai eval run|report`,
+  `tessera ai classification`, `tessera ai reindex`).
+- Kernel: `fields.Vector` with HNSW indexes; uninstall now moves indexes and join tables aside (D-052).
+- Client: AI-drafted label, proposal review card, streamed "Draft with AI" in the chatter composer
+  (for models that register a draft feature), feedback buttons, "AI unavailable" state, and an
+  administrator dashboard for usage, cost, acceptance and kill switches.
+- Docs: `docs/ai/governance.md`, `docs/ai/developer-guide.md`, `docs/admin/ai.md`.
+- Tests: gateway 118 (coverage 92 %, adapter contract suite on provider-format fixtures); backend 329
+  (coverage 87 %, including the 50-case prompt-injection corpus, 200 adversarial retrieval queries and
+  deterministic replay evaluations); frontend 66 (coverage 88 %).
+- Not yet: no live provider has been called (no keys in this environment); the browser end-to-end check
+  of the streamed draft arrives with the first application feature in 1.6.
+
 ### Sub-phase 1.4 — Applications
 - `contacts`: companies and people with addresses, tags, hierarchy and commercial entity; duplicate
   detection (same email, same phone, same name in the same company) and a merge wizard with field-by-field choices,
