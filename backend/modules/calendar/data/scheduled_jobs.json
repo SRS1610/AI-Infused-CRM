@@ -1,0 +1,3 @@
+[
+  {"id": "sched_sync", "model": "core.scheduled_job", "noupdate": true, "values": {"name": "Synchronise external calendars", "job_name": "calendar.sync", "cron": "*/10 * * * *"}}
+]

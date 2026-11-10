@@ -106,7 +106,7 @@ class Team(Model):
     @api.depends("member_ids.user_id", "member_ids.active")
     def _compute_member_users(self) -> None:
         for team in self:
-            team.member_user_ids = [("set", [m.user_id.ids[0] for m in team.member_ids if m.active and m.user_id])]
+            team.member_user_ids = [m.user_id.ids[0] for m in team.member_ids if m.active and m.user_id]
 
     def create(self, vals_list):  # type: ignore[no-untyped-def]
         teams = super().create(vals_list)

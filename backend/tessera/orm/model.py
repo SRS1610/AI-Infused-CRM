@@ -764,7 +764,7 @@ class Model:
             changed.update(inverse)
         # every stored computed field gets an initial value, whatever its dependencies
         for field in self._fields.values():
-            if field.compute and field.store:
+            if field.recompute_stored:
                 self.env.cache.invalidate_field(field, records.ids)
                 self.env.add_to_compute(self._name, field.name, records.ids)
         records.modified(list(changed) or list(self._fields), create=True)
@@ -1108,7 +1108,7 @@ class Model:
                     affected = self.env[trigger.model].browse(self._ids)
                 if not affected:
                     continue
-                if target_field.store:
+                if target_field.recompute_stored:
                     self.env.cache.invalidate_field(target_field, affected.ids)
                     self.env.add_to_compute(trigger.model, trigger.field, affected.ids)
                 else:
@@ -1134,7 +1134,7 @@ class Model:
                 if affected:
                     target_field = registry.models[trigger.model]._fields[trigger.field]
                     self.env.cache.invalidate_field(target_field, affected.ids)
-                    if target_field.store:
+                    if target_field.recompute_stored:
                         self.env.add_to_compute(trigger.model, trigger.field, affected.ids)
 
     def _compute_field(self, field: F.Field) -> None:
@@ -1177,6 +1177,12 @@ class Model:
         qualifier = existing._cache_qualifier(field)
         existing.env.cache.invalidate_field(field, existing.ids)
         existing._compute_field(field)
+        if isinstance(field, F.Many2many):  # no column: rewrite the relation rows
+            for rid in existing._ids:
+                ids = existing.env.cache.get(field, rid, qualifier, default=()) or ()
+                existing.browse([rid]).with_context(_recompute_write=True)._write_x2many(field, [("set", list(ids))])
+            existing.modified([field_name])
+            return
         by_value: dict[Any, list[int]] = defaultdict(list)
         for rid in existing._ids:
             value = existing.env.cache.get(field, rid, qualifier, default=None)

@@ -1633,3 +1633,36 @@ tr.clickable {
   max-height: 60vh;
   overflow: auto;
 }
+.calendar-toolbar .view-switcher {
+  margin-left: auto;
+}
+.calendar-agenda {
+  display: grid;
+  gap: 8px;
+}
+.calendar-agenda.week {
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+}
+@media (max-width: 900px) {
+  .calendar-agenda.week {
+    grid-template-columns: 1fr;
+  }
+}
+.agenda-day {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-height: 120px;
+}
+.agenda-day h3 {
+  margin: 0 0 4px;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+.agenda-day.today h3 {
+  color: var(--primary);
+}

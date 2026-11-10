@@ -291,6 +291,41 @@ class Lead(Model):
         return {"quotation_id": quote.ids[0], "action": "sale.action_quotations"}
 
     @api.expose
+    def action_schedule_meeting(
+        self, start: str, duration_minutes: int = 60, name: str | None = None
+    ) -> dict[str, Any]:
+        """Create a meeting linked to this lead with the salesperson and the customer contact."""
+        import datetime as dt
+
+        self.ensure_one()
+        begin = dt.datetime.fromisoformat(start)
+        if begin.tzinfo is None:
+            begin = begin.replace(tzinfo=dt.UTC)
+        event = self.env["calendar.event"].create(
+            {
+                "name": name or f"Meeting: {self.name}",
+                "start": begin,
+                "stop": begin + dt.timedelta(minutes=int(duration_minutes)),
+                "user_id": (self.user_id or self.env.user).ids[0],
+                "res_model": self._name,
+                "res_id": self.ids[0],
+            }
+        )
+        if self.partner_id:
+            event.action_add_attendees(self.partner_id.ids)
+        from modules.chatter.thread import post_message
+
+        post_message(
+            self.env,
+            self._name,
+            self.ids[0],
+            f"<p>Meeting planned: {event.name} on {begin:%Y-%m-%d %H:%M} UTC</p>",
+            message_type="notification",
+            notify=False,
+        )
+        return {"event_id": event.ids[0]}
+
+    @api.expose
     def action_find_matches(self) -> list[dict[str, Any]]:
         """Open opportunities of the same customer or email (merge candidates)."""
         self.ensure_one()

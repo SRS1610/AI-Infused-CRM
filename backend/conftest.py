@@ -45,6 +45,7 @@ KERNEL_TEST_MODULES = [
     "crm",
     "portal",
     "discuss",
+    "calendar",
 ]
 
 

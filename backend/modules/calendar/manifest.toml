@@ -1,0 +1,16 @@
+name = "calendar"
+version = "1.0.0"
+summary = "Meetings: recurring events, attendees and RSVP, rooms with conflict detection, booking links, CalDAV/Google/Microsoft sync"
+category = "Productivity"
+phase = 1
+depends = ["contacts", "chatter"]
+license = "Apache-2.0"
+installable = true
+application = true
+
+[load]
+security = ["security/access.json"]
+data = ["data/scheduled_jobs.json"]
+views = ["views.json"]
+actions = "actions.json"
+menus = "menus.json"

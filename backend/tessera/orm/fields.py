@@ -145,6 +145,12 @@ class Field:
         return not self.computed and self.column_type is not None
 
     @property
+    def recompute_stored(self) -> bool:
+        """A computed value persisted by ``flush``: a column, or the join table of a computed many2many
+        declared ``store=True`` (x2many fields have no column, so ``store`` is False for them)."""
+        return bool(self.compute) and (self.store or bool(self._store))
+
+    @property
     def copy(self) -> bool:
         if self._copy is not None:
             return self._copy
@@ -226,6 +232,8 @@ class Field:
     def default_value(self, model: Model) -> Any:
         if not self.has_default:
             return None
+        if self.default in (list, dict, set, tuple):  # default=list means "a new empty list", not list(records)
+            return self.default()
         return self.default(model) if callable(self.default) else self.default
 
     # -- descriptor ------------------------------------------------------------------

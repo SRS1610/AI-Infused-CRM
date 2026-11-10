@@ -281,6 +281,32 @@ describe("calendar, pivot and graph", () => {
     await waitFor(() =>
       expect(calls.filter((c) => c.path === "/api/v1/models/demo.deal").length).toBeGreaterThanOrEqual(2),
     );
+    await userEvent.click(screen.getByRole("tab", { name: "Week" }));
+    expect(screen.getByRole("list", { name: /–/ })).toBeInTheDocument();
+    await userEvent.click(screen.getByRole("tab", { name: "Day" }));
+    await userEvent.click(screen.getByRole("button", { name: "Next day" }));
+  });
+
+  it("uses the view's expansion endpoint for recurring meetings", async () => {
+    const now = new Date();
+    const at = (h: number, m = 0) => new Date(now.getFullYear(), now.getMonth(), 10, h, m).toISOString();
+    const { calls } = mockFetch({
+      ...session,
+      "GET /api/v1/calendar/events": () => [{ id: 3, name: "Standup", start: at(9), stop: at(9, 15), recurring: true }],
+    });
+    const onOpen = vi.fn();
+    wrap(
+      <CalendarView
+        model="calendar.event"
+        meta={meta}
+        view={{ ...meta.views.calendar, expand_endpoint: "/calendar/events" }}
+        domain={[]}
+        onOpen={onOpen}
+      />,
+    );
+    await userEvent.click(await screen.findByRole("button", { name: /Standup/ }));
+    expect(onOpen).toHaveBeenCalledWith(3);
+    expect(calls.find((c) => c.path === "/api/v1/calendar/events")?.url.searchParams.get("start")).toBeTruthy();
   });
 
   it("renders a pivot with totals and changes groupings", async () => {

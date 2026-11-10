@@ -1,0 +1,24 @@
+[
+  {"id": "view_event_calendar", "model": "calendar.event", "type": "calendar", "name": "calendar.event.calendar", "date_start": "start", "date_stop": "stop", "title": "name", "expand_endpoint": "/calendar/events"},
+  {"id": "view_event_list", "model": "calendar.event", "type": "list", "name": "calendar.event.list",
+   "columns": [{"field": "name"}, {"field": "start"}, {"field": "stop"}, {"field": "duration", "sum": true}, {"field": "location"}, {"field": "room_id"}, {"field": "user_id"}]},
+  {"id": "view_event_form", "model": "calendar.event", "type": "form", "name": "calendar.event.form", "chatter": true,
+   "root": {"kind": "sheet", "children": [
+     {"kind": "buttons", "children": [{"kind": "button", "method": "action_send_invitations", "label": "Send invitations"}]},
+     {"kind": "field", "name": "name", "widget": "title"},
+     {"kind": "group", "name": "when", "columns": 2, "children": [
+       {"kind": "field", "name": "start"}, {"kind": "field", "name": "stop"},
+       {"kind": "field", "name": "allday"}, {"kind": "field", "name": "duration", "readonly": true},
+       {"kind": "field", "name": "rrule"}, {"kind": "field", "name": "room_id"},
+       {"kind": "field", "name": "location"}, {"kind": "field", "name": "user_id"},
+       {"kind": "field", "name": "privacy"}, {"kind": "field", "name": "show_as"}
+     ]},
+     {"kind": "notebook", "pages": [
+       {"kind": "page", "name": "page_attendees", "title": "Attendees", "children": [{"kind": "field", "name": "attendee_ids", "columns": [{"field": "partner_id"}, {"field": "state"}]}]},
+       {"kind": "page", "name": "page_description", "title": "Description", "children": [{"kind": "field", "name": "description"}]}
+     ]}
+   ]}},
+  {"id": "view_event_search", "model": "calendar.event", "type": "search", "name": "calendar.event.search", "fields": ["name", "location"],
+   "filters": [{"name": "mine", "label": "My meetings", "domain": {"any": [["user_id", "=", "$uid"], ["partner_ids", "=", "$user.partner_id"]]}}, {"name": "recurring", "label": "Recurring", "domain": [["rrule", "!=", null]]}],
+   "group_bys": [{"field": "user_id"}, {"field": "room_id"}]}
+]

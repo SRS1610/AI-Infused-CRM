@@ -1,0 +1,7 @@
+[
+  {"id": "menu_root", "name": "Calendar", "sequence": 2, "icon": "calendar", "groups": ["core.group_user"]},
+  {"id": "menu_calendar", "name": "Calendar", "parent": "calendar.menu_root", "sequence": 10, "action": "calendar.action_calendar"},
+  {"id": "menu_booking", "name": "Scheduling links", "parent": "calendar.menu_root", "sequence": 20, "action": "calendar.action_booking_links"},
+  {"id": "menu_sync", "name": "External calendars", "parent": "calendar.menu_root", "sequence": 30, "action": "calendar.action_sync_accounts"},
+  {"id": "menu_rooms", "name": "Rooms", "parent": "calendar.menu_root", "sequence": 40, "action": "calendar.action_rooms"}
+]

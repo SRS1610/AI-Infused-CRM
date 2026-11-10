@@ -323,3 +323,11 @@ def test_dates(env: Any) -> None:
         {"name": "Dated", "date_deadline": (dt.date.today() + dt.timedelta(days=10)).isoformat()}
     )
     assert opp.date_last_stage_update
+
+
+def test_schedule_meeting_from_lead(env: Any) -> None:
+    opp = env.ref("crm.opp_1")
+    event_id = opp.action_schedule_meeting("2026-12-03T15:00:00+00:00", 45)["event_id"]
+    event = env["calendar.event"].browse([event_id])
+    assert event.res_model == "crm.lead" and event.res_id == opp.ids[0] and event.duration == 0.75
+    assert opp.partner_id in event.partner_ids and event.user_id == opp.user_id
