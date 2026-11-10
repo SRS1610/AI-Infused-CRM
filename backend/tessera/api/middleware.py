@@ -84,9 +84,25 @@ class RequestContextMiddleware(BaseHTTPMiddleware):
         finally:
             end_request(lang_token)
             clear_context()
+        elapsed = time.perf_counter() - started
         response.headers["X-Request-Id"] = rid
-        response.headers["Server-Timing"] = f"app;dur={(time.perf_counter() - started) * 1000:.1f}"
+        response.headers["Server-Timing"] = f"app;dur={elapsed * 1000:.1f}"
+        _observe(request, response.status_code, elapsed)
         return response
+
+
+def _observe(request: Request, status: int, elapsed: float) -> None:
+    """U-10 request metrics, labelled by route template (never the raw path: ids would explode labels)."""
+    from tessera.metrics import HTTP_LATENCY, HTTP_REQUESTS
+
+    if request.scope.get("route") is None:
+        route = "unmatched"
+    else:  # the request path with each matched parameter put back as {name}
+        route = request.url.path
+        for name, value in (request.scope.get("path_params") or {}).items():
+            route = route.replace(f"/{value}", "/{" + name + "}", 1)
+    HTTP_REQUESTS.labels(request.method, route, f"{status // 100}xx").inc()
+    HTTP_LATENCY.labels(request.method, route).observe(elapsed)
 
 
 class SecurityHeadersMiddleware(BaseHTTPMiddleware):

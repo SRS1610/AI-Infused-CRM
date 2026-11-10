@@ -29,6 +29,8 @@ dependencies = [
   # jobs / messaging
   "celery[redis]>=5.4",
   "redis>=5.1",
+  # observability
+  "prometheus-client>=0.21",
   # templating / formats
   "jinja2>=3.1",
   "pyyaml>=6.0",

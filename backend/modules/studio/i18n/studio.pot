@@ -409,20 +409,20 @@ msgstr ""
 msgid "Unknown view type '{view_type}'"
 msgstr ""
 
-#: service.py:548
+#: service.py:570
 msgid "A workflow needs at least one state"
 msgstr ""
 
-#: service.py:551
+#: service.py:573
 msgid "Every state needs its own key"
 msgstr ""
 
-#: service.py:603
+#: service.py:625
 #, python-brace-format
 msgid "'{model_name}' already has the workflow “{name}”"
 msgstr ""
 
-#: service.py:608
+#: service.py:630
 #, python-brace-format
 msgid "'{model_name}' has no field '{state_field}'"
 msgstr ""
@@ -462,26 +462,31 @@ msgstr ""
 msgid "'{name}' has no field '{fname}'"
 msgstr ""
 
-#: service.py:554
+#: service.py:548
+#, python-brace-format
+msgid "Only administrators can automate '{model}'"
+msgstr ""
+
+#: service.py:576
 msgid "Every transition needs a label"
 msgstr ""
 
-#: service.py:557
+#: service.py:579
 #, python-brace-format
 msgid "Transition “{name}” uses an unknown state"
 msgstr ""
 
-#: service.py:770
+#: service.py:792
 #, python-brace-format
 msgid "A later change relies on this one: roll it back first ({message})"
 msgstr ""
 
-#: service.py:212 service.py:563
+#: service.py:212 service.py:585
 #, python-brace-format
 msgid "Invalid condition: {exc}"
 msgstr ""
 
-#: service.py:225 service.py:598
+#: service.py:225 service.py:620
 #, python-brace-format
 msgid "Unknown group '{ref}'"
 msgstr ""

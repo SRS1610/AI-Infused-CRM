@@ -40,6 +40,18 @@ Summary of what works, what is stubbed and the known gaps: [docs/phase-1-summary
   without errors. Fixed on the way: the dev object store is SeaweedFS (MinIO images are gone from Docker
   Hub) and the S3 backend creates its bucket; the web container proxied the API to itself; a process
   started before modules were installed elsewhere now loads them; images pin uv; `.dockerignore`.
+- **Security review (U-9, D-067).** OWASP ASVS L2 review of the whole application
+  (`docs/security/asvs-phase-1.md`: 209 requirements, no high-severity finding open). Fixed seven
+  high-severity issues: company scope widened through the request context, API keys re-pointed at other
+  users, attachments readable and shareable outside their record's permissions, uploaded HTML/SVG rendered
+  inline, Studio automations granting administrator rights, local files and URLs embedded in PDFs, and
+  account takeover through single sign-on with an unverified e-mail. Also hardened: wrong second-factor
+  codes count towards lockout, client addresses behind proxies (`TESSERA_TRUSTED_PROXIES`), production
+  configuration checks, outbound calls to private addresses (`TESSERA_OUTBOUND_ALLOW_PRIVATE`), a CSP on
+  HTML served by the API, JSON-RPC batch size, constant-time login failures.
+- **Metrics (U-10, D-068).** `GET /metrics` on the API: request traffic and latency by route, background
+  jobs (attempts, outcome, run time) and AI feature runs (outcome, tokens, cost, provider time), plus the
+  in-process gateway's metrics; production requires `TESSERA_METRICS_TOKEN`.
 - **Performance at volume (U-6, D-065).** `tessera perf lists` fills the primary models to 100k rows and
   times their list views: p95 at most 108 ms (budget 300 ms) as administrator and as a salesperson under
   record rules. Fixed on the way: database sessions lost their statement timeout after first use, and

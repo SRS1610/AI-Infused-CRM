@@ -26,3 +26,20 @@ The application turns PostgreSQL's JIT compiler off for its own sessions (`TESSE
 default): on a 100k-row table JIT added ~160 ms of compilation to a 20 ms count. Analytical tools that
 connect separately keep the server's setting. Each session also gets `statement_timeout`
 (`TESSERA_DB_STATEMENT_TIMEOUT_MS`, 60 s) and the UTC time zone.
+
+## Monitoring
+
+`GET /metrics` on the API serves Prometheus metrics (U-10):
+
+| Metric | Labels | What |
+|---|---|---|
+| `tessera_http_requests_total`, `tessera_http_request_seconds` | method, route template, status class | API traffic and latency |
+| `tessera_jobs_total`, `tessera_job_seconds` | job, state (`done`, `retry`, `dead`) | background job attempts and run time |
+| `tessera_ai_runs_total` | feature, status | AI feature runs and their outcome (`ok`, `error`, `feature_disabled`, …) |
+| `tessera_ai_tokens_total`, `tessera_ai_cost_usd_total`, `tessera_ai_latency_seconds` | feature | tokens, provider cost and provider time per feature |
+| `tessera_ai_gateway_*` | feature, provider, model | the gateway's own metrics, included when it runs in-process |
+
+A separate gateway service serves its metrics on its own `/metrics` (port 8100). In development the
+endpoint is open; in production it is served only with `Authorization: Bearer $TESSERA_METRICS_TOKEN`
+(no token configured → not served). Each process (API, worker) keeps its own counters: scrape every
+process, or run jobs in the API process for a small deployment.

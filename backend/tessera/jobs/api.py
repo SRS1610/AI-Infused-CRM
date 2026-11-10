@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import datetime as dt
 import threading
+import time
 import traceback
 from typing import TYPE_CHECKING, Any
 
@@ -117,9 +118,12 @@ def process_job(db_url: str, job_id: int) -> str:
     cr = Cursor(engine)
     error: str | None = None
     result: Any = None
+    job_name = "unknown"
+    run_started = time.perf_counter()
     try:
         sys_env = Environment.new(registry, cr, SYSTEM_UID, su=True)
         record = sys_env["core.job"].browse([job_id])
+        job_name = record.name
         spec = get_job(record.name)
         bind_context(job=record.name, job_id=job_id)
         if spec.as_system or not uid:
@@ -138,6 +142,7 @@ def process_job(db_url: str, job_id: int) -> str:
         log.warning("job failed", job_id=job_id, error=str(exc)[:300])
     finally:
         cr.close()
+    run_seconds = time.perf_counter() - run_started
 
     # 3. record outcome
     cr = Cursor(engine)
@@ -166,6 +171,10 @@ def process_job(db_url: str, job_id: int) -> str:
                 cr.after_commit(lambda: dispatch(db_url, job_id, delay))
                 state = "retry"
         cr.commit()
+        from tessera.metrics import JOB_SECONDS, JOBS
+
+        JOBS.labels(job_name, state).inc()
+        JOB_SECONDS.labels(job_name).observe(run_seconds)
         return state
     finally:
         cr.close()

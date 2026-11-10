@@ -42,3 +42,23 @@ def readyz(request: Request, response: Response) -> dict[str, Any]:
         ok = False
     response.status_code = 200 if ok else 503
     return {"status": "ok" if ok else "degraded", "checks": checks}
+
+
+@router.get("/metrics", include_in_schema=False)
+def metrics(request: Request) -> Response:
+    """Prometheus metrics (U-10). Open in development; in production only with the bearer token
+    ``TESSERA_METRICS_TOKEN`` (not set → not served)."""
+    import hmac
+
+    from tessera.config import get_settings
+    from tessera.metrics import exposition
+
+    settings = get_settings()
+    token = settings.metrics_token
+    if token:
+        supplied = request.headers.get("authorization", "").removeprefix("Bearer ").strip()
+        if not hmac.compare_digest(supplied.encode(), token.encode()):
+            return Response(status_code=401)
+    elif settings.is_production:
+        return Response(status_code=404)
+    return Response(exposition(), media_type="text/plain; version=0.0.4")

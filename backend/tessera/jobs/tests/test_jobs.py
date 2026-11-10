@@ -224,3 +224,12 @@ def test_scheduled_job_run_now_button(jobs_db: str) -> None:
         )
         jid = sched.action_run_now()["job_id"]
     assert run_now(jobs_db, [jid]) == {jid: "done"}
+
+
+def test_job_attempts_are_counted_in_metrics(jobs_db: str) -> None:
+    from tessera.metrics import JOBS
+
+    before = JOBS.labels("test.flaky", "retry")._value.get()
+    jid = _enqueue(jobs_db, "test.flaky", {"key": "metrics", "fail_times": 1})
+    run_now(jobs_db, [jid])
+    assert JOBS.labels("test.flaky", "retry")._value.get() == before + 1

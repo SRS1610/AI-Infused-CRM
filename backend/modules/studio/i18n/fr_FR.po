@@ -411,20 +411,20 @@ msgstr "operations doit être une liste"
 msgid "Unknown view type '{view_type}'"
 msgstr "Type de vue « {view_type} » inconnu"
 
-#: service.py:548
+#: service.py:570
 msgid "A workflow needs at least one state"
 msgstr "Un workflow nécessite au moins un état"
 
-#: service.py:551
+#: service.py:573
 msgid "Every state needs its own key"
 msgstr "Chaque état doit avoir sa propre clé"
 
-#: service.py:603
+#: service.py:625
 #, python-brace-format
 msgid "'{model_name}' already has the workflow “{name}”"
 msgstr "« {model_name} » a déjà le workflow « {name} »"
 
-#: service.py:608
+#: service.py:630
 #, python-brace-format
 msgid "'{model_name}' has no field '{state_field}'"
 msgstr "« {model_name} » n'a pas de champ « {state_field} »"
@@ -464,26 +464,31 @@ msgstr "Les options peuvent être ajoutées ou renommées, pas supprimées"
 msgid "'{name}' has no field '{fname}'"
 msgstr "« {name} » n'a pas de champ « {fname} »"
 
-#: service.py:554
+#: service.py:548
+#, python-brace-format
+msgid "Only administrators can automate '{model}'"
+msgstr "Seuls les administrateurs peuvent automatiser « {model} »"
+
+#: service.py:576
 msgid "Every transition needs a label"
 msgstr "Chaque transition doit avoir un libellé"
 
-#: service.py:557
+#: service.py:579
 #, python-brace-format
 msgid "Transition “{name}” uses an unknown state"
 msgstr "La transition « {name} » utilise un état inconnu"
 
-#: service.py:770
+#: service.py:792
 #, python-brace-format
 msgid "A later change relies on this one: roll it back first ({message})"
 msgstr "Une modification ultérieure dépend de celle-ci : annulez-la d'abord ({message})"
 
-#: service.py:212 service.py:563
+#: service.py:212 service.py:585
 #, python-brace-format
 msgid "Invalid condition: {exc}"
 msgstr "Condition invalide : {exc}"
 
-#: service.py:225 service.py:598
+#: service.py:225 service.py:620
 #, python-brace-format
 msgid "Unknown group '{ref}'"
 msgstr "Groupe « {ref} » inconnu"

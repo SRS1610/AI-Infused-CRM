@@ -2,10 +2,12 @@
 
 An open, modular, multi-company business suite with a CRM at its core that grows into a full ERP, with AI built into every module — proposing, never committing, and always bound by the user's permissions.
 
-> **Status:** Phase 1 (foundation, CRM and AI) is built and awaiting sign-off: kernel, web client,
-> platform services, Contacts, Discuss, Calendar, CRM, Products, Quotations, the AI platform with 21 AI
-> features, and Studio. What works, what is stubbed and the known gaps are in
-> [docs/phase-1-summary.md](docs/phase-1-summary.md).
+> **Status:** Phase 1 (foundation, CRM and AI) is complete: kernel, web client, platform services,
+> Contacts, Discuss, Calendar, CRM, Products, Quotations, the AI platform with 21 AI features, and Studio,
+> in English and French. Every Phase 1 acceptance criterion is met except the live AI evaluation run,
+> which needs a provider key. Details, scores and open items:
+> [docs/phase-1-summary.md](docs/phase-1-summary.md). Security review:
+> [docs/security/asvs-phase-1.md](docs/security/asvs-phase-1.md).
 
 ## Try it
 

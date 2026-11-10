@@ -2008,12 +2008,12 @@ msgid "Response Body"
 msgstr "Corps de la réponse"
 
 #: models/access.py:30 models/access.py:67 tessera/api/routers/metadata.py:36
-#: tessera/api/routers/records.py:55 tessera/orm/environment.py:136
+#: tessera/api/routers/records.py:75 tessera/orm/environment.py:136
 #, python-brace-format
 msgid "Unknown model '{model_name}'"
 msgstr "Modèle « {model_name} » inconnu"
 
-#: models/attachment.py:83
+#: models/attachment.py:92 models/attachment.py:97 models/attachment.py:100
 msgid "You are not allowed to access this attachment"
 msgstr "Vous n'êtes pas autorisé à accéder à cette pièce jointe"
 
@@ -2026,21 +2026,21 @@ msgstr "Une société ne peut pas être sa propre société mère"
 msgid "No exchange rate for {name} on {date}"
 msgstr "Aucun taux de change pour {name} au {date}"
 
-#: models/dataio.py:122
+#: models/dataio.py:123
 #, python-brace-format
 msgid "Import finished: {filename}"
 msgstr "Import terminé : {filename}"
 
-#: models/dataio.py:123
+#: models/dataio.py:124
 #, python-brace-format
 msgid "{created} created, {updated} updated, {errors} errors"
 msgstr "{created} créés, {updated} mis à jour, {errors} erreurs"
 
-#: models/dataio.py:55
+#: models/dataio.py:56
 msgid "The import file is missing"
 msgstr "Le fichier d'import est manquant"
 
-#: models/dataio.py:83
+#: models/dataio.py:84
 msgid "This import is already running"
 msgstr "Cet import est déjà en cours"
 
@@ -2076,24 +2076,24 @@ msgstr "Aucune séquence définie pour le code « {code} »"
 msgid "Invalid sequence pattern '{text}': {exc}"
 msgstr "Motif de séquence « {text} » invalide : {exc}"
 
-#: models/user.py:174
+#: models/user.py:177
 #, python-brace-format
 msgid "Password must be at least {count} characters"
 msgstr "Le mot de passe doit comporter au moins {count} caractères"
 
-#: models/user.py:210
+#: models/user.py:213 tessera/api/routers/auth.py:125
 msgid "Too many failed attempts; this account is temporarily locked"
 msgstr "Trop de tentatives échouées ; ce compte est temporairement verrouillé"
 
-#: models/user.py:216
+#: models/user.py:217 models/user.py:221
 msgid "Invalid login or password"
 msgstr "Identifiant ou mot de passe incorrect"
 
-#: models/user.py:131
+#: models/user.py:134
 msgid "Login must be lowercase without surrounding spaces"
 msgstr "L'identifiant doit être en minuscules, sans espaces autour"
 
-#: models/user.py:137
+#: models/user.py:140
 msgid "The current company must be one of the allowed companies"
 msgstr "La société courante doit faire partie des sociétés autorisées"
 
@@ -2138,7 +2138,7 @@ msgstr "Cette proposition a expiré"
 msgid "This proposal was modified after it was made and cannot be accepted"
 msgstr "Cette proposition a été modifiée après sa création et ne peut pas être acceptée"
 
-#: tessera/ai/proposals.py:108 tessera/api/routers/attachments.py:33 tessera/api/routers/dataio.py:27
+#: tessera/ai/proposals.py:108 tessera/api/routers/attachments.py:62 tessera/api/routers/dataio.py:27
 #, python-brace-format
 msgid "Unknown model '{model}'"
 msgstr "Modèle « {model} » inconnu"
@@ -2190,7 +2190,7 @@ msgstr "Le modèle a refusé cette demande ({category})"
 msgid "The model declined this request"
 msgstr "Le modèle a refusé cette demande"
 
-#: tessera/api/deps.py:174 tessera/api/deps.py:184 tessera/api/routers/attachments.py:62
+#: tessera/api/deps.py:174 tessera/api/deps.py:184 tessera/api/routers/attachments.py:92
 msgid "Authentication required"
 msgstr "Authentification requise"
 
@@ -2230,52 +2230,61 @@ msgstr "Requête invalide"
 msgid "Database unavailable"
 msgstr "Base de données indisponible"
 
-#: tessera/api/middleware.py:117
+#: tessera/api/middleware.py:168
 msgid "Too many attempts"
 msgstr "Trop de tentatives"
 
-#: tessera/api/middleware.py:132
+#: tessera/api/middleware.py:183
 msgid "Rate limit exceeded"
 msgstr "Limite de requêtes dépassée"
 
-#: tessera/api/routers/attachments.py:30 tessera/api/routers/dataio.py:62
+#: tessera/api/routers/attachments.py:56 tessera/api/routers/attachments.py:59
+#: tessera/api/routers/dataio.py:62
 msgid "File too large (max 50 MB)"
 msgstr "Fichier trop volumineux (50 Mo maximum)"
 
-#: tessera/api/routers/attachments.py:54
+#: tessera/api/routers/attachments.py:83
 msgid "Attachment not found"
 msgstr "Pièce jointe introuvable"
 
-#: tessera/api/routers/attachments.py:57
+#: tessera/api/routers/attachments.py:87
 msgid "Invalid attachment token"
 msgstr "Jeton de pièce jointe invalide"
 
-#: tessera/api/routers/auth.py:124 tessera/api/routers/auth.py:180
+#: tessera/api/routers/auth.py:130 tessera/api/routers/auth.py:192
 msgid "Invalid authentication code"
 msgstr "Code d'authentification invalide"
 
-#: tessera/api/routers/auth.py:145
+#: tessera/api/routers/auth.py:153
 msgid "Current password is incorrect"
 msgstr "Le mot de passe actuel est incorrect"
 
-#: tessera/api/routers/auth.py:171
+#: tessera/api/routers/auth.py:173
+msgid "Two-factor authentication is already on; turn it off first"
+msgstr "L'authentification à deux facteurs est déjà activée ; désactivez-la d'abord"
+
+#: tessera/api/routers/auth.py:183
 msgid "The code does not match; scan the QR code again and retry"
 msgstr "Le code ne correspond pas ; scannez à nouveau le QR code et réessayez"
 
-#: tessera/api/routers/auth.py:209
+#: tessera/api/routers/auth.py:221
 msgid "API key not found"
 msgstr "Clé d'API introuvable"
 
-#: tessera/api/routers/auth.py:220
+#: tessera/api/routers/auth.py:232
 #, python-brace-format
 msgid "Unknown identity provider '{code}'"
 msgstr "Fournisseur d'identité « {code} » inconnu"
 
-#: tessera/api/routers/auth.py:261
+#: tessera/api/routers/auth.py:273
 msgid "State mismatch"
 msgstr "Paramètre state incohérent"
 
-#: tessera/api/routers/auth.py:259
+#: tessera/api/routers/auth.py:278
+msgid "The identity provider did not complete the login"
+msgstr "Le fournisseur d'identité n'a pas terminé la connexion"
+
+#: tessera/api/routers/auth.py:271
 msgid "Login session expired; start again"
 msgstr "La session de connexion a expiré ; recommencez"
 
@@ -2292,53 +2301,53 @@ msgstr "options doit être du JSON"
 msgid "Cannot follow '{part}'"
 msgstr "Impossible de suivre « {part} »"
 
-#: tessera/api/routers/jsonrpc.py:28
+#: tessera/api/routers/jsonrpc.py:29
 msgid "params.model is required"
 msgstr "params.model est obligatoire"
 
-#: tessera/api/routers/records.py:80
+#: tessera/api/routers/records.py:101
 msgid "context must be an object"
 msgstr "context doit être un objet"
 
-#: tessera/api/routers/records.py:206 tessera/api/routers/records.py:225
-#: tessera/api/routers/records.py:242 tessera/api/routers/records.py:254
+#: tessera/api/routers/records.py:227 tessera/api/routers/records.py:246
+#: tessera/api/routers/records.py:263 tessera/api/routers/records.py:275
 #, python-brace-format
 msgid "{model_name}({record_id}) not found"
 msgstr "{model_name}({record_id}) introuvable"
 
-#: tessera/api/routers/records.py:261
+#: tessera/api/routers/records.py:282
 #, python-brace-format
 msgid "Method '{method}' is not exposed on {name}"
 msgstr "La méthode « {method} » n'est pas exposée sur {name}"
 
-#: tessera/api/routers/records.py:69 tessera/orm/domain.py:157
+#: tessera/api/routers/records.py:90 tessera/orm/domain.py:157
 #, python-brace-format
 msgid "Invalid domain JSON: {msg}"
 msgstr "JSON de domaine invalide : {msg}"
 
-#: tessera/api/routers/records.py:78
+#: tessera/api/routers/records.py:99
 msgid "Invalid context JSON"
 msgstr "JSON de contexte invalide"
 
-#: tessera/api/routers/records.py:107
+#: tessera/api/routers/records.py:128
 msgid "Keyset pagination ('after') requires order=id"
 msgstr "La pagination par curseur ('after') exige order=id"
 
-#: tessera/api/routers/records.py:129
+#: tessera/api/routers/records.py:150
 #, python-brace-format
 msgid "Only many2one fields can be expanded ('{name}')"
 msgstr "Seuls les champs many2one peuvent être développés (« {name} »)"
 
-#: tessera/api/routers/records.py:229
+#: tessera/api/routers/records.py:250
 msgid "The record was modified by someone else; reload and retry"
 msgstr "L'enregistrement a été modifié par quelqu'un d'autre ; rechargez et réessayez"
 
-#: tessera/api/serializers.py:71 tessera/orm/model.py:633
+#: tessera/api/serializers.py:72 tessera/orm/model.py:637
 #, python-brace-format
 msgid "Unknown field(s) {unknown} on {name}"
 msgstr "Champ(s) inconnu(s) {unknown} sur {name}"
 
-#: tessera/api/serializers.py:34 tessera/orm/model.py:752
+#: tessera/api/serializers.py:35 tessera/orm/model.py:760
 #, python-brace-format
 msgid "Unknown field '{field}' on {model}"
 msgstr "Champ « {field} » inconnu sur {model}"
@@ -2512,6 +2521,25 @@ msgstr "« {name} » n'est pas autorisé dans les expressions"
 msgid "Cannot compare: {exc}"
 msgstr "Comparaison impossible : {exc}"
 
+#: tessera/net.py:50
+msgid "Only http and https addresses can be called"
+msgstr "Seules les adresses http et https peuvent être appelées"
+
+#: tessera/net.py:65
+#, python-brace-format
+msgid "{host} is not a public address and cannot be called from the server"
+msgstr "{host} n'est pas une adresse publique et ne peut pas être appelée depuis le serveur"
+
+#: tessera/net.py:48
+#, python-brace-format
+msgid "'{url}' is not a valid address"
+msgstr "« {url} » n'est pas une adresse valide"
+
+#: tessera/net.py:63
+#, python-brace-format
+msgid "{host} does not resolve"
+msgstr "{host} ne peut pas être résolu"
+
 #: tessera/orm/domain.py:181
 #, python-brace-format
 msgid "Cannot parse domain element {raw}"
@@ -2532,7 +2560,7 @@ msgstr "L'opérateur « {op} » ne peut pas être évalué en mémoire"
 msgid "Unknown domain operator '{key}' (expected all/any/not)"
 msgstr "Opérateur de domaine « {key} » inconnu (attendu : all/any/not)"
 
-#: tessera/orm/domain.py:256 tessera/orm/model.py:338
+#: tessera/orm/domain.py:256 tessera/orm/model.py:342
 #, python-brace-format
 msgid "Unknown domain variable '${name}'"
 msgstr "Variable de domaine « ${name} » inconnue"
@@ -2596,7 +2624,7 @@ msgstr "Valeur x2many invalide {value}"
 msgid "The id field cannot be written"
 msgstr "Le champ id ne peut pas être modifié"
 
-#: tessera/orm/fields.py:234 tessera/orm/fields.py:698 tessera/orm/model.py:1319
+#: tessera/orm/fields.py:234 tessera/orm/fields.py:698 tessera/orm/model.py:1353
 #, python-brace-format
 msgid "Field '{field}' is required"
 msgstr "Le champ « {field} » est obligatoire"
@@ -2676,37 +2704,41 @@ msgstr "créer"
 msgid "delete"
 msgstr "supprimer"
 
-#: tessera/orm/model.py:960
+#: tessera/orm/model.py:994
 #, python-brace-format
 msgid "Database constraint violated: {constraint}"
 msgstr "Contrainte de base de données violée : {constraint}"
 
-#: tessera/orm/model.py:142
+#: tessera/orm/model.py:146
 #, python-brace-format
 msgid "Expected a single {name} record, got {count}"
 msgstr "Un seul enregistrement {name} attendu, reçu {count}"
 
-#: tessera/orm/model.py:266
+#: tessera/orm/model.py:270
 #, python-brace-format
 msgid "You are not allowed to {operation} '{description}' ({name}) records"
 msgstr "Vous n'êtes pas autorisé à {operation} les enregistrements « {description} » ({name})"
 
-#: tessera/orm/model.py:295
+#: tessera/orm/model.py:299
 #, python-brace-format
 msgid "You are not allowed to {operation} some of these '{description}' records"
 msgstr "Vous n'êtes pas autorisé à {operation} certains de ces enregistrements « {description} »"
 
-#: tessera/orm/model.py:474
+#: tessera/orm/model.py:478
 #, python-brace-format
 msgid "You are not allowed to read field '{field}' of {model}"
 msgstr "Vous n'êtes pas autorisé à lire le champ « {field} » de {model}"
 
-#: tessera/orm/model.py:575
+#: tessera/orm/model.py:579
 #, python-brace-format
 msgid "Record {name}({ids}) does not exist or has been deleted"
 msgstr "L'enregistrement {name}({ids}) n'existe pas ou a été supprimé"
 
-#: tessera/orm/model.py:950
+#: tessera/orm/model.py:894
+msgid "You cannot move records to a company you do not work in"
+msgstr "Vous ne pouvez pas déplacer des enregistrements vers une société dans laquelle vous ne travaillez pas"
+
+#: tessera/orm/model.py:984
 #, python-brace-format
 msgid ""
 "This '{description}' record is still referenced by other records and cannot be deleted or "
@@ -2715,46 +2747,46 @@ msgstr ""
 "Cet enregistrement « {description} » est encore référencé par d'autres enregistrements et ne peut"
 " être ni supprimé ni modifié."
 
-#: tessera/orm/model.py:959
+#: tessera/orm/model.py:993
 msgid "A record with the same unique value already exists."
 msgstr "Un enregistrement avec la même valeur unique existe déjà."
 
-#: tessera/orm/model.py:1130
+#: tessera/orm/model.py:1164
 #, python-brace-format
 msgid "{description} records cannot be restored"
 msgstr "Les enregistrements « {description} » ne peuvent pas être restaurés"
 
-#: tessera/orm/model.py:1371
+#: tessera/orm/model.py:1405
 #, python-brace-format
 msgid "{description} records cannot be archived"
 msgstr "Les enregistrements « {description} » ne peuvent pas être archivés"
 
-#: tessera/orm/model.py:567
+#: tessera/orm/model.py:571
 #, python-brace-format
 msgid "You are not allowed to read this '{description}' record"
 msgstr "Vous n'êtes pas autorisé à lire cet enregistrement « {description} »"
 
-#: tessera/orm/model.py:637
+#: tessera/orm/model.py:641
 #, python-brace-format
 msgid "You are not allowed to read field '{n}' of {model}"
 msgstr "Vous n'êtes pas autorisé à lire le champ « {n} » de {model}"
 
-#: tessera/orm/model.py:757
+#: tessera/orm/model.py:765
 #, python-brace-format
 msgid "You are not allowed to write field '{field}' of {model}"
 msgstr "Vous n'êtes pas autorisé à modifier le champ « {field} » de {model}"
 
-#: tessera/orm/model.py:945
+#: tessera/orm/model.py:979
 #, python-brace-format
 msgid "A referenced record does not exist ({name}): {detail}"
 msgstr "Un enregistrement référencé n'existe pas ({name}) : {detail}"
 
-#: tessera/orm/model.py:767
+#: tessera/orm/model.py:775
 #, python-brace-format
 msgid "Field '{field}' on {model} is computed and cannot be written"
 msgstr "Le champ « {field} » de {model} est calculé et ne peut pas être modifié"
 
-#: tessera/orm/model.py:1038
+#: tessera/orm/model.py:1072
 #, python-brace-format
 msgid "Unknown x2many command '{kind}'"
 msgstr "Commande x2many « {kind} » inconnue"
@@ -2854,51 +2886,59 @@ msgstr "Impossible de trier les groupes par « {order} »"
 msgid "'{value}' is not a record id"
 msgstr "« {value} » n'est pas un identifiant d'enregistrement"
 
-#: tessera/reports/engine.py:220
+#: tessera/reports/engine.py:231
 #, python-brace-format
 msgid "Invalid field path '{path}'"
 msgstr "Chemin de champ « {path} » invalide"
 
-#: tessera/reports/engine.py:156 tessera/reports/engine.py:168
+#: tessera/reports/engine.py:162 tessera/reports/engine.py:174
 #, python-brace-format
 msgid "Template error: {exc}"
 msgstr "Erreur de modèle : {exc}"
 
-#: tessera/reports/engine.py:231
+#: tessera/reports/engine.py:242
 #, python-brace-format
 msgid "Unknown block type '{kind}'"
 msgstr "Type de bloc « {kind} » inconnu"
 
-#: tessera/security/auth.py:181
+#: tessera/security/auth.py:184
 msgid "Second-factor step expired; log in again"
 msgstr "L'étape du second facteur a expiré ; reconnectez-vous"
 
-#: tessera/security/auth.py:284
+#: tessera/security/auth.py:300
 msgid "Identity token has no subject"
 msgstr "Le jeton d'identité n'a pas de sujet"
 
-#: tessera/security/auth.py:308
+#: tessera/security/auth.py:305
+msgid ""
+"The identity provider did not confirm this e-mail address; ask an administrator to link your "
+"account"
+msgstr ""
+"Le fournisseur d'identité n'a pas confirmé cette adresse e-mail ; demandez à un administrateur de "
+"lier votre compte"
+
+#: tessera/security/auth.py:328
 msgid "This account is disabled"
 msgstr "Ce compte est désactivé"
 
-#: tessera/security/auth.py:320
+#: tessera/security/auth.py:340
 msgid "Password must be at least 8 characters"
 msgstr "Le mot de passe doit comporter au moins 8 caractères"
 
-#: tessera/security/auth.py:252
+#: tessera/security/auth.py:255
 #, python-brace-format
 msgid "Identity provider rejected the login ({status_code})"
 msgstr "Le fournisseur d'identité a refusé la connexion ({status_code})"
 
-#: tessera/security/auth.py:256
+#: tessera/security/auth.py:259
 msgid "Identity provider returned no id_token"
 msgstr "Le fournisseur d'identité n'a renvoyé aucun id_token"
 
-#: tessera/security/auth.py:293
+#: tessera/security/auth.py:313
 msgid "No account matches this identity; ask an administrator to invite you"
 msgstr "Aucun compte ne correspond à cette identité ; demandez à un administrateur de vous inviter"
 
-#: tessera/security/auth.py:295
+#: tessera/security/auth.py:315
 msgid "Identity token has no email; cannot create an account"
 msgstr "Le jeton d'identité ne contient pas d'e-mail ; impossible de créer un compte"
 

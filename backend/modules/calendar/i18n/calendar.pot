@@ -555,16 +555,16 @@ msgstr ""
 msgid "Use ISO 8601 date-times"
 msgstr ""
 
-#: models/booking.py:45
+#: models/booking.py:46
 msgid "Meetings last at least 5 minutes"
 msgstr ""
 
-#: models/booking.py:50
+#: models/booking.py:51
 #, python-brace-format
 msgid "Unknown time zone '{timezone}'"
 msgstr ""
 
-#: models/booking.py:61
+#: models/booking.py:62
 #, python-brace-format
 msgid "Invalid availability window {window}"
 msgstr ""

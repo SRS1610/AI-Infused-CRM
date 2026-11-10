@@ -478,23 +478,27 @@ msgstr "Nom proche ({percent} %)"
 msgid "Same domain ({domain})"
 msgstr "Même domaine ({domain})"
 
-#: merge.py:61
+#: merge.py:62
 msgid "Select at least two different contacts to merge"
 msgstr "Sélectionnez au moins deux contacts différents à fusionner"
 
-#: merge.py:63
+#: merge.py:64
 msgid "Merge at most 11 contacts at once"
 msgstr "Fusionnez au plus 11 contacts à la fois"
 
-#: merge.py:66
+#: merge.py:67
 msgid "A company cannot be merged into one of its own contacts"
 msgstr "Une société ne peut pas être fusionnée dans l'un de ses propres contacts"
 
-#: merge.py:225
+#: merge.py:237 merge.py:243
+msgid "This merge log is damaged and cannot be undone"
+msgstr "Ce journal de fusion est endommagé et ne peut pas être annulé"
+
+#: merge.py:250
 msgid "This merge was already undone"
 msgstr "Cette fusion a déjà été annulée"
 
-#: merge.py:227
+#: merge.py:252
 msgid "The undo window for this merge has passed"
 msgstr "Le délai d'annulation de cette fusion est dépassé"
 

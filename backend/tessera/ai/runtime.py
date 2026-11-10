@@ -300,6 +300,9 @@ def _finish(
             },
         }
     )
+    from tessera.metrics import record_ai_run
+
+    record_ai_run(feature.name, "ok", usage)
     return RunResult(run, text, data, created, citations, flags)
 
 
@@ -313,9 +316,11 @@ def _usage_add(total: dict[str, Any], resp: dict[str, Any]) -> None:
 
 
 def _fail(run: Model, exc: AIError | UserError, status: str = "error") -> None:
-    run.elevated().write(
-        {"status": status, "error_code": getattr(exc, "code", type(exc).__name__), "error": exc.message[:2000]}
-    )
+    from tessera.metrics import record_ai_run
+
+    run = run.elevated()
+    run.write({"status": status, "error_code": getattr(exc, "code", type(exc).__name__), "error": exc.message[:2000]})
+    record_ai_run(run.feature or "unknown", status)
 
 
 def run_feature(

@@ -559,16 +559,16 @@ msgstr "Réunion introuvable"
 msgid "Use ISO 8601 date-times"
 msgstr "Utilisez des dates-heures ISO 8601"
 
-#: models/booking.py:45
+#: models/booking.py:46
 msgid "Meetings last at least 5 minutes"
 msgstr "Les réunions durent au moins 5 minutes"
 
-#: models/booking.py:50
+#: models/booking.py:51
 #, python-brace-format
 msgid "Unknown time zone '{timezone}'"
 msgstr "Fuseau horaire « {timezone} » inconnu"
 
-#: models/booking.py:61
+#: models/booking.py:62
 #, python-brace-format
 msgid "Invalid availability window {window}"
 msgstr "Plage de disponibilité invalide {window}"
