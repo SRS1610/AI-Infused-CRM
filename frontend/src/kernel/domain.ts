@@ -109,6 +109,13 @@ export function evaluate(domain: Domain | undefined | null, record: Record<strin
         return actual < expected;
       case "<=":
         return actual <= expected;
+      case "ilike":
+      case "not_ilike": {
+        const found = String(actual ?? "")
+          .toLowerCase()
+          .includes(String(expected ?? "").toLowerCase());
+        return op === "ilike" ? actual !== null && actual !== undefined && actual !== false && found : !found;
+      }
       case "is_set":
         return (
           actual !== null && actual !== undefined && actual !== false && !(Array.isArray(actual) && actual.length === 0)

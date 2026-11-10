@@ -1,9 +1,10 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { api } from "../api/client";
-import type { Domain, FieldMeta, ViewDef, ViewsResponse } from "../api/types";
+import type { Domain, ViewDef, ViewsResponse } from "../api/types";
 import { searchAddonsFor } from "../extensions";
 import { buildDomain } from "./searchDomain";
+import { operatorsFor } from "../conditions";
 import { t } from "../i18n";
 
 export interface SearchState {
@@ -22,56 +23,6 @@ interface Props {
   value: SearchState;
   onChange: (v: SearchState) => void;
   inputRef?: React.Ref<HTMLInputElement>;
-}
-
-/** Operators offered per field kind, with labels in the user's language. */
-const operatorTable = (): Record<string, [string, string][]> => ({
-  text: [
-    ["ilike", t("contains")],
-    ["not_ilike", t("does not contain")],
-    ["=", t("is")],
-    ["!=", t("is not")],
-    ["is_set", t("is set")],
-    ["is_not_set", t("is not set")],
-  ],
-  number: [
-    ["=", "="],
-    ["!=", "≠"],
-    [">", ">"],
-    [">=", "≥"],
-    ["<", "<"],
-    ["<=", "≤"],
-    ["is_set", t("is set")],
-  ],
-  date: [
-    ["=", t("on")],
-    [">=", t("on or after")],
-    ["<=", t("on or before")],
-    ["is_set", t("is set")],
-    ["is_not_set", t("is not set")],
-  ],
-  boolean: [["=", t("is")]],
-  selection: [
-    ["=", t("is")],
-    ["!=", t("is not")],
-    ["is_set", t("is set")],
-  ],
-  relation: [
-    ["ilike", t("name contains")],
-    ["is_set", t("is set")],
-    ["is_not_set", t("is not set")],
-  ],
-});
-
-function operatorsFor(field?: FieldMeta): [string, string][] {
-  const OPERATORS = operatorTable();
-  if (!field) return OPERATORS.text;
-  if (["integer", "float", "monetary"].includes(field.type)) return OPERATORS.number;
-  if (["date", "datetime"].includes(field.type)) return OPERATORS.date;
-  if (field.type === "boolean") return OPERATORS.boolean;
-  if (field.type === "selection") return OPERATORS.selection;
-  if (["many2one", "many2many", "one2many"].includes(field.type)) return OPERATORS.relation;
-  return OPERATORS.text;
 }
 
 export function SearchBar({ model, meta, view, value, onChange, inputRef }: Props) {
