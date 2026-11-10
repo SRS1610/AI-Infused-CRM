@@ -361,9 +361,12 @@ def test_briefs_are_prepared_an_hour_before_and_notified(env: Any, env_for: Any,
         env["core.notification"].elevated().search([("model", "=", "calendar.event"), ("res_id", "=", event.ids[0])])
     )
     assert sorted(notes.mapped("user_id").ids) == sorted([demo_uid, marie_uid])
-    assert all(
-        n.url == f"/m/calendar.event/{event.ids[0]}" and n.title == "Meeting brief ready: Pricing call" for n in notes
-    )
+    assert all(n.url == f"/m/calendar.event/{event.ids[0]}" for n in notes)
+    # each participant is notified in their own language
+    assert {n.user_id.ids[0]: n.title for n in notes} == {
+        demo_uid: "Meeting brief ready: Pricing call",
+        marie_uid: "Note de préparation prête : Pricing call",
+    }
     runs = env["ai_core.run"].elevated().search([("feature", "=", A.BRIEF), ("res_id", "=", event.ids[0])])
     assert sorted(runs.mapped("user_id").ids) == sorted([demo_uid, marie_uid])  # each brief built as its reader
     assert not env["ai_core.run"].elevated().search([("feature", "=", A.BRIEF), ("res_id", "=", later.ids[0])])

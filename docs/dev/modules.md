@@ -19,7 +19,7 @@ my_module/
 ├── views/ menus.json actions.json   # loaded by the `web` module (Phase 1.2)
 ├── ai/                    # features.yaml, prompts/*.yaml, tools.py, evals/*.jsonl (Phase 1.5)
 ├── migrations/<version>/  # pre.py, post.py, down.py — each exposes migrate(env, from_version)
-├── i18n/*.po
+├── i18n/                  # <module>.pot (generated) and <lang>.po catalogues — see Translations
 └── tests/
 ```
 
@@ -171,6 +171,66 @@ A JSON list of `{"id", "model", "values", "noupdate"}` entries. String values of
 and lists of strings for x2many fields are external ids (`"core.main_company"` or a bare name for
 the current module). A dict keyed by language code on a translatable field writes every
 translation. `noupdate` records are created on install and never overwritten on upgrade.
+
+## Translations (i18n)
+
+Everything the server shows to users is written in English in the source and translated through
+per-module gettext catalogues: `i18n/<module>.pot` (the template, generated) and `i18n/<lang>.po`
+(one per language, e.g. `i18n/fr_FR.po`). Catalogues are found by convention; no manifest entry is
+needed. The web client's own strings live in `frontend/src/i18n/` and are not part of this.
+
+**What is translated, and how**
+
+| Text | Marked by | Translated when |
+|---|---|---|
+| Model `_description`, field labels (explicit `string` or the label derived from the name), `help`, static selection labels, `_sql_constraints` messages | nothing — extracted from the model definitions | `fields_get` / `/web/views` / `/metadata` answer in the user's language |
+| View attributes `label`, `title`, `string`, `help`, `placeholder`, `confirm`, `text`, `tooltip` (top level of a definition: `label`, `string`, `help` only — a calendar's `title` names a field) | nothing | `/web/views` resolves the view for the user's language |
+| Menu names, action names and help, and every `translate=True` value in `security/` and `data/` files (stages, groups, workflow states and transitions, …) | nothing | on install and upgrade the catalogues are written into the records' JSONB values (`{"en_US": …, "fr_FR": …}`) |
+| Messages in Python: exceptions, notifications, ranking reasons… | `_("…")` | when rendered — see below |
+| Report templates | `{{ _("Valid until: {date}", date=…) }}` | at rendering, in the document partner's language (else the user's) |
+
+**Marking messages.** Import `_` and give it a literal English text with `{name}` placeholders:
+
+```python
+from tessera.i18n import _, translatable
+
+raise ValidationError(_("'{value}' is not a valid choice for field '{field}'", value=value, field=translatable(label)))
+env["core.notification"].notify([uid], _("Import finished: {filename}", filename=name))
+```
+
+`_()` returns a `Message`: a `str` rendered in the current language (the caller's inside an API
+request, English in jobs and tests) that remembers its msgid, so the API error handlers render
+exception messages in the caller's language and `core.notification` renders titles and bodies in
+each recipient's language. Rules:
+
+* the first argument must be a **literal** (the extractor only collects literals); never build it with
+  an f-string or `+`, pass values as keyword parameters;
+* parameters are data and are not translated, except other messages — wrap a label that comes from
+  metadata (a field label, a model description) in `translatable(...)`;
+* one message per plural form (`_("Due in {count} days", count=n) if n > 1 else _("Due tomorrow")`);
+* compare messages by `msgid` (`getattr(reason, "msgid", reason)`), never by their rendered text;
+* never translate log messages, prompts sent to models, technical identifiers or data.
+
+**Extract, translate, check.**
+
+```bash
+cd backend
+uv run tessera i18n extract crm              # writes i18n/crm.pot, merges new msgids into every i18n/*.po
+uv run tessera i18n extract crm --lang de_DE # also creates i18n/de_DE.po
+uv run tessera i18n stats --missing          # completeness per module (fr_FR by default)
+```
+
+Translate the empty `msgstr` lines of `i18n/<lang>.po` (any PO editor works). Keep every `{placeholder}`
+exactly as in the msgid; entries flagged `#, fuzzy` are ignored. `extract` keeps existing translations
+and drops msgids that disappeared. `tessera/i18n/tests/test_i18n.py` fails when a Phase 1 module's
+`fr_FR.po` translates less than 95 % of its strings or a translation changes the placeholders — run
+`extract` and translate the new lines when you add strings.
+
+**Loading.** Installing or upgrading a module writes its catalogues into its translatable records;
+`tessera i18n load [module …]` re-applies them to an existing database without an upgrade (see
+[Administration → Translations](../admin/i18n.md)). Field labels, views and messages are read from
+the catalogues at run time and need no loading. Lookups fall back from the user's language to another
+catalogue of the same language (`fr_BE` → `fr_FR`) and then to the English source text.
 
 ## Testing
 
