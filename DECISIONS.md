@@ -355,6 +355,24 @@ Format: `D-nnn · date · status (Proposed | Accepted | Superseded)`
 - **Alternatives:** Prices always recomputed; automatic promotions on every save; a separate sales order model (D-074).
 - **Rationale:** Predictable prices, idempotent promotions, and a Phase 1 database upgrades in one command (U-3).
 
+### D-085 · 2026-11-10 · Accepted — Bank matching rebuilds the transaction's entry through the ledger
+- **Decision:** A posted bank transaction is booked bank ↔ suspense. Matching resets its entry to draft (lock dates apply), replaces the suspense item with one counterpart per matched item (on that item's account, partner and currency) plus write-offs, keeps any unexplained rest on suspense, posts again keeping its number, and reconciles each counterpart. Undo restores the suspense item. *Payments wait for bank matching* stays a per-journal setting, off by default (D-077); the demo turns it on and the guide recommends it when statements are imported. Bank journals used for statements cannot be hash-locked.
+- **Alternatives:** A separate matching entry; editing the posted entry in place.
+- **Rationale:** Posted entries stay read-only (D-073) and lock dates apply; invoices stay *Paid* for companies that do not import statements.
+
+### D-086 · 2026-11-10 · Accepted — Online payments: adapters over REST, events recorded once
+- **Decision:** Providers implement checkout, webhook, token charge, refund and status. Stripe uses `httpx` (no SDK) with the `Stripe-Signature` HMAC-SHA256 check (5-minute tolerance, constant-time compare). Every notification is stored under `UNIQUE (provider_id, event_id)` before it is applied, so a replay is a no-op (2-j); transactions never leave a final state. A confirmed transaction books an `account.payment` through `register_payments`; money for an invoice already paid stays as an unmatched customer credit. Keys, webhook secrets and saved-card references are encrypted and readable by advisers only.
+- **Rationale:** No SDK dependency; idempotent by construction.
+
+### D-087 · 2026-11-10 · Accepted — E-invoices are validated with the official artefacts
+- **Decision:** The OASIS UBL 2.1 schemas (unmodified, plus wrapper schemas), the CEN EN16931 rules and the OpenPeppol BIS 3 rules are vendored with their licences and run with Saxon-HE (`saxonche`). A document with a fatal finding is not sent; findings are stored as structured records on `account.edi_document`. The mock access point stores its "network" in a table so send, status and receive work across processes.
+- **Alternatives:** Re-implementing the rules in Python.
+- **Rationale:** 2-h asks for the official schematron; structured findings feed the 2.6 explanations.
+
+### D-088 · 2026-11-10 · Accepted — Payment reminders
+- **Decision:** A customer gets the highest level reached by their oldest overdue, undisputed invoice, excluding invoices *in payment*, excluded customers and balances under the company minimum. A level (or a higher one) is not sent again within the level's delay. Amounts and invoice tables always come from the ledger; message text goes through a replaceable renderer so the 2.6 feature can propose personalised text for review.
+- **Rationale:** Predictable, never over-reminding, numbers never from a model.
+
 ### D-023 · 2026-11-09 · Proposed — Public web surfaces before Phase 7 use `*_website` bridge modules
 - **Decision:** Modules that need a public page before the `website` builder exists (recruitment job postings, event pages, eLearning courses, blog, forum, survey invitations) depend only on `portal` for their minimal public rendering in their own phase; `recruitment_website`, `events_website`, `elearning_website`, `blog_website`, `forum_website` bridge modules (auto-installed when `website` is present) move those pages into the website builder in Phase 7.
 - **Rationale:** Preserves the layering rule (no dependency on a later phase) while still shipping usable public pages when each module lands.
