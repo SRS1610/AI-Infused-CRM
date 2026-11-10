@@ -212,6 +212,19 @@ Format: `D-nnn · date · status (Proposed | Accepted | Superseded)`
 - **Decision:** Uninstalling a module without `--drop-data` renames its tables *and* their indexes (to short hashed names) and treats its many2many join tables as owned. Found while uninstalling and reinstalling `ai_core`: the old indexes blocked the reinstall and the join table showed as drift.
 - **Rationale:** U-2 requires a clean `tessera db check` after uninstalling a leaf module, and reinstalling must work.
 
+### D-053 · 2026-11-10 · Accepted — Studio fields are per-database dynamic fragments; a registry stamp tells other processes
+- **Decision:** Studio fields are rows of `studio.field`. A `before_build` registry hook turns the committed rows of the registry's own database into model fragments (module `studio`), so two databases served by one process keep separate customisations. Adding a field rebuilds the in-process registry from the transaction's rows, runs the additive schema sync and the metadata sync, and rewrites `core.registry_stamp`; every API request, job and `environment_for` compares the stamp and rebuilds when it changed. If the transaction rolls back, a new `Cursor.on_rollback` callback rebuilds the registry from the committed state.
+- **Rationale:** "Without restart" (1.7-a) across workers, using the kernel's existing composition of fragments; no generated Python files on disk.
+- **Limits:** a rebuild happens under the registry lock; requests already running keep their model classes. Studio layout editing covers form field order, visibility and read-only; other view types are edited with view operations through the API.
+
+### D-054 · 2026-11-10 · Accepted — Studio changes are ordinary view extensions, automations and workflows, logged in `studio.change`
+- **Decision:** Layout changes are extension views (`web.view` with `inherit_id`, `studio=True`, sequence 1000) holding inheritance operations; automations and workflows are ordinary `workflow.*` records. Each change records before/after metadata and the record it created; rollback deletes that record (or, for a field, deactivates it, removes it from Studio view changes that use it, and renames its column). Export writes the applied changes as data files of a `studio_customizations_<company>` module.
+- **Rationale:** No second customisation mechanism next to modules: what Studio produces is what a developer would have written, so it exports and installs like any module.
+
+### D-055 · 2026-11-10 · Accepted — `tessera seed demo`
+- **Decision:** `tessera seed demo --phase 1` installs the phase's modules with demo data and runs every module's `seed_demo` hook (retrieval index, trained models, sample runs).
+- **Rationale:** The phase definition (§1.2) needs one command that prepares the demo scenario.
+
 ### D-023 · 2026-11-09 · Proposed — Public web surfaces before Phase 7 use `*_website` bridge modules
 - **Decision:** Modules that need a public page before the `website` builder exists (recruitment job postings, event pages, eLearning courses, blog, forum, survey invitations) depend only on `portal` for their minimal public rendering in their own phase; `recruitment_website`, `events_website`, `elearning_website`, `blog_website`, `forum_website` bridge modules (auto-installed when `website` is present) move those pages into the website builder in Phase 7.
 - **Rationale:** Preserves the layering rule (no dependency on a later phase) while still shipping usable public pages when each module lands.
