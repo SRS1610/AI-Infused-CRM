@@ -7,7 +7,7 @@ from typing import Any
 from fastapi import APIRouter, Depends, Query
 
 from modules.web.views import resolve_view, strip_inaccessible_fields
-from tessera.api.deps import RequestContext, authenticated
+from tessera.api.deps import RequestContext, admin_only, authenticated
 from tessera.api.registry import register_router
 from tessera.exceptions import MissingError, ValidationError
 
@@ -146,3 +146,39 @@ def filters(model: str, ctx: RequestContext = Depends(authenticated)) -> list[di
         [("model_name", "=", model)],
         ["name", "domain", "context", "group_bys", "sort", "is_default", "is_favorite", "user_id", "action_id"],
     )
+
+
+@router.get("/search")
+def global_search(
+    q: str = Query("", max_length=200),
+    limit: int = Query(20, ge=1, le=100),
+    models: str | None = Query(None, description="Comma-separated model names to restrict to"),
+    ctx: RequestContext = Depends(authenticated),
+) -> dict[str, Any]:
+    """Records (ranked, access-filtered) and menus matching ``q`` — the command palette's data source."""
+    from modules.web.search import search
+
+    records = search(ctx.env, q, limit, [m for m in (models or "").split(",") if m] or None)
+    needle = q.strip().lower()
+    found: list[dict[str, Any]] = []
+
+    def walk(items: list[dict[str, Any]], trail: list[str]) -> None:
+        for item in items:
+            path = [*trail, item["name"]]
+            if item.get("action") and needle and needle in " / ".join(path).lower():
+                found.append(
+                    {"id": item["id"], "name": item["name"], "path": " / ".join(path), "action": item["action"]}
+                )
+            walk(item.get("children", []), path)
+
+    if len(needle) >= 2:
+        walk(menus(ctx), [])
+    return {"records": records, "menus": found[:10]}
+
+
+@router.post("/search/rebuild", status_code=202)
+def rebuild_search(ctx: RequestContext = Depends(admin_only)) -> dict[str, Any]:
+    from tessera.jobs import enqueue
+
+    job = enqueue(ctx.env, "web.search_rebuild", {}, description="Rebuild the global search index")
+    return {"job_id": job.ids[0]}

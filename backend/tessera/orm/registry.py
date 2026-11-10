@@ -48,7 +48,9 @@ log = get_logger(__name__)
 _fragments_by_module: dict[str, list[type[Model]]] = defaultdict(list)
 _loading_module: threading.local = threading.local()
 
-HookName = str  # "after_create" | "after_write" | "before_unlink" | "after_unlink" | "registry_built"
+HookName = (
+    str  # after_create | before_write | after_write | before_unlink | after_unlink | after_restore | registry_built
+)
 
 
 def set_loading_module(name: str | None) -> None:

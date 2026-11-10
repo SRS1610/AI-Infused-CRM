@@ -1059,6 +1059,7 @@ class Model:
         self.elevated("restore").with_context(_recompute_write=True)._write_columns(
             {"deleted_at": None, "deleted_by": None}
         )
+        self.env.registry.run_hooks("after_restore", self)
         return True
 
     # ------------------------------------------------------------------ recomputation

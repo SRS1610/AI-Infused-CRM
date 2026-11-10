@@ -44,9 +44,26 @@ def post_init(env: Environment) -> None:
 # -- security cache --------------------------------------------------------------------------
 
 
-def _invalidate_if_security(records: Model) -> None:
-    if records._name in SECURITY_MODELS:
-        records.env.registry.security.invalidate()
+USER_SECURITY_FIELDS = {"group_ids", "active", "share", "company_id", "company_ids"}
+
+
+def _invalidate_if_security(records: Model, changed: set[str] | None = None) -> None:
+    """Bump the security stamp when access can change. User writes count only for membership-related
+    fields (not logins or preferences); external ids only for groups (cached xmlid → group id)."""
+    name = records._name
+    if name not in SECURITY_MODELS:
+        return
+    if name == "core.user" and changed is not None and not changed & USER_SECURITY_FIELDS:
+        return
+    if name == "core.module_record" and records._ids:
+        models = {r.model for r in records.elevated()}
+        if "core.group" not in models:
+            return
+    security = records.env.registry.security
+    if hasattr(security, "bump"):
+        security.bump(records.env)
+    else:
+        security.invalidate()
 
 
 @hook("after_create")
@@ -56,12 +73,15 @@ def invalidate_security_on_create(records: Model, vals_list: list[dict[str, Any]
 
 @hook("after_write")
 def invalidate_security_on_write(records: Model, vals: dict[str, Any], old_values: dict[str, Any]) -> None:
-    _invalidate_if_security(records)
+    _invalidate_if_security(records, set(vals))
 
 
 @hook("after_unlink")
 def invalidate_security_on_unlink(model: Model, ids: list[int]) -> None:
-    _invalidate_if_security(model)
+    if model._name != "core.module_record":  # rows are gone: cannot tell; group xmlids are rarely deleted
+        _invalidate_if_security(model)
+    else:
+        model.env.registry.security.invalidate()
 
 
 # -- audit log ---------------------------------------------------------------------------------

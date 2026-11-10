@@ -63,3 +63,16 @@ class RecordRule(Model):
             if rule.model_name not in self.env.registry.models:
                 raise ValidationError(f"Unknown model '{rule.model_name}'", field="model_name")
             parse(rule.domain)
+
+
+class SecurityStamp(Model):
+    """One row whose ``version`` changes (randomly) in the same transaction as any change to groups,
+    access rights, record rules or memberships. Every process compares it with the version of its
+    cached rules, so changes made by other workers — and rolled-back changes — are never served stale."""
+
+    _name = "core.security_stamp"
+    _description = "Security cache stamp"
+    _log_access = False
+    _studio = False
+
+    version = fields.Integer()

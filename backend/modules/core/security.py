@@ -38,11 +38,35 @@ class DatabaseSecurityProvider:
         self._implied: dict[int, set[int]] | None = None
         self._user_groups: dict[int, frozenset[int]] = {}
         self._group_ids_by_xmlid: dict[str, int | None] = {}
+        self._version: int | None = None
 
     # -- loading ---------------------------------------------------------------------------
+    def _stamp(self, env: Environment) -> int | None:
+        """The security stamp as seen by this transaction (read once per transaction)."""
+        tr = env.transaction
+        if getattr(tr, "_security_stamp_read", False):
+            return getattr(tr, "_security_stamp", None)
+        stamp = None
+        if env.cr.scalar("SELECT to_regclass('core_security_stamp') IS NOT NULL"):
+            stamp = env.cr.scalar("SELECT version FROM core_security_stamp WHERE id = 1")
+        tr._security_stamp, tr._security_stamp_read = stamp, True  # type: ignore[attr-defined]
+        return int(stamp) if stamp is not None else None
+
+    def bump(self, env: Environment) -> None:
+        """Record a security change in the current transaction (visible to others once committed)."""
+        if env.cr.scalar("SELECT to_regclass('core_security_stamp') IS NOT NULL"):
+            env.cr.execute(
+                "INSERT INTO core_security_stamp (id, version) VALUES (1, floor(random() * 1e15)::bigint) "
+                "ON CONFLICT (id) DO UPDATE SET version = floor(random() * 1e15)::bigint"
+            )
+        env.transaction._security_stamp_read = False  # type: ignore[attr-defined]
+        self.invalidate()
+
     def _ensure_loaded(self, env: Environment) -> None:
+        stamp = self._stamp(env)
         with self._lock:
-            if self._acl is not None and self._rules is not None and self._implied is not None:
+            loaded = self._acl is not None and self._rules is not None and self._implied is not None
+            if loaded and stamp == self._version:
                 return
             cr = env.cr
             acl: dict[str, list[AccessRow]] = {}
@@ -76,6 +100,7 @@ class DatabaseSecurityProvider:
             ):
                 implied.setdefault(group_id, set()).add(implied_id)
             self._acl, self._rules, self._implied = acl, rules, implied
+            self._version = stamp
             self._user_groups.clear()
             self._group_ids_by_xmlid.clear()
 
@@ -167,6 +192,7 @@ class DatabaseSecurityProvider:
 
     def invalidate(self) -> None:
         with self._lock:
+            self._version = None
             self._acl = None
             self._rules = None
             self._implied = None
