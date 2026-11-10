@@ -1,0 +1,23 @@
+name = "core"
+version = "1.0.0"
+summary = "Companies, users, groups, access rights, currencies, countries, languages, sequences, attachments, audit log, module registry"
+description = "The platform's root module. Every other module depends on it."
+category = "Platform"
+phase = 1
+depends = []
+license = "Apache-2.0"
+installable = true
+auto_install = true
+application = false
+post_init = "hooks:post_init"
+
+[load]
+security = ["security/groups.json", "security/access.json"]
+data = [
+  "data/languages.json",
+  "data/currencies.json",
+  "data/countries.json",
+  "data/companies.json",
+  "data/users.json",
+]
+demo = ["data/demo/users.json"]

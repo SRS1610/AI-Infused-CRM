@@ -1,0 +1,4 @@
+[
+  {"id": "main_company", "model": "core.company", "noupdate": true,
+   "values": {"name": "My Company", "currency_id": "core.USD", "country_id": "core.country_us", "email": "hello@example.com", "website": "https://example.com"}}
+]

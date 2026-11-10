@@ -1,0 +1,9 @@
+name = "kernel_test_b"
+version = "1.0.0"
+summary = "Kernel test module B: extends module A's models without forking them"
+category = "Testing"
+phase = 0
+depends = ["kernel_test_a"]
+
+[load]
+data = ["data/extra.json"]

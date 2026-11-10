@@ -1,0 +1,4 @@
+[
+  {"id": "access_review_system", "model": "core.model_access", "values": {"name": "review admin", "model_name": "ktest.review", "group_id": "core.group_system", "perm_read": true, "perm_write": true, "perm_create": true, "perm_unlink": true}},
+  {"id": "access_review_reader", "model": "core.model_access", "values": {"name": "review reader", "model_name": "ktest.review", "group_id": "kernel_test_a.group_reader", "perm_read": true, "perm_write": true, "perm_create": true, "perm_unlink": false}}
+]

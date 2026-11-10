@@ -1,0 +1,16 @@
+[
+  {"id": "lang_en_US", "model": "core.language", "noupdate": true,
+   "values": {"name": "English (US)", "code": "en_US", "iso_code": "en", "active": true, "date_format": "%m/%d/%Y", "decimal_point": ".", "thousands_sep": ",", "week_start": 7}},
+  {"id": "lang_en_GB", "model": "core.language", "noupdate": true,
+   "values": {"name": "English (UK)", "code": "en_GB", "iso_code": "en", "active": false, "date_format": "%d/%m/%Y", "decimal_point": ".", "thousands_sep": ","}},
+  {"id": "lang_fr_FR", "model": "core.language", "noupdate": true,
+   "values": {"name": "Français", "code": "fr_FR", "iso_code": "fr", "active": true, "date_format": "%d/%m/%Y", "decimal_point": ",", "thousands_sep": " "}},
+  {"id": "lang_de_DE", "model": "core.language", "noupdate": true,
+   "values": {"name": "Deutsch", "code": "de_DE", "iso_code": "de", "active": false, "date_format": "%d.%m.%Y", "decimal_point": ",", "thousands_sep": "."}},
+  {"id": "lang_es_ES", "model": "core.language", "noupdate": true,
+   "values": {"name": "Español", "code": "es_ES", "iso_code": "es", "active": false, "date_format": "%d/%m/%Y", "decimal_point": ",", "thousands_sep": "."}},
+  {"id": "lang_ar_001", "model": "core.language", "noupdate": true,
+   "values": {"name": "العربية", "code": "ar_001", "iso_code": "ar", "active": false, "direction": "rtl", "date_format": "%d/%m/%Y"}},
+  {"id": "lang_hi_IN", "model": "core.language", "noupdate": true,
+   "values": {"name": "हिन्दी", "code": "hi_IN", "iso_code": "hi", "active": false, "date_format": "%d/%m/%Y"}}
+]

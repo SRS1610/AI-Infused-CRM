@@ -100,6 +100,15 @@ Format: `D-nnn · date · status (Proposed | Accepted | Superseded)`
 - **Decision:** The `sms` module (provider adapters, outbound queue, delivery status, opt-out registry) is delivered with Phase 2b because Sign needs SMS one-time codes and SMS signing links. SMS *marketing* (campaigns, segmentation) stays in Phase 6 as an extension of `sms`.
 - **Rationale:** Avoids Sign depending on a Phase 6 module; the transport layer is small and reusable.
 
+### D-024 · 2026-11-10 · Accepted — The ORM is synchronous; FastAPI runs it in its threadpool
+- **Decision:** The kernel ORM, module loader and security provider are synchronous (psycopg 3 through SQLAlchemy Core). API handlers are plain `def` endpoints (FastAPI dispatches them to a threadpool); `async` is reserved for WebSockets, SSE streaming and the AI gateway client.
+- **Alternatives:** Fully async ORM.
+- **Rationale:** A metadata ORM with recursive compute/related resolution, savepoints per DML statement and record-rule re-checks is far simpler to reason about synchronously; Postgres connection pooling makes the threadpool model perform well at the expected concurrency. Async where it pays (fan-out, streaming) keeps the benefits where they exist.
+
+### D-025 · 2026-11-10 · Accepted — mypy: checked everywhere, strict on stable leaf packages
+- **Decision:** `check_untyped_defs` across kernel and modules; `strict = true` only for stable, non-dynamic packages (`orm.domain`, `orm.cache`, `modules.graph`, `modules.manifest`, `exceptions`, `config`). `Model.__getattr__` is typed `Any` so `record.<field>` access type-checks. Strictness is tightened per package as APIs stabilise.
+- **Rationale:** Fields are descriptors composed at runtime; demanding strict typing of every dynamic attribute would cost `# type: ignore` noise without catching real defects. Correctness of the dynamic parts is covered by the kernel test modules instead.
+
 ### D-023 · 2026-11-09 · Proposed — Public web surfaces before Phase 7 use `*_website` bridge modules
 - **Decision:** Modules that need a public page before the `website` builder exists (recruitment job postings, event pages, eLearning courses, blog, forum, survey invitations) depend only on `portal` for their minimal public rendering in their own phase; `recruitment_website`, `events_website`, `elearning_website`, `blog_website`, `forum_website` bridge modules (auto-installed when `website` is present) move those pages into the website builder in Phase 7.
 - **Rationale:** Preserves the layering rule (no dependency on a later phase) while still shipping usable public pages when each module lands.

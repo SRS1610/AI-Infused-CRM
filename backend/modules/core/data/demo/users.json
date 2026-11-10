@@ -1,0 +1,18 @@
+[
+  {"id": "demo_company_eu", "model": "core.company", "noupdate": true,
+   "values": {"name": "My Company (Europe)", "currency_id": "core.EUR", "country_id": "core.country_fr", "parent_id": "core.main_company", "email": "paris@example.com"}},
+  {"id": "user_demo", "model": "core.user", "noupdate": true,
+   "values": {"login": "demo", "name": "Dana Demo", "email": "dana@example.com", "password": "demo1234", "lang": "en_US", "tz": "America/New_York",
+              "company_id": "core.main_company", "company_ids": ["core.main_company", "core.demo_company_eu"], "group_ids": ["core.group_user", "core.group_multi_company"]}},
+  {"id": "user_demo_fr", "model": "core.user", "noupdate": true,
+   "values": {"login": "marie", "name": "Marie Martin", "email": "marie@example.com", "password": "demo1234", "lang": "fr_FR", "tz": "Europe/Paris",
+              "company_id": "core.demo_company_eu", "company_ids": ["core.demo_company_eu"], "group_ids": ["core.group_user"]}},
+  {"id": "rate_eur_2026", "model": "core.currency_rate", "noupdate": true,
+   "values": {"currency_id": "core.EUR", "date": "2026-01-01", "rate": 0.92}},
+  {"id": "rate_gbp_2026", "model": "core.currency_rate", "noupdate": true,
+   "values": {"currency_id": "core.GBP", "date": "2026-01-01", "rate": 0.79}},
+  {"id": "rate_inr_2026", "model": "core.currency_rate", "noupdate": true,
+   "values": {"currency_id": "core.INR", "date": "2026-01-01", "rate": 84.5}},
+  {"id": "rate_aud_2026", "model": "core.currency_rate", "noupdate": true,
+   "values": {"currency_id": "core.AUD", "date": "2026-01-01", "rate": 1.52}}
+]

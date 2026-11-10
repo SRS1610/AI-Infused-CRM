@@ -1,0 +1,1 @@
+"""Kernel test module B."""

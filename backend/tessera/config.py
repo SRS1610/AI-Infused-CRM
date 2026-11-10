@@ -10,10 +10,10 @@ from __future__ import annotations
 import base64
 from functools import lru_cache
 from pathlib import Path
-from typing import Literal
+from typing import Annotated, Literal
 
 from pydantic import Field, field_validator
-from pydantic_settings import BaseSettings, SettingsConfigDict
+from pydantic_settings import BaseSettings, NoDecode, SettingsConfigDict
 
 BACKEND_ROOT = Path(__file__).resolve().parent.parent
 DEFAULT_MODULE_PATH = BACKEND_ROOT / "modules"
@@ -37,17 +37,18 @@ class Settings(BaseSettings):
     redis_url: str = "redis://localhost:6379/0"
 
     # web
-    secret_key: str = "dev-only-secret-key-change-me-please-32b"
+    secret_key: str = "dev-only-secret-key-change-me-please-32b"  # noqa: S105 - rejected by check() in production
     master_key: str = "ZGV2LW9ubHktbWFzdGVyLWtleS0zMi1ieXRlcy0hIQ=="
     base_url: str = "http://localhost:8000"
-    allowed_hosts: list[str] = Field(default_factory=lambda: ["localhost", "127.0.0.1"])
+    allowed_hosts: Annotated[list[str], NoDecode] = Field(default_factory=lambda: ["localhost", "127.0.0.1"])
     session_idle_minutes: int = 60 * 8
     session_absolute_hours: int = 24 * 7
 
     # modules
-    module_paths: list[Path] = Field(default_factory=lambda: [DEFAULT_MODULE_PATH])
+    module_paths: Annotated[list[Path], NoDecode] = Field(default_factory=lambda: [DEFAULT_MODULE_PATH])
     default_lang: str = "en_US"
     default_tz: str = "UTC"
+    admin_password: str | None = None  # initial password of the `admin` user; "admin1234" outside production
 
     # storage
     storage_backend: Literal["s3", "filesystem"] = "filesystem"
@@ -68,7 +69,7 @@ class Settings(BaseSettings):
 
     # AI gateway
     ai_gateway_url: str = "http://localhost:8100"
-    ai_gateway_token: str = "dev-only-gateway-token"
+    ai_gateway_token: str = "dev-only-gateway-token"  # noqa: S105 - rejected by check() in production
 
     # logging / observability
     log_level: str = "INFO"

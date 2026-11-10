@@ -1,0 +1,11 @@
+name = "kernel_test_a"
+version = "1.0.0"
+summary = "Kernel test module A: books, authors, chapters, tags"
+category = "Testing"
+phase = 0
+depends = ["core"]
+
+[load]
+security = ["security/groups.json", "security/access.json", "security/rules.json"]
+data = ["data/sequences.json"]
+demo = ["data/demo/books.json"]

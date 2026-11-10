@@ -1,0 +1,21 @@
+[
+  {"id": "USD", "model": "core.currency", "noupdate": true, "values": {"name": "USD", "full_name": "US Dollar", "symbol": "$", "position": "before"}},
+  {"id": "EUR", "model": "core.currency", "noupdate": true, "values": {"name": "EUR", "full_name": "Euro", "symbol": "€", "position": "after"}},
+  {"id": "GBP", "model": "core.currency", "noupdate": true, "values": {"name": "GBP", "full_name": "Pound Sterling", "symbol": "£", "position": "before"}},
+  {"id": "AUD", "model": "core.currency", "noupdate": true, "values": {"name": "AUD", "full_name": "Australian Dollar", "symbol": "A$", "position": "before"}},
+  {"id": "CAD", "model": "core.currency", "noupdate": true, "values": {"name": "CAD", "full_name": "Canadian Dollar", "symbol": "C$", "position": "before"}},
+  {"id": "INR", "model": "core.currency", "noupdate": true, "values": {"name": "INR", "full_name": "Indian Rupee", "symbol": "₹", "position": "before"}},
+  {"id": "JPY", "model": "core.currency", "noupdate": true, "values": {"name": "JPY", "full_name": "Japanese Yen", "symbol": "¥", "position": "before", "decimal_places": 0, "rounding": 1.0}},
+  {"id": "CHF", "model": "core.currency", "noupdate": true, "values": {"name": "CHF", "full_name": "Swiss Franc", "symbol": "CHF", "position": "before", "rounding": 0.05}},
+  {"id": "SGD", "model": "core.currency", "noupdate": true, "values": {"name": "SGD", "full_name": "Singapore Dollar", "symbol": "S$", "position": "before"}},
+  {"id": "NZD", "model": "core.currency", "noupdate": true, "values": {"name": "NZD", "full_name": "New Zealand Dollar", "symbol": "NZ$", "position": "before"}},
+  {"id": "AED", "model": "core.currency", "noupdate": true, "values": {"name": "AED", "full_name": "UAE Dirham", "symbol": "د.إ", "position": "after"}},
+  {"id": "SEK", "model": "core.currency", "noupdate": true, "values": {"name": "SEK", "full_name": "Swedish Krona", "symbol": "kr", "position": "after"}},
+  {"id": "NOK", "model": "core.currency", "noupdate": true, "values": {"name": "NOK", "full_name": "Norwegian Krone", "symbol": "kr", "position": "after"}},
+  {"id": "DKK", "model": "core.currency", "noupdate": true, "values": {"name": "DKK", "full_name": "Danish Krone", "symbol": "kr", "position": "after"}},
+  {"id": "CNY", "model": "core.currency", "noupdate": true, "values": {"name": "CNY", "full_name": "Chinese Yuan", "symbol": "¥", "position": "before"}},
+  {"id": "BRL", "model": "core.currency", "noupdate": true, "values": {"name": "BRL", "full_name": "Brazilian Real", "symbol": "R$", "position": "before"}},
+  {"id": "MXN", "model": "core.currency", "noupdate": true, "values": {"name": "MXN", "full_name": "Mexican Peso", "symbol": "$", "position": "before"}},
+  {"id": "ZAR", "model": "core.currency", "noupdate": true, "values": {"name": "ZAR", "full_name": "South African Rand", "symbol": "R", "position": "before"}},
+  {"id": "HKD", "model": "core.currency", "noupdate": true, "values": {"name": "HKD", "full_name": "Hong Kong Dollar", "symbol": "HK$", "position": "before"}}
+]

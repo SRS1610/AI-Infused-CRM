@@ -14,7 +14,7 @@ from typing import Any
 
 from sqlalchemy import Connection, Engine, create_engine, event, text
 from sqlalchemy.engine import CursorResult
-from sqlalchemy.sql import ClauseElement
+from sqlalchemy.sql.base import Executable
 
 from tessera.config import get_settings
 from tessera.logging import get_logger
@@ -61,7 +61,7 @@ def get_engine(url: str | None = None) -> Engine:
                     from pgvector.psycopg import register_vector
 
                     register_vector(dbapi_conn)
-                except Exception:  # noqa: BLE001 - vector extension not installed: fine until ai_core needs it
+                except Exception:  # noqa: S110 - vector extension absent until ai_core needs it
                     pass
 
             _engines[url] = engine
@@ -94,19 +94,21 @@ class Cursor:
 
     # -- execution -------------------------------------------------------------------
     def execute(
-        self, statement: str | ClauseElement, params: Mapping[str, Any] | Sequence[Mapping[str, Any]] | None = None
+        self,
+        statement: str | Executable,
+        params: Mapping[str, Any] | Sequence[Mapping[str, Any]] | None = None,
     ) -> CursorResult[Any]:
         if isinstance(statement, str):
             statement = text(statement)
         return self._conn.execute(statement, params) if params is not None else self._conn.execute(statement)
 
-    def fetchall(self, statement: str | ClauseElement, params: Mapping[str, Any] | None = None) -> list[Any]:
+    def fetchall(self, statement: str | Executable, params: Mapping[str, Any] | None = None) -> list[Any]:
         return list(self.execute(statement, params).fetchall())
 
-    def fetchone(self, statement: str | ClauseElement, params: Mapping[str, Any] | None = None) -> Any:
+    def fetchone(self, statement: str | Executable, params: Mapping[str, Any] | None = None) -> Any:
         return self.execute(statement, params).fetchone()
 
-    def scalar(self, statement: str | ClauseElement, params: Mapping[str, Any] | None = None) -> Any:
+    def scalar(self, statement: str | Executable, params: Mapping[str, Any] | None = None) -> Any:
         return self.execute(statement, params).scalar()
 
     @property
@@ -141,7 +143,7 @@ class Cursor:
         for cb in callbacks:
             try:
                 cb()
-            except Exception:  # noqa: BLE001 - a failing hook must not break the request
+            except Exception:
                 log.exception("after_commit callback failed")
         self._trans = self._conn.begin()
 

@@ -1,0 +1,8 @@
+[
+  {"id": "user_system", "model": "core.user", "noupdate": true,
+   "values": {"login": "system", "name": "System", "active": false, "company_id": "core.main_company", "company_ids": ["core.main_company"], "group_ids": ["core.group_system"], "share": false}},
+  {"id": "user_admin", "model": "core.user", "noupdate": true,
+   "values": {"login": "admin", "name": "Administrator", "email": "admin@example.com", "active": true, "company_id": "core.main_company", "company_ids": ["core.main_company"], "group_ids": ["core.group_system"]}},
+  {"id": "user_public", "model": "core.user", "noupdate": true,
+   "values": {"login": "public", "name": "Public user", "active": false, "share": true, "company_id": "core.main_company", "company_ids": ["core.main_company"], "group_ids": ["core.group_public"]}}
+]

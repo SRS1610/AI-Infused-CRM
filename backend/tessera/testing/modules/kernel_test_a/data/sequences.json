@@ -1,0 +1,4 @@
+[
+  {"id": "seq_book", "model": "core.sequence", "noupdate": true,
+   "values": {"name": "Book reference", "code": "ktest.book", "prefix": "BK/%(year)s/", "padding": 4, "implementation": "gapless"}}
+]

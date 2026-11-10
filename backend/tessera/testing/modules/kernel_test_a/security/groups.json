@@ -1,0 +1,4 @@
+[
+  {"id": "group_reader", "model": "core.group", "values": {"name": "Library / Reader", "category": "Testing", "implied_ids": ["core.group_user"]}},
+  {"id": "group_librarian", "model": "core.group", "values": {"name": "Library / Librarian", "category": "Testing", "implied_ids": ["kernel_test_a.group_reader"]}}
+]
