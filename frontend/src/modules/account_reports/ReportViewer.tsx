@@ -146,7 +146,11 @@ export function ReportViewer({ code }: { code: string }) {
     if (groups.length && groups[groups.length - 1].label === label) groups[groups.length - 1].span += 1;
     else groups.push({ label, span: 1 });
   }
-  const exportFilters = { ...filters };
+  // a download link carries no company header: name the companies the report was computed for
+  const exportFilters = {
+    ...filters,
+    company_ids: filters.company_ids?.length ? filters.company_ids : data?.companies.map((c) => c.id),
+  };
 
   return (
     <div className="account-report">

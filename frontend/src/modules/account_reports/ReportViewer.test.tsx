@@ -224,6 +224,7 @@ describe("account reports viewer", () => {
     );
     const exports = screen.getByRole("group", { name: "Export" });
     expect(within(exports).getByRole("link", { name: "PDF" }).getAttribute("href")).toContain("format=pdf");
+    expect(within(exports).getByRole("link", { name: "CSV" }).getAttribute("href")).toContain("company_ids=2%2C1");
   });
 
   it("loads more ledger items and links items to their entries", async () => {
