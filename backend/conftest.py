@@ -54,6 +54,8 @@ KERNEL_TEST_MODULES = [
     "account_analytic",
     "account_budget",
     "account_asset",
+    "account_reports",
+    "account_tax",
     "auth_saml",
 ]
 

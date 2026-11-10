@@ -58,6 +58,23 @@ All notable changes are recorded here, grouped by phase. Format follows [Keep a 
   a van and office furniture with partly posted boards. Guides:
   [analytic](docs/admin/analytic.md), [budgets](docs/admin/budgets.md), [assets](docs/admin/assets.md).
 
+- **Financial reports (`account_reports` 1.0.0, D-077).** General ledger, trial balance, profit and loss,
+  balance sheet (computed current-year earnings and retained earnings, so assets = liabilities + equity at
+  any date), direct-method cash flow statement, aged receivable / payable (residuals as of the date) and
+  partner ledger, aggregated in SQL from journal items; date range or as-of date, fiscal-year aware,
+  comparison columns, journal / partner / draft filters. Reports are data (`account.report` and lines with
+  `type()` / `code()` / `tag()` / `grid()` / `cash()` / `line()` expressions); consolidation converts
+  companies at closing / average rates with a currency translation adjustment. JSON API
+  (`/api/v1/account/reports/{code}`), CSV / XLSX / PDF exports, a `ReportParams` object for the 2.6
+  natural-language reports, and a report page with drill-down to journal items. 2-a: the demo's trial
+  balances sum to zero per company and consolidated, net income equals the balance sheet's current year
+  earnings. `tessera perf reports` (2-l): every report under 450 ms p95 on 100,000 journal items; nightly job.
+- **Tax returns (`account_tax` 1.0.0).** VAT / sales tax return per chart template (EU, US, generic) from the
+  tax grids, signed so that credit notes reduce them, tied to the tax accounts (2-e); tax closing entry per
+  tax group into tax payable / receivable with the tax lock date; tax return records (monthly or quarterly)
+  with the report snapshot; deterministic pre-filing checks (`prefiling_checks`).
+- Guides: [docs/admin/reports.md](docs/admin/reports.md), [docs/admin/tax-return.md](docs/admin/tax-return.md).
+
 ### Sub-phase 2.7 — SAML single sign-on
 - **SAML 2.0 single sign-on (`auth_saml`, D-013, D-069).** Administrators add SAML identity providers under
   Settings → Users & Companies; the login page offers them next to OIDC. Service-provider initiated login

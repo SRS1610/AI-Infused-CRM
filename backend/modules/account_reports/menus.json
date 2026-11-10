@@ -1,0 +1,12 @@
+[
+ {"id": "menu_reporting", "name": "Reporting", "parent": "account.menu_root", "sequence": 60, "groups": ["account.group_account_readonly"]},
+ {"id": "menu_balance_sheet", "name": "Balance sheet", "parent": "account_reports.menu_reporting", "sequence": 10, "action": "account_reports.action_balance_sheet"},
+ {"id": "menu_profit_loss", "name": "Profit and loss", "parent": "account_reports.menu_reporting", "sequence": 20, "action": "account_reports.action_profit_loss"},
+ {"id": "menu_cash_flow", "name": "Cash flow statement", "parent": "account_reports.menu_reporting", "sequence": 30, "action": "account_reports.action_cash_flow"},
+ {"id": "menu_trial_balance", "name": "Trial balance", "parent": "account_reports.menu_reporting", "sequence": 40, "action": "account_reports.action_trial_balance"},
+ {"id": "menu_general_ledger", "name": "General ledger", "parent": "account_reports.menu_reporting", "sequence": 50, "action": "account_reports.action_general_ledger"},
+ {"id": "menu_partner_ledger", "name": "Partner ledger", "parent": "account_reports.menu_reporting", "sequence": 60, "action": "account_reports.action_partner_ledger"},
+ {"id": "menu_aged_receivable", "name": "Aged receivable", "parent": "account_reports.menu_reporting", "sequence": 70, "action": "account_reports.action_aged_receivable"},
+ {"id": "menu_aged_payable", "name": "Aged payable", "parent": "account_reports.menu_reporting", "sequence": 80, "action": "account_reports.action_aged_payable"},
+ {"id": "menu_report_definitions", "name": "Financial reports", "parent": "account.menu_config", "sequence": 80, "action": "account_reports.action_report_definitions"}
+]

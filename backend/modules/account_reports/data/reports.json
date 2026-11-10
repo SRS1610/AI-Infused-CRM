@@ -1,0 +1,596 @@
+[
+ {
+  "id": "report_balance_sheet",
+  "model": "account.report",
+  "values": {
+   "name": "Balance sheet",
+   "code": "balance_sheet",
+   "sequence": 10,
+   "engine": "lines",
+   "date_mode": "as_of",
+   "allow_comparison": true,
+   "description": "Assets, liabilities and equity as of a date. Equity includes the current year's earnings (computed) and the retained earnings of earlier years."
+  }
+ },
+ {
+  "id": "bs_assets",
+  "model": "account.report_line",
+  "values": {
+   "report_id": "report_balance_sheet",
+   "sequence": 10,
+   "name": "Assets",
+   "code": "ASSETS",
+   "expression": "children",
+   "style": "total"
+  }
+ },
+ {
+  "id": "bs_current_assets",
+  "model": "account.report_line",
+  "values": {
+   "report_id": "report_balance_sheet",
+   "sequence": 20,
+   "name": "Current assets",
+   "code": "CURRENT_ASSETS",
+   "expression": "children",
+   "parent_id": "bs_assets",
+   "style": "header"
+  }
+ },
+ {
+  "id": "bs_bank",
+  "model": "account.report_line",
+  "values": {
+   "report_id": "report_balance_sheet",
+   "sequence": 30,
+   "name": "Bank and cash",
+   "code": "BANK",
+   "expression": "type(asset_cash)",
+   "parent_id": "bs_current_assets",
+   "date_scope": "as_of",
+   "groupby_account": true
+  }
+ },
+ {
+  "id": "bs_receivables",
+  "model": "account.report_line",
+  "values": {
+   "report_id": "report_balance_sheet",
+   "sequence": 40,
+   "name": "Receivables",
+   "code": "RECEIVABLES",
+   "expression": "type(asset_receivable)",
+   "parent_id": "bs_current_assets",
+   "date_scope": "as_of",
+   "groupby_account": true
+  }
+ },
+ {
+  "id": "bs_other_current_assets",
+  "model": "account.report_line",
+  "values": {
+   "report_id": "report_balance_sheet",
+   "sequence": 50,
+   "name": "Other current assets",
+   "code": "OTHER_CURRENT_ASSETS",
+   "expression": "type(asset_current)",
+   "parent_id": "bs_current_assets",
+   "date_scope": "as_of",
+   "groupby_account": true
+  }
+ },
+ {
+  "id": "bs_prepayments",
+  "model": "account.report_line",
+  "values": {
+   "report_id": "report_balance_sheet",
+   "sequence": 60,
+   "name": "Prepayments",
+   "code": "PREPAYMENTS",
+   "expression": "type(asset_prepayments)",
+   "parent_id": "bs_current_assets",
+   "date_scope": "as_of",
+   "groupby_account": true,
+   "hide_if_zero": true
+  }
+ },
+ {
+  "id": "bs_fixed_assets",
+  "model": "account.report_line",
+  "values": {
+   "report_id": "report_balance_sheet",
+   "sequence": 70,
+   "name": "Fixed assets",
+   "code": "FIXED_ASSETS",
+   "expression": "type(asset_fixed)",
+   "parent_id": "bs_assets",
+   "date_scope": "as_of",
+   "groupby_account": true
+  }
+ },
+ {
+  "id": "bs_non_current_assets",
+  "model": "account.report_line",
+  "values": {
+   "report_id": "report_balance_sheet",
+   "sequence": 80,
+   "name": "Non-current assets",
+   "code": "NON_CURRENT_ASSETS",
+   "expression": "type(asset_non_current)",
+   "parent_id": "bs_assets",
+   "date_scope": "as_of",
+   "groupby_account": true,
+   "hide_if_zero": true
+  }
+ },
+ {
+  "id": "bs_liabilities",
+  "model": "account.report_line",
+  "values": {
+   "report_id": "report_balance_sheet",
+   "sequence": 90,
+   "name": "Liabilities",
+   "code": "LIABILITIES",
+   "expression": "children",
+   "style": "total"
+  }
+ },
+ {
+  "id": "bs_current_liabilities",
+  "model": "account.report_line",
+  "values": {
+   "report_id": "report_balance_sheet",
+   "sequence": 100,
+   "name": "Current liabilities",
+   "code": "CURRENT_LIABILITIES",
+   "expression": "children",
+   "parent_id": "bs_liabilities",
+   "style": "header"
+  }
+ },
+ {
+  "id": "bs_payables",
+  "model": "account.report_line",
+  "values": {
+   "report_id": "report_balance_sheet",
+   "sequence": 110,
+   "name": "Payables",
+   "code": "PAYABLES",
+   "expression": "type(liability_payable)",
+   "parent_id": "bs_current_liabilities",
+   "date_scope": "as_of",
+   "sign": "-1",
+   "groupby_account": true
+  }
+ },
+ {
+  "id": "bs_other_current_liabilities",
+  "model": "account.report_line",
+  "values": {
+   "report_id": "report_balance_sheet",
+   "sequence": 120,
+   "name": "Other current liabilities",
+   "code": "OTHER_CURRENT_LIABILITIES",
+   "expression": "type(liability_current, liability_credit_card)",
+   "parent_id": "bs_current_liabilities",
+   "date_scope": "as_of",
+   "sign": "-1",
+   "groupby_account": true
+  }
+ },
+ {
+  "id": "bs_non_current_liabilities",
+  "model": "account.report_line",
+  "values": {
+   "report_id": "report_balance_sheet",
+   "sequence": 130,
+   "name": "Non-current liabilities",
+   "code": "NON_CURRENT_LIABILITIES",
+   "expression": "type(liability_non_current)",
+   "parent_id": "bs_liabilities",
+   "date_scope": "as_of",
+   "sign": "-1",
+   "groupby_account": true,
+   "hide_if_zero": true
+  }
+ },
+ {
+  "id": "bs_equity",
+  "model": "account.report_line",
+  "values": {
+   "report_id": "report_balance_sheet",
+   "sequence": 140,
+   "name": "Equity",
+   "code": "EQUITY",
+   "expression": "children",
+   "style": "total"
+  }
+ },
+ {
+  "id": "bs_retained_earnings",
+  "model": "account.report_line",
+  "values": {
+   "report_id": "report_balance_sheet",
+   "sequence": 150,
+   "name": "Retained earnings",
+   "code": "RETAINED_EARNINGS",
+   "expression": "type(equity) + type(income, income_other, expense, expense_direct_cost, expense_depreciation, equity_unaffected)@before_fy",
+   "parent_id": "bs_equity",
+   "date_scope": "as_of",
+   "sign": "-1",
+   "groupby_account": true
+  }
+ },
+ {
+  "id": "bs_current_earnings",
+  "model": "account.report_line",
+  "values": {
+   "report_id": "report_balance_sheet",
+   "sequence": 160,
+   "name": "Current year earnings",
+   "code": "CURRENT_EARNINGS",
+   "expression": "type(income, income_other, expense, expense_direct_cost, expense_depreciation, equity_unaffected)@fy_to_date",
+   "parent_id": "bs_equity",
+   "date_scope": "as_of",
+   "sign": "-1",
+   "groupby_account": true
+  }
+ },
+ {
+  "id": "bs_cta",
+  "model": "account.report_line",
+  "values": {
+   "report_id": "report_balance_sheet",
+   "sequence": 170,
+   "name": "Currency translation adjustment",
+   "code": "CTA",
+   "expression": "line(ASSETS) - line(LIABILITIES) - line(RETAINED_EARNINGS) - line(CURRENT_EARNINGS)",
+   "parent_id": "bs_equity",
+   "consolidation_only": true
+  }
+ },
+ {
+  "id": "bs_liabilities_equity",
+  "model": "account.report_line",
+  "values": {
+   "report_id": "report_balance_sheet",
+   "sequence": 180,
+   "name": "Liabilities and equity",
+   "code": "LIABILITIES_EQUITY",
+   "expression": "line(LIABILITIES) + line(EQUITY)",
+   "style": "total"
+  }
+ },
+ {
+  "id": "report_profit_loss",
+  "model": "account.report",
+  "values": {
+   "name": "Profit and loss",
+   "code": "profit_loss",
+   "sequence": 20,
+   "engine": "lines",
+   "date_mode": "range",
+   "allow_comparison": true,
+   "description": "Income and expenses over a period (by default from the start of the fiscal year)."
+  }
+ },
+ {
+  "id": "pl_revenue",
+  "model": "account.report_line",
+  "values": {
+   "report_id": "report_profit_loss",
+   "sequence": 10,
+   "name": "Revenue",
+   "code": "REVENUE",
+   "expression": "type(income)",
+   "sign": "-1",
+   "groupby_account": true
+  }
+ },
+ {
+  "id": "pl_cost_of_revenue",
+  "model": "account.report_line",
+  "values": {
+   "report_id": "report_profit_loss",
+   "sequence": 20,
+   "name": "Cost of revenue",
+   "code": "COST_OF_REVENUE",
+   "expression": "type(expense_direct_cost)",
+   "groupby_account": true
+  }
+ },
+ {
+  "id": "pl_gross_profit",
+  "model": "account.report_line",
+  "values": {
+   "report_id": "report_profit_loss",
+   "sequence": 30,
+   "name": "Gross profit",
+   "code": "GROSS_PROFIT",
+   "expression": "line(REVENUE) - line(COST_OF_REVENUE)",
+   "style": "total"
+  }
+ },
+ {
+  "id": "pl_operating_expenses",
+  "model": "account.report_line",
+  "values": {
+   "report_id": "report_profit_loss",
+   "sequence": 40,
+   "name": "Operating expenses",
+   "code": "OPERATING_EXPENSES",
+   "expression": "type(expense)",
+   "groupby_account": true
+  }
+ },
+ {
+  "id": "pl_depreciation",
+  "model": "account.report_line",
+  "values": {
+   "report_id": "report_profit_loss",
+   "sequence": 50,
+   "name": "Depreciation and amortisation",
+   "code": "DEPRECIATION",
+   "expression": "type(expense_depreciation)",
+   "groupby_account": true,
+   "hide_if_zero": true
+  }
+ },
+ {
+  "id": "pl_operating_income",
+  "model": "account.report_line",
+  "values": {
+   "report_id": "report_profit_loss",
+   "sequence": 60,
+   "name": "Operating income",
+   "code": "OPERATING_INCOME",
+   "expression": "line(GROSS_PROFIT) - line(OPERATING_EXPENSES) - line(DEPRECIATION)",
+   "style": "total"
+  }
+ },
+ {
+  "id": "pl_other_income",
+  "model": "account.report_line",
+  "values": {
+   "report_id": "report_profit_loss",
+   "sequence": 70,
+   "name": "Other income and expenses",
+   "code": "OTHER_INCOME",
+   "expression": "type(income_other)",
+   "sign": "-1",
+   "groupby_account": true
+  }
+ },
+ {
+  "id": "pl_net_income",
+  "model": "account.report_line",
+  "values": {
+   "report_id": "report_profit_loss",
+   "sequence": 80,
+   "name": "Net income",
+   "code": "NET_INCOME",
+   "expression": "line(OPERATING_INCOME) + line(OTHER_INCOME)",
+   "style": "total"
+  }
+ },
+ {
+  "id": "report_cash_flow",
+  "model": "account.report",
+  "values": {
+   "name": "Cash flow statement",
+   "code": "cash_flow",
+   "sequence": 30,
+   "engine": "lines",
+   "date_mode": "range",
+   "allow_comparison": true,
+   "description": "Direct method: the counterparts of the bank and cash movements of the period, by kind of account."
+  }
+ },
+ {
+  "id": "cf_opening_cash",
+  "model": "account.report_line",
+  "values": {
+   "report_id": "report_cash_flow",
+   "sequence": 10,
+   "name": "Cash and cash equivalents at the beginning of the period",
+   "code": "OPENING_CASH",
+   "expression": "type(asset_cash)",
+   "date_scope": "opening",
+   "style": "header",
+   "groupby_account": true
+  }
+ },
+ {
+  "id": "cf_operating",
+  "model": "account.report_line",
+  "values": {
+   "report_id": "report_cash_flow",
+   "sequence": 20,
+   "name": "Cash flows from operating activities",
+   "code": "OPERATING",
+   "expression": "children",
+   "style": "header"
+  }
+ },
+ {
+  "id": "cf_customers",
+  "model": "account.report_line",
+  "values": {
+   "report_id": "report_cash_flow",
+   "sequence": 30,
+   "name": "Receipts from customers",
+   "code": "CUSTOMERS",
+   "expression": "cash(asset_receivable, income)",
+   "parent_id": "cf_operating",
+   "groupby_account": true
+  }
+ },
+ {
+  "id": "cf_suppliers",
+  "model": "account.report_line",
+  "values": {
+   "report_id": "report_cash_flow",
+   "sequence": 40,
+   "name": "Payments to suppliers and employees",
+   "code": "SUPPLIERS",
+   "expression": "cash(liability_payable, expense, expense_direct_cost, expense_depreciation)",
+   "parent_id": "cf_operating",
+   "groupby_account": true
+  }
+ },
+ {
+  "id": "cf_other_operating",
+  "model": "account.report_line",
+  "values": {
+   "report_id": "report_cash_flow",
+   "sequence": 50,
+   "name": "Other operating cash flows (taxes, other receivables and payables)",
+   "code": "OTHER_OPERATING",
+   "expression": "cash(asset_current, asset_prepayments, liability_current, liability_credit_card, income_other)",
+   "parent_id": "cf_operating",
+   "groupby_account": true
+  }
+ },
+ {
+  "id": "cf_investing",
+  "model": "account.report_line",
+  "values": {
+   "report_id": "report_cash_flow",
+   "sequence": 60,
+   "name": "Cash flows from investing activities",
+   "code": "INVESTING",
+   "expression": "cash(asset_fixed, asset_non_current)",
+   "style": "header",
+   "groupby_account": true
+  }
+ },
+ {
+  "id": "cf_financing",
+  "model": "account.report_line",
+  "values": {
+   "report_id": "report_cash_flow",
+   "sequence": 70,
+   "name": "Cash flows from financing activities",
+   "code": "FINANCING",
+   "expression": "cash(liability_non_current, equity, equity_unaffected)",
+   "style": "header",
+   "groupby_account": true
+  }
+ },
+ {
+  "id": "cf_exchange",
+  "model": "account.report_line",
+  "values": {
+   "report_id": "report_cash_flow",
+   "sequence": 80,
+   "name": "Effect of exchange rate changes",
+   "code": "EXCHANGE",
+   "expression": "cash(exchange)",
+   "groupby_account": true,
+   "hide_if_zero": true
+  }
+ },
+ {
+  "id": "cf_net_change",
+  "model": "account.report_line",
+  "values": {
+   "report_id": "report_cash_flow",
+   "sequence": 90,
+   "name": "Net change in cash",
+   "code": "NET_CHANGE",
+   "expression": "line(OPERATING) + line(INVESTING) + line(FINANCING) + line(EXCHANGE)",
+   "style": "total"
+  }
+ },
+ {
+  "id": "cf_translation",
+  "model": "account.report_line",
+  "values": {
+   "report_id": "report_cash_flow",
+   "sequence": 100,
+   "name": "Currency translation difference",
+   "code": "TRANSLATION",
+   "expression": "line(CLOSING_CASH) - line(OPENING_CASH) - line(NET_CHANGE)",
+   "consolidation_only": true
+  }
+ },
+ {
+  "id": "cf_closing_cash",
+  "model": "account.report_line",
+  "values": {
+   "report_id": "report_cash_flow",
+   "sequence": 110,
+   "name": "Cash and cash equivalents at the end of the period",
+   "code": "CLOSING_CASH",
+   "expression": "type(asset_cash)",
+   "date_scope": "as_of",
+   "style": "total",
+   "groupby_account": true
+  }
+ },
+ {
+  "id": "report_trial_balance",
+  "model": "account.report",
+  "values": {
+   "name": "Trial balance",
+   "code": "trial_balance",
+   "sequence": 40,
+   "engine": "trial_balance",
+   "date_mode": "range",
+   "allow_comparison": true,
+   "description": "Opening balance, debit, credit and closing balance per account."
+  }
+ },
+ {
+  "id": "report_general_ledger",
+  "model": "account.report",
+  "values": {
+   "name": "General ledger",
+   "code": "general_ledger",
+   "sequence": 50,
+   "engine": "general_ledger",
+   "date_mode": "range",
+   "allow_comparison": false,
+   "description": "Journal items per account with opening and running balances."
+  }
+ },
+ {
+  "id": "report_partner_ledger",
+  "model": "account.report",
+  "values": {
+   "name": "Partner ledger",
+   "code": "partner_ledger",
+   "sequence": 60,
+   "engine": "partner_ledger",
+   "date_mode": "range",
+   "allow_comparison": false,
+   "description": "Receivable and payable items per partner."
+  }
+ },
+ {
+  "id": "report_aged_receivable",
+  "model": "account.report",
+  "values": {
+   "name": "Aged receivable",
+   "code": "aged_receivable",
+   "sequence": 70,
+   "engine": "aged_receivable",
+   "date_mode": "as_of",
+   "allow_comparison": false,
+   "description": "Open customer items as of a date, by days past due."
+  }
+ },
+ {
+  "id": "report_aged_payable",
+  "model": "account.report",
+  "values": {
+   "name": "Aged payable",
+   "code": "aged_payable",
+   "sequence": 80,
+   "engine": "aged_payable",
+   "date_mode": "as_of",
+   "allow_comparison": false,
+   "description": "Open vendor items as of a date, by days past due."
+  }
+ }
+]

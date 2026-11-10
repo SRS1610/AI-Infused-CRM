@@ -1,6 +1,6 @@
 name: Nightly
 
-# U-6 performance at volume, and the live AI evaluation run (1.6-b) when a provider key is configured.
+# U-6 performance at volume, financial reports at 100k journal items (2-l), and the live AI evaluation run (1.6-b) when a provider key is configured.
 on:
   schedule:
     - cron: "17 3 * * *"
@@ -51,6 +51,48 @@ jobs:
         with:
           name: perf-report
           path: backend/perf.json
+
+  perf-reports:
+    name: Financial reports at 100k journal items (2-l)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    services:
+      postgres:
+        image: pgvector/pgvector:pg16
+        env:
+          POSTGRES_USER: tessera
+          POSTGRES_PASSWORD: tessera
+          POSTGRES_DB: tessera_perf_reports
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U tessera -d tessera_perf_reports"
+          --health-interval 5s --health-timeout 3s --health-retries 20
+    env:
+      TESSERA_ENV: test
+      TESSERA_DATABASE_URL: postgresql://tessera:tessera@localhost:5432/tessera_perf_reports
+      TESSERA_SECRET_KEY: ci-only-secret-key-not-for-production-32b
+      TESSERA_MASTER_KEY: Y2ktb25seS1tYXN0ZXIta2V5LW5vdC1mb3ItcHJvZHVjdGlvbi0zMmI=
+      TESSERA_JOBS_BACKEND: inline
+      TESSERA_AI_GATEWAY_URL: inprocess
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+          cache-dependency-glob: backend/uv.lock
+      - run: uv python install 3.12
+      - run: uv sync --frozen
+      - name: Database extensions
+        run: PGPASSWORD=tessera psql -h localhost -U tessera -d tessera_perf_reports -c "CREATE EXTENSION IF NOT EXISTS vector; CREATE EXTENSION IF NOT EXISTS pg_trgm; CREATE EXTENSION IF NOT EXISTS unaccent;"
+      - run: uv run tessera seed demo --phase 2
+      - run: uv run tessera perf reports --lines 100000 --json perf-reports.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: perf-reports
+          path: backend/perf-reports.json
 
   ai-live:
     name: Live AI evaluation (1.6-b)
