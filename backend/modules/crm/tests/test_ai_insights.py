@@ -505,6 +505,10 @@ def test_forecast_ranges_explanation_and_notification(env: Any) -> None:
         and run.provider == AI.PROVIDER
         and run.output_data[0]["p50"] == record.periods[0]["p50"]
     )
+    # the optional LLM narrative is stored beside the figures and never changes them
+    narrated = env["crm.ai_forecast"].browse([AI.forecast_job(env, narrative=True)["forecast_id"]])
+    assert narrated.narrative and [p["p50"] for p in narrated.periods] == [p["p50"] for p in record.periods]
+    assert MockAdapter.captured[-1]["metadata"]["feature"] == "crm.forecast"
 
 
 def test_forecast_figures_ignore_text_in_deal_names() -> None:
