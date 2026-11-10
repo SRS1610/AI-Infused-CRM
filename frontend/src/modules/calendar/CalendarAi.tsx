@@ -7,6 +7,7 @@ import { request } from "../../kernel/api/client";
 import { ai, aiErrorMessage, type Citation, type Proposal } from "../../kernel/ai/api";
 import { AiLabel, AiUnavailable, Citations, Feedback, ProposalCard, useAiFeature } from "../../kernel/ai/components";
 import { registerFormPanel, registerSearchAddon } from "../../kernel/extensions";
+import { t } from "../../kernel/i18n";
 
 const EVENT = "calendar.event";
 
@@ -65,25 +66,26 @@ export function MeetingBrief({ resId }: { resId: number }) {
   return (
     <div className="cal-ai">
       {brief ? (
-        <article className="cal-brief" aria-label="Meeting brief">
-          <AiLabel text="AI-generated brief" />
+        <article className="cal-brief" aria-label={t("Meeting brief")}>
+          <AiLabel text={t("AI-generated brief")} />
           <div className="cal-brief-text">{plain(brief.text)}</div>
           <Citations items={brief.citations} />
           <div className="cal-ai-row">
             <Feedback runId={brief.run_id} />
             <button type="button" className="btn ghost small" disabled={busy} onClick={() => void prepare()}>
-              {busy ? "Preparing…" : "Refresh"}
+              {busy ? t("Preparing…") : t("Refresh")}
             </button>
           </div>
         </article>
       ) : (
         <>
           <p className="muted small">
-            A brief from this meeting, its attendees, open deals and earlier meetings you can access. It is also
-            prepared for you about an hour before the meeting.
+            {t(
+              "A brief from this meeting, its attendees, open deals and earlier meetings you can access. It is also prepared for you about an hour before the meeting.",
+            )}
           </p>
           <button type="button" className="btn small" disabled={busy} onClick={() => void prepare()}>
-            {busy ? "Preparing…" : "Prepare brief"}
+            {busy ? t("Preparing…") : t("Prepare brief")}
           </button>
         </>
       )}
@@ -148,20 +150,22 @@ export function SuggestedTimes({ resId, reload }: { resId: number; reload: () =>
     <div className="cal-ai">
       <div className="cal-ai-row">
         <label className="small">
-          <span className="sr-only">Preferred time of day</span>
+          <span className="sr-only">{t("Preferred time of day")}</span>
           <select value={prefer} onChange={(e) => setPrefer(e.target.value as typeof prefer)}>
-            <option value="">Any time</option>
-            <option value="morning">Mornings</option>
-            <option value="afternoon">Afternoons</option>
+            <option value="">{t("Any time")}</option>
+            <option value="morning">{t("Mornings")}</option>
+            <option value="afternoon">{t("Afternoons")}</option>
           </select>
         </label>
         <button type="button" className="btn small" disabled={busy} onClick={() => void find()}>
-          {busy ? "Searching…" : "Find times"}
+          {busy ? t("Searching…") : t("Find times")}
         </button>
       </div>
-      {slots && slots.length === 0 && <p className="muted small">No time works for everyone in the next week.</p>}
+      {slots && slots.length === 0 && (
+        <p className="muted small">{t("No time works for everyone in the next week.")}</p>
+      )}
       {slots && slots.length > 0 && (
-        <ol className="cal-slots" aria-label="Suggested times">
+        <ol className="cal-slots" aria-label={t("Suggested times")}>
           {slots.map((s) => (
             <li key={s.start}>
               <div>
@@ -173,16 +177,16 @@ export function SuggestedTimes({ resId, reload }: { resId: number; reload: () =>
                 className="btn ghost small"
                 onClick={() => void move(s)}
                 disabled={moved === s.start}
-                aria-label={`Move the meeting to ${when(s.start)}`}
+                aria-label={t("Move the meeting to {time}", { time: when(s.start) })}
               >
-                {moved === s.start ? "Moved" : "Move here"}
+                {moved === s.start ? t("Moved") : t("Move here")}
               </button>
             </li>
           ))}
         </ol>
       )}
       {slots && (
-        <p className="muted small">Computed from everyone&apos;s calendar; nothing is booked until you choose.</p>
+        <p className="muted small">{t("Computed from everyone's calendar; nothing is booked until you choose.")}</p>
       )}
       {error && (
         <div className="alert error" role="alert">
@@ -241,22 +245,22 @@ export function ScheduleWithAi() {
   return (
     <span className="cal-nl">
       <button type="button" className="btn ghost small" aria-expanded={open} onClick={() => setOpen((o) => !o)}>
-        ✦ Schedule with AI
+        ✦ {t("Schedule with AI")}
       </button>
       {open && (
-        <div className="search-panel cal-nl-panel" role="dialog" aria-label="Schedule with AI">
+        <div className="search-panel cal-nl-panel" role="dialog" aria-label={t("Schedule with AI")}>
           <form onSubmit={submit} className="cal-ai-row">
             <label className="cal-nl-input">
-              <span className="sr-only">Describe the meeting</span>
+              <span className="sr-only">{t("Describe the meeting")}</span>
               <input
                 className="input"
                 value={text}
-                placeholder="Lunch with Dana next Tuesday 12:30"
+                placeholder={t("Lunch with Dana next Tuesday 12:30")}
                 onChange={(e) => setText(e.target.value)}
               />
             </label>
             <button type="submit" className="btn primary small" disabled={busy || text.trim().length < 3}>
-              {busy ? "Drafting…" : "Draft"}
+              {busy ? t("Drafting…") : t("Draft")}
             </button>
           </form>
           {error && (
@@ -266,7 +270,7 @@ export function ScheduleWithAi() {
           )}
           {draft && !draft.proposal && (
             <div className="alert error" role="alert">
-              {draft.problems[0] ?? "The request could not be turned into a meeting."}
+              {draft.problems[0] ?? t("The request could not be turned into a meeting.")}
             </div>
           )}
           {draft?.proposal && (
@@ -279,14 +283,18 @@ export function ScheduleWithAi() {
                 {payload.location && <> · {payload.location}</>}
               </p>
               {draft.resolved.length > 0 && (
-                <p className="small">Invites: {draft.resolved.map((p) => p.name).join(", ")}</p>
+                <p className="small">
+                  {t("Invites: {names}", { names: draft.resolved.map((p) => p.name).join(", ") })}
+                </p>
               )}
               {draft.unresolved.map((u) => (
                 <p key={u.name} className="alert warning small" role="status">
-                  “{u.name}” was not added:{" "}
                   {u.candidates.length
-                    ? `several contacts match (${u.candidates.map((c) => c.name).join(", ")}); add the right one yourself.`
-                    : "no contact you can see matches."}
+                    ? t("“{name}” was not added: several contacts match ({matches}); add the right one yourself.", {
+                        name: u.name,
+                        matches: u.candidates.map((c) => c.name).join(", "),
+                      })
+                    : t("“{name}” was not added: no contact you can see matches.", { name: u.name })}
                 </p>
               ))}
               <ProposalCard proposal={draft.proposal} onDecided={() => void qc.invalidateQueries()} />
@@ -299,9 +307,16 @@ export function ScheduleWithAi() {
   );
 }
 
-registerFormPanel(EVENT, { title: "Meeting brief", render: ({ resId }) => <MeetingBrief resId={resId} /> });
 registerFormPanel(EVENT, {
-  title: "Suggested times",
+  get title() {
+    return t("Meeting brief");
+  },
+  render: ({ resId }) => <MeetingBrief resId={resId} />,
+});
+registerFormPanel(EVENT, {
+  get title() {
+    return t("Suggested times");
+  },
   render: ({ resId, reload }) => <SuggestedTimes resId={resId} reload={reload} />,
 });
 registerSearchAddon(EVENT, { key: "calendar.nl_schedule", render: () => <ScheduleWithAi /> });

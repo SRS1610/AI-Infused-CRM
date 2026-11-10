@@ -5,6 +5,7 @@ import { api, request } from "../../kernel/api/client";
 import { chatter } from "../../kernel/api/platform";
 import { Composer, MessageItem } from "../../kernel/chatter/Chatter";
 import { registerClientAction } from "../../kernel/extensions";
+import { t, tn, tx } from "../../kernel/i18n";
 import { useRealtime } from "../../kernel/realtime";
 import { useSession } from "../../kernel/session";
 import {
@@ -100,14 +101,14 @@ export function DiscussApp() {
               {c.type === "dm" ? (
                 <span
                   className={`presence-dot${c.partner_user_id && online.has(c.partner_user_id) ? " online" : ""}`}
-                  aria-label={c.partner_user_id && online.has(c.partner_user_id) ? "online" : "offline"}
+                  aria-label={c.partner_user_id && online.has(c.partner_user_id) ? t("online") : t("offline")}
                 />
               ) : (
                 <span aria-hidden="true">#</span>
               )}
               <span className="discuss-name">{c.name}</span>
               {c.unread > 0 && (
-                <span className="badge count-inline" aria-label={`${c.unread} unread`}>
+                <span className="badge count-inline" aria-label={t("{count} unread", { count: c.unread })}>
                   {c.unread}
                 </span>
               )}
@@ -120,29 +121,32 @@ export function DiscussApp() {
 
   return (
     <div className="discuss">
-      <nav className="discuss-sidebar" aria-label="Conversations">
+      <nav className="discuss-sidebar" aria-label={t("Conversations")}>
         <CatchUpButton onClick={() => setPanel("catchup")} />
         {section(
-          "Channels",
+          t("Channels"),
           list.filter((c) => c.type === "channel"),
         )}
         <div className="button-row">
           <button type="button" className="btn small ghost" onClick={() => setPanel("browse")}>
-            Browse
+            {t("Browse")}
           </button>
           <button type="button" className="btn small ghost" onClick={() => setPanel("new")}>
-            New channel
+            {t("New channel")}
           </button>
         </div>
         {section(
-          "Direct messages",
+          t("Direct messages"),
           list.filter((c) => c.type !== "channel"),
         )}
         <button type="button" className="btn small ghost" onClick={() => setPanel("dm")}>
-          Message someone
+          {t("Message someone")}
         </button>
       </nav>
-      <section className="discuss-main" aria-label={current ? `Conversation ${current.name}` : "Conversation"}>
+      <section
+        className="discuss-main"
+        aria-label={current ? t("Conversation {name}", { name: current.name }) : t("Conversation")}
+      >
         {panel === "catchup" && <CatchUpPanel onClose={() => setPanel(null)} onJump={jump} />}
         {panel && panel !== "catchup" && (
           <ChannelPicker
@@ -170,7 +174,7 @@ export function DiscussApp() {
             onJump={jump}
           />
         )}
-        {!panel && !current && <p className="muted">Join a channel or start a conversation.</p>}
+        {!panel && !current && <p className="muted">{t("Join a channel or start a conversation.")}</p>}
       </section>
     </div>
   );
@@ -228,7 +232,7 @@ function Conversation({
           {channel.name}
         </h1>
         {channel.description && <span className="muted">{channel.description}</span>}
-        <span className="muted small">{channel.member_count} members</span>
+        <span className="muted small">{tn("{count} member", "{count} members", channel.member_count)}</span>
         <SummaryButton
           busy={summarising}
           onClick={async () => {
@@ -240,18 +244,21 @@ function Conversation({
         <TranslateLanguage lang={lang} onChange={setLang} />
         {channel.member && (
           <label className="small">
-            Notify me{" "}
-            <select
-              className="input small"
-              defaultValue={channel.notify ?? "mentions"}
-              onChange={(e) =>
-                void request("POST", `/discuss/channels/${channel.id}/notify`, { body: { notify: e.target.value } })
-              }
-            >
-              <option value="all">for every message</option>
-              <option value="mentions">when mentioned</option>
-              <option value="none">never</option>
-            </select>
+            {tx("Notify me {when}", {
+              when: (
+                <select
+                  className="input small"
+                  defaultValue={channel.notify ?? "mentions"}
+                  onChange={(e) =>
+                    void request("POST", `/discuss/channels/${channel.id}/notify`, { body: { notify: e.target.value } })
+                  }
+                >
+                  <option value="all">{t("for every message")}</option>
+                  <option value="mentions">{t("when mentioned")}</option>
+                  <option value="none">{t("never")}</option>
+                </select>
+              ),
+            })}
           </label>
         )}
       </header>
@@ -272,7 +279,7 @@ function Conversation({
             <li
               id={`discuss-msg-${m.id}`}
               className={`discuss-ai-row${focus === m.id ? " focused" : ""}`}
-              aria-label={focus === m.id ? "Linked message" : undefined}
+              aria-label={focus === m.id ? t("Linked message") : undefined}
             >
               {m.body && m.author?.id !== session?.user.id && <TranslateControl messageId={m.id} lang={lang} />}
             </li>
@@ -291,7 +298,7 @@ function Conversation({
             void queryClient.invalidateQueries({ queryKey: ["discuss", "channels"] });
           }}
         >
-          Join #{channel.name}
+          {t("Join #{name}", { name: channel.name })}
         </button>
       )}
     </>
@@ -323,9 +330,9 @@ function ChannelPicker({
   return (
     <div className="discuss-picker">
       <div className="button-row">
-        <h2>{mode === "browse" ? "Browse channels" : mode === "new" ? "New channel" : "Message someone"}</h2>
+        <h2>{mode === "browse" ? t("Browse channels") : mode === "new" ? t("New channel") : t("Message someone")}</h2>
         <button type="button" className="btn small ghost" onClick={onClose}>
-          Close
+          {t("Close")}
         </button>
       </div>
       {mode === "new" ? (
@@ -338,26 +345,26 @@ function ChannelPicker({
           }}
         >
           <label>
-            Name
+            {t("Name")}
             <input className="input" value={name} onChange={(e) => setName(e.target.value)} required maxLength={80} />
           </label>
           <label>
-            Who can join
+            {t("Who can join")}
             <select className="input" value={privacy} onChange={(e) => setPrivacy(e.target.value)}>
-              <option value="public">Everyone</option>
-              <option value="invite">Invited members only</option>
+              <option value="public">{t("Everyone")}</option>
+              <option value="invite">{t("Invited members only")}</option>
             </select>
           </label>
           <button type="submit" className="btn primary">
-            Create
+            {t("Create")}
           </button>
         </form>
       ) : (
         <>
           <input
             className="input"
-            placeholder="Search…"
-            aria-label="Search"
+            placeholder={t("Search…")}
+            aria-label={t("Search")}
             value={q}
             onChange={(e) => setQ(e.target.value)}
           />
@@ -373,7 +380,10 @@ function ChannelPicker({
                       onOpen(c.id);
                     }}
                   >
-                    # {c.name} <span className="muted small">{c.member ? "joined" : `${c.member_count} members`}</span>
+                    # {c.name}{" "}
+                    <span className="muted small">
+                      {c.member ? t("joined") : tn("{count} member", "{count} members", c.member_count)}
+                    </span>
                   </button>
                 </li>
               ))}

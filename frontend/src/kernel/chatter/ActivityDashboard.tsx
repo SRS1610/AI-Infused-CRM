@@ -6,13 +6,20 @@ import { AiLabel, Feedback, useAiFeature } from "../ai/components";
 import { request } from "../api/client";
 import { chatter } from "../api/platform";
 import { formatDate } from "../format";
+import { t } from "../i18n";
 import { ActivityRow } from "./Chatter";
 
-const STATES = [
-  { key: "overdue", label: "Overdue" },
-  { key: "today", label: "Today" },
-  { key: "planned", label: "Planned" },
-] as const;
+const STATE_KEYS = ["overdue", "today", "planned"] as const;
+
+/** The due buckets with their labels in the current language. */
+const states = () => {
+  const labels: Record<(typeof STATE_KEYS)[number], string> = {
+    overdue: t("Overdue"),
+    today: t("Today"),
+    planned: t("Planned"),
+  };
+  return STATE_KEYS.map((key) => ({ key, label: labels[key] }));
+};
 
 const DAILY_TODO = "chatter.daily_todo";
 
@@ -46,11 +53,12 @@ export function ActivityDashboard() {
   const todo = useAiFeature(DAILY_TODO);
   const data = useQuery({ queryKey: ["activities", "mine", state], queryFn: () => chatter.mine(state) });
   const summary = data.data?.summary ?? [];
-  const totals = STATES.map((s) => ({ ...s, count: summary.reduce((n, m) => n + m[s.key], 0) }));
+  const buckets = states();
+  const totals = buckets.map((s) => ({ ...s, count: summary.reduce((n, m) => n + m[s.key], 0) }));
   return (
     <div className="activity-dashboard">
       <div className="activity-dashboard-head">
-        <h1 className="page-title">My activities</h1>
+        <h1 className="page-title">{t("My activities")}</h1>
         {/* ranked by rules on the server (no AI provider), so it works while the AI gateway is down;
             hidden when the feature is turned off for the company */}
         {todo.enabled && (
@@ -60,12 +68,12 @@ export function ActivityDashboard() {
             aria-pressed={ranked}
             onClick={() => setRanked((r) => !r)}
           >
-            ✦ Rank my day
+            ✦ {t("Rank my day")}
           </button>
         )}
       </div>
       {todo.enabled && ranked && <RankedTodoPanel onChange={() => void data.refetch()} />}
-      <div className="activity-buckets" role="tablist" aria-label="Due">
+      <div className="activity-buckets" role="tablist" aria-label={t("Due")}>
         <button
           type="button"
           role="tab"
@@ -73,7 +81,7 @@ export function ActivityDashboard() {
           className={`btn small${!state ? " active" : " ghost"}`}
           onClick={() => setState(undefined)}
         >
-          All
+          {t("All")}
         </button>
         {totals.map((s) => (
           <button
@@ -92,8 +100,8 @@ export function ActivityDashboard() {
         <table className="activity-summary">
           <thead>
             <tr>
-              <th scope="col">Document</th>
-              {STATES.map((s) => (
+              <th scope="col">{t("Document")}</th>
+              {buckets.map((s) => (
                 <th key={s.key} scope="col" className="num">
                   {s.label}
                 </th>
@@ -104,7 +112,7 @@ export function ActivityDashboard() {
             {summary.map((m) => (
               <tr key={m.model}>
                 <th scope="row">{m.label}</th>
-                {STATES.map((s) => (
+                {buckets.map((s) => (
                   <td key={s.key} className={`num ${m[s.key] ? s.key : ""}`}>
                     {m[s.key]}
                   </td>
@@ -115,11 +123,11 @@ export function ActivityDashboard() {
         </table>
       )}
       <div className="activity-list">
-        {data.isLoading && <div className="loading">Loading…</div>}
+        {data.isLoading && <div className="loading">{t("Loading…")}</div>}
         {(data.data?.items ?? []).map((a) => (
           <ActivityRow key={a.id} activity={a} showRecord onChange={() => void data.refetch()} />
         ))}
-        {!data.isLoading && (data.data?.items.length ?? 0) === 0 && <p className="muted">Nothing to do. 🎉</p>}
+        {!data.isLoading && (data.data?.items.length ?? 0) === 0 && <p className="muted">{t("Nothing to do.")} 🎉</p>}
       </div>
     </div>
   );
@@ -139,18 +147,18 @@ function RankedTodoPanel({ onChange }: { onChange: () => void }) {
   };
   const items = ranked.data?.items ?? [];
   return (
-    <section className="ai-todo" aria-label="AI-ranked to-do">
+    <section className="ai-todo" aria-label={t("AI-ranked to-do")}>
       <header>
-        <h2>Suggested order for today</h2>
-        {ranked.data && <AiLabel text="AI-ranked" />}
+        <h2>{t("Suggested order for today")}</h2>
+        {ranked.data && <AiLabel text={t("AI-ranked")} />}
         <span className="spacer" />
         <button type="button" className="btn small ghost" onClick={() => void ranked.refetch()}>
-          Re-rank
+          {t("Re-rank")}
         </button>
       </header>
       {ranked.isLoading && (
         <p className="muted" role="status">
-          Ranking your activities…
+          {t("Ranking your activities…")}
         </p>
       )}
       {ranked.isError && (
@@ -158,7 +166,7 @@ function RankedTodoPanel({ onChange }: { onChange: () => void }) {
           {aiErrorMessage(ranked.error)}
         </div>
       )}
-      {ranked.data && items.length === 0 && <p className="muted">Nothing to rank. 🎉</p>}
+      {ranked.data && items.length === 0 && <p className="muted">{t("Nothing to rank.")} 🎉</p>}
       {items.length > 0 && (
         <ol className="ai-todo-list">
           {items.map((i) => (
@@ -175,8 +183,8 @@ function RankedTodoPanel({ onChange }: { onChange: () => void }) {
                       <Link to={`/m/${i.model}/${i.res_id}`}>{i.res_name}</Link>
                     </>
                   )}
-                  <div className="muted small">due {formatDate(i.date_deadline)}</div>
-                  <ul className="ai-todo-reasons" aria-label="Why">
+                  <div className="muted small">{t("due {date}", { date: formatDate(i.date_deadline) })}</div>
+                  <ul className="ai-todo-reasons" aria-label={t("Why")}>
                     {i.reasons.map((r) => (
                       <li key={r}>{r}</li>
                     ))}
@@ -186,13 +194,13 @@ function RankedTodoPanel({ onChange }: { onChange: () => void }) {
               <button
                 type="button"
                 className="btn small"
-                aria-label={`Done: ${i.summary}`}
+                aria-label={t("Done: {summary}", { summary: i.summary })}
                 onClick={async () => {
                   await chatter.done(i.activity_id);
                   refresh();
                 }}
               >
-                Done
+                {t("Done")}
               </button>
             </li>
           ))}

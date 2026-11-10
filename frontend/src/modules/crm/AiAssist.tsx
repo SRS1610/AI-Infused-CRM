@@ -7,6 +7,7 @@ import { request } from "../../kernel/api/client";
 import { ai, aiErrorMessage, type Citation, type Proposal } from "../../kernel/ai/api";
 import { AiLabel, AiUnavailable, Citations, Feedback, ProposalCard, useAiFeature } from "../../kernel/ai/components";
 import { registerAiDraft, registerFormPanel, registerSearchAddon } from "../../kernel/extensions";
+import { t } from "../../kernel/i18n";
 
 const LEAD = "crm.lead";
 
@@ -40,19 +41,20 @@ interface SearchResult {
   fields: Record<string, FieldOption>;
 }
 
-const OPERATORS: [Operator, string][] = [
-  ["=", "is"],
-  ["!=", "is not"],
+/** Operators of the condition editor with their labels, in the current language. */
+const operators = (): [Operator, string][] => [
+  ["=", t("is")],
+  ["!=", t("is not")],
   [">", ">"],
   [">=", "≥"],
   ["<", "<"],
   ["<=", "≤"],
-  ["in", "is one of"],
-  ["not_in", "is none of"],
-  ["ilike", "contains"],
-  ["not_ilike", "does not contain"],
-  ["is_set", "is set"],
-  ["is_not_set", "is not set"],
+  ["in", t("is one of")],
+  ["not_in", t("is none of")],
+  ["ilike", t("contains")],
+  ["not_ilike", t("does not contain")],
+  ["is_set", t("is set")],
+  ["is_not_set", t("is not set")],
 ];
 const NUMERIC = ["integer", "float", "monetary"];
 
@@ -66,11 +68,11 @@ export function showValue(value: unknown): string {
 export function parseValue(raw: string, operator: Operator, type: string | undefined): unknown {
   if (operator === "is_set" || operator === "is_not_set") return null;
   const one = (s: string): unknown => {
-    const t = s.trim();
-    if (t.startsWith("$")) return t;
-    if (type && NUMERIC.includes(type) && t !== "" && !Number.isNaN(Number(t))) return Number(t);
-    if (type === "boolean") return t === "true";
-    return t;
+    const v = s.trim();
+    if (v.startsWith("$")) return v;
+    if (type && NUMERIC.includes(type) && v !== "" && !Number.isNaN(Number(v))) return Number(v);
+    if (type === "boolean") return v === "true";
+    return v;
   };
   return operator === "in" || operator === "not_in"
     ? raw
@@ -144,20 +146,20 @@ export function NlSearch({ apply }: { apply: (domain: unknown) => void }) {
   return (
     <span className="crm-nl-search">
       <button type="button" className="btn ghost small" aria-expanded={open} onClick={() => setOpen((o) => !o)}>
-        ✦ Ask AI
+        ✦ {t("Ask AI")}
       </button>
       {open && (
-        <div className="search-panel crm-nl-panel" role="dialog" aria-label="Search with AI">
+        <div className="search-panel crm-nl-panel" role="dialog" aria-label={t("Search with AI")}>
           <form onSubmit={generate} className="crm-nl-form">
             <input
               className="input"
-              aria-label="Describe what you are looking for"
-              placeholder="e.g. open deals over 10k in EMEA closing this quarter owned by me"
+              aria-label={t("Describe what you are looking for")}
+              placeholder={t("e.g. open deals over 10k in EMEA closing this quarter owned by me")}
               value={query}
               onChange={(e) => setQuery(e.target.value)}
             />
             <button type="submit" className="btn small" disabled={busy || !query.trim()}>
-              {busy ? "Thinking…" : "Generate filter"}
+              {busy ? t("Thinking…") : t("Generate filter")}
             </button>
           </form>
           {error && (
@@ -166,17 +168,19 @@ export function NlSearch({ apply }: { apply: (domain: unknown) => void }) {
             </div>
           )}
           {result && (
-            <div className="crm-nl-review" aria-label="Suggested filter">
+            <div className="crm-nl-review" aria-label={t("Suggested filter")}>
               <p className="muted small">
-                {!edited && <AiLabel text="AI-suggested" />} {result.data.explanation}
+                {!edited && <AiLabel text={t("AI-suggested")} />} {result.data.explanation}
               </p>
-              {result.data.match === "any" && rows.length > 1 && <p className="small">Any of these conditions:</p>}
-              {rows.length === 0 && <p className="muted small">No condition — this would show everything.</p>}
+              {result.data.match === "any" && rows.length > 1 && (
+                <p className="small">{t("Any of these conditions:")}</p>
+              )}
+              {rows.length === 0 && <p className="muted small">{t("No condition — this would show everything.")}</p>}
               {rows.map((row, i) => (
                 <div key={i} className="crm-nl-row">
                   <select
                     className="input small"
-                    aria-label={`Field of condition ${i + 1}`}
+                    aria-label={t("Field of condition {n}", { n: i + 1 })}
                     value={row.field}
                     onChange={(e) => update(i, { field: e.target.value }, drafts[i])}
                   >
@@ -189,11 +193,11 @@ export function NlSearch({ apply }: { apply: (domain: unknown) => void }) {
                   </select>
                   <select
                     className="input small"
-                    aria-label={`Operator of condition ${i + 1}`}
+                    aria-label={t("Operator of condition {n}", { n: i + 1 })}
                     value={row.operator}
                     onChange={(e) => update(i, { operator: e.target.value as Operator })}
                   >
-                    {OPERATORS.map(([op, label]) => (
+                    {operators().map(([op, label]) => (
                       <option key={op} value={op}>
                         {label}
                       </option>
@@ -202,7 +206,7 @@ export function NlSearch({ apply }: { apply: (domain: unknown) => void }) {
                   {row.operator !== "is_set" && row.operator !== "is_not_set" && (
                     <input
                       className="input small"
-                      aria-label={`Value of condition ${i + 1}`}
+                      aria-label={t("Value of condition {n}", { n: i + 1 })}
                       value={drafts[i] ?? ""}
                       onChange={(e) => update(i, {}, e.target.value)}
                     />
@@ -210,7 +214,7 @@ export function NlSearch({ apply }: { apply: (domain: unknown) => void }) {
                   <button
                     type="button"
                     className="btn ghost small"
-                    aria-label={`Remove condition ${i + 1}`}
+                    aria-label={t("Remove condition {n}", { n: i + 1 })}
                     onClick={() => remove(i)}
                   >
                     ×
@@ -219,7 +223,7 @@ export function NlSearch({ apply }: { apply: (domain: unknown) => void }) {
               ))}
               <div className="ai-actions">
                 <button type="button" className="btn primary small" onClick={onApply}>
-                  Apply filter
+                  {t("Apply filter")}
                 </button>
                 <Feedback runId={result.runId} />
               </div>
@@ -245,7 +249,7 @@ export function LeadSuggestions({ resId }: { resId: number }) {
   if (!feature.enabled || !items.length) return <Hidden />;
   return (
     <div className="crm-assist">
-      <p className="muted small">Details read by AI from the e-mail or form that created this lead.</p>
+      <p className="muted small">{t("Details read by AI from the e-mail or form that created this lead.")}</p>
       {items.map((p) => (
         <ProposalCard key={p.id} proposal={p} onDecided={() => void qc.invalidateQueries({ queryKey: ["record"] })} />
       ))}
@@ -333,11 +337,11 @@ export function CallNotes({ resId, reload }: { resId: number; reload: () => void
       setJob(state);
       if (state.state === "done") {
         if (state.run_id) await loadRun(state.run_id);
-        if (state.status && state.status !== "ok") setError(state.message ?? "The summary could not be made.");
+        if (state.status && state.status !== "ok") setError(state.message ?? t("The summary could not be made."));
         return;
       }
       if (state.state === "dead" || state.state === "cancelled") {
-        setError("The summary could not be made. You can try again.");
+        setError(t("The summary could not be made. You can try again."));
         return;
       }
       timer.current = setTimeout(() => void poll(jobId), POLL_MS);
@@ -367,21 +371,21 @@ export function CallNotes({ resId, reload }: { resId: number; reload: () => void
     <div className="crm-assist">
       <form onSubmit={submit}>
         <label className="field">
-          <span>Call or meeting notes</span>
+          <span>{t("Call or meeting notes")}</span>
           <textarea
             rows={5}
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
-            placeholder="Paste the transcript or your notes"
+            placeholder={t("Paste the transcript or your notes")}
           />
         </label>
         <button type="submit" className="btn small" disabled={working || notes.trim().length < 10}>
-          {working ? "Summarising…" : "Summarise"}
+          {working ? t("Summarising…") : t("Summarise")}
         </button>
       </form>
       {working && (
         <p className="muted small" role="status">
-          Working on it in the background — you will be notified when it is ready.
+          {t("Working on it in the background — you will be notified when it is ready.")}
         </p>
       )}
       {error && (
@@ -391,7 +395,9 @@ export function CallNotes({ resId, reload }: { resId: number; reload: () => void
       )}
       {run && out && (
         <div className="crm-call-summary">
-          <h3 className="small">Summary {run.decision === "pending" && <AiLabel />}</h3>
+          <h3 className="small">
+            {t("Summary")} {run.decision === "pending" && <AiLabel />}
+          </h3>
           <p>{out.summary}</p>
           {!!out.key_points?.length && (
             <ul>
@@ -412,24 +418,28 @@ export function CallNotes({ resId, reload }: { resId: number; reload: () => void
             />
           ))}
           <details className="crm-audit">
-            <summary>Audit trail</summary>
-            <dl aria-label="AI run audit">
-              <dt>Run</dt>
+            <summary>{t("Audit trail")}</summary>
+            <dl aria-label={t("AI run audit")}>
+              <dt>{t("Run")}</dt>
               <dd>
                 #{run.id} · {run.create_date?.slice(0, 16).replace("T", " ")} · {run.user}
               </dd>
-              <dt>Prompt</dt>
+              <dt>{t("Prompt")}</dt>
               <dd>{run.prompt_version}</dd>
-              <dt>Model</dt>
+              <dt>{t("Model")}</dt>
               <dd>{[run.provider, run.model].filter(Boolean).join(" · ") || "—"}</dd>
-              <dt>Status</dt>
+              <dt>{t("Status")}</dt>
               <dd>{run.status}</dd>
-              <dt>Decision</dt>
+              <dt>{t("Decision")}</dt>
               <dd>
-                {run.decision} ({decided}/{run.proposals.length} decided)
+                {t("{decision} ({decided}/{total} decided)", {
+                  decision: run.decision,
+                  decided,
+                  total: run.proposals.length,
+                })}
               </dd>
-              <dt>Tool calls</dt>
-              <dd>{run.tool_calls.length ? run.tool_calls.map((c) => c.name).join(", ") : "none"}</dd>
+              <dt>{t("Tool calls")}</dt>
+              <dd>{run.tool_calls.length ? run.tool_calls.map((c) => c.name).join(", ") : t("none")}</dd>
             </dl>
           </details>
         </div>
@@ -451,16 +461,16 @@ function SuggestedResponse({ item, citations }: { item: ObjectionResult["respons
   const cited = citations.filter((c) => item.citations.includes(c.id));
   return (
     <li className="crm-objection">
-      <strong>{item.approach}</strong> {text === item.response && <AiLabel text="AI-suggested" />}
+      <strong>{item.approach}</strong> {text === item.response && <AiLabel text={t("AI-suggested")} />}
       <textarea
-        aria-label={`Response: ${item.approach}`}
+        aria-label={t("Response: {approach}", { approach: item.approach })}
         rows={3}
         value={text}
         onChange={(e) => setText(e.target.value)}
       />
       {cited.length > 0 && (
         <>
-          <span className="muted small">Based on:</span>
+          <span className="muted small">{t("Based on:")}</span>
           <Citations items={cited} />
         </>
       )}
@@ -493,16 +503,16 @@ export function Objections({ resId }: { resId: number }) {
     <div className="crm-assist">
       <form onSubmit={submit}>
         <label className="field">
-          <span>What did the customer object?</span>
+          <span>{t("What did the customer object?")}</span>
           <input
             className="input"
             value={objection}
             onChange={(e) => setObjection(e.target.value)}
-            placeholder="e.g. Your price is above our budget"
+            placeholder={t("e.g. Your price is above our budget")}
           />
         </label>
         <button type="submit" className="btn small" disabled={busy || objection.trim().length < 3}>
-          {busy ? "Looking at past deals…" : "Suggest responses"}
+          {busy ? t("Looking at past deals…") : t("Suggest responses")}
         </button>
       </form>
       {error && (
@@ -511,9 +521,9 @@ export function Objections({ resId }: { resId: number }) {
         </div>
       )}
       {result && (
-        <div aria-label="Suggested responses">
+        <div aria-label={t("Suggested responses")}>
           {result.data.insufficient_evidence && (
-            <p className="muted small">No similar past deal was found — general advice only.</p>
+            <p className="muted small">{t("No similar past deal was found — general advice only.")}</p>
           )}
           <ul className="crm-objections">
             {result.data.responses.map((item, i) => (
@@ -531,9 +541,22 @@ export function Objections({ resId }: { resId: number }) {
 
 registerAiDraft(LEAD, "crm.followup_draft");
 registerSearchAddon(LEAD, { key: "crm.nl_search", render: ({ apply }) => <NlSearch apply={apply} /> });
-registerFormPanel(LEAD, { title: "AI suggestions", render: ({ resId }) => <LeadSuggestions resId={resId} /> });
+// titles are getters so they follow the current language
 registerFormPanel(LEAD, {
-  title: "Summarise call notes",
+  get title() {
+    return t("AI suggestions");
+  },
+  render: ({ resId }) => <LeadSuggestions resId={resId} />,
+});
+registerFormPanel(LEAD, {
+  get title() {
+    return t("Summarise call notes");
+  },
   render: ({ resId, reload }) => <CallNotes resId={resId} reload={reload} />,
 });
-registerFormPanel(LEAD, { title: "Objection handling", render: ({ resId }) => <Objections resId={resId} /> });
+registerFormPanel(LEAD, {
+  get title() {
+    return t("Objection handling");
+  },
+  render: ({ resId }) => <Objections resId={resId} />,
+});

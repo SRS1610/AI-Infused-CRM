@@ -3,6 +3,7 @@ import { useState } from "react";
 import { useParams, useSearchParams } from "react-router-dom";
 import { request } from "../../kernel/api/client";
 import { formatMonetary } from "../../kernel/format";
+import { t, tx } from "../../kernel/i18n";
 
 interface QuoteLine {
   id: number;
@@ -36,12 +37,18 @@ export interface Quote {
   lines: QuoteLine[];
 }
 
-const STATE_LABEL: Record<string, string> = {
-  sent: "Waiting for your answer",
-  accepted: "Accepted",
-  rejected: "Declined",
-  expired: "Expired",
-};
+/** A quotation's state as the customer reads it; unknown states show as sent by the server. */
+export function quoteStateLabel(state: string): string {
+  const labels: Record<string, string> = {
+    draft: t("In preparation"),
+    sent: t("Waiting for your answer"),
+    accepted: t("Accepted"),
+    rejected: t("Declined"),
+    expired: t("Expired"),
+    cancelled: t("Cancelled"),
+  };
+  return labels[state] ?? state;
+}
 
 /** A quotation as the customer sees it: by token link (no login) or as a signed-in portal user. */
 export function QuotePage() {
@@ -61,7 +68,7 @@ export function QuotePage() {
   if (quote.isLoading)
     return (
       <div className="loading" role="status">
-        Loading…
+        {t("Loading…")}
       </div>
     );
   if (quote.isError)
@@ -92,27 +99,27 @@ export function QuotePage() {
       <header className="portal-quote-head">
         <div>
           <p className="muted">{q.company.name}</p>
-          <h1>Quotation {q.name}</h1>
+          <h1>{t("Quotation {name}", { name: q.name })}</h1>
           <p>
-            For <strong>{q.customer}</strong>
-            {q.validity_date && <> · valid until {q.validity_date}</>}
+            {tx("For {customer}", { customer: <strong>{q.customer}</strong> })}
+            {q.validity_date && <> · {t("valid until {date}", { date: q.validity_date })}</>}
           </p>
         </div>
-        <span className={`badge state-${q.state}`}>{STATE_LABEL[q.state] ?? q.state}</span>
+        <span className={`badge state-${q.state}`}>{quoteStateLabel(q.state)}</span>
       </header>
       <div className="table-scroll">
         <table className="pivot-table quote-lines">
           <thead>
             <tr>
-              <th scope="col">Description</th>
+              <th scope="col">{t("Description")}</th>
               <th scope="col" className="num">
-                Quantity
+                {t("Quantity")}
               </th>
               <th scope="col" className="num">
-                Unit price
+                {t("Unit price")}
               </th>
               <th scope="col" className="num">
-                Amount
+                {t("Amount")}
               </th>
             </tr>
           </thead>
@@ -134,7 +141,7 @@ export function QuotePage() {
                 <tr key={line.id} className={line.is_optional ? "optional" : undefined}>
                   <td>
                     {line.name}
-                    {line.is_optional && <span className="badge">Optional</span>}
+                    {line.is_optional && <span className="badge">{t("Optional")}</span>}
                     {line.discount ? <span className="muted"> (−{line.discount} %)</span> : null}
                   </td>
                   <td className="num">
@@ -149,19 +156,19 @@ export function QuotePage() {
           <tfoot>
             <tr>
               <th scope="row" colSpan={3}>
-                Untaxed
+                {t("Untaxed")}
               </th>
               <td className="num">{money(q.amount_untaxed)}</td>
             </tr>
             <tr>
               <th scope="row" colSpan={3}>
-                Taxes
+                {t("Taxes")}
               </th>
               <td className="num">{money(q.amount_tax)}</td>
             </tr>
             <tr>
               <th scope="row" colSpan={3}>
-                Total
+                {t("Total")}
               </th>
               <td className="num total">{money(q.amount_total)}</td>
             </tr>
@@ -171,15 +178,15 @@ export function QuotePage() {
       {q.note && <div className="quote-note" dangerouslySetInnerHTML={{ __html: q.note }} />}
       <div className="button-row">
         <a className="btn" href={pdf} target="_blank" rel="noreferrer">
-          Download PDF
+          {t("Download PDF")}
         </a>
         {q.state === "sent" && (
           <>
             <button type="button" className="btn primary" onClick={() => setMode("accept")}>
-              Accept
+              {t("Accept")}
             </button>
             <button type="button" className="btn ghost" onClick={() => setMode("reject")}>
-              Decline
+              {t("Decline")}
             </button>
           </>
         )}
@@ -193,7 +200,7 @@ export function QuotePage() {
           }}
         >
           <label>
-            Type your full name to accept this quotation
+            {t("Type your full name to accept this quotation")}
             <input
               className="input"
               value={name}
@@ -203,7 +210,7 @@ export function QuotePage() {
             />
           </label>
           <button type="submit" className="btn primary">
-            Accept and sign
+            {t("Accept and sign")}
           </button>
         </form>
       )}
@@ -216,17 +223,17 @@ export function QuotePage() {
           }}
         >
           <label>
-            Tell us why (optional)
+            {t("Tell us why (optional)")}
             <textarea className="input" value={reason} onChange={(e) => setReason(e.target.value)} />
           </label>
           <button type="submit" className="btn">
-            Decline quotation
+            {t("Decline quotation")}
           </button>
         </form>
       )}
       {q.state === "accepted" && q.signed_by && (
         <div className="alert info" role="status">
-          Accepted by {q.signed_by}. Thank you!
+          {t("Accepted by {name}. Thank you!", { name: q.signed_by })}
         </div>
       )}
       {error && (
@@ -235,7 +242,7 @@ export function QuotePage() {
         </div>
       )}
       <p className="muted small">
-        Questions? {q.salesperson && <>Your contact is {q.salesperson}. </>}
+        {t("Questions?")} {q.salesperson && <>{t("Your contact is {name}.", { name: q.salesperson })} </>}
         {q.company.email && <a href={`mailto:${q.company.email}`}>{q.company.email}</a>}
       </p>
     </div>

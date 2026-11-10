@@ -185,13 +185,14 @@ describe("Discuss AI", () => {
         run({ run_id: 79, feature: "discuss.translate", text: "Le lancement est le 3 mars" }),
     });
     renderApp();
-    await userEvent.click((await screen.findAllByRole("button", { name: "Translate message to French" }))[0]);
+    // the session is French, so the UI is too
+    await userEvent.click((await screen.findAllByRole("button", { name: "Traduire le message en français" }))[0]);
     expect(await screen.findByText("Le lancement est le 3 mars")).toBeInTheDocument();
-    expect(screen.getByRole("note", { name: /AI translation \(French\)/ })).toBeInTheDocument();
+    expect(screen.getByRole("note", { name: /Traduction IA \(français\)/ })).toBeInTheDocument();
     const sent = calls.find((c) => c.path === "/api/v1/ai/features/discuss.translate/run")!;
     expect(sent.body).toEqual({ inputs: { message_id: 11, target_lang: "fr" } });
-    await userEvent.selectOptions(screen.getByRole("combobox", { name: /Translate to/ }), "de");
-    expect(screen.getAllByRole("button", { name: "Translate message to German" }).length).toBe(2);
+    await userEvent.selectOptions(screen.getByRole("combobox", { name: /Traduire en/ }), "de");
+    expect(screen.getAllByRole("button", { name: "Traduire le message en allemand" }).length).toBe(2);
   });
 
   it("drafts a reply in the composer and sends it only through the proposal", async () => {

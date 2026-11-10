@@ -3,10 +3,18 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { ai, aiErrorMessage, type Proposal, type RunResult } from "../../kernel/ai/api";
-import { AiLabel, AiUnavailable, Feedback, ProposalCard, useAiFeature } from "../../kernel/ai/components";
+import {
+  AiLabel,
+  AiUnavailable,
+  Feedback,
+  ProposalCard,
+  proposalStateLabel,
+  useAiFeature,
+} from "../../kernel/ai/components";
 import { request } from "../../kernel/api/client";
 import { registerFormPanel, registerSelectionAction } from "../../kernel/extensions";
 import { formatNumber } from "../../kernel/format";
+import { t } from "../../kernel/i18n";
 
 export interface ScoreFactor {
   feature: string;
@@ -107,9 +115,9 @@ export function ScoreBlock({ leadId, score }: { leadId: number; score: NonNullab
   if (score.score === null) {
     return (
       <div className="ai-score empty">
-        <span className="muted small">Not scored yet.</span>{" "}
+        <span className="muted small">{t("Not scored yet.")}</span>{" "}
         <button type="button" className="btn small" disabled={rescore.isPending} onClick={() => rescore.mutate()}>
-          Score now
+          {t("Score now")}
         </button>
       </div>
     );
@@ -118,16 +126,19 @@ export function ScoreBlock({ leadId, score }: { leadId: number; score: NonNullab
   return (
     <div className="ai-score">
       <div className="ai-score-head">
-        <span className="ai-score-value" aria-label={`AI score ${score.score} out of 100`}>
+        <span className="ai-score-value" aria-label={t("AI score {score} out of 100", { score: score.score })}>
           {score.score}
         </span>
         <span className="ai-score-meta">
-          <AiLabel text="AI score" />
-          <span className="small">Win probability {pct(score.probability)}</span>
+          <AiLabel text={t("AI score")} />
+          <span className="small">{t("Win probability {value}", { value: pct(score.probability) })}</span>
           <span className="muted small">
             {score.source === "model" && score.model
-              ? `Model v${score.model.version}, trained on ${score.model.rows ?? "?"} closed deals`
-              : "Rule-based until there is enough history"}
+              ? t("Model v{version}, trained on {rows} closed deals", {
+                  version: score.model.version,
+                  rows: score.model.rows ?? "?",
+                })
+              : t("Rule-based until there is enough history")}
           </span>
         </span>
       </div>
@@ -138,16 +149,16 @@ export function ScoreBlock({ leadId, score }: { leadId: number; score: NonNullab
         aria-controls={`why-${leadId}`}
         onClick={() => setOpen((o) => !o)}
       >
-        Why this score?
+        {t("Why this score?")}
       </button>
       {open && (
-        <div id={`why-${leadId}`} className="ai-why" role="region" aria-label="Why this score">
+        <div id={`why-${leadId}`} className="ai-why" role="region" aria-label={t("Why this score")}>
           <ul className="ai-factors">
             {score.factors.map((f) => (
               <li key={f.feature} className={`factor ${f.direction}`}>
                 <span aria-hidden="true">{f.direction === "positive" ? "▲" : "▼"}</span>{" "}
                 <span className="sr-only">
-                  {f.direction === "positive" ? "Raises the score:" : "Lowers the score:"}
+                  {f.direction === "positive" ? t("Raises the score:") : t("Lowers the score:")}
                 </span>
                 {f.label}
                 <span
@@ -169,12 +180,12 @@ export function ScoreBlock({ leadId, score }: { leadId: number; score: NonNullab
 /** Risk badge with its reasons (only when the deal is flagged). */
 export function RiskBlock({ risk }: { risk: NonNullable<LeadInsights["risk"]> }) {
   if (risk.level !== "medium" && risk.level !== "high") {
-    return risk.checked_at ? <p className="muted small">No deal risk signals.</p> : null;
+    return risk.checked_at ? <p className="muted small">{t("No deal risk signals.")}</p> : null;
   }
   return (
     <div className={`ai-risk level-${risk.level}`} role="status">
-      <span className={`badge risk-${risk.level}`}>{risk.level === "high" ? "High risk" : "At risk"}</span>{" "}
-      <AiLabel text="AI alert" />
+      <span className={`badge risk-${risk.level}`}>{risk.level === "high" ? t("High risk") : t("At risk")}</span>{" "}
+      <AiLabel text={t("AI alert")} />
       <ul className="ai-risk-reasons">
         {risk.reasons.map((r) => (
           <li key={r.code}>{r.label}</li>
@@ -208,12 +219,12 @@ export function NextBestAction({ leadId }: { leadId: number }) {
   return (
     <div className="ai-nba">
       <button type="button" className="btn small" disabled={busy} onClick={run}>
-        {busy ? "Thinking…" : result ? "Suggest again" : "Suggest next actions"}
+        {busy ? t("Thinking…") : result ? t("Suggest again") : t("Suggest next actions")}
       </button>
       {error && <div className="alert error">{error}</div>}
       {result && (
         <div className="ai-nba-result">
-          <AiLabel text="AI suggestions" />
+          <AiLabel text={t("AI suggestions")} />
           <ol className="ai-nba-actions">
             {actions.map((a, i) => (
               <li key={i}>
@@ -251,20 +262,20 @@ export function RoutingSuggestion({ leadId, onDecided }: { leadId: number; onDec
     <div className="ai-routing">
       {!out && (
         <button type="button" className="btn small" onClick={run}>
-          Suggest salesperson
+          {t("Suggest salesperson")}
         </button>
       )}
       {error && <div className="alert error">{error}</div>}
       {row && (
         <div>
-          <AiLabel text="AI suggestion" />{" "}
+          <AiLabel text={t("AI suggestion")} />{" "}
           {row.user ? (
             <span>
               <strong>{row.user}</strong>
               {row.team ? ` (${row.team})` : ""}
             </span>
           ) : (
-            <span className="muted">No eligible salesperson found.</span>
+            <span className="muted">{t("No eligible salesperson found.")}</span>
           )}
           <ul className="small">
             {row.reasons.map((r) => (
@@ -272,7 +283,9 @@ export function RoutingSuggestion({ leadId, onDecided }: { leadId: number; onDec
             ))}
           </ul>
           {row.proposal && <ProposalCard proposal={row.proposal} onDecided={() => onDecided?.()} />}
-          {row.status === "applied" && <p className="small">Assigned automatically (allowed by an assignment rule).</p>}
+          {row.status === "applied" && (
+            <p className="small">{t("Assigned automatically (allowed by an assignment rule).")}</p>
+          )}
           <Feedback runId={out!.run_id} />
         </div>
       )}
@@ -310,20 +323,33 @@ export function LeadInsightsPanel({
       {insights.data?.risk && <RiskBlock risk={insights.data.risk} />}
       {insights.data?.score && <ScoreBlock leadId={resId} score={insights.data.score} />}
       {nba.enabled && (
-        <section aria-label="Next best action">
-          <h3 className="small">Next best action</h3>
+        <section aria-label={t("Next best action")}>
+          <h3 className="small">{t("Next best action")}</h3>
           <NextBestAction leadId={resId} />
         </section>
       )}
       {routing.enabled && unassigned && (
-        <section aria-label="Routing">
-          <h3 className="small">Routing</h3>
+        <section aria-label={t("Routing")}>
+          <h3 className="small">{t("Routing")}</h3>
           <RoutingSuggestion leadId={resId} onDecided={reload} />
         </section>
       )}
     </div>
   );
 }
+
+function routingStatusLabel(status: RoutingRow["status"]): string {
+  const labels: Record<RoutingRow["status"], string> = {
+    proposed: t("proposed"),
+    applied: t("applied"),
+    already_assigned: t("already assigned"),
+    no_candidate: t("no candidate"),
+  };
+  return labels[status] ?? status;
+}
+
+/** A proposal state after a decision, or the error message when the decision failed. */
+const decidedLabel = (value: string) => proposalStateLabel(value as Proposal["state"]);
 
 /** Bulk routing: one proposal per selected lead, accepted or rejected row by row. */
 export function RoutingReview({ ids, onDone }: { ids: number[]; onDone: () => void }) {
@@ -337,7 +363,7 @@ export function RoutingReview({ ids, onDone }: { ids: number[]; onDone: () => vo
     staleTime: Infinity,
   });
   const [decided, setDecided] = useState<Record<number, string>>({});
-  if (!feature.enabled) return <p className="muted">AI routing is turned off.</p>;
+  if (!feature.enabled) return <p className="muted">{t("AI routing is turned off.")}</p>;
   const decide = async (p: Proposal, accept: boolean) => {
     try {
       const out = accept ? await ai.accept(p.id) : await ai.reject(p.id);
@@ -350,18 +376,18 @@ export function RoutingReview({ ids, onDone }: { ids: number[]; onDone: () => vo
   const pending = (result.data?.rows ?? []).filter((r) => r.proposal && !decided[r.proposal.id]);
   return (
     <div className="ai-routing-review">
-      <AiLabel text="AI suggestions" />
-      {result.isLoading && <p className="muted">Finding the best salesperson for each lead…</p>}
+      <AiLabel text={t("AI suggestions")} />
+      {result.isLoading && <p className="muted">{t("Finding the best salesperson for each lead…")}</p>}
       {result.error && <div className="alert error">{aiErrorMessage(result.error)}</div>}
       {result.data && (
         <table className="data-table">
-          <caption className="sr-only">Suggested assignees</caption>
+          <caption className="sr-only">{t("Suggested assignees")}</caption>
           <thead>
             <tr>
-              <th scope="col">Lead</th>
-              <th scope="col">Suggested</th>
-              <th scope="col">Why</th>
-              <th scope="col">Decision</th>
+              <th scope="col">{t("Lead")}</th>
+              <th scope="col">{t("Suggested")}</th>
+              <th scope="col">{t("Why")}</th>
+              <th scope="col">{t("Decision")}</th>
             </tr>
           </thead>
           <tbody>
@@ -376,22 +402,24 @@ export function RoutingReview({ ids, onDone }: { ids: number[]; onDone: () => vo
                       <button
                         type="button"
                         className="btn primary small"
-                        aria-label={`Accept ${r.user} for ${r.lead}`}
+                        aria-label={t("Accept {user} for {lead}", { user: r.user, lead: r.lead })}
                         onClick={() => decide(r.proposal!, true)}
                       >
-                        Accept
+                        {t("Accept")}
                       </button>
                       <button
                         type="button"
                         className="btn small"
-                        aria-label={`Reject suggestion for ${r.lead}`}
+                        aria-label={t("Reject suggestion for {lead}", { lead: r.lead })}
                         onClick={() => decide(r.proposal!, false)}
                       >
-                        Reject
+                        {t("Reject")}
                       </button>
                     </span>
                   ) : (
-                    <span className="badge">{r.proposal ? decided[r.proposal.id] : r.status.replace("_", " ")}</span>
+                    <span className="badge">
+                      {r.proposal ? decidedLabel(decided[r.proposal.id]) : routingStatusLabel(r.status)}
+                    </span>
                   )}
                 </td>
               </tr>
@@ -408,11 +436,11 @@ export function RoutingReview({ ids, onDone }: { ids: number[]; onDone: () => vo
               for (const r of pending) await decide(r.proposal!, true);
             }}
           >
-            Accept all remaining ({pending.length})
+            {t("Accept all remaining ({count})", { count: pending.length })}
           </button>
         )}
         <button type="button" className="btn ghost small" onClick={onDone}>
-          Close
+          {t("Close")}
         </button>
         {result.data && <Feedback runId={result.data.run_id} />}
       </div>
@@ -435,7 +463,7 @@ export function AiForecastSection() {
   const refresh = async () => {
     try {
       await insightsApi.requestForecast();
-      setQueued("Forecast requested — you will get a notification when it is ready.");
+      setQueued(t("Forecast requested — you will get a notification when it is ready."));
       void qc.invalidateQueries({ queryKey: ["crm-ai", "forecast"] });
     } catch (e) {
       setQueued(aiErrorMessage(e));
@@ -445,22 +473,22 @@ export function AiForecastSection() {
   return (
     <section aria-labelledby="ai-forecast-h" className="ai-forecast">
       <h2 id="ai-forecast-h">
-        Forecast with confidence range <AiLabel text="AI forecast" />
+        {t("Forecast with confidence range")} <AiLabel text={t("AI forecast")} />
       </h2>
       {fc ? (
         <>
           <table className="pivot-table">
             <thead>
               <tr>
-                <th scope="col">Month</th>
+                <th scope="col">{t("Month")}</th>
                 <th scope="col" className="num">
-                  Low (P10)
+                  {t("Low (P10)")}
                 </th>
                 <th scope="col" className="num">
-                  Likely (P50)
+                  {t("Likely (P50)")}
                 </th>
                 <th scope="col" className="num">
-                  High (P90)
+                  {t("High (P90)")}
                 </th>
               </tr>
             </thead>
@@ -490,11 +518,11 @@ export function AiForecastSection() {
           {fc.run_id && <Feedback runId={fc.run_id} />}
         </>
       ) : (
-        !data.isLoading && <p className="muted">No forecast computed yet.</p>
+        !data.isLoading && <p className="muted">{t("No forecast computed yet.")}</p>
       )}
       <div className="ai-actions">
         <button type="button" className="btn small" onClick={refresh}>
-          {fc ? "Refresh forecast" : "Compute forecast"}
+          {fc ? t("Refresh forecast") : t("Compute forecast")}
         </button>
         {queued && (
           <span className="small" role="status">
@@ -507,11 +535,15 @@ export function AiForecastSection() {
 }
 
 registerFormPanel("crm.lead", {
-  title: "AI insights",
+  get title() {
+    return t("AI insights");
+  },
   render: ({ resId, record, reload }) => <LeadInsightsPanel resId={resId} record={record} reload={reload} />,
 });
 
 registerSelectionAction("crm.lead", {
-  label: "Suggest salespeople (AI)",
+  get label() {
+    return t("Suggest salespeople (AI)");
+  },
   render: ({ ids, onDone }) => <RoutingReview ids={ids} onDone={onDone} />,
 });

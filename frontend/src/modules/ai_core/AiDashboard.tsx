@@ -61,7 +61,7 @@ function UsageTable({ rows }: { rows: UsageRow[] }) {
             {t("Latency p95")}
           </th>
           <th scope="col" className="num">
-            {t("Accepted")}
+            {t("Acceptance rate")}
           </th>
           <th scope="col" className="num">
             {t("Fallback")}

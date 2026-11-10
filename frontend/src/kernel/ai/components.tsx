@@ -84,7 +84,7 @@ export function Citations({ items }: { items: Citation[] }) {
   );
 }
 
-function proposalStateLabel(state: Proposal["state"]): string {
+export function proposalStateLabel(state: Proposal["state"]): string {
   const labels: Record<Proposal["state"], string> = {
     pending: t("pending"),
     accepted: t("accepted"),

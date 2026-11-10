@@ -3,8 +3,9 @@ import { useState } from "react";
 import { Link, Navigate, Route, Routes, useNavigate, useSearchParams } from "react-router-dom";
 import { request } from "../../kernel/api/client";
 import { formatMonetary } from "../../kernel/format";
+import { t, tx } from "../../kernel/i18n";
 import { useSession } from "../../kernel/session";
-import { QuotePage } from "./QuotePage";
+import { QuotePage, quoteStateLabel } from "./QuotePage";
 
 interface Doc {
   id: number;
@@ -22,25 +23,25 @@ export function PortalApp() {
   return (
     <div className="portal-shell">
       <a href="#main" className="skip-link">
-        Skip to content
+        {t("Skip to content")}
       </a>
       <header className="topbar">
         <Link to="/portal" className="brand">
           <img src="/icon.svg" alt="" width={24} height={24} />{" "}
-          <span>{session?.company?.name ?? "Customer portal"}</span>
+          <span>{session?.company?.name ?? t("Customer portal")}</span>
         </Link>
-        <nav className="apps" aria-label="Portal">
+        <nav className="apps" aria-label={t("Portal")}>
           <Link className="btn ghost small" to="/portal">
-            My documents
+            {t("My documents")}
           </Link>
           <Link className="btn ghost small" to="/portal/profile">
-            My details
+            {t("My details")}
           </Link>
         </nav>
         <div className="spacer" />
         <span className="muted small">{session?.user.name}</span>
         <button type="button" className="btn ghost small" onClick={() => void logout()}>
-          Sign out
+          {t("Sign out")}
         </button>
       </header>
       <main id="main" className="content" tabIndex={-1}>
@@ -63,21 +64,21 @@ function Documents() {
   });
   return (
     <div className="portal-page">
-      <h1>My documents</h1>
-      <h2>Quotations</h2>
-      {docs.isLoading && <p className="muted">Loading…</p>}
-      {docs.data && docs.data.quotations.length === 0 && <p className="muted">No quotations yet.</p>}
+      <h1>{t("My documents")}</h1>
+      <h2>{t("Quotations")}</h2>
+      {docs.isLoading && <p className="muted">{t("Loading…")}</p>}
+      {docs.data && docs.data.quotations.length === 0 && <p className="muted">{t("No quotations yet.")}</p>}
       {docs.data && docs.data.quotations.length > 0 && (
         <table className="pivot-table">
           <thead>
             <tr>
-              <th scope="col">Number</th>
-              <th scope="col">Date</th>
-              <th scope="col">Valid until</th>
+              <th scope="col">{t("Number")}</th>
+              <th scope="col">{t("Date")}</th>
+              <th scope="col">{t("Valid until")}</th>
               <th scope="col" className="num">
-                Total
+                {t("Total")}
               </th>
-              <th scope="col">Status</th>
+              <th scope="col">{t("Status")}</th>
             </tr>
           </thead>
           <tbody>
@@ -90,7 +91,7 @@ function Documents() {
                 <td>{d.validity_date}</td>
                 <td className="num">{formatMonetary(d.amount_total, d.currency)}</td>
                 <td>
-                  <span className={`badge state-${d.state}`}>{d.state}</span>
+                  <span className={`badge state-${d.state}`}>{quoteStateLabel(d.state)}</span>
                 </td>
               </tr>
             ))}
@@ -101,25 +102,27 @@ function Documents() {
   );
 }
 
-const PROFILE = [
-  ["phone", "Phone"],
-  ["mobile", "Mobile"],
-  ["function", "Job position"],
-  ["street", "Street"],
-  ["street2", "Street (2)"],
-  ["zip", "Postcode"],
-  ["city", "City"],
-] as const;
+/** Editable contact details: the API field and its label in the current language. */
+const profileFields = () =>
+  [
+    ["phone", t("Phone")],
+    ["mobile", t("Mobile")],
+    ["function", t("Job position")],
+    ["street", t("Street")],
+    ["street2", t("Street (2)")],
+    ["zip", t("Postcode")],
+    ["city", t("City")],
+  ] as const;
 
 function Profile() {
   const queryClient = useQueryClient();
   const me = useQuery({ queryKey: ["portal-me"], queryFn: () => request<Record<string, any>>("GET", "/portal/me") });
   const [draft, setDraft] = useState<Record<string, string>>({});
   const [saved, setSaved] = useState(false);
-  if (!me.data) return <p className="muted">Loading…</p>;
+  if (!me.data) return <p className="muted">{t("Loading…")}</p>;
   return (
     <div className="portal-page">
-      <h1>My details</h1>
+      <h1>{t("My details")}</h1>
       <p>
         <strong>{me.data.name}</strong>
         {me.data.company && <> · {me.data.company}</>} · {me.data.email}
@@ -134,7 +137,7 @@ function Profile() {
           setSaved(true);
         }}
       >
-        {PROFILE.map(([key, label]) => (
+        {profileFields().map(([key, label]) => (
           <label key={key}>
             {label}
             <input
@@ -148,11 +151,11 @@ function Profile() {
           </label>
         ))}
         <button type="submit" className="btn primary" disabled={!Object.keys(draft).length}>
-          Save
+          {t("Save")}
         </button>
         {saved && (
           <span role="status" className="muted">
-            Saved.
+            {t("Saved.")}
           </span>
         )}
       </form>
@@ -174,7 +177,7 @@ export function InvitePage() {
         onSubmit={async (e) => {
           e.preventDefault();
           if (password !== confirm) {
-            setError("The passwords do not match");
+            setError(t("The passwords do not match"));
             return;
           }
           try {
@@ -187,15 +190,17 @@ export function InvitePage() {
           }
         }}
       >
-        <h1>Welcome</h1>
+        <h1>{t("Welcome")}</h1>
         {done ? (
           <p role="status">
-            Your account is ready. <a href="/">Sign in as {done}</a>.
+            {tx("Your account is ready. {link}.", {
+              link: <a href="/">{t("Sign in as {login}", { login: done })}</a>,
+            })}
           </p>
         ) : (
           <>
             <label>
-              Choose a password
+              {t("Choose a password")}
               <input
                 className="input"
                 type="password"
@@ -207,7 +212,7 @@ export function InvitePage() {
               />
             </label>
             <label>
-              Repeat it
+              {t("Repeat it")}
               <input
                 className="input"
                 type="password"
@@ -218,7 +223,7 @@ export function InvitePage() {
               />
             </label>
             <button type="submit" className="btn primary">
-              Activate my account
+              {t("Activate my account")}
             </button>
           </>
         )}

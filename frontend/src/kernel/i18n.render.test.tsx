@@ -1,9 +1,12 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { MemoryRouter } from "react-router-dom";
 import { App } from "../App";
+import "../modules/crm/CrmReports";
 import { mockFetch } from "../test/mockApi";
 import type { ViewsResponse } from "./api/types";
+import { clientAction, formPanelsFor, selectionActionsFor } from "./extensions";
 import { setLanguage } from "./i18n";
 import { ListView } from "./views/ListView";
 
@@ -95,5 +98,39 @@ describe("French UI", () => {
     expect(screen.getByRole("toolbar", { name: "Actions groupées" })).toHaveTextContent("2 sélectionné(s)");
     for (const name of ["Exporter en CSV", "Archiver", "Désarchiver", "Supprimer"])
       expect(screen.getByRole("button", { name })).toBeInTheDocument();
+  });
+
+  it("renders a module screen (CRM sales analysis) and module labels in French", async () => {
+    setLanguage("fr_FR");
+    mockFetch({
+      "GET /api/v1/crm/reports/forecast": () => [{ month: null, count: 1, pipeline: 500, weighted: 250 }],
+      "GET /api/v1/crm/reports/funnel": () => [{ stage: "New", count: 2, revenue: 100, reached: 5, conversion: 100 }],
+      "GET /api/v1/crm/reports/win-rate": () => [
+        { label: "Admin", won: 2, lost: 1, win_rate: 66.67, won_revenue: 900 },
+      ],
+      "GET /api/v1/crm/reports/velocity": () => ({
+        open_opportunities: 7,
+        average_deal: 450,
+        win_rate: 66.67,
+        average_cycle_days: 30,
+        velocity_per_day: 70,
+      }),
+    });
+    render(
+      <QueryClientProvider client={client()}>
+        <MemoryRouter>{clientAction("crm.reports")!()}</MemoryRouter>
+      </QueryClientProvider>,
+    );
+    expect(await screen.findByRole("heading", { name: "Analyse des ventes" })).toBeInTheDocument();
+    expect(await screen.findByText("Opportunités ouvertes")).toBeInTheDocument();
+    expect(screen.getByRole("columnheader", { name: "Étape" })).toBeInTheDocument();
+    expect(await screen.findByRole("rowheader", { name: "Sans date" })).toBeInTheDocument();
+    const groupBy = screen.getByRole("combobox", { name: "Regrouper le taux de réussite par" });
+    expect(within(groupBy).getByRole("option", { name: "équipe" })).toBeInTheDocument();
+    // labels registered by modules at import time follow the language when they are read
+    expect(formPanelsFor("crm.lead").map((p) => p.title)).toContain("Analyses IA");
+    expect(selectionActionsFor("crm.lead").map((a) => a.label)).toContain("Suggérer des commerciaux (IA)");
+    setLanguage("en_US");
+    expect(formPanelsFor("crm.lead").map((p) => p.title)).toContain("AI insights");
   });
 });

@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { request } from "../../kernel/api/client";
 import { registerSelectionAction } from "../../kernel/extensions";
+import { t, tn } from "../../kernel/i18n";
 
 interface Preview {
   records: Record<string, any>[];
@@ -50,11 +51,11 @@ export function MergeDialog({ ids, onDone }: { ids: number[]; onDone: () => void
         className="dialog"
         role="dialog"
         aria-modal="true"
-        aria-label="Merge contacts"
+        aria-label={t("Merge contacts")}
         onMouseDown={(e) => e.stopPropagation()}
       >
-        <h2>Merge {ids.length} contacts</h2>
-        {preview.isLoading && <p className="muted">Loading…</p>}
+        <h2>{tn("Merge {count} contact", "Merge {count} contacts", ids.length)}</h2>
+        {preview.isLoading && <p className="muted">{t("Loading…")}</p>}
         {preview.isError && (
           <div className="alert error" role="alert">
             {(preview.error as Error).message}
@@ -63,14 +64,15 @@ export function MergeDialog({ ids, onDone }: { ids: number[]; onDone: () => void
         {preview.data && !result && (
           <>
             <p className="muted">
-              The kept contact receives every reference (quotes, leads, messages, activities, attachments) of the
-              others, which are archived. You can undo the merge for 7 days.
+              {t(
+                "The kept contact receives every reference (quotes, leads, messages, activities, attachments) of the others, which are archived. You can undo the merge for 7 days.",
+              )}
             </p>
             <div className="table-scroll">
               <table className="import-mapping">
                 <thead>
                   <tr>
-                    <th scope="col">Field</th>
+                    <th scope="col">{t("Field")}</th>
                     {preview.data.records.map((r) => (
                       <th key={r.id} scope="col">
                         <label>
@@ -79,9 +81,9 @@ export function MergeDialog({ ids, onDone }: { ids: number[]; onDone: () => void
                             name="survivor"
                             checked={keep === r.id}
                             onChange={() => setSurvivor(r.id)}
-                            aria-label={`Keep ${r.display_name}`}
+                            aria-label={t("Keep {name}", { name: r.display_name })}
                           />{" "}
-                          Keep #{r.id}
+                          {t("Keep #{id}", { id: r.id })}
                         </label>
                       </th>
                     ))}
@@ -102,7 +104,7 @@ export function MergeDialog({ ids, onDone }: { ids: number[]; onDone: () => void
                                   name={`choice-${f}`}
                                   checked={(choices[f] ?? keep) === r.id}
                                   onChange={() => setChoices((c) => ({ ...c, [f]: r.id }))}
-                                  aria-label={`Use ${f} from #${r.id}`}
+                                  aria-label={t("Use {field} from #{id}", { field: f, id: r.id })}
                                 />{" "}
                                 {label(r[f])}
                               </label>
@@ -119,22 +121,22 @@ export function MergeDialog({ ids, onDone }: { ids: number[]; onDone: () => void
             </div>
             <div className="button-row">
               <button type="button" className="btn primary" onClick={() => void merge()} disabled={!keep}>
-                Merge
+                {t("Merge")}
               </button>
               <button type="button" className="btn ghost" onClick={onDone}>
-                Cancel
+                {t("Cancel")}
               </button>
             </div>
           </>
         )}
         {result && (
           <div className="alert info" role="status">
-            Contacts merged.{" "}
+            {t("Contacts merged.")}{" "}
             <button type="button" className="btn small" onClick={() => void undo()}>
-              Undo
+              {t("Undo")}
             </button>{" "}
             <button type="button" className="btn small primary" onClick={onDone}>
-              Close
+              {t("Close")}
             </button>
           </div>
         )}
@@ -149,7 +151,9 @@ export function MergeDialog({ ids, onDone }: { ids: number[]; onDone: () => void
 }
 
 registerSelectionAction("contacts.partner", {
-  label: "Merge",
+  get label() {
+    return t("Merge");
+  },
   min: 2,
   render: ({ ids, onDone }) => <MergeDialog ids={ids} onDone={onDone} />,
 });

@@ -8,6 +8,7 @@ import { request } from "../../kernel/api/client";
 import { ai, aiErrorMessage, type Proposal } from "../../kernel/ai/api";
 import { AiLabel, AiUnavailable, Feedback, ProposalCard, useAiFeature } from "../../kernel/ai/components";
 import { registerFormPanel } from "../../kernel/extensions";
+import { t, tx } from "../../kernel/i18n";
 
 const PARTNER = "contacts.partner";
 
@@ -46,10 +47,10 @@ export function PossibleDuplicates({ resId, reload }: { resId: number; reload: (
     retry: false,
   });
   if (!feature.enabled) return <Hidden />;
-  if (found.isLoading) return <p className="muted small">Looking for duplicates…</p>;
+  if (found.isLoading) return <p className="muted small">{t("Looking for duplicates…")}</p>;
   if (found.isError) return <ErrorNote message={aiErrorMessage(found.error)} />;
   const candidates = found.data?.candidates ?? [];
-  if (!candidates.length) return <p className="muted small">No likely duplicates.</p>;
+  if (!candidates.length) return <p className="muted small">{t("No likely duplicates.")}</p>;
 
   const toggle = (id: number) => setPicked((p) => (p.includes(id) ? p.filter((x) => x !== id) : [...p, id]));
   const propose = async () => {
@@ -65,7 +66,7 @@ export function PossibleDuplicates({ resId, reload }: { resId: number; reload: (
 
   return (
     <div className="contacts-ai">
-      <ul className="contacts-ai-list" aria-label="Possible duplicates">
+      <ul className="contacts-ai-list" aria-label={t("Possible duplicates")}>
         {candidates.map((c) => (
           <li key={c.id}>
             <label>
@@ -73,22 +74,22 @@ export function PossibleDuplicates({ resId, reload }: { resId: number; reload: (
                 type="checkbox"
                 checked={picked.includes(c.id)}
                 onChange={() => toggle(c.id)}
-                aria-label={`Select ${c.display_name}`}
+                aria-label={t("Select {name}", { name: c.display_name })}
                 disabled={!!proposal}
               />{" "}
               <Link to={`/m/${PARTNER}/${c.id}`}>{c.display_name}</Link>{" "}
               <span className={c.duplicate ? "badge" : "badge muted"}>
-                {c.duplicate ? "likely" : "possible"} · {Math.round(c.score * 100)}%
+                {c.duplicate ? t("likely") : t("possible")} · {Math.round(c.score * 100)}%
               </span>
             </label>
-            <div className="muted small">{c.reasons.join(" · ") || "Weak match"}</div>
+            <div className="muted small">{c.reasons.join(" · ") || t("Weak match")}</div>
           </li>
         ))}
       </ul>
       {found.data?.embedding === "unavailable" && <AiUnavailable />}
       {!proposal && (
         <button type="button" className="btn small" disabled={!picked.length} onClick={() => void propose()}>
-          Propose merge
+          {t("Propose merge")}
         </button>
       )}
       {proposal && (
@@ -138,25 +139,25 @@ export function SuggestedTags({ resId, reload }: { resId: number; reload: () => 
   return (
     <div className="contacts-ai">
       <button type="button" className="btn small" disabled={busy} onClick={() => void suggest()}>
-        {busy ? "Thinking…" : result ? "Suggest again" : "Suggest tags"}
+        {busy ? t("Thinking…") : result ? t("Suggest again") : t("Suggest tags")}
       </button>
       {result && (
         <>
-          {!decided && <AiLabel text="AI suggestion" />}
+          {!decided && <AiLabel text={t("AI suggestion")} />}
           {result.data.suggested.length === 0 && !result.data.parent && (
-            <p className="muted small">No tag fits better than the ones already set.</p>
+            <p className="muted small">{t("No tag fits better than the ones already set.")}</p>
           )}
-          <ul className="contacts-ai-list" aria-label="Suggested tags">
-            {result.data.suggested.map((t) => (
-              <li key={t.tag_id}>
-                <strong>{t.name}</strong> <span className="muted small">{Math.round(t.confidence * 100)}%</span>
-                <div className="muted small">{t.reason}</div>
+          <ul className="contacts-ai-list" aria-label={t("Suggested tags")}>
+            {result.data.suggested.map((tag) => (
+              <li key={tag.tag_id}>
+                <strong>{tag.name}</strong> <span className="muted small">{Math.round(tag.confidence * 100)}%</span>
+                <div className="muted small">{tag.reason}</div>
               </li>
             ))}
           </ul>
           {result.data.parent && (
             <p className="small">
-              Works for <strong>{result.data.parent.display_name}</strong>{" "}
+              {tx("Works for {company}", { company: <strong>{result.data.parent.display_name}</strong> })}{" "}
               <span className="muted">({result.data.parent.reason})</span>
             </p>
           )}
@@ -200,12 +201,12 @@ function EnrichmentProposal({ proposal, reload }: { proposal: Proposal; reload: 
   return (
     <div className="contacts-ai-enrich">
       {suggestions.length > 0 && (
-        <table className="ai-diff" aria-label="Suggested values and their sources">
+        <table className="ai-diff" aria-label={t("Suggested values and their sources")}>
           <thead>
             <tr>
-              <th scope="col">Field</th>
-              <th scope="col">Suggested</th>
-              <th scope="col">Source</th>
+              <th scope="col">{t("Field")}</th>
+              <th scope="col">{t("Suggested")}</th>
+              <th scope="col">{t("Source")}</th>
             </tr>
           </thead>
           <tbody>
@@ -269,14 +270,16 @@ export function EnrichmentSuggestions({ resId, reload }: { resId: number; reload
       ))}
       {queued ? (
         <p className="muted small" role="status">
-          Looking this contact up in the approved sources. You will get a notification when suggestions are ready.{" "}
+          {t(
+            "Looking this contact up in the approved sources. You will get a notification when suggestions are ready.",
+          )}{" "}
           <button type="button" className="btn ghost small" onClick={() => void pending.refetch()}>
-            Check now
+            {t("Check now")}
           </button>
         </p>
       ) : (
         <button type="button" className="btn small" onClick={() => void start()}>
-          Find missing details
+          {t("Find missing details")}
         </button>
       )}
       <ErrorNote message={error} />
@@ -285,14 +288,20 @@ export function EnrichmentSuggestions({ resId, reload }: { resId: number; reload
 }
 
 registerFormPanel(PARTNER, {
-  title: "Possible duplicates",
+  get title() {
+    return t("Possible duplicates");
+  },
   render: ({ resId, reload }) => <PossibleDuplicates resId={resId} reload={reload} />,
 });
 registerFormPanel(PARTNER, {
-  title: "Suggested tags",
+  get title() {
+    return t("Suggested tags");
+  },
   render: ({ resId, reload }) => <SuggestedTags resId={resId} reload={reload} />,
 });
 registerFormPanel(PARTNER, {
-  title: "Enrichment suggestions",
+  get title() {
+    return t("Enrichment suggestions");
+  },
   render: ({ resId, reload }) => <EnrichmentSuggestions resId={resId} reload={reload} />,
 });

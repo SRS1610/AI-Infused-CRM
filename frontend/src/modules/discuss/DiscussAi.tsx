@@ -6,6 +6,7 @@ import { request } from "../../kernel/api/client";
 import { ai, aiErrorMessage, type Citation, type RunResult } from "../../kernel/ai/api";
 import { AiLabel, AiUnavailable, Feedback, useAiFeature } from "../../kernel/ai/components";
 import { registerAiDraft } from "../../kernel/extensions";
+import { t, tn, tx } from "../../kernel/i18n";
 
 export const SUMMARY = "discuss.summary";
 export const CATCH_UP = "discuss.catch_up";
@@ -17,15 +18,26 @@ registerAiDraft("discuss.channel", REPLY_DRAFT);
 
 export type AiLinks = Record<string, { channel_id: number; author?: string; date?: string }>;
 
-export const LANGUAGES: { code: string; label: string }[] = [
-  { code: "en", label: "English" },
-  { code: "fr", label: "French" },
-  { code: "de", label: "German" },
-  { code: "es", label: "Spanish" },
-  { code: "it", label: "Italian" },
-  { code: "nl", label: "Dutch" },
-  { code: "pt", label: "Portuguese" },
+/** Translation targets; the codes are sent to the API, the labels follow the UI language. */
+export const languages = (): { code: string; label: string }[] => [
+  { code: "en", label: t("English") },
+  { code: "fr", label: t("French") },
+  { code: "de", label: t("German") },
+  { code: "es", label: t("Spanish") },
+  { code: "it", label: t("Italian") },
+  { code: "nl", label: t("Dutch") },
+  { code: "pt", label: t("Portuguese") },
 ];
+
+const languageLabel = (code: string) => languages().find((l) => l.code === code)?.label ?? code;
+
+/** Accessible name of a citation link: who wrote the message and when, when known. */
+function openMessageLabel(author?: string, date?: string): string {
+  if (author && date) return t("Open message from {author} at {date}", { author, date });
+  if (author) return t("Open message from {author}", { author });
+  if (date) return t("Open message at {date}", { date });
+  return t("Open message");
+}
 
 const MARKER = /\s*\[source:([a-z][a-z0-9_]*\.[a-z0-9_.]+):(\d+)\]/g;
 
@@ -57,14 +69,13 @@ export function AiText({
               .filter((r) => r.model === "chatter.message" && links[String(r.id)])
               .map((r) => {
                 const link = links[String(r.id)];
-                const who = link.author ? ` from ${link.author}` : "";
                 return (
                   <button
                     key={r.id}
                     type="button"
                     className="btn ghost small discuss-cite"
-                    aria-label={`Open message${who}${link.date ? ` at ${link.date}` : ""}`}
-                    title={`Open message${who}`}
+                    aria-label={openMessageLabel(link.author, link.date)}
+                    title={openMessageLabel(link.author)}
                     onClick={() => onJump(link.channel_id, r.id)}
                   >
                     ↗
@@ -130,7 +141,7 @@ export function SummaryButton({ busy, onClick }: { busy: boolean; onClick: () =>
   if (!feature.available) return <AiUnavailable />;
   return (
     <button type="button" className="btn small ghost" disabled={busy} onClick={onClick}>
-      {busy ? "Summarising…" : "✦ Summarize"}
+      {busy ? t("Summarising…") : `✦ ${t("Summarize")}`}
     </button>
   );
 }
@@ -145,22 +156,25 @@ export function SummaryPanel({
   onJump: (channelId: number, messageId: number) => void;
 }) {
   return (
-    <section className="discuss-ai-panel" aria-label="AI summary">
+    <section className="discuss-ai-panel" aria-label={t("AI summary")}>
       <header>
-        <strong>Summary</strong>
-        {state.kind === "result" && <AiLabel text="AI-generated" />}
+        <strong>{t("Summary")}</strong>
+        {state.kind === "result" && <AiLabel text={t("AI-generated")} />}
         <span className="spacer" />
         <button type="button" className="btn small ghost" onClick={onClose}>
-          Close
+          {t("Close")}
         </button>
       </header>
       {state.kind === "queued" && (
         <p className="muted" role="status">
-          {state.count} messages: the summary is being prepared in the background. You will get a notification with a
-          link when it is ready.
+          {tn(
+            "{count} message: the summary is being prepared in the background. You will get a notification with a link when it is ready.",
+            "{count} messages: the summary is being prepared in the background. You will get a notification with a link when it is ready.",
+            state.count,
+          )}
         </p>
       )}
-      {state.kind === "empty" && <p className="muted">There are no messages to summarise.</p>}
+      {state.kind === "empty" && <p className="muted">{t("There are no messages to summarise.")}</p>}
       {state.kind === "error" && (
         <div className="alert error" role="alert">
           {state.message}
@@ -170,7 +184,7 @@ export function SummaryPanel({
         <>
           <AiText text={state.text} links={state.links} onJump={onJump} />
           {state.flags.includes("fabricated_citation") && (
-            <p className="muted small">Some references could not be verified and were removed.</p>
+            <p className="muted small">{t("Some references could not be verified and were removed.")}</p>
           )}
           <Feedback runId={state.runId} />
         </>
@@ -192,7 +206,7 @@ export function CatchUpButton({ onClick }: { onClick: () => void }) {
   if (!feature.available) return <AiUnavailable />;
   return (
     <button type="button" className="btn small ghost discuss-catch-up" onClick={onClick}>
-      ✦ Catch me up
+      ✦ {t("Catch me up")}
     </button>
   );
 }
@@ -222,18 +236,18 @@ export function CatchUpPanel({
   }, []);
   const result = state.kind === "done" ? state.data.result : null;
   return (
-    <section className="discuss-ai-panel" aria-label="Catch me up">
+    <section className="discuss-ai-panel" aria-label={t("Catch me up")}>
       <header>
-        <h2>Catch me up</h2>
-        {result && <AiLabel text="AI-generated" />}
+        <h2>{t("Catch me up")}</h2>
+        {result && <AiLabel text={t("AI-generated")} />}
         <span className="spacer" />
         <button type="button" className="btn small ghost" onClick={onClose}>
-          Close
+          {t("Close")}
         </button>
       </header>
       {state.kind === "loading" && (
         <p className="muted" role="status">
-          Reading your unread messages…
+          {t("Reading your unread messages…")}
         </p>
       )}
       {state.kind === "error" && (
@@ -241,11 +255,15 @@ export function CatchUpPanel({
           {state.message}
         </div>
       )}
-      {state.kind === "done" && !result && <p className="muted">You're all caught up.</p>}
+      {state.kind === "done" && !result && <p className="muted">{t("You're all caught up.")}</p>}
       {result && (
         <>
           <p className="muted small">
-            {state.kind === "done" ? state.data.unread : 0} unread messages, most important first.
+            {tn(
+              "{count} unread message, most important first.",
+              "{count} unread messages, most important first.",
+              state.kind === "done" ? state.data.unread : 0,
+            )}
           </p>
           <AiText text={result.text} links={state.kind === "done" ? state.data.links : {}} onJump={onJump} />
           <Feedback runId={result.run_id} />
@@ -274,7 +292,6 @@ export function TranslateControl({ messageId, lang }: { messageId: number; lang:
       setBusy(false);
     }
   };
-  const label = LANGUAGES.find((l) => l.code === lang)?.label ?? lang;
   return (
     <div className="discuss-translate">
       {(!out || out.lang !== lang) && (
@@ -283,18 +300,18 @@ export function TranslateControl({ messageId, lang }: { messageId: number; lang:
           className="btn ghost small"
           disabled={busy}
           onClick={() => void translate()}
-          aria-label={`Translate message to ${label}`}
+          aria-label={t("Translate message to {language}", { language: languageLabel(lang) })}
         >
-          {busy ? "Translating…" : `✦ Translate`}
+          {busy ? t("Translating…") : `✦ ${t("Translate")}`}
         </button>
       )}
       {out && (
         <div className="discuss-translation" lang={out.lang}>
-          <AiLabel text={`AI translation (${LANGUAGES.find((l) => l.code === out.lang)?.label ?? out.lang})`} />
+          <AiLabel text={t("AI translation ({language})", { language: languageLabel(out.lang) })} />
           <p>{out.text}</p>
           <Feedback runId={out.runId} />
           <button type="button" className="btn ghost small" onClick={() => setOut(null)}>
-            Hide translation
+            {t("Hide translation")}
           </button>
         </div>
       )}
@@ -313,14 +330,17 @@ export function TranslateLanguage({ lang, onChange }: { lang: string; onChange: 
   if (!feature.available) return <AiUnavailable />;
   return (
     <label className="small">
-      Translate to{" "}
-      <select className="input small" value={lang} onChange={(e) => onChange(e.target.value)}>
-        {LANGUAGES.map((l) => (
-          <option key={l.code} value={l.code}>
-            {l.label}
-          </option>
-        ))}
-      </select>
+      {tx("Translate to {language}", {
+        language: (
+          <select className="input small" value={lang} onChange={(e) => onChange(e.target.value)}>
+            {languages().map((l) => (
+              <option key={l.code} value={l.code}>
+                {l.label}
+              </option>
+            ))}
+          </select>
+        ),
+      })}
     </label>
   );
 }
