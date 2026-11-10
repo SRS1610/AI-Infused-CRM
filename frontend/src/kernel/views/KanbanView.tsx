@@ -3,7 +3,7 @@ import { useMemo, useState } from "react";
 import { api } from "../api/client";
 import type { Domain, GroupRow, RecordData, ViewDef, ViewNode, ViewsResponse } from "../api/types";
 import { and } from "../domain";
-import { displayValue } from "../format";
+import { displayValue, formatNumber } from "../format";
 import { collectFields } from "./FormView";
 
 interface Props {
@@ -30,9 +30,22 @@ export function KanbanView({ model, meta, view, domain, groupBy, onOpen }: Props
     return [...names].filter((n) => n in meta.fields);
   }, [view, meta.fields, groupField]);
 
+  const sumField = typeof view.sum_field === "string" && view.sum_field in meta.fields ? view.sum_field : null;
   const groups = useQuery({
-    queryKey: ["list", model, "kanban-groups", domain, groupField],
-    queryFn: () => api.readGroup(model, { domain, groupby: groupField ? [groupField] : [] }),
+    queryKey: ["list", model, "kanban-groups", domain, groupField, sumField],
+    queryFn: () =>
+      api.readGroup(model, {
+        domain,
+        groupby: groupField ? [groupField] : [],
+        aggregates: sumField ? [`${sumField}:sum`] : [],
+      }),
+  });
+  const groupMeta = groupField ? meta.fields[groupField] : undefined;
+  // pipelines show every stage, even empty ones (view option "all_groups")
+  const allGroups = useQuery({
+    queryKey: ["list", groupMeta?.comodel, "kanban-all-groups"],
+    queryFn: () => api.list(groupMeta!.comodel!, { fields: ["display_name"], limit: 50 }),
+    enabled: !!view.all_groups && groupMeta?.type === "many2one" && !!groupMeta.comodel,
   });
 
   if (groups.isLoading)
@@ -41,7 +54,21 @@ export function KanbanView({ model, meta, view, domain, groupBy, onOpen }: Props
         Loading…
       </div>
     );
-  const columns: GroupRow[] = groupField ? (groups.data?.groups ?? []) : [{ __count: 0, __domain: domain }];
+  let columns: GroupRow[] = groupField ? (groups.data?.groups ?? []) : [{ __count: 0, __domain: domain }];
+  if (groupField && allGroups.data) {
+    const present = new Map(columns.map((g) => [g[groupField]?.id ?? g[groupField], g]));
+    columns = [
+      ...allGroups.data.items.map(
+        (s) =>
+          present.get(s.id) ?? {
+            __count: 0,
+            __domain: and(domain, [[groupField, "=", s.id]]),
+            [groupField]: { id: s.id, display_name: s.display_name },
+          },
+      ),
+      ...columns.filter((g) => !allGroups.data!.items.some((s) => s.id === (g[groupField]?.id ?? g[groupField]))),
+    ];
+  }
   return (
     <div className="kanban" role="list" aria-label={`${meta.model.description} board`}>
       {columns.map((g, i) => (
@@ -53,6 +80,7 @@ export function KanbanView({ model, meta, view, domain, groupBy, onOpen }: Props
           group={g}
           groupField={groupField}
           fieldNames={fieldNames}
+          sumField={sumField}
           onOpen={onOpen}
         />
       ))}
@@ -67,6 +95,7 @@ function KanbanColumn({
   group,
   groupField,
   fieldNames,
+  sumField,
   onOpen,
 }: {
   model: string;
@@ -75,6 +104,7 @@ function KanbanColumn({
   group: GroupRow;
   groupField: string | null;
   fieldNames: string[];
+  sumField?: string | null;
   onOpen: (id: number) => void;
 }) {
   const queryClient = useQueryClient();
@@ -137,6 +167,11 @@ function KanbanColumn({
       <header className="kanban-header">
         <h3>{String(title)}</h3>
         <span className="count">{records.data?.total ?? group.__count}</span>
+        {sumField && (
+          <span className="kanban-sum" title={`Total ${meta.fields[sumField]?.string ?? sumField}`}>
+            {formatNumber(Number(group[`${sumField}:sum`] ?? 0), 0)}
+          </span>
+        )}
       </header>
       {meta.model.access.create && (
         <form

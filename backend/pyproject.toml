@@ -108,6 +108,7 @@ ignore = [
 "modules/core/hooks.py" = ["S105"]
 # table/column names below come from the model registry, never from requests
 "modules/contacts/merge.py" = ["S608"]
+"modules/crm/services.py" = ["S608"]
 
 [tool.ruff.format]
 quote-style = "double"

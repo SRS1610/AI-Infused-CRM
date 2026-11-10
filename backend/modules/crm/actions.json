@@ -1,0 +1,13 @@
+[
+  {"id": "action_pipeline", "name": "Pipeline", "model": "crm.lead", "views": ["kanban", "list", "form", "calendar", "pivot", "graph"], "search_view": "crm.view_lead_search", "domain": [["type", "=", "opportunity"]], "context": {"default_type": "opportunity"}},
+  {"id": "action_leads", "name": "Leads", "model": "crm.lead", "views": ["list", "form", "kanban"], "view_refs": {"list": "crm.view_lead_list_leads"}, "search_view": "crm.view_lead_search", "domain": [["type", "=", "lead"]], "context": {"default_type": "lead"}},
+  {"id": "action_forecast", "name": "Forecast", "model": "crm.lead", "views": ["graph", "pivot", "list"], "view_refs": {"graph": "crm.view_lead_forecast_graph", "pivot": "crm.view_lead_forecast_pivot"}, "search_view": "crm.view_lead_search", "domain": [["type", "=", "opportunity"], ["is_won", "=", false]]},
+  {"id": "action_reports", "name": "Sales analysis", "kind": "client", "client_tag": "crm.reports"},
+  {"id": "action_stages", "name": "Stages", "model": "crm.stage", "views": ["list", "form"]},
+  {"id": "action_teams", "name": "Sales teams", "model": "crm.team", "views": ["list", "form"]},
+  {"id": "action_tags", "name": "Tags", "model": "crm.tag", "views": ["list", "form"]},
+  {"id": "action_lost_reasons", "name": "Lost reasons", "model": "crm.lost_reason", "views": ["list", "form"]},
+  {"id": "action_scoring_rules", "name": "Scoring rules", "model": "crm.scoring_rule", "views": ["list", "form"]},
+  {"id": "action_assignment_rules", "name": "Assignment rules", "model": "crm.assignment_rule", "views": ["list", "form"]},
+  {"id": "action_sources", "name": "Sources", "model": "crm.source", "views": ["list", "form"]}
+]

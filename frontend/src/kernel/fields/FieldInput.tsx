@@ -1,6 +1,7 @@
 import type { FieldMeta, RecordData, ViewNode } from "../api/types";
 import { bindRecord } from "../domain";
 import { displayValue } from "../format";
+import { PriorityWidget, StatusbarWidget } from "./ChoiceWidgets";
 import { Many2manyTags } from "./Many2manyTags";
 import { Many2oneInput } from "./Many2oneInput";
 import { One2manyTable } from "./One2manyTable";
@@ -42,6 +43,10 @@ export function FieldInput({ field, value, record, onChange, readonly, node, id,
     disabled: readonly,
   };
 
+  if (widget === "statusbar" && (field.type === "many2one" || field.type === "selection"))
+    return <StatusbarWidget field={field} value={value} onChange={onChange} readonly={readonly} id={id} />;
+  if (widget === "priority" && field.type === "selection")
+    return <PriorityWidget field={field} value={value} onChange={onChange} readonly={readonly} id={id} />;
   if (field.type === "one2many") {
     return (
       <One2manyTable

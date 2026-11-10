@@ -1,0 +1,17 @@
+name = "crm"
+version = "1.0.0"
+summary = "Leads and opportunities: pipeline, teams and assignment, scoring, intake by email and web form, forecast and reports"
+category = "Sales"
+phase = 1
+depends = ["contacts", "chatter", "workflow", "reports", "product", "sale"]
+license = "Apache-2.0"
+installable = true
+application = true
+
+[load]
+security = ["security/groups.json", "security/access.json"]
+data = ["data/stages.json", "data/lost_reasons.json", "data/teams.json"]
+demo = ["data/demo/crm.json"]
+views = ["views.json"]
+actions = "actions.json"
+menus = "menus.json"

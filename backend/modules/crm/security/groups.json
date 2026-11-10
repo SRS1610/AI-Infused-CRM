@@ -1,0 +1,5 @@
+[
+  {"id": "group_crm_user", "model": "core.group", "noupdate": true, "values": {"name": "CRM / User", "category": "Sales", "comment": "Sees the pipeline; edits their own and their team's leads", "implied_ids": ["sale.group_sale_user"]}},
+  {"id": "group_crm_manager", "model": "core.group", "noupdate": true, "values": {"name": "CRM / Manager", "category": "Sales", "comment": "Edits every lead; configures teams, stages, scoring and assignment", "implied_ids": ["crm.group_crm_user", "sale.group_sale_all"]}},
+  {"id": "core.group_system", "model": "core.group", "values": {"implied_ids": {"$add": ["crm.group_crm_manager"]}}}
+]

@@ -1398,3 +1398,78 @@ kbd {
   max-height: 40vh;
   overflow: auto;
 }
+/* -- 1.4 applications -- */
+.kanban-sum {
+  margin-left: auto;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}
+.statusbar-widget {
+  display: inline-flex;
+  flex-wrap: wrap;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+.statusbar-widget .step {
+  border: 0;
+  border-right: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text-muted);
+  padding: 4px 12px;
+  cursor: pointer;
+  min-height: 32px;
+}
+.statusbar-widget .step:last-child {
+  border-right: 0;
+}
+.statusbar-widget .step.current {
+  background: var(--primary);
+  color: var(--primary-text);
+  font-weight: 600;
+}
+.priority-widget .star {
+  border: 0;
+  background: none;
+  color: var(--warning);
+  font-size: 1.1rem;
+  cursor: pointer;
+  padding: 0 2px;
+  min-width: 24px;
+  min-height: 24px;
+}
+.kpis {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.kpi {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+}
+.kpi-value {
+  font-size: 1.5rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+.kpi-label {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}
+.crm-reports section {
+  margin-bottom: 20px;
+}
+.bar {
+  display: inline-block;
+  height: 10px;
+  background: var(--chart-1);
+  border-radius: 2px;
+  vertical-align: middle;
+  max-width: 160px;
+}

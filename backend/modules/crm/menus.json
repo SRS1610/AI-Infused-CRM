@@ -1,0 +1,17 @@
+[
+  {"id": "menu_root", "name": "CRM", "sequence": 10, "icon": "trending-up", "groups": ["crm.group_crm_user"]},
+  {"id": "menu_pipeline", "name": "Pipeline", "parent": "crm.menu_root", "sequence": 10, "action": "crm.action_pipeline"},
+  {"id": "menu_leads", "name": "Leads", "parent": "crm.menu_root", "sequence": 20, "action": "crm.action_leads"},
+  {"id": "menu_quotations", "name": "Quotations", "parent": "crm.menu_root", "sequence": 30, "action": "sale.action_quotations"},
+  {"id": "menu_reporting", "name": "Reporting", "parent": "crm.menu_root", "sequence": 80},
+  {"id": "menu_forecast", "name": "Forecast", "parent": "crm.menu_reporting", "sequence": 10, "action": "crm.action_forecast"},
+  {"id": "menu_analysis", "name": "Sales analysis", "parent": "crm.menu_reporting", "sequence": 20, "action": "crm.action_reports"},
+  {"id": "menu_config", "name": "Configuration", "parent": "crm.menu_root", "sequence": 90, "groups": ["crm.group_crm_manager"]},
+  {"id": "menu_teams", "name": "Sales teams", "parent": "crm.menu_config", "sequence": 10, "action": "crm.action_teams"},
+  {"id": "menu_stages", "name": "Stages", "parent": "crm.menu_config", "sequence": 20, "action": "crm.action_stages"},
+  {"id": "menu_scoring", "name": "Scoring rules", "parent": "crm.menu_config", "sequence": 30, "action": "crm.action_scoring_rules"},
+  {"id": "menu_assignment", "name": "Assignment rules", "parent": "crm.menu_config", "sequence": 40, "action": "crm.action_assignment_rules"},
+  {"id": "menu_tags", "name": "Tags", "parent": "crm.menu_config", "sequence": 50, "action": "crm.action_tags"},
+  {"id": "menu_lost_reasons", "name": "Lost reasons", "parent": "crm.menu_config", "sequence": 60, "action": "crm.action_lost_reasons"},
+  {"id": "menu_sources", "name": "Sources", "parent": "crm.menu_config", "sequence": 70, "action": "crm.action_sources"}
+]

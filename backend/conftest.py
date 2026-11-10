@@ -42,6 +42,7 @@ KERNEL_TEST_MODULES = [
     "contacts_test",
     "product",
     "sale",
+    "crm",
 ]
 
 
