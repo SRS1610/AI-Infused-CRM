@@ -2,7 +2,7 @@
 SHELL := /bin/bash
 COMPOSE := docker compose -f deploy/compose/docker-compose.yml --env-file .env
 BACKEND := cd backend && uv run
-FRONTEND := cd frontend && pnpm
+FRONTEND := cd frontend && npm run
 
 .PHONY: help setup up down logs ps db-init db-migrate seed serve worker scheduler gateway web \
         test test-backend test-frontend e2e lint format typecheck ci clean
@@ -13,7 +13,7 @@ help: ## Show this help
 setup: ## Install backend and frontend dependencies, copy .env
 	@test -f .env || cp .env.example .env
 	cd backend && uv sync
-	@test -d frontend && (cd frontend && pnpm install) || true
+	@test -d frontend && (cd frontend && npm ci) || true
 
 up: ## Start the full stack with Docker Compose
 	$(COMPOSE) up -d --build

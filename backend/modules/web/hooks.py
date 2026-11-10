@@ -6,6 +6,7 @@ from typing import TYPE_CHECKING, Any
 
 from tessera.orm.hooks import hook
 from tessera.realtime import publish_after_commit
+from tessera.runtime import client_id_var
 
 if TYPE_CHECKING:
     from tessera.orm.model import Model
@@ -25,7 +26,7 @@ def _silent(records: Model) -> bool:
 
 
 def _emit(records: Model, event: str, fields: list[str]) -> None:
-    payload = {"model": records._name, "fields": fields, "uid": records.env.uid}
+    payload = {"model": records._name, "fields": fields, "uid": records.env.uid, "client": client_id_var.get()}
     for rid in records.ids:
         publish_after_commit(records.env.cr, f"record:{records._name}:{rid}", event, {**payload, "id": rid})
     publish_after_commit(records.env.cr, f"model:{records._name}", event, {**payload, "ids": records.ids})

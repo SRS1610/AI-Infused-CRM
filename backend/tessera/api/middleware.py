@@ -13,7 +13,7 @@ from starlette.responses import JSONResponse
 
 from tessera.config import get_settings
 from tessera.logging import bind_context, clear_context, get_logger
-from tessera.runtime import new_request_id, remote_ip_var, user_agent_var
+from tessera.runtime import client_id_var, new_request_id, remote_ip_var, user_agent_var
 
 log = get_logger(__name__)
 
@@ -29,6 +29,7 @@ class RequestContextMiddleware(BaseHTTPMiddleware):
         ip = forwarded.split(",")[0].strip() if forwarded else (request.client.host if request.client else None)
         remote_ip_var.set(ip)
         user_agent_var.set(request.headers.get("user-agent"))
+        client_id_var.set((request.headers.get("x-tessera-client") or "")[:64] or None)
         bind_context(request_id=rid, path=request.url.path, method=request.method)
         started = time.perf_counter()
         try:

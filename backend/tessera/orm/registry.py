@@ -269,6 +269,9 @@ class Registry:
             self.ready = True
             for hook in self.hooks.get("registry_built", ()):
                 hook(self)
+            from tessera.api.app import mount_new_routers
+
+            mount_new_routers()
             log.info("registry built", db=self.dbname, models=len(self.models), modules=len(self.module_order))
 
     def _setup_class_metadata(self, cls: type[Model]) -> None:

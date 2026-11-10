@@ -37,3 +37,7 @@ test-results/
 # backend runtime data
 var/
 backend/var/
+
+# test artefacts
+frontend/test-results/
+frontend/coverage/

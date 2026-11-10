@@ -119,6 +119,17 @@ Format: `D-nnn · date · status (Proposed | Accepted | Superseded)`
 ### D-028 · 2026-11-10 · Accepted — Realtime hub backends
 - **Decision:** In-process fan-out by default (`TESSERA_REALTIME_BACKEND=memory`); Redis pub/sub (`redis`) for multi-process deployments. Events are published only after commit. Replies (`subscribed`, `pong`) share the per-connection queue so they are ordered after already-published events.
 
+### D-029 · 2026-11-10 · Accepted — Client styling: CSS design tokens and hand-built accessible components (supersedes the Radix/Tailwind line of ARCHITECTURE §1.2)
+- **Decision:** One stylesheet with CSS custom properties (light/dark tokens, AA contrast), native elements and small hand-written ARIA widgets (combobox, tabs, listbox, dialog). No Tailwind or Radix for now.
+- **Rationale:** The generic renderer needs only a dozen primitives; owning them keeps the bundle at ~110 kB gzip, avoids class-name churn in metadata-driven markup, and keeps accessibility behaviour testable in our own suite. Radix can be introduced per component later without changing view definitions.
+
+### D-030 · 2026-11-10 · Accepted — Typed API client is hand-written
+- **Decision:** `frontend/src/kernel/api/{client,types}.ts` mirror the documented contract by hand instead of being generated from OpenAPI.
+- **Rationale:** The generated OpenAPI describes generic endpoints (`/models/{model}`) whose payloads depend on runtime metadata, so generated types would be `Record<string, any>` anyway. Per-model OpenAPI schemas (and generated types for module-specific endpoints) are planned with the schemathesis contract suite.
+
+### D-031 · 2026-11-10 · Accepted — npm (package-lock.json) instead of pnpm
+- **Rationale:** npm ships with Node; one fewer tool for contributors and CI. Makefile, CI and the web image use `npm ci`.
+
 ### D-023 · 2026-11-09 · Proposed — Public web surfaces before Phase 7 use `*_website` bridge modules
 - **Decision:** Modules that need a public page before the `website` builder exists (recruitment job postings, event pages, eLearning courses, blog, forum, survey invitations) depend only on `portal` for their minimal public rendering in their own phase; `recruitment_website`, `events_website`, `elearning_website`, `blog_website`, `forum_website` bridge modules (auto-installed when `website` is present) move those pages into the website builder in Phase 7.
 - **Rationale:** Preserves the layering rule (no dependency on a later phase) while still shipping usable public pages when each module lands.

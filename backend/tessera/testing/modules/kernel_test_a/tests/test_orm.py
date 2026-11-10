@@ -402,3 +402,13 @@ def test_sql_constraint_message(env):  # type: ignore[no-untyped-def]
     env["ktest.tag"].create({"name": "unique-tag-x"})
     with pytest.raises(ValidationError, match="Tag names must be unique"):
         env["ktest.tag"].create({"name": "unique-tag-x"})
+
+
+def test_monetary_rounds_to_currency_precision(env):  # type: ignore[no-untyped-def]
+    book = env["ktest.book"].create({"name": "Priced", "price": 12.345})
+    assert book.currency_id.name == "USD" and book.price == 12.35  # USD: 2 decimals
+    jpy = env.ref("core.JPY")
+    book.write({"price": 1234.6, "currency_id": jpy.ids[0]})
+    assert book.price == 1235.0  # JPY: no decimals
+    book.write({"price": 99.4})  # currency taken from the record
+    assert book.price == 99.0

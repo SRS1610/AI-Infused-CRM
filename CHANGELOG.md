@@ -4,6 +4,20 @@ All notable changes are recorded here, grouped by phase. Format follows [Keep a 
 
 ## [Unreleased] — Phase 1 in progress
 
+### Sub-phase 1.2 — API and client foundation
+- HTTP API: FastAPI app, session + CSRF auth, TOTP with recovery codes, account lockout, API keys,
+  OIDC SSO (PKCE), auto REST (filters, keyset pagination, expand, ETags, method calls), JSON-RPC 2.0,
+  attachments, webhooks with HMAC signatures and retry backoff, realtime WebSocket hub.
+- `web` module: menus, actions, views as data with inheritance operations and schema validation,
+  generated default views, saved filters.
+- Web client: login (password/TOTP/SSO), app shell with menus and multi-company switcher, command
+  palette, generic list (sorting, grouping, totals, bulk actions, configurable columns, inline editing
+  with conflict handling), form (validation, method buttons, live refresh), kanban (drag-and-drop,
+  quick create), search panel with condition editor and favourites, all field widgets, dark mode,
+  responsive layout, PWA manifest + service worker.
+- Tests: 107 backend (coverage 82 %), 34 frontend (coverage 87 %), 7 Playwright e2e (desktop + mobile,
+  axe accessibility checks, two-browser realtime).
+
 ### Sub-phase 1.1 — Kernel
 - Metadata ORM: field types (char, text, html, integer, float, monetary, boolean, date, datetime,
   selection, json, binary, image, many2one, one2many, many2many, reference), computed (stored and
@@ -34,4 +48,4 @@ All notable changes are recorded here, grouped by phase. Format follows [Keep a 
 
 ### Planning
 - Architecture document, module dependency map, core ERD, AI architecture note and phased build plan under `docs/architecture/`.
-- `DECISIONS.md` (D-001 … D-025).
+- `DECISIONS.md` (D-001 … D-031).

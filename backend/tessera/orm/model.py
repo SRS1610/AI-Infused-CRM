@@ -655,6 +655,30 @@ class Model:
         return defaults
 
     # ------------------------------------------------------------------ writing
+    def _round_monetary(self, columns: Vals) -> None:
+        """Round monetary values to their currency's precision (``core.currency.round``).
+
+        The currency comes from the values being written or, on write, from the records themselves;
+        when records of several currencies are written together each keeps 4-decimal precision.
+        """
+        monetary = [n for n, v in columns.items() if isinstance(self._fields[n], F.Monetary) and v is not None]
+        if not monetary or "core.currency" not in self.env:
+            return
+        currencies = self.env["core.currency"].elevated()
+        for name in monetary:
+            cur_field = self._fields[name].currency_field  # type: ignore[attr-defined]
+            if cur_field not in self._fields:
+                continue
+            cur_id = columns.get(cur_field)
+            if cur_id is None and self._ids:
+                ids = {rid for rec in self.elevated() for rid in rec[cur_field].ids}
+                cur_id = ids.pop() if len(ids) == 1 else None
+            if cur_id is None and not self._ids:
+                field = self._fields[cur_field]
+                cur_id = field.convert_to_cache(field.default_value(self), self) if field.has_default else None
+            if cur_id:
+                columns[name] = float(currencies.browse([int(cur_id)]).round(columns[name]))
+
     def _split_vals(self, vals: Vals) -> tuple[Vals, dict[str, list[tuple[Any, ...]]], Vals]:
         columns: Vals = {}
         x2many: dict[str, list[tuple[Any, ...]]] = {}
@@ -695,6 +719,7 @@ class Model:
             missing = [n for n in self._fields if n not in vals]
             vals = {**self.default_get(missing), **vals}
             columns, x2many, inverse = self._split_vals(vals)
+            self._round_monetary(columns)
             for field in self._fields.values():
                 if field.required and not field.compute and field.store and field.name != "id":
                     field.validate(columns.get(field.name), self)
@@ -748,6 +773,7 @@ class Model:
         self.check_access_rights("write")
         self.check_access_rule("write")
         columns, x2many, inverse = self._split_vals(vals)
+        self._round_monetary(columns)
         for name, value in columns.items():
             self._fields[name].validate(value, self)
         relational_changed = [n for n in columns if isinstance(self._fields[n], F.Many2one)]

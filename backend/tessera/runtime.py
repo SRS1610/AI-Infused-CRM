@@ -8,6 +8,8 @@ import uuid
 request_id_var: contextvars.ContextVar[str | None] = contextvars.ContextVar("tessera_request_id", default=None)
 remote_ip_var: contextvars.ContextVar[str | None] = contextvars.ContextVar("tessera_remote_ip", default=None)
 user_agent_var: contextvars.ContextVar[str | None] = contextvars.ContextVar("tessera_user_agent", default=None)
+# browser tab id (X-Tessera-Client) so a tab can ignore realtime echoes of its own writes
+client_id_var: contextvars.ContextVar[str | None] = contextvars.ContextVar("tessera_client_id", default=None)
 
 
 def new_request_id() -> str:
