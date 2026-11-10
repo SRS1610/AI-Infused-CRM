@@ -2,6 +2,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { api } from "../api/client";
 import type { Domain, FieldMeta, ViewDef, ViewsResponse } from "../api/types";
+import { searchAddonsFor } from "../extensions";
 import { buildDomain } from "./searchDomain";
 
 export interface SearchState {
@@ -145,6 +146,11 @@ export function SearchBar({ model, meta, view, value, onChange, inputRef }: Prop
       >
         Filters{active ? ` (${active})` : ""}
       </button>
+      {searchAddonsFor(model).map((a) => (
+        <span key={a.key} className="search-addon">
+          {a.render({ model, apply: (domain) => onChange({ ...value, custom: [...value.custom, domain as Domain] }) })}
+        </span>
+      ))}
       {active > 0 && (
         <button
           type="button"

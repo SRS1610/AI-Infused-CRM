@@ -7,6 +7,7 @@ import { FieldInput } from "../fields/FieldInput";
 import { useHotkeys } from "../hotkeys";
 import { reports } from "../api/platform";
 import { Chatter } from "../chatter/Chatter";
+import { formPanelsFor } from "../extensions";
 import { useRealtime, type RealtimeEvent } from "../realtime";
 import { useSession } from "../session";
 import { StatusBar } from "./StatusBar";
@@ -378,11 +379,21 @@ export function FormView({ model, recordId, meta, view, defaults, onSaved, onBac
       {view.root ? render(view.root, "root") : null}
     </form>
   );
-  if (!showChatter) return form;
+  const panels = recordId !== null ? formPanelsFor(model) : [];
+  const side = panels.map((p) => (
+    <section key={p.title} className="form-panel" aria-label={p.title}>
+      <h2 className="form-panel-title">{p.title}</h2>
+      {p.render({ model, resId: recordId as number, record, reload: () => void loaded.refetch() })}
+    </section>
+  ));
+  if (!showChatter && !side.length) return form;
   return (
     <div className="form-with-chatter">
       {form}
-      <Chatter model={model} resId={recordId as number} canWrite={meta.model.access.write} />
+      <div className="form-side">
+        {side}
+        {showChatter && <Chatter model={model} resId={recordId as number} canWrite={meta.model.access.write} />}
+      </div>
     </div>
   );
 }

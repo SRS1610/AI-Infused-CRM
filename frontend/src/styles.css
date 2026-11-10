@@ -1765,3 +1765,22 @@ tr.clickable {
   text-align: right;
   white-space: nowrap;
 }
+.form-side {
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+}
+.form-panel {
+  border: 1px solid var(--border, #e5e7eb);
+  border-radius: 8px;
+  padding: 0.75rem;
+  background: var(--surface, #fff);
+  min-width: 0;
+}
+.form-panel-title {
+  font-size: 0.95rem;
+  margin: 0 0 0.5rem;
+}
+.search-addon {
+  display: inline-flex;
+}

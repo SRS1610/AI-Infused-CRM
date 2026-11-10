@@ -33,18 +33,24 @@ def module_ai_dir(module_path: Path) -> Path:
 
 
 def read_features(module_path: Path) -> list[dict[str, Any]]:
-    path = module_ai_dir(module_path) / "features.yaml"
-    if not path.exists():
-        return []
-    data = yaml.safe_load(path.read_text()) or {}
-    features = data.get("features") or []
-    for f in features:
-        unknown = set(f) - FEATURE_KEYS
-        if unknown:
-            raise ConfigurationError(f"{path}: feature '{f.get('name')}' has unknown keys {sorted(unknown)}")
-        if f.get("risk_class") == "high" and f.get("employment_related") and not f.get("bias_tests"):
-            raise ConfigurationError(f"{path}: high-risk employment feature '{f['name']}' must link its bias tests")
-    return list(features)
+    """``ai/features.yaml`` plus any ``ai/features/*.yaml`` (large modules split their manifest)."""
+    ai_dir = module_ai_dir(module_path)
+    paths = [ai_dir / "features.yaml", *sorted((ai_dir / "features").glob("*.yaml"))]
+    features: list[dict[str, Any]] = []
+    for path in paths:
+        if not path.exists():
+            continue
+        data = yaml.safe_load(path.read_text()) or {}
+        for f in data.get("features") or []:
+            unknown = set(f) - FEATURE_KEYS
+            if unknown:
+                raise ConfigurationError(f"{path}: feature '{f.get('name')}' has unknown keys {sorted(unknown)}")
+            if f.get("risk_class") == "high" and f.get("employment_related") and not f.get("bias_tests"):
+                raise ConfigurationError(f"{path}: high-risk employment feature '{f['name']}' must link its bias tests")
+            if any(f["name"] == g["name"] for g in features):
+                raise ConfigurationError(f"{path}: feature '{f['name']}' is declared twice")
+            features.append(f)
+    return features
 
 
 def read_prompts(module_path: Path) -> list[dict[str, Any]]:
