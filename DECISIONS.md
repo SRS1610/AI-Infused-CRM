@@ -130,6 +130,41 @@ Format: `D-nnn · date · status (Proposed | Accepted | Superseded)`
 ### D-031 · 2026-11-10 · Accepted — npm (package-lock.json) instead of pnpm
 - **Rationale:** npm ships with Node; one fewer tool for contributors and CI. Makefile, CI and the web image use `npm ci`.
 
+### D-032 · 2026-11-10 · Accepted — Scheduler exactly-once through database row locks, not a Redis lock
+- **Decision:** Each scheduler tick claims due `core.scheduled_job` rows with `SELECT … FOR UPDATE SKIP LOCKED`, advances `next_run` in the same transaction, and enqueues the job with idempotency key `sched:<id>:<due time>` (unique). BUILD_PLAN 1.3 mentioned a Redis lock.
+- **Rationale:** The database already serialises the state that matters; a Redis lock adds a second source of truth with expiry races (a slow tick outliving its lock). Verified by a test running four concurrent ticks: one job per occurrence.
+
+### D-033 · 2026-11-10 · Accepted — Job ledger in PostgreSQL; Celery is only the transport
+- **Decision:** `core.job` + `core.job_attempt` hold state, attempts, errors, progress and results. Celery tasks carry only `(db_url, job_id)`; claiming uses a row lock, so redelivered messages (acks-late) never run a job twice. Jobs dispatch after commit; three backends: `celery`, `inline` (dev), `manual` (tests). A sweep recovers jobs whose worker died.
+- **Rationale:** Jobs are visible and re-queueable from the UI, survive broker loss, and tests control execution deterministically.
+
+### D-034 · 2026-11-10 · Accepted — Security cache keyed by a transactional stamp
+- **Decision:** The access-rule cache in each process is tied to `core.security_stamp.version`, a random value rewritten in the same transaction as any change to groups, access rights, record rules, user memberships or group external ids; each transaction reads the stamp once and reloads the cache when it differs.
+- **Rationale:** The previous in-process invalidation missed changes made by other workers and could serve rights granted inside a transaction that later rolled back (found by the global-search tests). A random value (not a counter) avoids a rolled-back change colliding with a later committed one.
+
+### D-035 · 2026-11-10 · Accepted — Sandboxed expression language for automations
+- **Decision:** `tessera.expr` evaluates Python-syntax expressions by walking a whitelisted AST (no statements, comprehensions, lambdas, method calls or non-field attributes; `_`-names rejected; step and size budgets). No `eval`, no RestrictedPython.
+- **Rationale:** Automation and Studio formulas are written by administrators but stored as data and executed by the server; a closed evaluator is small enough to audit fully and its escape tests are part of the suite.
+
+### D-036 · 2026-11-10 · Accepted — Thread access derives from the record
+- **Decision:** `chatter.message`, `chatter.follower` and `chatter.activity` reference records generically (`model`, `res_id`). Ordinary users have no direct model access to messages/followers; the chatter API checks the record first and then reads the thread elevated. Portal users never see internal messages; recipients who cannot read a record are not notified about it. Activities are additionally readable by their assignee.
+- **Rationale:** Record rules cannot express "readable if the parent record is readable" for generic references; one checked entry point is simpler and safer than per-model rules.
+
+### D-037 · 2026-11-10 · Accepted — Import dry run = the real import inside a rolled-back savepoint
+- **Decision:** The dry run executes conversion, create/write, constraints and automations exactly as the real run, inside a savepoint that is rolled back; rolling back a savepoint now also discards its after-commit callbacks and clears the ORM cache. Rows fail individually (per-row savepoints only for batches that fail).
+- **Rationale:** A separate validation path would drift from the real one; this way the dry-run error list is exactly what the import will hit (1.3-i: 25 of 25 errors by row and column, nothing written).
+
+### D-038 · 2026-11-10 · Accepted — Global search: one trigram index table, access re-checked after ranking
+- **Decision:** `web.search_index` holds one row per record of models with `_global_search` (title, text, company), maintained by ORM hooks. A query ranks up to 200 candidates by trigram similarity, then re-runs a `search([("id", "in", …)])` per model as the caller so record rules apply before anything is returned.
+- **Rationale:** One cross-model ranked query is fast with a GIN trigram index; re-checking with the ORM reuses the exact access logic. For RAG (Phase 1.5) the AI note requires filtering *before* ranking; that is handled in the retrieval layer, not here, because embeddings carry more sensitive content than titles.
+
+### D-039 · 2026-11-10 · Accepted — Reports render in-process with WeasyPrint, templates in a Jinja2 sandbox
+- **Decision:** `tessera.reports` renders Jinja2 templates (sandboxed, autoescaped, records exposed through read-only proxies, rendered as the requesting user) to HTML and then to PDF with WeasyPrint, synchronously for single documents and in the `reports` job queue for batches. Templates are versioned (`reports.template_version`) with publish and rollback.
+- **Rationale:** No headless browser to operate; WeasyPrint supports paged media (running headers/footers, page counters). Rendering as the user means a template cannot print a field the user could not read.
+
+### D-040 · 2026-11-10 · Accepted — Developer docs live in `docs/dev/`
+- **Decision:** BUILD_PLAN paths `docs/developer/*` map to `docs/dev/*` (existing since 1.1); administrator docs are in `docs/admin/`.
+
 ### D-023 · 2026-11-09 · Proposed — Public web surfaces before Phase 7 use `*_website` bridge modules
 - **Decision:** Modules that need a public page before the `website` builder exists (recruitment job postings, event pages, eLearning courses, blog, forum, survey invitations) depend only on `portal` for their minimal public rendering in their own phase; `recruitment_website`, `events_website`, `elearning_website`, `blog_website`, `forum_website` bridge modules (auto-installed when `website` is present) move those pages into the website builder in Phase 7.
 - **Rationale:** Preserves the layering rule (no dependency on a later phase) while still shipping usable public pages when each module lands.

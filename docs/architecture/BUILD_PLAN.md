@@ -152,7 +152,7 @@ Phase 1 is delivered in sub-phases 1.0–1.7 (D-021). Each sub-phase ends runnab
 - `reports` module: WeasyPrint engine in worker, `reports.template` versioning, `reports.layout` per company (header/footer/logo/paper), QR codes, basic block-based template editor.
 - Remaining Phase 1 renderers: **calendar**, **pivot**, **graph**, **activity** views.
 
-**Deliverables:** `chatter`, `workflow`, `reports` modules; `tessera.jobs`, `tessera.reports`; job and mail-queue admin UIs; `docs/admin/email.md`, `docs/admin/jobs.md`, `docs/developer/workflows.md`.
+**Deliverables:** `chatter`, `workflow`, `reports` modules; `tessera.jobs`, `tessera.reports`; job and mail-queue admin UIs; `docs/admin/email.md`, `docs/admin/jobs.md`, `docs/dev/workflows.md`, `docs/dev/platform-services.md`.
 
 **Acceptance criteria**
 

@@ -194,3 +194,50 @@ def test_notifications_are_private_and_published(env: Any, env_for: Any, monkeyp
     assert len(env["core.notification"].search([("title", "=", "Hi")])) == 1  # admin sees only their own too
     mine.action_mark_read()
     assert mine.is_read and mine.read_at
+
+
+def test_mail_reaches_a_real_smtp_server(db: str, monkeypatch: pytest.MonkeyPatch) -> None:
+    """1.3-a delivery leg over a real SMTP socket (aiosmtpd stands in for Mailpit in CI)."""
+    import socket
+
+    from aiosmtpd.controller import Controller
+
+    received: list[Any] = []
+
+    class Handler:
+        async def handle_DATA(self, server: Any, session: Any, envelope: Any) -> str:  # noqa: N802 - aiosmtpd API
+            received.append(envelope)
+            return "250 OK"
+
+    with socket.socket() as s:
+        s.bind(("127.0.0.1", 0))
+        port = s.getsockname()[1]
+    controller = Controller(Handler(), hostname="127.0.0.1", port=port)
+    controller.start()
+    try:
+        from tessera.config import get_settings
+
+        settings = get_settings()
+        monkeypatch.setattr(settings, "smtp_host", "127.0.0.1")
+        monkeypatch.setattr(settings, "smtp_port", port)
+        monkeypatch.setattr(settings, "smtp_tls", False)
+        with environment_for(db, ADMIN_UID) as env:
+            mail_id = (
+                env["core.mail_queue"]
+                .queue(
+                    {
+                        "email_to": "rcpt@example.test",
+                        "subject": "T-real",
+                        "body_html": "<p>Real SMTP</p>",
+                        "reply_to": "reply+abc@tessera.local",
+                    }
+                )
+                .ids[0]
+            )
+        jobs = _mail_jobs(db, mail_id)
+        assert run_now(db, jobs) == {jobs[0]: "done"}
+    finally:
+        controller.stop()
+    assert len(received) == 1 and received[0].rcpt_tos == ["rcpt@example.test"]
+    content = received[0].content.decode()
+    assert "Subject: T-real" in content and "Reply-To: reply+abc@tessera.local" in content

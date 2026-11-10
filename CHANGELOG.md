@@ -4,6 +4,31 @@ All notable changes are recorded here, grouped by phase. Format follows [Keep a 
 
 ## [Unreleased] — Phase 1 in progress
 
+### Sub-phase 1.3 — Platform services
+- Background jobs (`tessera.jobs`): PostgreSQL job ledger with per-attempt history, Celery/inline/manual
+  dispatch after commit, retries with capped exponential backoff, dead letter and re-queue, idempotency
+  keys, progress events, sweep for lost workers; scheduler with exactly-once claiming across replicas;
+  `tessera jobs` CLI; webhook deliveries moved onto jobs.
+- Mail: outgoing queue with per-company SMTP servers (encrypted passwords) and bounce handling; inbound
+  routing by signed `reply+` address, In-Reply-To or alias (`message_new` / `message_update`), via IMAP
+  fetcher or HTTP endpoint; email notifications and a daily digest.
+- `chatter` module: thread mixin, messages and internal notes, followers and subtypes, field tracking,
+  reactions, attachments, @mentions, activities with a per-user dashboard; in-app notifications live
+  over WebSocket; Web Push subscriptions stored (sending arrives with the PWA work in 1.7).
+- `workflow` module: state machines as data with guarded, group-restricted transitions (409 when not
+  allowed), strict state fields, status bar; automations on create/write/delete/time/transition/webhook
+  with a sandboxed expression language, run log and once-only time triggers.
+- Import/export: CSV/XLSX, mapping suggestions, saved mappings, dry run that writes nothing, background
+  import with progress; export through relation paths honouring field access.
+- Global search index with access re-check; command palette searches records.
+- `reports` module: Jinja2 sandbox → WeasyPrint PDF, per-company layouts, versioned templates, QR codes,
+  block editor format and preview.
+- Client: chatter panel, status bar, print menu, calendar/pivot/graph views, activity dashboard,
+  notification bell, import wizard, export dialog, record route `/m/:model/:id`.
+- Security: access-rule cache tied to a transactional stamp (multi-process correct, rollback safe).
+- Tests: 238 backend (coverage 85 %, incl. 100k-row pivot p95, PDF/QR decode, real SMTP delivery), 47 frontend
+  unit (coverage 88 %), 13 Playwright e2e on desktop and mobile with axe checks.
+
 ### Sub-phase 1.2 — API and client foundation
 - HTTP API: FastAPI app, session + CSRF auth, TOTP with recovery codes, account lockout, API keys,
   OIDC SSO (PKCE), auto REST (filters, keyset pagination, expand, ETags, method calls), JSON-RPC 2.0,
@@ -48,4 +73,4 @@ All notable changes are recorded here, grouped by phase. Format follows [Keep a 
 
 ### Planning
 - Architecture document, module dependency map, core ERD, AI architecture note and phased build plan under `docs/architecture/`.
-- `DECISIONS.md` (D-001 … D-031).
+- `DECISIONS.md` (D-001 … D-031; D-032 … D-040 added in 1.3).
