@@ -5,6 +5,7 @@ from __future__ import annotations
 from typing import Any
 
 from tessera.exceptions import UserError, ValidationError
+from tessera.i18n import _
 from tessera.orm import Model, api, fields
 
 JOB_STATES = [
@@ -53,7 +54,7 @@ class Job(Model):
 
         for job in self:
             if job.state not in ("dead", "cancelled"):
-                raise UserError("Only failed or cancelled jobs can be re-queued")
+                raise UserError(_("Only failed or cancelled jobs can be re-queued"))
             job.write(
                 {
                     "state": "queued",
@@ -69,7 +70,7 @@ class Job(Model):
     def action_cancel(self) -> bool:
         for job in self:
             if job.state != "queued":
-                raise UserError("Only queued jobs can be cancelled")
+                raise UserError(_("Only queued jobs can be cancelled"))
         self.write({"state": "cancelled"})
         return True
 
@@ -132,11 +133,11 @@ class ScheduledJob(Model):
 
         for sched in self:
             if not sched.cron and not sched.interval_seconds:
-                raise ValidationError("Give a cron expression or an interval", field="cron")
+                raise ValidationError(_("Give a cron expression or an interval"), field="cron")
             if sched.cron and not croniter.is_valid(sched.cron):
-                raise ValidationError(f"Invalid cron expression '{sched.cron}'", field="cron")
+                raise ValidationError(_("Invalid cron expression '{cron}'", cron=sched.cron), field="cron")
             if registered_jobs() and sched.job_name not in registered_jobs():
-                raise ValidationError(f"Unknown job '{sched.job_name}'", field="job_name")
+                raise ValidationError(_("Unknown job '{job_name}'", job_name=sched.job_name), field="job_name")
 
     @api.expose
     def action_run_now(self) -> dict[str, Any]:

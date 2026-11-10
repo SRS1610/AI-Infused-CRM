@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from tessera.exceptions import ValidationError
+from tessera.i18n import _
 from tessera.orm import Model, api, fields
 
 
@@ -29,4 +30,7 @@ class EnrichmentSource(Model):
         for src in self:
             if src.adapter not in ADAPTERS:
                 known = ", ".join(sorted(ADAPTERS)) or "none"
-                raise ValidationError(f"Unknown enrichment adapter '{src.adapter}' (known: {known})", field="adapter")
+                raise ValidationError(
+                    _("Unknown enrichment adapter '{adapter}' (known: {known})", adapter=src.adapter, known=known),
+                    field="adapter",
+                )

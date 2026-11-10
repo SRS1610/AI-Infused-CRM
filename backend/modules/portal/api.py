@@ -12,6 +12,7 @@ from tessera.api.deps import RequestContext, authenticated_any, request_context
 from tessera.api.middleware import limiter
 from tessera.api.registry import register_router
 from tessera.exceptions import UserError
+from tessera.i18n import _
 from tessera.runtime import current_remote_ip
 
 router = register_router(APIRouter(prefix="/portal", tags=["portal"]))
@@ -26,7 +27,7 @@ def accept(
     ctx: RequestContext = Depends(request_context),
 ) -> dict[str, Any]:
     if not limiter.allow(f"portal-invite:{current_remote_ip() or '?'}", 10):
-        raise UserError("Too many attempts; try again in a minute")
+        raise UserError(_("Too many attempts; try again in a minute"))
     user = accept_invitation(ctx.env, token, password)
     return {"login": user.login}
 
@@ -34,7 +35,7 @@ def accept(
 def _partner(ctx: RequestContext) -> Any:
     partner = ctx.env.user.elevated().partner_id
     if not partner:
-        raise UserError("Your account has no contact")
+        raise UserError(_("Your account has no contact"))
     return partner
 
 

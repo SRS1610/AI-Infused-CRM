@@ -10,6 +10,7 @@ from fastapi.responses import Response
 from tessera.api.deps import RequestContext, admin_only, authenticated
 from tessera.api.registry import register_router
 from tessera.exceptions import MissingError, UserError
+from tessera.i18n import _
 from tessera.jobs import enqueue
 from tessera.reports import blocks_to_template, render_html
 
@@ -20,7 +21,7 @@ def _template(ctx: RequestContext, ref: str) -> Any:
     templates = ctx.env["reports.template"]
     tpl = templates.browse([int(ref)]).exists() if ref.isdigit() else ctx.env.ref(ref, raise_if_not_found=False)
     if not tpl or tpl._name != "reports.template":
-        raise MissingError(f"Report '{ref}' not found")
+        raise MissingError(_("Report '{ref}' not found", ref=ref))
     return tpl
 
 
@@ -28,9 +29,9 @@ def _ids(raw: str) -> list[int]:
     try:
         ids = [int(x) for x in raw.split(",") if x.strip()]
     except ValueError as exc:
-        raise UserError("ids must be comma-separated integers") from exc
+        raise UserError(_("ids must be comma-separated integers")) from exc
     if not ids or len(ids) > 500:
-        raise UserError("Give between 1 and 500 ids")
+        raise UserError(_("Give between 1 and 500 ids"))
     return ids
 
 
@@ -90,7 +91,7 @@ def preview(
 ) -> Response:
     """Render an unsaved template as HTML for the editor's live preview."""
     if model not in ctx.registry.models:
-        raise MissingError(f"Unknown model '{model}'")
+        raise MissingError(_("Unknown model '{model}'", model=model))
     record = ctx.env[model].browse([res_id])
     record.check_access("read")
     source = body or blocks_to_template(blocks or [])
@@ -99,7 +100,12 @@ def preview(
 
     html_doc = render_html(
         source,
-        {"docs": [record], "company": wrap(ctx.env.company.elevated()), "user": wrap(ctx.env.user.elevated())},
+        {
+            "docs": [record],
+            "company": wrap(ctx.env.company.elevated()),
+            "user": wrap(ctx.env.user.elevated()),
+            "lang": ctx.env.lang,
+        },
         layout=layout.as_dict() if layout else None,
     )
     return Response(html_doc, media_type="text/html; charset=utf-8")

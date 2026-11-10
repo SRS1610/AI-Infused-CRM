@@ -16,6 +16,7 @@ from tessera.api.deps import RequestContext, authenticated, request_context
 from tessera.api.middleware import limiter
 from tessera.api.registry import register_router
 from tessera.exceptions import MissingError, UserError
+from tessera.i18n import _
 from tessera.runtime import current_remote_ip
 
 router = register_router(APIRouter(prefix="/calendar", tags=["calendar"]))
@@ -26,7 +27,7 @@ def _dt(value: str) -> dt.datetime:
     try:
         parsed = dt.datetime.fromisoformat(value.replace("Z", "+00:00"))
     except ValueError as exc:
-        raise UserError("Use ISO 8601 date-times") from exc
+        raise UserError(_("Use ISO 8601 date-times")) from exc
     return parsed if parsed.tzinfo else parsed.replace(tzinfo=dt.UTC)
 
 
@@ -41,7 +42,7 @@ def events(
     """Occurrences in [start, end) visible to the caller, recurring series expanded."""
     s, e = _dt(start), _dt(end)
     if e <= s or e - s > dt.timedelta(days=370):
-        raise UserError("Ask for at most one year")
+        raise UserError(_("Ask for at most one year"))
     domain: list[Any] = []
     if user_id:
         partner = ctx.env["core.user"].elevated().browse([user_id]).partner_id
@@ -56,7 +57,7 @@ def rsvp(
     event_id: int, answer: str = Body(..., embed=True), ctx: RequestContext = Depends(authenticated)
 ) -> dict[str, Any]:
     if answer not in ANSWERS:
-        raise UserError("Answer accepted, tentative or declined")
+        raise UserError(_("Answer accepted, tentative or declined"))
     partner = ctx.env.user.elevated().partner_id
     att = (
         ctx.env["calendar.attendee"]
@@ -64,7 +65,7 @@ def rsvp(
         .search([("event_id", "=", event_id), ("partner_id", "=", partner.ids[0] if partner else 0)], limit=1)
     )
     if not att:
-        raise MissingError("You are not invited to this meeting")
+        raise MissingError(_("You are not invited to this meeting"))
     att.write({"state": answer, "responded_at": ctx.env.now()})
     return {"state": answer}
 
@@ -73,13 +74,13 @@ def rsvp(
 def rsvp_link(token: str, answer: str = Query(...), ctx: RequestContext = Depends(request_context)) -> HTMLResponse:
     """The Yes / Maybe / No links in invitation emails (no login)."""
     if not limiter.allow(f"rsvp:{current_remote_ip() or '?'}", 30):
-        raise UserError("Too many attempts")
+        raise UserError(_("Too many attempts"))
     if answer not in ANSWERS:
-        raise UserError("Unknown answer")
+        raise UserError(_("Unknown answer"))
     attendees = ctx.env["calendar.attendee"].elevated("rsvp link")
     att = attendees.search([("access_token", "=", token)], limit=1)
     if not att or not hmac.compare_digest(att.access_token or "", token):
-        raise MissingError("This invitation link is not valid")
+        raise MissingError(_("This invitation link is not valid"))
     att.write({"state": answer, "responded_at": ctx.env.now()})
     label = {"accepted": "You're attending", "tentative": "You might attend", "declined": "You declined"}[answer]
     event = att.event_id
@@ -99,7 +100,7 @@ def _link(ctx: RequestContext, slug: str) -> Any:
         .search([("slug", "=", slug), ("active", "=", True)], limit=1)
     )
     if not link:
-        raise MissingError("This booking page does not exist")
+        raise MissingError(_("This booking page does not exist"))
     return link
 
 
@@ -120,7 +121,7 @@ def booking_slots(slug: str, start: str, end: str, ctx: RequestContext = Depends
     link = _link(ctx, slug)
     s, e = _dt(start), _dt(end)
     if e - s > dt.timedelta(days=31):
-        raise UserError("Ask for at most 31 days")
+        raise UserError(_("Ask for at most 31 days"))
     return {"slots": [slot.isoformat() for slot in link.free_slots(s, e)]}
 
 
@@ -134,12 +135,12 @@ class BookingIn(BaseModel):
 @router.post("/book/{slug}", status_code=201)
 def book(slug: str, data: BookingIn, ctx: RequestContext = Depends(request_context)) -> dict[str, Any]:
     if not limiter.allow(f"booking:{current_remote_ip() or '?'}", 10):
-        raise UserError("Too many bookings from this address; try again later")
+        raise UserError(_("Too many bookings from this address; try again later"))
     link = _link(ctx, slug)
     start = _dt(data.start)
     length = dt.timedelta(minutes=link.duration_minutes)
     if start not in link.free_slots(start - dt.timedelta(minutes=1), start + length):
-        raise UserError("That time is no longer available")
+        raise UserError(_("That time is no longer available"))
     env = ctx.env.elevated("public booking")
     from modules.contacts.models.partner import normalize_email
 
@@ -199,7 +200,7 @@ def ai_suggest_times(data: SuggestIn, ctx: RequestContext = Depends(authenticate
     if data.event_id:
         record = ctx.env["calendar.event"].browse([data.event_id])
         if not record.exists():
-            raise MissingError("No such meeting")
+            raise MissingError(_("No such meeting"))
     inputs = data.model_dump(exclude_none=True, exclude={"event_id"})
     return suggest_for(ctx.env, inputs, record)
 
@@ -212,5 +213,5 @@ def ai_latest_brief(event_id: int, ctx: RequestContext = Depends(authenticated))
     check_feature(ctx.env, BRIEF)
     event = ctx.env["calendar.event"].browse([event_id])
     if not event.exists():
-        raise MissingError("No such meeting")
+        raise MissingError(_("No such meeting"))
     return {"brief": latest_brief(ctx.env, event)}

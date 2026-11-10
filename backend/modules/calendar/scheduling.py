@@ -19,6 +19,7 @@ from typing import TYPE_CHECKING, Any
 from zoneinfo import ZoneInfo
 
 from tessera.exceptions import UserError
+from tessera.i18n import _
 
 if TYPE_CHECKING:
     from tessera.orm.environment import Environment
@@ -37,7 +38,7 @@ def zone(name: str | None) -> ZoneInfo:
     try:
         return ZoneInfo(name or "UTC")
     except Exception as exc:
-        raise UserError(f"Unknown time zone '{name}'") from exc
+        raise UserError(_("Unknown time zone '{name}'", name=name)) from exc
 
 
 def event_spans(ev: Model, start: dt.datetime, end: dt.datetime) -> list[Span]:
@@ -163,7 +164,7 @@ class Constraints:
             try:
                 return aware(dt.datetime.fromisoformat(str(value).replace("Z", "+00:00")))
             except ValueError as exc:
-                raise UserError(f"'{key}' must be an ISO 8601 date-time") from exc
+                raise UserError(_("'{key}' must be an ISO 8601 date-time", key=key)) from exc
 
         tz = str(data.get("tz") or env.user.elevated().tz or "UTC")
         zone(tz)
@@ -185,16 +186,16 @@ class Constraints:
             exclude_event_id=int(data["exclude_event_id"]) if data.get("exclude_event_id") else None,
         )
         if not 5 <= c.duration_minutes <= 8 * 60:
-            raise UserError("A meeting lasts between 5 minutes and 8 hours")
+            raise UserError(_("A meeting lasts between 5 minutes and 8 hours"))
         if c.step_minutes not in (5, 10, 15, 20, 30, 60):
-            raise UserError("Slots start every 5, 10, 15, 20, 30 or 60 minutes")
+            raise UserError(_("Slots start every 5, 10, 15, 20, 30 or 60 minutes"))
         if c.prefer not in (None, "morning", "afternoon"):
-            raise UserError("Prefer 'morning' or 'afternoon'")
+            raise UserError(_("Prefer 'morning' or 'afternoon'"))
         try:
             if dt.time.fromisoformat(c.day_end) <= dt.time.fromisoformat(c.day_start):
-                raise UserError("The working day ends before it starts")
+                raise UserError(_("The working day ends before it starts"))
         except ValueError as exc:
-            raise UserError("Use HH:MM for the working day") from exc
+            raise UserError(_("Use HH:MM for the working day")) from exc
         return c
 
 
@@ -226,7 +227,7 @@ def suggest_times(env: Environment, partner_ids: list[int], c: Constraints, *, l
     start = aware(c.start) if c.start else now
     end = aware(c.end) if c.end else start + dt.timedelta(days=7)
     if end <= start or end - start > MAX_WINDOW:
-        raise UserError("Search at most 31 days ahead")
+        raise UserError(_("Search at most 31 days ahead"))
     start = max(start, now + dt.timedelta(minutes=c.min_notice_minutes))
     length = dt.timedelta(minutes=c.duration_minutes)
     pad = dt.timedelta(minutes=c.buffer_minutes)
@@ -275,15 +276,15 @@ def _rank(
     score = 10.0 - (s - start).total_seconds() / 86400  # sooner is better, a day costs a point
     if (c.prefer == "morning" and local.hour < 12) or (c.prefer == "afternoon" and local.hour >= 12):
         score += 3
-        reasons.append(f"In the {c.prefer}, as asked")
+        reasons.append(_("In the {period}, as asked", period=c.prefer))
     if zones:
-        reasons.append("Inside everyone's working hours" if len(zones) > 1 else "Inside working hours")
+        reasons.append(_("Inside everyone's working hours") if len(zones) > 1 else _("Inside working hours"))
     breathing = dt.timedelta(minutes=15)
     if not any(overlaps(s, e, spans, breathing) for spans in busy.values()):
         score += 0.5
-        reasons.append("Not back-to-back with another meeting")
+        reasons.append(_("Not back-to-back with another meeting"))
     if c.room_id:
-        reasons.append("The room is free")
+        reasons.append(_("The room is free"))
     return {
         "start": s.isoformat(),
         "stop": e.isoformat(),

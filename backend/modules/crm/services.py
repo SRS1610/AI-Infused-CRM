@@ -5,6 +5,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any
 
 from tessera.exceptions import UserError
+from tessera.i18n import _
 from tessera.jobs import job
 from tessera.orm.domain import Domain
 
@@ -158,7 +159,7 @@ def merge_leads(target: Model, sources: Model) -> None:
     target.ensure_one()
     sources = sources - target
     if not sources:
-        raise UserError("Nothing to merge")
+        raise UserError(_("Nothing to merge"))
     (target | sources).check_access("write")
     env = target.env
     cr = env.cr

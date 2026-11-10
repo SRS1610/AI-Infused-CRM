@@ -8,6 +8,7 @@ from fastapi import APIRouter, Depends
 
 from tessera.api.deps import RequestContext, authenticated
 from tessera.exceptions import MissingError
+from tessera.i18n import _
 
 router = APIRouter(prefix="/metadata", tags=["metadata"])
 
@@ -18,17 +19,25 @@ def list_models(ctx: RequestContext = Depends(authenticated)) -> list[dict[str, 
     for name, cls in sorted(ctx.registry.models.items()):
         if not ctx.env[name].check_access_rights("read", raise_exception=False):
             continue
-        out.append({"name": name, "description": cls._description, "module": cls._module, "studio": cls._studio})
+        out.append(
+            {
+                "name": name,
+                "description": cls._description_in(ctx.env.lang),
+                "module": cls._module,
+                "studio": cls._studio,
+            }
+        )
     return out
 
 
 @router.get("/models/{model_name}")
 def describe_model(model_name: str, ctx: RequestContext = Depends(authenticated)) -> dict[str, Any]:
     if model_name not in ctx.registry.models:
-        raise MissingError(f"Unknown model '{model_name}'")
+        raise MissingError(_("Unknown model '{model_name}'", model_name=model_name))
     model = ctx.env[model_name]
     model.check_access_rights("read")
     desc = ctx.registry.describe_model(model_name)
+    desc["description"] = type(model)._description_in(ctx.env.lang)
     desc["fields"] = model.fields_get()
     desc["methods"] = sorted(type(model)._exposed_methods)
     desc["access"] = {

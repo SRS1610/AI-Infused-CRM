@@ -19,6 +19,7 @@ from tessera.api.deps import RequestContext, admin_only, authenticated, authenti
 from tessera.api.registry import register_router
 from tessera.config import get_settings
 from tessera.exceptions import AccessDenied, AccessError, MissingError, UserError
+from tessera.i18n import _
 
 router = register_router(APIRouter(prefix="/chatter", tags=["chatter"]))
 
@@ -116,7 +117,7 @@ def create_message(
     model: str, res_id: int, data: PostIn, ctx: RequestContext = Depends(authenticated_any)
 ) -> dict[str, Any]:
     if not data.body.strip() and not data.attachment_ids:
-        raise UserError("A message needs a body or an attachment")
+        raise UserError(_("A message needs a body or an attachment"))
     msg = post_message(
         ctx.env,
         model,
@@ -135,13 +136,13 @@ def create_message(
 def _own_message(ctx: RequestContext, message_id: int) -> Any:
     msg = ctx.env["chatter.message"].elevated().browse([message_id]).exists()
     if not msg:
-        raise MissingError("Message not found")
+        raise MissingError(_("Message not found"))
     check_thread_access(ctx.env, msg.model, msg.res_id, "read")
     is_admin = ctx.registry.security.has_groups(ctx.env, ["core.group_system"])
     if not is_admin and (not msg.author_id or msg.author_id.ids[0] != ctx.uid):
-        raise AccessError("You can only change your own messages")
+        raise AccessError(_("You can only change your own messages"))
     if msg.message_type not in ("comment", "note"):
-        raise UserError("Only comments and notes can be changed")
+        raise UserError(_("Only comments and notes can be changed"))
     return msg
 
 
@@ -165,10 +166,10 @@ def toggle_reaction(
 ) -> dict[str, Any]:
     msg = ctx.env["chatter.message"].elevated().browse([message_id]).exists()
     if not msg:
-        raise MissingError("Message not found")
+        raise MissingError(_("Message not found"))
     check_thread_access(ctx.env, msg.model, msg.res_id, "read")
     if msg.is_internal and not is_internal_user(ctx.env):
-        raise MissingError("Message not found")
+        raise MissingError(_("Message not found"))
     reactions = ctx.env["chatter.reaction"].elevated()
     existing = reactions.search(
         [("message_id", "=", message_id), ("user_id", "=", ctx.uid), ("emoji", "=", data.emoji)]
@@ -277,7 +278,7 @@ def create_activity(
 def _activity_for_update(ctx: RequestContext, activity_id: int) -> Any:
     act = ctx.env["chatter.activity"].elevated().browse([activity_id]).exists()
     if not act:
-        raise MissingError("Activity not found")
+        raise MissingError(_("Activity not found"))
     if act.user_id.ids[0] != ctx.uid:
         check_thread_access(ctx.env, act.model, act.res_id, "write")
     else:
@@ -362,9 +363,9 @@ async def inbound_email(request: Request, ctx: RequestContext = Depends(request_
     supplied = request.headers.get("x-tessera-inbound-token")
     if not (token and supplied and hmac.compare_digest(token, supplied)):
         if not ctx.authenticated:
-            raise AccessDenied("Inbound token or administrator credentials required")
+            raise AccessDenied(_("Inbound token or administrator credentials required"))
         admin_only(authenticated(ctx))
     raw = await request.body()
     if len(raw) > 25 * 1024 * 1024:
-        raise UserError("Message too large")
+        raise UserError(_("Message too large"))
     return await run_in_threadpool(process_email, ctx.env, raw)

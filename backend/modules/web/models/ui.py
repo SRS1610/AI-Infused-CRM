@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from tessera.exceptions import ValidationError
+from tessera.i18n import _
 from tessera.orm import Model, api, fields
 from tessera.orm.domain import parse
 
@@ -54,13 +55,17 @@ class Action(Model):
     def _check_kind(self) -> None:
         for action in self:
             if action.kind in ("window", "server", "report") and not action.model_name:
-                raise ValidationError(f"Action '{action.name}' needs a model", field="model_name")
+                raise ValidationError(_("Action '{name}' needs a model", name=action.name), field="model_name")
             if action.kind == "url" and not action.url:
-                raise ValidationError(f"URL action '{action.name}' needs a url", field="url")
+                raise ValidationError(_("URL action '{name}' needs a url", name=action.name), field="url")
             if action.kind == "client" and not action.client_tag:
-                raise ValidationError(f"Client action '{action.name}' needs a client_tag", field="client_tag")
+                raise ValidationError(
+                    _("Client action '{name}' needs a client_tag", name=action.name), field="client_tag"
+                )
             if action.kind == "server" and not action.server_method:
-                raise ValidationError(f"Server action '{action.name}' needs a method", field="server_method")
+                raise ValidationError(
+                    _("Server action '{name}' needs a method", name=action.name), field="server_method"
+                )
 
     @api.constrains("domain")
     def _check_domain(self) -> None:
@@ -109,7 +114,7 @@ class Menu(Model):
             current = menu
             while current:
                 if current.ids[0] in seen:
-                    raise ValidationError("Menu hierarchy cannot contain cycles")
+                    raise ValidationError(_("Menu hierarchy cannot contain cycles"))
                 seen.add(current.ids[0])
                 current = current.parent_id
 
@@ -142,14 +147,16 @@ class View(Model):
         for view in self:
             if view.inherit_id:
                 if view.inherit_id.model_name != view.model_name or view.inherit_id.type != view.type:
-                    raise ValidationError("An extension view must have the same model and type as its parent")
+                    raise ValidationError(_("An extension view must have the same model and type as its parent"))
                 validate_operations(view.operations or [])
             else:
                 if not view.definition:
-                    raise ValidationError(f"Base view '{view.name}' needs a definition", field="definition")
+                    raise ValidationError(
+                        _("Base view '{name}' needs a definition", name=view.name), field="definition"
+                    )
                 validate_definition(view.type, view.definition)
             if view.model_name not in self.env.registry.models:
-                raise ValidationError(f"Unknown model '{view.model_name}'", field="model_name")
+                raise ValidationError(_("Unknown model '{model_name}'", model_name=view.model_name), field="model_name")
 
 
 class Filter(Model):

@@ -8,6 +8,7 @@ from typing import Any
 
 from modules.calendar.recurrence import normalize_rule, occurrences
 from tessera.exceptions import ConflictError, UserError, ValidationError
+from tessera.i18n import _
 from tessera.orm import Model, api, fields
 
 ATTENDEE_STATES = [
@@ -102,11 +103,11 @@ class Event(Model):
     def _check_times(self) -> None:
         for ev in self:
             if ev.stop and ev.start and ev.stop < ev.start:
-                raise ValidationError("The meeting ends before it starts", field="stop")
+                raise ValidationError(_("The meeting ends before it starts"), field="stop")
             if ev.rrule:
                 normalize_rule(ev.rrule)
                 if ev.recurrence_id:
-                    raise ValidationError("A modified occurrence cannot itself repeat", field="rrule")
+                    raise ValidationError(_("A modified occurrence cannot itself repeat"), field="rrule")
 
     @api.constrains("room_id", "start", "stop", "rrule", "exdates", "active")
     def _check_room(self) -> None:
@@ -116,7 +117,12 @@ class Event(Model):
                 if clash is not None:
                     other, when = clash
                     raise ConflictError(
-                        f"{ev.room_id.name} is already booked for '{other.name}' on {when:%Y-%m-%d %H:%M} UTC",
+                        _(
+                            "{room} is already booked for '{event}' on {when:%Y-%m-%d %H:%M} UTC",
+                            room=ev.room_id.name,
+                            event=other.name,
+                            when=when,
+                        ),
                         field="room_id",
                         conflicting_event=other.ids[0],
                     )
@@ -264,7 +270,7 @@ class Event(Model):
         """Remove one occurrence from a series (adds an EXDATE)."""
         self.ensure_one()
         if not self.rrule:
-            raise UserError("This meeting does not repeat")
+            raise UserError(_("This meeting does not repeat"))
         when = aware(dt.datetime.fromisoformat(occurrence_start)).isoformat()
         self.write({"exdates": sorted({*(self.exdates or []), when})})
         return True
@@ -274,7 +280,7 @@ class Event(Model):
         """Detach one occurrence as its own event (the series keeps the others)."""
         self.ensure_one()
         if not self.rrule:
-            raise UserError("This meeting does not repeat")
+            raise UserError(_("This meeting does not repeat"))
         original = aware(dt.datetime.fromisoformat(occurrence_start))
         length = aware(self.stop) - aware(self.start)
         vals = {

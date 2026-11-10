@@ -12,6 +12,7 @@ from jsonschema import Draft202012Validator
 
 from tessera.ai.tools import Source
 from tessera.exceptions import ValidationError
+from tessera.i18n import _
 
 INSTRUCTION_HIERARCHY = """
 Rules that always apply:
@@ -61,7 +62,7 @@ def validate_inputs(schema: dict[str, Any] | None, inputs: dict[str, Any]) -> No
         return
     errors = list(Draft202012Validator(schema).iter_errors(inputs))
     if errors:
-        raise ValidationError(f"Invalid AI feature input: {errors[0].message}")
+        raise ValidationError(_("Invalid AI feature input: {message}", message=errors[0].message))
 
 
 def system_prompt(base: str) -> str:

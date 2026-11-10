@@ -21,6 +21,7 @@ from typing import TYPE_CHECKING, Any, ClassVar
 
 from tessera.config import get_settings
 from tessera.exceptions import AccessError, UserError
+from tessera.i18n import _
 from tessera.orm import Model, api, fields
 from tessera.realtime import publish_after_commit
 
@@ -175,10 +176,10 @@ def is_thread(model: Model | type) -> bool:
 def check_thread_access(env: Environment, model: str, res_id: int, operation: str = "read") -> Model:
     """The record a thread belongs to, after checking the caller may ``operation`` it."""
     if model not in env.registry.models:
-        raise UserError(f"Unknown model '{model}'")
+        raise UserError(_("Unknown model '{model}'", model=model))
     record = env[model].browse([int(res_id)])
     if not is_thread(record):
-        raise UserError(f"'{model}' has no discussion thread")
+        raise UserError(_("'{model}' has no discussion thread", model=model))
     record.check_access(operation)
     return record
 
@@ -262,7 +263,7 @@ def post_message(
     author = author_id if author_id is not None else (env.uid if env.uid != SYSTEM_UID else None)
     internal = message_type in ("note", "notification", "system", "activity_done")
     if check_access and internal and not is_internal_user(env):
-        raise AccessError("Portal users can only post public messages")
+        raise AccessError(_("Portal users can only post public messages"))
     subtype = env.ref(SUBTYPE_BY_TYPE.get(message_type, "chatter.subtype_comment"), raise_if_not_found=False)
     mentions = _resolve_mentions(env, body, mention_user_ids)
     if attachment_ids:
@@ -321,10 +322,10 @@ def _notify(env: Environment, msg: Model, mentions: list[int]) -> None:
     if not recipients:
         return
     users = env["core.user"].elevated().browse(list(recipients))
-    author_name = msg.author_id.name if msg.author_id else "System"
+    author_name = msg.author_id.name if msg.author_id else _("System")
     title_by_kind = {
-        "message": f"{author_name} on {msg.record_name}",
-        "mention": f"{author_name} mentioned you on {msg.record_name}",
+        "message": _("{author} on {record}", author=author_name, record=msg.record_name),
+        "mention": _("{author} mentioned you on {record}", author=author_name, record=msg.record_name),
     }
     preview = re.sub(r"\s+", " ", re.sub(r"<[^>]+>", " ", msg.body or "")).strip()[:280]
     notifications = env["core.notification"].elevated("notify")
@@ -445,7 +446,7 @@ def schedule_activity(
     types = env["chatter.activity_type"].elevated()
     atype = env.ref(activity_type) if isinstance(activity_type, str) else types.browse([activity_type]).exists()
     if not atype:
-        raise UserError(f"Unknown activity type '{activity_type}'")
+        raise UserError(_("Unknown activity type '{activity_type}'", activity_type=activity_type))
     deadline = (
         dt.date.fromisoformat(date_deadline)
         if date_deadline
@@ -453,7 +454,7 @@ def schedule_activity(
     )
     assignee = user_id or (env.uid if env.uid != SYSTEM_UID else None)
     if not assignee:
-        raise UserError("An activity needs an assignee")
+        raise UserError(_("An activity needs an assignee"))
     record = env[model].browse([res_id])
     act = (
         env["chatter.activity"]
@@ -474,8 +475,8 @@ def schedule_activity(
     if assignee != env.uid:
         env["core.notification"].notify(
             [assignee],
-            f"New activity: {act.summary or atype.name}",
-            f"{record.elevated().display_name} — due {deadline.isoformat()}",
+            _("New activity: {summary}", summary=act.summary or atype.name),
+            _("{record} — due {date}", record=record.elevated().display_name, date=deadline.isoformat()),
             kind="activity",
             model=model,
             res_id=res_id,

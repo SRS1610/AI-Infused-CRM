@@ -10,6 +10,7 @@ from modules.discuss.models.channel import unread_counts
 from tessera.api.deps import RequestContext, authenticated
 from tessera.api.registry import register_router
 from tessera.exceptions import MissingError
+from tessera.i18n import _
 from tessera.realtime import hub
 
 router = register_router(APIRouter(prefix="/discuss", tags=["discuss"]))
@@ -80,7 +81,7 @@ def _membership(ctx: RequestContext, channel_id: int) -> Any:
         .search([("channel_id", "=", channel_id), ("user_id", "=", ctx.uid)], limit=1)
     )
     if not member:
-        raise MissingError("You are not a member of this channel")
+        raise MissingError(_("You are not a member of this channel"))
     return member
 
 

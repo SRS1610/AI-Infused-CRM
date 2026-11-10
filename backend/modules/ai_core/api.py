@@ -19,6 +19,7 @@ from tessera.ai.runtime import HANDLERS, check_enabled, get_feature, proposal_di
 from tessera.api.deps import RequestContext, admin_only, authenticated, database_url_for
 from tessera.api.registry import register_router
 from tessera.exceptions import AccessError, MissingError
+from tessera.i18n import _
 
 router = register_router(APIRouter(prefix="/ai", tags=["ai"]))
 _health_cache: dict[str, Any] = {"at": 0.0, "ok": False}
@@ -54,10 +55,10 @@ def _record(ctx: RequestContext, data: RunIn) -> Any:
     if not data.res_model:
         return None
     if data.res_model not in ctx.env.registry.models or data.res_id is None:
-        raise MissingError("Unknown record")
+        raise MissingError(_("Unknown record"))
     rec = ctx.env[data.res_model].browse([data.res_id])
     if not rec.exists():
-        raise MissingError("Unknown record")
+        raise MissingError(_("Unknown record"))
     rec.check_access("read")
     return rec
 
@@ -170,10 +171,10 @@ def _is_admin(ctx: RequestContext) -> bool:
 def _visible_run(ctx: RequestContext, run_id: int) -> Any:
     run = ctx.env["ai_core.run"].elevated().browse([run_id]).exists()
     if not run:
-        raise MissingError("No such run")
+        raise MissingError(_("No such run"))
     if run.user_id.ids[:1] != [ctx.env.uid] and not _is_admin(ctx):
         if not run.res_model or run.res_model not in ctx.env.registry.models:
-            raise AccessError("Not your run")
+            raise AccessError(_("Not your run"))
         ctx.env[run.res_model].browse([run.res_id]).check_access("read")  # audit trail of a record I can read
     return run
 
@@ -197,7 +198,7 @@ def list_runs(
     runs = ctx.env["ai_core.run"].elevated()
     if res_model:
         if res_model not in ctx.env.registry.models or res_id is None:
-            raise MissingError("Unknown record")
+            raise MissingError(_("Unknown record"))
         ctx.env[res_model].browse([res_id]).check_access("read")
         found = runs.search([("res_model", "=", res_model), ("res_id", "=", res_id)], limit=limit)
     else:

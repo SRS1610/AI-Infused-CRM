@@ -8,6 +8,7 @@ from tessera.ai import retrieval
 from tessera.ai.prompts import html_to_text
 from tessera.ai.tools import ToolContext, tool
 from tessera.exceptions import AccessError, MissingError, ValidationError
+from tessera.i18n import _
 from tessera.orm import fields as F
 
 MAX_FIELDS = 30
@@ -15,7 +16,7 @@ MAX_FIELDS = 30
 
 def _model(ctx: ToolContext, model: str) -> Any:
     if model not in ctx.env.registry.models or not ctx.env.registry.models[model]._auto:
-        raise ValidationError(f"Unknown model '{model}'")
+        raise ValidationError(_("Unknown model '{model}'", model=model))
     return ctx.env[model]
 
 
@@ -44,7 +45,7 @@ def _plain(rec: Any, names: list[str]) -> dict[str, Any]:
 def read_record(ctx: ToolContext, model: str, record_id: int, fields: list[str] | None = None) -> dict[str, Any]:
     rec = _model(ctx, model).browse([record_id])
     if not rec.exists():
-        raise MissingError("No such record")
+        raise MissingError(_("No such record"))
     rec.check_access("read")
     readable = [
         f.name
@@ -108,11 +109,11 @@ def retrieval_search(ctx: ToolContext, query: str, limit: int = 6) -> list[dict[
 def propose_write(ctx: ToolContext, model: str, record_id: int, values: dict[str, Any]) -> dict[str, Any]:
     rec = _model(ctx, model).browse([record_id])
     if not rec.exists():
-        raise MissingError("No such record")
+        raise MissingError(_("No such record"))
     rec.check_access("write")  # proposing a change the user could not make is pointless
     unknown = [k for k in values if k not in rec._fields or not rec._check_field_access(rec._fields[k], "write")]
     if unknown:
-        raise AccessError(f"Fields not writable: {', '.join(unknown)}")
+        raise AccessError(_("Fields not writable: {unknown}", unknown=", ".join(unknown)))
     return ctx.propose("write", model, record_id, payload=values, title=f"Update {rec.display_name}")
 
 

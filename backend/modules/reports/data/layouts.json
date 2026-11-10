@@ -2,6 +2,6 @@
   {"id": "layout_default", "model": "reports.layout", "noupdate": true, "values": {
     "name": "Standard",
     "header_html": "<table style='width:100%'><tr><td><strong>{{ company.name }}</strong></td><td style='text-align:right'>{{ company.street or '' }} {{ company.city or '' }}</td></tr></table>",
-    "footer_html": "{{ company.email or '' }} · {{ company.phone or '' }} · {{ company.website or '' }}{% if company.vat %} · Tax ID {{ company.vat }}{% endif %}"
+    "footer_html": "{{ company.email or '' }} · {{ company.phone or '' }} · {{ company.website or '' }}{% if company.vat %} · {{ _(\"Tax ID {vat}\", vat=company.vat) }}{% endif %}"
   }}
 ]

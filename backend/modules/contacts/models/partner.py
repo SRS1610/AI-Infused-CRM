@@ -6,6 +6,7 @@ import re
 from typing import Any
 
 from tessera.exceptions import ValidationError
+from tessera.i18n import _
 from tessera.orm import Model, api, fields
 
 PARTNER_TYPES = [
@@ -143,13 +144,13 @@ class Partner(Model):
     def _check_name(self) -> None:
         for p in self:
             if not p.name and (p.type == "contact" or p.is_company):
-                raise ValidationError("A contact needs a name", field="name")
+                raise ValidationError(_("A contact needs a name"), field="name")
             if p.parent_id and p.parent_id.ids == p.ids:
-                raise ValidationError("A contact cannot be its own company", field="parent_id")
+                raise ValidationError(_("A contact cannot be its own company"), field="parent_id")
             ancestor, seen = p.parent_id, set()
             while ancestor:
                 if ancestor.ids[0] in seen or (p.ids and ancestor.ids[0] == p.ids[0]):
-                    raise ValidationError("Recursive company hierarchy", field="parent_id")
+                    raise ValidationError(_("Recursive company hierarchy"), field="parent_id")
                 seen.add(ancestor.ids[0])
                 ancestor = ancestor.parent_id
 
@@ -180,7 +181,7 @@ class Partner(Model):
         if parent_id:  # refuse cycles before anything depending on the hierarchy is recomputed
             ancestors = {int(parent_id)} | self.browse([int(parent_id)]).elevated()._ancestor_ids()
             if set(self.ids) & ancestors:
-                raise ValidationError("Recursive company hierarchy", field="parent_id")
+                raise ValidationError(_("Recursive company hierarchy"), field="parent_id")
         return super().write(vals)
 
     # -- duplicates ---------------------------------------------------------------------------------

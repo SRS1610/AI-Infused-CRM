@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from tessera.exceptions import ValidationError
+from tessera.i18n import _
 from tessera.orm import Model, api, fields
 from tessera.orm.domain import parse
 
@@ -25,7 +26,9 @@ class ModelAccess(Model):
     def _check_model(self) -> None:
         for access in self:
             if access.model_name not in self.env.registry.models:
-                raise ValidationError(f"Unknown model '{access.model_name}'", field="model_name")
+                raise ValidationError(
+                    _("Unknown model '{model_name}'", model_name=access.model_name), field="model_name"
+                )
 
 
 class RecordRule(Model):
@@ -61,7 +64,7 @@ class RecordRule(Model):
     def _check_domain(self) -> None:
         for rule in self:
             if rule.model_name not in self.env.registry.models:
-                raise ValidationError(f"Unknown model '{rule.model_name}'", field="model_name")
+                raise ValidationError(_("Unknown model '{model_name}'", model_name=rule.model_name), field="model_name")
             parse(rule.domain)
 
 

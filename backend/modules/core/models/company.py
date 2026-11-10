@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import Any
 
 from tessera.exceptions import ValidationError
+from tessera.i18n import _
 from tessera.orm import Model, api, fields
 
 
@@ -45,7 +46,7 @@ class Company(Model):
             current = company
             while current:
                 if current.ids[0] in seen:
-                    raise ValidationError("A company cannot be its own ancestor")
+                    raise ValidationError(_("A company cannot be its own ancestor"))
                 seen.add(current.ids[0])
                 current = current.parent_id
 

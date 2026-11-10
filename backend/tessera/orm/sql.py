@@ -16,6 +16,7 @@ from sqlalchemy.sql import ColumnElement
 from sqlalchemy.types import Text as SAText
 
 from tessera.exceptions import ValidationError
+from tessera.i18n import _
 from tessera.orm import fields as F
 from tessera.orm.domain import And, Leaf, Node, Not, Or, parse
 
@@ -90,7 +91,9 @@ class Query:
             nulls = pieces[2].lower() if len(pieces) > 2 else None
             field = self.cls._fields.get(fname)
             if field is None:
-                raise ValidationError(f"Cannot order by unknown field '{fname}' on {self.cls._name}")
+                raise ValidationError(
+                    _("Cannot order by unknown field '{fname}' on {name}", fname=fname, name=self.cls._name)
+                )
             if isinstance(field, F.Many2one) and field.store:
                 co_cls = self.registry.models[field.comodel_name or ""]
                 co_table = self.registry.table_for(co_cls._name).alias(f"ord_{fname}")
@@ -106,7 +109,9 @@ class Query:
             elif field.store:
                 expr = self.column(field)
             else:
-                raise ValidationError(f"Cannot order by non-stored field '{fname}' on {self.cls._name}")
+                raise ValidationError(
+                    _("Cannot order by non-stored field '{fname}' on {name}", fname=fname, name=self.cls._name)
+                )
             clause = expr.desc() if direction == "desc" else expr.asc()
             if nulls == "first" or (nulls is None and direction == "desc"):
                 clause = clause.nulls_first()
@@ -135,7 +140,7 @@ class Query:
         head = segments[0]
         field = cls._fields.get(head)
         if field is None:
-            raise ValidationError(f"Unknown field '{head}' in domain on {cls._name}")
+            raise ValidationError(_("Unknown field '{head}' in domain on {name}", head=head, name=cls._name))
 
         if len(segments) > 1:
             rest = Leaf(".".join(segments[1:]), leaf.operator, leaf.value)
@@ -154,11 +159,11 @@ class Query:
         if isinstance(field, F.One2many | F.Many2many):
             return self._compile_x2many(field, op, value, table, cls)
         if op in ("child_of", "parent_of"):
-            raise ValidationError(f"Operator '{op}' only applies to relational fields")
+            raise ValidationError(_("Operator '{op}' only applies to relational fields", op=op))
 
         col = self.column(field, table)
         if op in ("any", "not_any"):
-            raise ValidationError(f"Operator '{op}' only applies to relational fields")
+            raise ValidationError(_("Operator '{op}' only applies to relational fields", op=op))
         if op == "is_set":
             return col.isnot(None) if not isinstance(field, F.Boolean) else col.is_(True)
         if op == "is_not_set":
@@ -176,7 +181,7 @@ class Query:
             return col.isnot(None) if value is None else or_(col.is_(None), col != value)
         if op in (">", ">=", "<", "<="):
             if value is None:
-                raise ValidationError(f"Operator '{op}' requires a value")
+                raise ValidationError(_("Operator '{op}' requires a value", op=op))
             comparisons: dict[str, ColumnElement[Any]] = {
                 ">": col > value,
                 ">=": col >= value,
@@ -207,7 +212,7 @@ class Query:
             return expr if not op.startswith("not") else or_(text_col.is_(None), not_(expr))
         if op == "starts_with":
             return text_col.ilike(f"{value}%")
-        raise ValidationError(f"Unsupported operator '{op}'")
+        raise ValidationError(_("Unsupported operator '{op}'", op=op))
 
     def _coerce(self, field: F.Field, value: Any) -> Any:
         if value is None or (value is False and not isinstance(field, F.Boolean)):
@@ -250,7 +255,7 @@ class Query:
             elif isinstance(v, str) and v.isdigit():
                 ids.append(int(v))
             else:
-                raise ValidationError(f"'{v!r}' is not a record id")
+                raise ValidationError(_("'{value}' is not a record id", value=repr(v)))
         return ids
 
     # -- relational leaves --------------------------------------------------------------
@@ -318,7 +323,7 @@ class Query:
         if op in (">", ">=", "<", "<="):
             ids = self._ids_from_value(value)
             return {">": col > ids[0], ">=": col >= ids[0], "<": col < ids[0], "<=": col <= ids[0]}[op]
-        raise ValidationError(f"Unsupported operator '{op}' for many2one '{field.name}'")
+        raise ValidationError(_("Unsupported operator '{op}' for many2one '{name}'", op=op, name=field.name))
 
     def _x2many_subquery(
         self,
@@ -381,15 +386,17 @@ class Query:
             if not ids:
                 return self._x2many_subquery(field, table, co_cls, co_table, base_cond)
             return not_(self._x2many_subquery(field, table, co_cls, co_table, and_(base_cond, co_table.c.id.in_(ids))))
-        raise ValidationError(f"Unsupported operator '{op}' for x2many '{field.name}'")
+        raise ValidationError(_("Unsupported operator '{op}' for x2many '{name}'", op=op, name=field.name))
 
     def _traverse(self, field: F.Field, rest: Leaf, table: Table, cls: type[Model], negate: bool) -> ColumnElement[Any]:
         if not field.relational or not field.comodel_name:
-            raise ValidationError(f"Cannot traverse non-relational field '{field.name}' on {cls._name}")
+            raise ValidationError(
+                _("Cannot traverse non-relational field '{field}' on {model}", field=field.name, model=cls._name)
+            )
         co_cls, co_table = self._comodel_query(field.comodel_name)
         if isinstance(field, F.Many2one):
             if not field.store:
-                raise ValidationError(f"Cannot traverse non-stored many2one '{field.name}'")
+                raise ValidationError(_("Cannot traverse non-stored many2one '{name}'", name=field.name))
             sub = select(co_table.c.id).where(self._comodel_filter(co_cls, co_table, rest))
             return table.c[field.column_name].in_(sub)
         cond: ColumnElement[Any] = self._comodel_filter(co_cls, co_table, rest)
@@ -410,12 +417,16 @@ class Query:
             rec = cls._rec_name if cls._rec_name in cls._fields and cls._fields[cls._rec_name].store else None
             if rec:
                 return self._compile_leaf(Leaf(rec, leaf.operator, leaf.value), table, cls)
-        raise ValidationError(f"Field '{field.name}' on {cls._name} is not stored and cannot be searched")
+        raise ValidationError(
+            _("Field '{field}' on {model} is not stored and cannot be searched", field=field.name, model=cls._name)
+        )
 
     def _hierarchy_ids(self, co_cls: type[Model], ids: Sequence[int], op: str) -> list[int]:
         parent = co_cls._parent_name
         if parent not in co_cls._fields:
-            raise ValidationError(f"Model '{co_cls._name}' has no parent field '{parent}' for {op}")
+            raise ValidationError(
+                _("Model '{name}' has no parent field '{parent}' for {op}", name=co_cls._name, parent=parent, op=op)
+            )
         if not ids:
             return []
         table = self.registry.table_for(co_cls._name)
@@ -447,30 +458,32 @@ class Query:
         group_exprs: list[Any] = []
         labels: list[str] = []
         for spec in groupby:
-            fname, _, granularity = spec.partition(":")
+            fname, _sep, granularity = spec.partition(":")
             field = self.cls._fields.get(fname)
             if field is None or not field.store:
-                raise ValidationError(f"Cannot group by '{fname}' on {self.cls._name}")
+                raise ValidationError(_("Cannot group by '{fname}' on {name}", fname=fname, name=self.cls._name))
             expr = self.column(field)
             if granularity:
                 if not isinstance(field, F.Date | F.Datetime):
-                    raise ValidationError(f"Granularity '{granularity}' only applies to date fields")
+                    raise ValidationError(
+                        _("Granularity '{granularity}' only applies to date fields", granularity=granularity)
+                    )
                 if granularity not in ("day", "week", "month", "quarter", "year"):
-                    raise ValidationError(f"Unknown granularity '{granularity}'")
+                    raise ValidationError(_("Unknown granularity '{granularity}'", granularity=granularity))
                 expr = func.date_trunc(granularity, expr)
             label = spec.replace(":", "__")
             group_exprs.append(expr.label(label))
             labels.append(label)
         agg_exprs: list[Any] = [func.count().label("__count")]
         for spec in aggregates:
-            fname, _, fn = spec.partition(":")
+            fname, _sep, fn = spec.partition(":")
             fn = fn or "sum"
             field = self.cls._fields.get(fname)
             if field is None or not field.store:
-                raise ValidationError(f"Cannot aggregate '{fname}' on {self.cls._name}")
+                raise ValidationError(_("Cannot aggregate '{fname}' on {name}", fname=fname, name=self.cls._name))
             col = self.column(field)
             if fn not in ("sum", "avg", "min", "max", "count", "count_distinct"):
-                raise ValidationError(f"Unknown aggregate '{fn}'")
+                raise ValidationError(_("Unknown aggregate '{fn}'", fn=fn))
             agg = func.count(func.distinct(col)) if fn == "count_distinct" else getattr(func, fn)(col)
             agg_exprs.append(agg.label(f"{fname}__{fn}"))
         stmt: Select[Any] = (
@@ -488,7 +501,7 @@ class Query:
                 direction = pieces[1].lower() if len(pieces) > 1 else "asc"
                 target = next((e for e in [*group_exprs, *agg_exprs] if e.name == key), None)
                 if target is None:
-                    raise ValidationError(f"Cannot order groups by '{pieces[0]}'")
+                    raise ValidationError(_("Cannot order groups by '{order}'", order=pieces[0]))
                 order_clauses.append(target.desc() if direction == "desc" else target.asc())
         elif group_exprs:
             order_clauses = [e.asc().nulls_first() for e in group_exprs]

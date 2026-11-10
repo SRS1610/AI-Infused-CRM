@@ -8,6 +8,7 @@ import secrets
 from typing import Any
 
 from tessera.exceptions import UserError, ValidationError
+from tessera.i18n import _
 from tessera.orm import Model, api, fields
 
 STATES = [
@@ -97,7 +98,7 @@ class Quotation(Model):
     def _check_dates(self) -> None:
         for q in self:
             if q.validity_date and q.date_order and q.validity_date < q.date_order.date():
-                raise ValidationError("The validity date is before the quotation date", field="validity_date")
+                raise ValidationError(_("The validity date is before the quotation date"), field="validity_date")
 
     # -- workflow ------------------------------------------------------------------------------------
 
@@ -119,15 +120,15 @@ class Quotation(Model):
 
         self.ensure_one()
         if not self.line_ids.filtered(lambda line: not line.display_type):
-            raise UserError("Add at least one line before sending")
+            raise UserError(_("Add at least one line before sending"))
         if self.state not in ("draft", "sent"):
-            raise UserError("Only draft or sent quotations can be sent")
+            raise UserError(_("Only draft or sent quotations can be sent"))
         me = self.elevated("send quotation")
         if not me.access_token:
             me.write({"access_token": secrets.token_urlsafe(24)})
         recipient = email_to or self.partner_id.email or self.partner_id.commercial_partner_id.email
         if not recipient:
-            raise UserError("The customer has no email address")
+            raise UserError(_("The customer has no email address"))
         attachment_ids: list[int] = []
         template = self.env.ref("sale.report_quotation", raise_if_not_found=False)
         if template is not None:
@@ -186,11 +187,11 @@ class Quotation(Model):
         """Customer acceptance (portal or on behalf of the customer)."""
         self.ensure_one()
         if not (signed_by or "").strip():
-            raise UserError("Type your full name to accept")
+            raise UserError(_("Type your full name to accept"))
         if self.state != "sent":
-            raise UserError("This quotation can no longer be accepted")
+            raise UserError(_("This quotation can no longer be accepted"))
         if self.validity_date and self.validity_date < self.env.today():
-            raise UserError("This quotation has expired")
+            raise UserError(_("This quotation has expired"))
         self.elevated().write(
             {"signed_by": signed_by.strip(), "signed_email": signed_email, "signed_ip": ip, "signed_at": self.env.now()}
         )
@@ -199,7 +200,7 @@ class Quotation(Model):
     def reject(self, reason: str | None = None) -> None:
         self.ensure_one()
         if self.state != "sent":
-            raise UserError("This quotation can no longer be rejected")
+            raise UserError(_("This quotation can no longer be rejected"))
         self.elevated().write({"rejection_reason": reason})
         self._transition("sale.tr_reject", elevated=True)
 
@@ -267,9 +268,9 @@ class QuotationLine(Model):
     def _check_values(self) -> None:
         for line in self:
             if not 0 <= (line.discount or 0) <= 100:
-                raise ValidationError("A discount is between 0 and 100 %", field="discount")
+                raise ValidationError(_("A discount is between 0 and 100 %"), field="discount")
             if not line.display_type and (line.quantity or 0) < 0:
-                raise ValidationError("Quantities cannot be negative", field="quantity")
+                raise ValidationError(_("Quantities cannot be negative"), field="quantity")
 
     def create(self, vals_list):  # type: ignore[no-untyped-def]
         batch = [dict(vals_list)] if isinstance(vals_list, dict) else [dict(v) for v in vals_list]

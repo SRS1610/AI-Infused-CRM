@@ -6,6 +6,7 @@ import datetime as dt
 from typing import Any
 
 from tessera.exceptions import UserError
+from tessera.i18n import _
 from tessera.orm import Model, api, fields
 
 
@@ -50,7 +51,7 @@ class Sequence(Model):
         try:
             return text % values
         except (KeyError, ValueError) as exc:
-            raise UserError(f"Invalid sequence pattern '{text}': {exc}") from exc
+            raise UserError(_("Invalid sequence pattern '{text}': {exc}", text=text, exc=exc)) from exc
 
     def _pg_sequence_name(self) -> str:
         return f"core_sequence_{self.ids[0]}_seq"
@@ -91,7 +92,7 @@ class Sequence(Model):
         if not seq:
             seq = sequences.search([("code", "=", code), ("company_id", "is_not_set")], limit=1)
         if not seq:
-            raise UserError(f"No sequence defined for code '{code}'", code=code)
+            raise UserError(_("No sequence defined for code '{code}'", code=code), code=code)
         return str(seq.next_by_id())
 
     def write(self, vals: dict[str, Any]) -> bool:

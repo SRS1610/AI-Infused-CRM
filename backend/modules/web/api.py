@@ -6,10 +6,11 @@ from typing import Any
 
 from fastapi import APIRouter, Depends, Query
 
-from modules.web.views import resolve_view, strip_inaccessible_fields
+from modules.web.views import resolve_view, strip_inaccessible_fields, translate_view
 from tessera.api.deps import RequestContext, admin_only, authenticated
 from tessera.api.registry import register_router
 from tessera.exceptions import MissingError, ValidationError
+from tessera.i18n import _
 
 router = register_router(APIRouter(prefix="/web", tags=["web"]))
 
@@ -93,7 +94,7 @@ def action(ref: str, ctx: RequestContext = Depends(authenticated)) -> dict[str, 
         found = ctx.env.ref(ref, raise_if_not_found=False)
         record = actions.browse(found.ids) if found is not None and found._name == "web.action" else actions.browse([])
     if not record or not _visible(ctx, record):
-        raise MissingError(f"Action '{ref}' not found")
+        raise MissingError(_("Action '{ref}' not found", ref=ref))
     if record.model_name and record.kind in ("window", "server", "report"):
         ctx.env[record.model_name].check_access_rights("read")
     return _action_payload(ctx, record)
@@ -107,7 +108,7 @@ def views(
     ctx: RequestContext = Depends(authenticated),
 ) -> dict[str, Any]:
     if model not in ctx.registry.models:
-        raise MissingError(f"Unknown model '{model}'")
+        raise MissingError(_("Unknown model '{model}'", model=model))
     record_model = ctx.env[model]
     record_model.check_access_rights("read")
     ref_map: dict[str, str] = {}
@@ -122,11 +123,13 @@ def views(
             definition = resolve_view(ctx.env, model, view_type, ref_map.get(view_type))
         except ValidationError as exc:
             raise MissingError(exc.message) from exc
-        out[view_type] = strip_inaccessible_fields(ctx.env, model, definition)
+        out[view_type] = translate_view(
+            strip_inaccessible_fields(ctx.env, model, definition), ctx.env.lang, ctx.registry.module_order
+        )
     return {
         "model": {
             "name": model,
-            "description": type(record_model)._description,
+            "description": type(record_model)._description_in(ctx.env.lang),
             "rec_name": type(record_model)._rec_name,
             "order": type(record_model)._order,
             "methods": sorted(type(record_model)._exposed_methods),

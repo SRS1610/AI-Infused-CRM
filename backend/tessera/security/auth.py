@@ -18,6 +18,8 @@ from typing import TYPE_CHECKING, Any
 import httpx
 import pyotp
 
+from tessera.i18n import _
+
 with warnings.catch_warnings():
     # authlib.jose is deprecated in favour of joserfc; the API we use is stable until authlib 2.0
     warnings.simplefilter("ignore", DeprecationWarning)
@@ -176,7 +178,7 @@ def consume_pre_auth(env: Environment, token: str) -> Model:
         [("token_hash", "=", hash_token(token)), ("pre_auth", "=", True), ("revoked", "=", False)], limit=1
     )
     if not session or session.expires_at < env.now():
-        raise AccessDenied("Second-factor step expired; log in again")
+        raise AccessDenied(_("Second-factor step expired; log in again"))
     session.write({"revoked": True})
     user: Model = session.user_id
     return user
@@ -247,11 +249,11 @@ class OidcClient:
             data["client_secret"] = self.client_secret
         resp = httpx.post(cfg["token_endpoint"], data=data, timeout=self.timeout)
         if resp.status_code >= 400:
-            raise AccessDenied(f"Identity provider rejected the login ({resp.status_code})")
+            raise AccessDenied(_("Identity provider rejected the login ({status_code})", status_code=resp.status_code))
         tokens = resp.json()
         id_token = tokens.get("id_token")
         if not id_token:
-            raise AccessDenied("Identity provider returned no id_token")
+            raise AccessDenied(_("Identity provider returned no id_token"))
         claims = self.validate_id_token(id_token, nonce)
         return OidcTokens(claims=dict(claims), access_token=tokens.get("access_token"))
 
@@ -279,7 +281,7 @@ def user_for_oidc_claims(env: Environment, provider: Model, claims: dict[str, An
     email = (claims.get("email") or "").strip().lower()
     subject = claims.get("sub")
     if not subject:
-        raise AccessDenied("Identity token has no subject")
+        raise AccessDenied(_("Identity token has no subject"))
     users = env["core.user"].with_context(active_test=False)
     user = users.search([("sso_provider_id", "=", provider.ids[0]), ("sso_subject", "=", subject)], limit=1)
     if not user and email:
@@ -288,9 +290,9 @@ def user_for_oidc_claims(env: Environment, provider: Model, claims: dict[str, An
             user.write({"sso_provider_id": provider.ids[0], "sso_subject": subject})
     if not user:
         if not provider.auto_create_users:
-            raise AccessDenied("No account matches this identity; ask an administrator to invite you")
+            raise AccessDenied(_("No account matches this identity; ask an administrator to invite you"))
         if not email:
-            raise AccessDenied("Identity token has no email; cannot create an account")
+            raise AccessDenied(_("Identity token has no email; cannot create an account"))
         vals: dict[str, Any] = {
             "login": email,
             "email": email,
@@ -303,7 +305,7 @@ def user_for_oidc_claims(env: Environment, provider: Model, claims: dict[str, An
             vals["group_ids"] = [("set", [provider.default_group_id.ids[0]])]
         user = users.create(vals)
     if not user.active:
-        raise AccessDenied("This account is disabled")
+        raise AccessDenied(_("This account is disabled"))
     return user
 
 
@@ -315,4 +317,4 @@ def ensure_settings_for_auth() -> None:
 
 def check_password_policy(password: str) -> None:
     if len(password) < 8:
-        raise UserError("Password must be at least 8 characters")
+        raise UserError(_("Password must be at least 8 characters"))

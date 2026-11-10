@@ -20,6 +20,7 @@ from tessera.ai.tools import Source
 from tessera.api.deps import RequestContext, authenticated
 from tessera.api.registry import register_router
 from tessera.exceptions import AccessError, MissingError, UserError
+from tessera.i18n import _
 from tessera.orm import Model
 from tessera.orm import fields as F
 
@@ -67,10 +68,10 @@ def feature_enabled(env: Environment, name: str, company_id: int | None) -> bool
 def readable_lead(env: Environment, record: Any) -> Model:
     """The lead a feature works on, checked readable by the requesting user."""
     if record is None or getattr(record, "_name", None) != LEAD or not record.ids:
-        raise UserError("Open a lead or opportunity first")
+        raise UserError(_("Open a lead or opportunity first"))
     lead = env[LEAD].with_context(active_test=False).browse(record.ids[:1])
     if not lead.exists():
-        raise MissingError("This lead no longer exists")
+        raise MissingError(_("This lead no longer exists"))
     lead.check_access("read")
     return lead
 
@@ -212,7 +213,7 @@ def assist_job(job_id: int, ctx: RequestContext = Depends(authenticated)) -> dic
     """State of one of my CRM assist jobs and, once done, the AI run it produced."""
     job = ctx.env["core.job"].elevated().browse([job_id]).exists()
     if not job or not str(job.name).startswith("crm.ai_") or job.user_id.ids[:1] != [ctx.env.uid]:
-        raise MissingError("No such job")
+        raise MissingError(_("No such job"))
     result = job.result or {}
     return {
         "id": job.ids[0],

@@ -38,6 +38,7 @@ from tessera.ai import client as C
 from tessera.ai.errors import AIError, AIUnavailable
 from tessera.ai.manifest import module_ai_dir, read_features
 from tessera.exceptions import UserError
+from tessera.i18n import _
 from tessera.orm.sandbox import sandbox
 
 if TYPE_CHECKING:
@@ -422,7 +423,9 @@ def run_case(env: Environment, spec: FeatureSpec, case: dict[str, Any], client: 
     watched = list(case.get("watch_models", [m for m in default_watch if m in env.registry.models]))
     unknown = [m for m in watched if m not in env.registry.models]
     if unknown:  # a typo here would silently disable the no-mutation check
-        raise UserError(f"Eval case {case['id']} watches unknown models: {', '.join(unknown)}")
+        raise UserError(
+            _("Eval case {case} watches unknown models: {unknown}", case=case["id"], unknown=", ".join(unknown))
+        )
     before = _snapshot_counts(env, watched)
     started = time.monotonic()
     out: dict[str, Any] = {"case": case["id"], "status": "ok", "text": "", "data": None, "flags": []}

@@ -18,6 +18,7 @@ from tessera.api.middleware import limiter
 from tessera.api.registry import register_router
 from tessera.config import get_settings
 from tessera.exceptions import MissingError, UserError
+from tessera.i18n import _
 from tessera.runtime import current_remote_ip
 
 router = register_router(APIRouter(prefix="/crm", tags=["crm"]))
@@ -44,7 +45,7 @@ def _team_for_token(ctx: RequestContext, token: str) -> Any:
     teams = ctx.env["crm.team"].elevated("webform").search([("active", "=", True)])
     team = next((t for t in teams if t.webform_token and hmac.compare_digest(t.webform_token, token)), None)
     if team is None:
-        raise MissingError("Unknown form")
+        raise MissingError(_("Unknown form"))
     return team
 
 
@@ -144,7 +145,7 @@ def _date(value: str | None) -> dt.date | None:
     try:
         return dt.date.fromisoformat(value) if value else None
     except ValueError as exc:
-        raise UserError("Dates use YYYY-MM-DD") from exc
+        raise UserError(_("Dates use YYYY-MM-DD")) from exc
 
 
 @router.get("/reports/win-rate")

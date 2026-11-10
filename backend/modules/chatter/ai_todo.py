@@ -25,6 +25,7 @@ from tessera.ai.errors import AIError, FeatureDisabled
 from tessera.api.deps import RequestContext, authenticated
 from tessera.api.registry import register_router
 from tessera.exceptions import AccessError, MissingError
+from tessera.i18n import _
 from tessera.jobs import job
 from tessera.orm import fields as F
 
@@ -76,14 +77,14 @@ def linked_facts(env: Any, model: str, res_id: int) -> dict[str, Any]:
 def _due_reason(days: int) -> tuple[float, str]:
     if days < 0:
         n = -days
-        return 50.0 + 2.0 * min(n, 10), f"Overdue by {n} day{'s' if n > 1 else ''}"
+        return 50.0 + 2.0 * min(n, 10), (_("Overdue by {count} days", count=n) if n > 1 else _("Overdue by 1 day"))
     if days == 0:
-        return 45.0, "Due today"
+        return 45.0, _("Due today")
     if days == 1:
-        return 30.0, "Due tomorrow"
+        return 30.0, _("Due tomorrow")
     if days <= 7:
-        return 30.0 - 3.0 * (days - 1), f"Due in {days} days"
-    return max(0.0, 10.0 - (days - 7)), f"Due in {days} days"
+        return 30.0 - 3.0 * (days - 1), _("Due in {count} days", count=days)
+    return max(0.0, 10.0 - (days - 7)), _("Due in {count} days", count=days)
 
 
 def score_activity(activity: Any, facts: dict[str, Any], today: dt.date) -> tuple[float, list[str]]:
@@ -93,14 +94,14 @@ def score_activity(activity: Any, facts: dict[str, Any], today: dt.date) -> tupl
     category = activity.activity_type_id.category or "todo"
     if category == "meeting" and days == 0:
         score += MEETING_TODAY
-        reasons.append("Meeting today")
+        reasons.append(_("Meeting today"))
     else:
         score += TYPE_POINTS.get(category, 0.0)
         if category in ("call", "meeting"):
-            reasons.append(f"{activity.activity_type_id.name} with other people")
+            reasons.append(_("{type} with other people", type=activity.activity_type_id.name))
     if not facts.get("visible"):
         if activity.model and activity.res_id:
-            reasons.append("Linked record not visible to you")
+            reasons.append(_("Linked record not visible to you"))
         return score, reasons
     value = facts.get("value") or 0.0
     if value > 0:
@@ -115,7 +116,7 @@ def score_activity(activity: Any, facts: dict[str, Any], today: dt.date) -> tupl
     stars = int(facts.get("priority") or 0)
     if stars:
         score += PRIORITY_POINTS * stars
-        reasons.append(f"Priority {'★' * stars}")
+        reasons.append(_("Priority {stars}", stars="★" * stars))
     return score, reasons
 
 
@@ -163,7 +164,7 @@ def _feature(env: Any) -> Any:
     from tessera.ai.runtime import check_enabled, get_feature
 
     if "ai_core.feature" not in env.registry.models:
-        raise FeatureDisabled("AI features are not installed")
+        raise FeatureDisabled(_("AI features are not installed"))
     feature = get_feature(env, FEATURE)
     check_enabled(env, feature)
     return feature
@@ -251,8 +252,15 @@ def morning_job(env: Any) -> dict[str, int]:
         env["core.notification"].create(
             {
                 "user_id": user.ids[0],
-                "title": f"Your AI-ranked to-do for today: {len(items)} activit{'ies' if len(items) > 1 else 'y'}",
-                "body": f"Start with {top['type'].lower()}: {top['summary']} ({'; '.join(top['reasons'][:2])})",
+                "title": _("Your AI-ranked to-do for today: {count} activities", count=len(items))
+                if len(items) > 1
+                else _("Your AI-ranked to-do for today: 1 activity"),
+                "body": _(
+                    "Start with {type}: {summary} ({reasons})",
+                    type=top["type"].lower(),
+                    summary=top["summary"],
+                    reasons="; ".join(top["reasons"][:2]),
+                ),
                 "kind": "activity",
                 "url": TODO_URL,
             }

@@ -12,6 +12,7 @@ from modules.studio import service as S
 from tessera.api.deps import RequestContext, authenticated
 from tessera.api.registry import register_router
 from tessera.exceptions import MissingError
+from tessera.i18n import _
 
 router = register_router(APIRouter(prefix="/studio", tags=["studio"]))
 
@@ -120,7 +121,7 @@ def changes(model: str | None = None, ctx: RequestContext = Depends(designer)) -
 def rollback(change_id: int, ctx: RequestContext = Depends(designer)) -> dict[str, Any]:
     change = ctx.env["studio.change"].elevated().browse([change_id]).exists()
     if not change:
-        raise MissingError("No such change")
+        raise MissingError(_("No such change"))
     done = S.rollback(ctx.env, change)
     return {**_change(change), "rolled_back_now": done}
 
@@ -143,7 +144,7 @@ def snapshots(ctx: RequestContext = Depends(designer)) -> list[dict[str, Any]]:
 def rollback_snapshot(snapshot_id: int, ctx: RequestContext = Depends(designer)) -> dict[str, Any]:
     snap = ctx.env["studio.snapshot"].elevated().browse([snapshot_id]).exists()
     if not snap:
-        raise MissingError("No such snapshot")
+        raise MissingError(_("No such snapshot"))
     return {"rolled_back": S.rollback_to(ctx.env, snap)}
 
 

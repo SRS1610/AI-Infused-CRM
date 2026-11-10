@@ -10,6 +10,7 @@ import hashlib
 from typing import Any
 
 from tessera.exceptions import UserError
+from tessera.i18n import _
 from tessera.orm import Model, api, fields
 
 STATUSES = [("draft", "Draft"), ("testing", "Testing"), ("active", "Active"), ("retired", "Retired")]
@@ -47,7 +48,7 @@ class Prompt(Model):
                     return v
         active = versions.search([("prompt_id", "=", self.ids[0]), ("status", "=", "active")], limit=1)
         if not active:
-            raise UserError(f"Prompt '{self.name}' has no active version")
+            raise UserError(_("Prompt '{name}' has no active version", name=self.name))
         return active
 
 
@@ -94,7 +95,7 @@ class PromptVersion(Model):
     def write(self, vals):  # type: ignore[no-untyped-def]
         content = {"system", "template", "input_schema", "output_schema"} & set(vals)
         if content and any(v.status in ("active", "retired") for v in self):
-            raise UserError("Active and retired prompt versions are immutable; create a new version")
+            raise UserError(_("Active and retired prompt versions are immutable; create a new version"))
         return super().write(vals)
 
 

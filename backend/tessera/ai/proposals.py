@@ -18,6 +18,7 @@ from typing import TYPE_CHECKING, Any
 from tessera.ai.tools import PendingProposal
 from tessera.config import get_settings
 from tessera.exceptions import AccessError, ConflictError, MissingError, UserError, ValidationError
+from tessera.i18n import _
 
 if TYPE_CHECKING:
     from tessera.orm.environment import Environment
@@ -57,7 +58,7 @@ def _original(env: Environment, model: str, res_id: int | None, payload: dict[st
 
 def create(env: Environment, run: Model | None, feature: str, pending: PendingProposal) -> Model:
     if pending.kind not in ("create", "write", "transition", "message", "action"):
-        raise ValidationError(f"Unknown proposal kind '{pending.kind}'")
+        raise ValidationError(_("Unknown proposal kind '{kind}'", kind=pending.kind))
     payload = pending.payload
     return (
         env["ai_core.proposal"]
@@ -86,16 +87,16 @@ def create(env: Environment, run: Model | None, feature: str, pending: PendingPr
 def _check(env: Environment, proposal: Model) -> Model:
     p = proposal.elevated().exists()
     if not p:
-        raise MissingError("This proposal no longer exists")
+        raise MissingError(_("This proposal no longer exists"))
     if p.user_id.ids[0] != env.uid:
-        raise AccessError("Only the person who asked for this proposal can decide on it")
+        raise AccessError(_("Only the person who asked for this proposal can decide on it"))
     if p.state != "pending":
-        raise ConflictError(f"This proposal is already {p.state}")
+        raise ConflictError(_("This proposal is already {state}", state=p.state))
     if p.expires_at and p.expires_at < env.now():
         p.write({"state": "expired"})
-        raise ConflictError("This proposal has expired")
+        raise ConflictError(_("This proposal has expired"))
     if not p.payload_signature or not hmac.compare_digest(p.payload_signature, sign(p.payload)):
-        raise AccessError("This proposal was modified after it was made and cannot be accepted")
+        raise AccessError(_("This proposal was modified after it was made and cannot be accepted"))
     return p
 
 
@@ -104,12 +105,12 @@ def apply(
 ) -> int | None:
     """Apply a decided proposal as ``env``'s user. Returns the id of a created record."""
     if model not in env.registry.models:
-        raise ValidationError(f"Unknown model '{model}'")
+        raise ValidationError(_("Unknown model '{model}'", model=model))
     if kind == "create":
         return int(env[model].create(dict(payload)).ids[0])
     rec = env[model].browse([res_id]) if res_id else env[model]
     if kind != "action" and not rec.exists():
-        raise MissingError("The record this proposal is about no longer exists")
+        raise MissingError(_("The record this proposal is about no longer exists"))
     if kind == "write":
         rec.write(dict(payload))
     elif kind == "message":
@@ -130,7 +131,7 @@ def apply(
 
         wf = workflow_for(env, model)
         if not wf:
-            raise ValidationError(f"'{model}' has no workflow")
+            raise ValidationError(_("'{model}' has no workflow", model=model))
         transitions = (
             env["workflow.transition"]
             .elevated()
@@ -138,12 +139,12 @@ def apply(
         )
         chosen = next((t for t in transitions if t.blocked_reason(rec) is None), None)
         if chosen is None:
-            raise ConflictError(f"Cannot move to '{payload.get('to_state')}' from the current state")
+            raise ConflictError(_("Cannot move to '{state}' from the current state", state=payload.get("to_state")))
         chosen.apply(rec)
     elif kind == "action":
         name = str(payload.get("action", ""))
         if name not in ACTIONS:
-            raise ValidationError(f"Unknown action '{name}'")
+            raise ValidationError(_("Unknown action '{name}'", name=name))
         ACTIONS[name](env, model, res_id, dict(payload.get("args") or {}))
     return None
 

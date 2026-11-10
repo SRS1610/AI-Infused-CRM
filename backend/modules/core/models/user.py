@@ -10,6 +10,7 @@ from argon2.exceptions import VerifyMismatchError
 
 from tessera.config import get_settings
 from tessera.exceptions import AccessDenied, ValidationError
+from tessera.i18n import _
 from tessera.orm import Model, api, fields
 
 _hasher = PasswordHasher()
@@ -127,13 +128,13 @@ class User(Model):
     def _check_login(self) -> None:
         for user in self:
             if not user.login or user.login != user.login.strip().lower():
-                raise ValidationError("Login must be lowercase without surrounding spaces", field="login")
+                raise ValidationError(_("Login must be lowercase without surrounding spaces"), field="login")
 
     @api.constrains("company_id", "company_ids")
     def _check_companies(self) -> None:
         for user in self:
             if user.company_id and user.company_ids and user.company_id not in user.company_ids:
-                raise ValidationError("The current company must be one of the allowed companies", field="company_id")
+                raise ValidationError(_("The current company must be one of the allowed companies"), field="company_id")
 
     def create(self, vals_list: dict[str, Any] | Sequence[dict[str, Any]]) -> Model:
         batch = [dict(vals_list)] if isinstance(vals_list, dict) else [dict(v) for v in vals_list]
@@ -169,7 +170,13 @@ class User(Model):
     @staticmethod
     def _hash_password(password: str) -> str:
         if len(password) < MIN_PASSWORD_LENGTH:
-            raise ValidationError(f"Password must be at least {MIN_PASSWORD_LENGTH} characters", field="password")
+            raise ValidationError(
+                _(
+                    "Password must be at least {count} characters",
+                    count=MIN_PASSWORD_LENGTH,
+                ),
+                field="password",
+            )
         return _hasher.hash(password)
 
     def set_password(self, password: str) -> None:
@@ -200,13 +207,13 @@ class User(Model):
         user = users.search([("login", "=", (login or "").strip().lower()), ("active", "=", True)], limit=1)
         now = self.env.now()
         if user and user.locked_until and user.locked_until > now:
-            raise AccessDenied("Too many failed attempts; this account is temporarily locked", locked=True)
+            raise AccessDenied(_("Too many failed attempts; this account is temporarily locked"), locked=True)
         if not user or not user.check_password(password):
             if user:
                 _record_failed_login(
                     self.env, user.ids[0], settings.login_lockout_attempts, settings.login_lockout_minutes
                 )
-            raise AccessDenied("Invalid login or password")
+            raise AccessDenied(_("Invalid login or password"))
         vals: dict[str, Any] = {"last_login": now}
         if user.failed_login_count or user.locked_until:
             vals.update({"failed_login_count": 0, "locked_until": None})

@@ -8,6 +8,7 @@ import io
 from typing import Any
 
 from tessera.exceptions import UserError
+from tessera.i18n import _
 
 MAX_ROWS = 200_000
 
@@ -18,7 +19,7 @@ def _decode(data: bytes, encoding: str | None) -> str:
             return data.decode(enc or "utf-8")
         except (UnicodeDecodeError, LookupError):
             continue
-    raise UserError("Cannot decode the file: pass its encoding explicitly")
+    raise UserError(_("Cannot decode the file: pass its encoding explicitly"))
 
 
 def read_table(
@@ -50,7 +51,7 @@ def _read_xlsx(data: bytes, sheet: str | None) -> tuple[list[str], list[list[Any
     try:
         wb = load_workbook(io.BytesIO(data), read_only=True, data_only=True)
     except Exception as exc:
-        raise UserError(f"Not a valid XLSX file: {exc}") from exc
+        raise UserError(_("Not a valid XLSX file: {exc}", exc=exc)) from exc
     ws = wb[sheet] if sheet else wb.worksheets[0]
     rows: list[list[Any]] = []
     for row in ws.iter_rows(values_only=True):
@@ -77,10 +78,10 @@ def _split(rows: list[list[Any]]) -> tuple[list[str], list[list[Any]]]:
     while rows and not any(str(c).strip() for c in rows[-1]):
         rows.pop()
     if not rows:
-        raise UserError("The file is empty")
+        raise UserError(_("The file is empty"))
     headers = [str(h).strip() for h in rows[0]]
     data = rows[1:]
     if len(data) > MAX_ROWS:
-        raise UserError(f"Files are limited to {MAX_ROWS} rows")
+        raise UserError(_("Files are limited to {limit} rows", limit=MAX_ROWS))
     width = len(headers)
     return headers, [list(r) + [""] * (width - len(r)) if len(r) < width else list(r[:width]) for r in data]

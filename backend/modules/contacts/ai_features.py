@@ -26,6 +26,7 @@ from tessera.ai.prompts import html_to_text
 from tessera.ai.runtime import check_enabled, get_feature, handler, run_feature
 from tessera.ai.tools import PendingProposal, ToolContext
 from tessera.exceptions import AccessError, MissingError
+from tessera.i18n import _
 from tessera.jobs import enqueue, job
 from tessera.logging import get_logger
 from tessera.orm.hooks import hook
@@ -109,8 +110,8 @@ def check_duplicates_job(env: Environment, partner_id: int) -> int:
         names = ", ".join(str(c["display_name"]) for c in dups[:3])
         env["core.notification"].notify(
             [env.uid],
-            f"Possible duplicate: {partner.display_name}",
-            f"Looks like {names}. Review and merge from the contact.",
+            _("Possible duplicate: {name}", name=partner.display_name),
+            _("Looks like {names}. Review and merge from the contact.", names=names),
             kind="system",
             model="contacts.partner",
             res_id=partner_id,
@@ -427,16 +428,24 @@ def enrich_partner_job(env: Environment, partner_id: int) -> dict[str, Any]:
         result = run_feature(env, ENRICH_FEATURE, {}, record=partner, **enrich_context(env, partner, {}))
     except AIError as exc:
         env["core.notification"].notify(
-            [env.uid], f"Enrichment unavailable: {partner.display_name}", exc.message, kind="job", url=url
+            [env.uid],
+            _("Enrichment unavailable: {name}", name=partner.display_name),
+            exc.message,
+            kind="job",
+            url=url,
         )
         return {"error": exc.code}
     n = len(result.data.get("suggestions", [])) if isinstance(result.data, dict) else 0
     env["core.notification"].notify(
         [env.uid],
-        f"Enrichment ready: {partner.display_name}",
-        f"{n} suggested field{'s' if n != 1 else ''}, each with its source. Review them on the contact."
+        _("Enrichment ready: {name}", name=partner.display_name),
+        (
+            _("{count} suggested fields, each with its source. Review them on the contact.", count=n)
+            if n > 1
+            else _("1 suggested field, with its source. Review it on the contact.")
+        )
         if n
-        else "No new information was found in the approved sources.",
+        else _("No new information was found in the approved sources."),
         kind="job",
         model="contacts.partner",
         res_id=partner_id,

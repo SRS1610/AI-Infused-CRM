@@ -13,6 +13,7 @@ from starlette.concurrency import run_in_threadpool
 from tessera.api.deps import RequestContext, authenticated
 from tessera.dataio import export_rows, importable_fields, read_table, render_export, suggest_mapping
 from tessera.exceptions import MissingError, UserError
+from tessera.i18n import _
 from tessera.orm import fields as F
 
 router = APIRouter(tags=["import-export"])
@@ -23,7 +24,7 @@ PREVIEW_ROWS = 10
 
 def _model(ctx: RequestContext, model: str) -> Any:
     if model not in ctx.registry.models:
-        raise MissingError(f"Unknown model '{model}'")
+        raise MissingError(_("Unknown model '{model}'", model=model))
     return ctx.env[model]
 
 
@@ -58,11 +59,11 @@ async def upload_import(
     target.check_access_rights("create")
     data = await file.read()
     if len(data) > MAX_IMPORT:
-        raise UserError("File too large (max 50 MB)")
+        raise UserError(_("File too large (max 50 MB)"))
     try:
         opts = json.loads(options or "{}")
     except ValueError as exc:
-        raise UserError("options must be JSON") from exc
+        raise UserError(_("options must be JSON")) from exc
     filename = file.filename or "import.csv"
     headers, rows = await run_in_threadpool(
         read_table,
@@ -112,7 +113,7 @@ class ImportUpdate(BaseModel):
 def _job(ctx: RequestContext, job_id: int) -> Any:
     job = ctx.env["core.import_job"].browse([job_id]).exists()
     if not job:
-        raise MissingError("Import not found")
+        raise MissingError(_("Import not found"))
     job.check_access("read")
     return job
 
@@ -218,7 +219,7 @@ def exportable_fields(
             or not isinstance(f, F.Many2one | F.Many2many | F.One2many)
             or not current._check_field_access(f, "read")
         ):
-            raise UserError(f"Cannot follow '{part}'")
+            raise UserError(_("Cannot follow '{part}'", part=part))
         current = ctx.env[str(f.comodel_name)]
     out = []
     for f in current._readable_fields():

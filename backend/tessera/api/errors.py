@@ -10,6 +10,8 @@ from fastapi.responses import JSONResponse
 from sqlalchemy.exc import OperationalError
 
 from tessera.exceptions import TesseraError, UserError
+from tessera.i18n import _, current_language, translate
+from tessera.i18n.message import current_modules
 from tessera.logging import get_logger
 from tessera.runtime import current_request_id
 
@@ -22,26 +24,40 @@ def _body(error: str, message: str, status: int, **extra: Any) -> JSONResponse:
     return JSONResponse(status_code=status, content=payload)
 
 
+def _language(request: Request) -> str | None:
+    lang = current_language()
+    if lang:
+        return lang
+    from tessera.api.deps import header_language
+
+    return header_language(request)
+
+
+def localize(message: str, request: Request) -> str:
+    """``message`` in the caller's language (a ``_()`` message is rendered again, a constant looked up)."""
+    return str(translate(message, _language(request), modules=current_modules()))
+
+
 def install_error_handlers(app: FastAPI) -> None:
     @app.exception_handler(UserError)
     async def _user_error(request: Request, exc: UserError) -> JSONResponse:
-        return _body(type(exc).__name__, exc.message, exc.http_status, **exc.context)
+        return _body(type(exc).__name__, localize(exc.message, request), exc.http_status, **exc.context)
 
     @app.exception_handler(TesseraError)
     async def _kernel_error(request: Request, exc: TesseraError) -> JSONResponse:
         log.error("kernel error", error=type(exc).__name__, message=exc.message)
-        return _body("ServerError", "Internal error", 500)
+        return _body("ServerError", localize(_("Internal error"), request), 500)
 
     @app.exception_handler(RequestValidationError)
     async def _validation(request: Request, exc: RequestValidationError) -> JSONResponse:
-        return _body("RequestValidationError", "Invalid request", 422, details=exc.errors())
+        return _body("RequestValidationError", localize(_("Invalid request"), request), 422, details=exc.errors())
 
     @app.exception_handler(OperationalError)
     async def _db_down(request: Request, exc: OperationalError) -> JSONResponse:
         log.error("database unavailable", error=str(exc)[:300])
-        return _body("ServiceUnavailable", "Database unavailable", 503)
+        return _body("ServiceUnavailable", localize(_("Database unavailable"), request), 503)
 
     @app.exception_handler(Exception)
     async def _unexpected(request: Request, exc: Exception) -> JSONResponse:
         log.exception("unhandled error")
-        return _body("ServerError", "Internal error", 500)
+        return _body("ServerError", localize(_("Internal error"), request), 500)

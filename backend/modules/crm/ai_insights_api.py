@@ -14,6 +14,7 @@ from tessera.ai.errors import AIError
 from tessera.api.deps import RequestContext, authenticated
 from tessera.api.registry import register_router
 from tessera.exceptions import AccessError, MissingError
+from tessera.i18n import _
 
 router = register_router(APIRouter(prefix="/crm/ai", tags=["crm", "ai"]))
 
@@ -27,14 +28,14 @@ def _error(exc: AIError) -> JSONResponse:
 def _lead(ctx: RequestContext, lead_id: int) -> Any:
     lead = ctx.env["crm.lead"].with_context(active_test=False).browse([lead_id])
     if not lead.exists():
-        raise MissingError("No such lead")
+        raise MissingError(_("No such lead"))
     lead.check_access("read")
     return lead
 
 
 def _manager(ctx: RequestContext) -> None:
     if not ctx.env.registry.security.has_groups(ctx.env, ["crm.group_crm_manager"]):
-        raise AccessError("Only sales managers can do this")
+        raise AccessError(_("Only sales managers can do this"))
 
 
 def _company(ctx: RequestContext) -> int:

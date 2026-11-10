@@ -6,6 +6,7 @@ from typing import Any
 
 from modules.contacts.models.partner import normalize_email
 from tessera.exceptions import UserError
+from tessera.i18n import _
 from tessera.orm import Model, api, fields
 
 PRIORITIES = [("0", "Normal"), ("1", "Good"), ("2", "Very good"), ("3", "Excellent")]
@@ -210,14 +211,14 @@ class Lead(Model):
             if not stage.team_ids or (team and team.ids[0] in stage.team_ids.ids):
                 return stage
         if not stages:
-            raise UserError("Define a won stage first")
+            raise UserError(_("Define a won stage first"))
         return stages[:1]
 
     @api.expose
     def action_set_won(self) -> bool:
         for lead in self:
             if lead.lost or not lead.active:
-                raise UserError("Restore the opportunity before marking it won")
+                raise UserError(_("Restore the opportunity before marking it won"))
             lead.write(
                 {
                     "stage_id": lead._won_stage().ids[0],
@@ -280,7 +281,7 @@ class Lead(Model):
     def action_new_quotation(self) -> dict[str, Any]:
         self.ensure_one()
         if not self.partner_id:
-            raise UserError("Set the customer before creating a quotation")
+            raise UserError(_("Set the customer before creating a quotation"))
         quote = self.env["sale.quotation"].create(
             {
                 "partner_id": self.partner_id.ids[0],
@@ -348,7 +349,7 @@ def convert_partner(lead: Model, mode: str, partner_id: int | None) -> Model:
     partners = lead.env["contacts.partner"]
     if mode == "existing":
         if not partner_id:
-            raise UserError("Choose the existing customer")
+            raise UserError(_("Choose the existing customer"))
         return partners.browse([partner_id])
     if mode == "none" or lead.partner_id:
         return lead.partner_id

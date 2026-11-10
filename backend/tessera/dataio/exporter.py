@@ -9,6 +9,7 @@ import io
 from typing import TYPE_CHECKING, Any
 
 from tessera.exceptions import UserError
+from tessera.i18n import _
 from tessera.orm import fields as F
 
 if TYPE_CHECKING:
@@ -71,7 +72,7 @@ def _value(record: Model, path: str) -> Any:
 def export_rows(records: Model, paths: list[str]) -> tuple[list[str], list[str], list[list[Any]]]:
     """(kept paths, header labels, rows). Paths the user may not read are silently removed."""
     if len(records) > MAX_EXPORT_ROWS:
-        raise UserError(f"Exports are limited to {MAX_EXPORT_ROWS} rows; narrow the selection")
+        raise UserError(_("Exports are limited to {limit} rows; narrow the selection", limit=MAX_EXPORT_ROWS))
     records.check_access("read")
     kept = [p for p in paths if _allowed_path(records, p)]
     headers = [_label(records, p) for p in kept]

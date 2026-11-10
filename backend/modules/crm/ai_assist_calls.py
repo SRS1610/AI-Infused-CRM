@@ -23,6 +23,7 @@ from tessera.ai.errors import AIError
 from tessera.ai.runtime import check_enabled, get_feature, handler, run_feature
 from tessera.ai.tools import PendingProposal, ToolContext
 from tessera.exceptions import AccessError
+from tessera.i18n import _
 from tessera.jobs import enqueue, job
 
 if TYPE_CHECKING:
@@ -183,13 +184,15 @@ def call_summary_job(env: Any, lead_id: int, notes: str) -> dict[str, Any]:
     try:
         result = run_feature(env, FEATURE, inputs, record=lead, **prepare(env, lead, inputs))
     except AIError as exc:
-        notify(env, lead, f"Call summary failed for {lead.display_name}", exc.message[:200])
+        notify(env, lead, _("Call summary failed for {lead}", lead=lead.display_name), exc.message[:200])
         return {"status": exc.code, "run_id": exc.context.get("run_id"), "message": exc.message}
     changes = sum(1 for p in result.proposals if p.kind == "write")
     notify(
         env,
         lead,
-        f"Call summary ready for {lead.display_name}",
-        f"Summary and {changes} field suggestion{'s' if changes != 1 else ''} to review",
+        _("Call summary ready for {lead}", lead=lead.display_name),
+        _("Summary and {count} field suggestions to review", count=changes)
+        if changes != 1
+        else _("Summary and 1 field suggestion to review"),
     )
     return {"status": "ok", "run_id": result.run.ids[0], "proposals": len(result.proposals)}

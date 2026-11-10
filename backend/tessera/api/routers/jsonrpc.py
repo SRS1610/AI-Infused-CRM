@@ -11,6 +11,7 @@ from tessera.api.deps import RequestContext, authenticated
 from tessera.api.routers.records import _call, get_model
 from tessera.api.serializers import clean_input_values, default_read_fields
 from tessera.exceptions import TesseraError, UserError, ValidationError
+from tessera.i18n import _, translate
 from tessera.orm.model import Model
 
 router = APIRouter(tags=["jsonrpc"])
@@ -24,7 +25,7 @@ def _execute(ctx: RequestContext, method: str, params: dict[str, Any]) -> Any:
         rec = ctx.env.ref(str(params["external_id"]), raise_if_not_found=False)
         return {"model": rec._name, "id": rec.ids[0]} if rec else None
     if not model_name:
-        raise ValidationError("params.model is required")
+        raise ValidationError(_("params.model is required"))
     model: Model = get_model(ctx, str(model_name), params.get("context"))
     if method == "search_read":
         records = model.search(
@@ -101,7 +102,7 @@ def _handle(ctx: RequestContext, payload: Any) -> dict[str, Any]:
             "id": rid,
             "error": {
                 "code": ERR_PARAMS if exc.http_status in (400, 422) else -32000 - exc.http_status,
-                "message": exc.message,
+                "message": str(translate(exc.message, ctx.env.context.get("lang"), modules=ctx.registry.module_order)),
                 "data": exc.to_dict(),
             },
         }

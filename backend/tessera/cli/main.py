@@ -35,12 +35,14 @@ def _root(
 
 from tessera.cli import ai as _ai  # noqa: E402
 from tessera.cli import db as _db  # noqa: E402
+from tessera.cli import i18n as _i18n  # noqa: E402
 from tessera.cli import jobs as _jobs  # noqa: E402
 from tessera.cli import module as _module  # noqa: E402
 from tessera.cli import run as _run  # noqa: E402
 from tessera.cli import seed as _seed  # noqa: E402
 
 app.add_typer(_db.app, name="db", help="Database: init, migrate, check, reset")
+app.add_typer(_i18n.app, name="i18n", help="Translations: extract catalogues, completeness, load into a database")
 app.add_typer(_module.app, name="module", help="Modules: scaffold, install, upgrade, uninstall, list")
 app.add_typer(_jobs.app, name="jobs", help="Background jobs: run, list, requeue, tick")
 app.add_typer(_seed.app, name="seed", help="Demo data: install a phase's scenario")

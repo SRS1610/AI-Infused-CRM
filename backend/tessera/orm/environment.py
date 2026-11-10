@@ -16,6 +16,7 @@ from zoneinfo import ZoneInfo
 
 from tessera.db.engine import Cursor, get_engine
 from tessera.exceptions import MissingError
+from tessera.i18n import _
 from tessera.logging import get_logger
 from tessera.orm.cache import Cache
 
@@ -132,7 +133,7 @@ class Environment:
     def __getitem__(self, model_name: str) -> Model:
         cls = self.registry.models.get(model_name)
         if cls is None:
-            raise MissingError(f"Unknown model '{model_name}'", model=model_name)
+            raise MissingError(_("Unknown model '{model_name}'", model_name=model_name), model=model_name)
         return cls._browse(self, ())
 
     def __contains__(self, model_name: str) -> bool:
@@ -210,16 +211,18 @@ class Environment:
         """Resolve ``module.name`` to a record via ``core.module_record``."""
         found = self.transaction.xmlid_cache.get(external_id)
         if found is None:
-            module, _, name = external_id.partition(".")
+            module, _sep, name = external_id.partition(".")
             if not name:
-                raise MissingError(f"External id '{external_id}' must be 'module.name'")
+                raise MissingError(_("External id '{external_id}' must be 'module.name'", external_id=external_id))
             row = self.cr.fetchone(
                 "SELECT model, res_id FROM core_module_record WHERE module = :module AND name = :name",
                 {"module": module, "name": name},
             )
             if row is None:
                 if raise_if_not_found:
-                    raise MissingError(f"External id '{external_id}' not found", external_id=external_id)
+                    raise MissingError(
+                        _("External id '{external_id}' not found", external_id=external_id), external_id=external_id
+                    )
                 return None
             found = (row[0], row[1])
             self.transaction.xmlid_cache[external_id] = found

@@ -17,6 +17,7 @@ from fastapi import Depends, Request
 from tessera.config import get_settings
 from tessera.db.engine import Cursor, get_engine
 from tessera.exceptions import AccessDenied, AccessError, UserError
+from tessera.i18n import _, set_request_language
 from tessera.logging import bind_context
 from tessera.orm.environment import SYSTEM_UID, Environment
 from tessera.orm.model import Model
@@ -58,6 +59,23 @@ def database_url_for(request: Request) -> str:
     return get_settings().database_url
 
 
+def header_language(request: Request) -> str | None:
+    """``X-Tessera-Lang``, else the first ``Accept-Language`` entry (``fr-FR`` → ``fr_FR``)."""
+    lang = request.headers.get("x-tessera-lang")
+    if not lang:
+        accept = request.headers.get("accept-language", "")
+        lang = accept.split(",")[0].split(";")[0].strip()
+    lang = lang.replace("-", "_")[:16]
+    return lang if lang and lang != "*" else None
+
+
+def request_language(request: Request, env: Environment | None = None) -> str | None:
+    """The caller's language: the authenticated user's (or the header override), else the headers."""
+    if env is not None and env.context.get("lang"):
+        return str(env.context["lang"])
+    return header_language(request)
+
+
 def _bearer_token(request: Request) -> str | None:
     header = request.headers.get("authorization", "")
     if header.lower().startswith("bearer "):
@@ -73,10 +91,10 @@ def _user_context(sys_env: Environment, request: Request, user: Model) -> dict[s
         try:
             requested = [int(c) for c in chosen.split(",") if c.strip()]
         except ValueError as exc:
-            raise UserError("Invalid X-Tessera-Companies header") from exc
+            raise UserError(_("Invalid X-Tessera-Companies header")) from exc
         selected = [c for c in requested if c in allowed]
         if not selected:
-            raise AccessError("None of the requested companies is allowed for this user")
+            raise AccessError(_("None of the requested companies is allowed for this user"))
         allowed = selected
     current_header = request.headers.get("x-tessera-company")
     current = int(current_header) if current_header and current_header.isdigit() else None
@@ -99,7 +117,7 @@ def _authenticate(ctx: RequestContext) -> None:
     if bearer and bearer.startswith(API_KEY_PREFIX):
         key = resolve_api_key(sys_env, bearer)
         if key is None:
-            raise AccessDenied("Invalid or expired API key")
+            raise AccessDenied(_("Invalid or expired API key"))
         user = key.user_id
         ctx.env = Environment(ctx.env.transaction, user.ids[0], _user_context(sys_env, request, user))
         ctx.auth_kind, ctx.api_key = "api_key", key
@@ -111,7 +129,7 @@ def _authenticate(ctx: RequestContext) -> None:
             csrf = request.headers.get("x-csrf-token")
             if not csrf or not constant_time_equals(csrf, str(session.csrf_token)):
                 if request.url.path not in CSRF_EXEMPT_ANONYMOUS:
-                    raise AccessError("Missing or invalid CSRF token", csrf=True)
+                    raise AccessError(_("Missing or invalid CSRF token"), csrf=True)
                 # logging in again with a stale cookie: proceed as anonymous instead of failing
                 token, session = None, None
         if session is not None:
@@ -133,6 +151,7 @@ def _open_context(request: Request) -> Iterator[RequestContext]:
         env = Environment.new(registry, cr, SYSTEM_UID, su=True)
         ctx = RequestContext(request=request, cr=cr, registry=registry, env=env)
         _authenticate(ctx)
+        set_request_language(request_language(request, ctx.env), registry.module_order)
         bind_context(uid=ctx.env.uid, db=registry.dbname, auth=ctx.auth_kind)
         request.state.ctx = ctx
         yield ctx
@@ -152,21 +171,21 @@ def request_context(request: Request) -> Iterator[RequestContext]:
 
 def authenticated(ctx: RequestContext = Depends(request_context)) -> RequestContext:
     if not ctx.authenticated:
-        raise AccessDenied("Authentication required")
+        raise AccessDenied(_("Authentication required"))
     user = ctx.env.user.elevated()
     if user.share:
-        raise AccessError("Portal users cannot use the back-office API")
+        raise AccessError(_("Portal users cannot use the back-office API"))
     return ctx
 
 
 def authenticated_any(ctx: RequestContext = Depends(request_context)) -> RequestContext:
     """Authenticated internal *or* portal user."""
     if not ctx.authenticated:
-        raise AccessDenied("Authentication required")
+        raise AccessDenied(_("Authentication required"))
     return ctx
 
 
 def admin_only(ctx: RequestContext = Depends(authenticated)) -> RequestContext:
     if not ctx.env.registry.security.has_groups(ctx.env, ["core.group_system"]):
-        raise AccessError("Administrator rights required")
+        raise AccessError(_("Administrator rights required"))
     return ctx

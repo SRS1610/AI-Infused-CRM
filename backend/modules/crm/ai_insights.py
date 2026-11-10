@@ -21,6 +21,7 @@ from typing import TYPE_CHECKING, Any
 
 from modules.crm import ai_insights_ml as ML
 from tessera.exceptions import AccessError, UserError
+from tessera.i18n import _
 from tessera.jobs import enqueue, job
 from tessera.logging import get_logger
 from tessera.orm.hooks import hook
@@ -76,7 +77,7 @@ def ensure_enabled(env: Environment, name: str) -> Model:
     from tessera.ai.runtime import check_enabled, get_feature
 
     if not ai_installed(env):
-        raise FeatureDisabled("AI is not installed")
+        raise FeatureDisabled(_("AI is not installed"))
     feature = get_feature(env, name)
     check_enabled(env, feature)
     return feature
@@ -335,13 +336,22 @@ def train_score_models_job(
         out[str(cid)] = {"version": model.version if model else None, **counts}
         env.flush()
         text = (
-            f"Lead scoring model v{model.version} trained on {model.metrics['rows']} closed deals "
-            f"(hold-out AUC {model.metrics['holdout_auc']:.2f}); {counts['model']} open leads rescored."
+            _(
+                "Lead scoring model v{version} trained on {rows} closed deals (hold-out AUC {auc:.2f}); "
+                "{rescored} open leads rescored.",
+                version=model.version,
+                rows=model.metrics["rows"],
+                auc=model.metrics["holdout_auc"],
+                rescored=counts["model"],
+            )
             if model
-            else f"Not enough closed deals for a predictive model yet; {counts['rules']} leads scored with the rules."
+            else _(
+                "Not enough closed deals for a predictive model yet; {count} leads scored with the rules.",
+                count=counts["rules"],
+            )
         )
         recipients = [notify_user_id] if notify_user_id else (_managers(env, cid) if model else [])
-        _notify(env, recipients, "Lead scores updated", text, url="/a/crm.action_leads")
+        _notify(env, recipients, _("Lead scores updated"), text, url="/a/crm.action_leads")
     return out
 
 
@@ -459,7 +469,7 @@ def deal_risk_job(env: Any, company_ids: list[int] | None = None, notify_user_id
                     _notify(
                         env,
                         [lead.user_id.ids[0]] if lead.user_id else [],
-                        f"Deal at risk: {lead.name}",
+                        _("Deal at risk: {lead}", lead=lead.name),
                         top,
                         url=f"/m/crm.lead/{lead.ids[0]}",
                         model="crm.lead",
@@ -470,8 +480,8 @@ def deal_risk_job(env: Any, company_ids: list[int] | None = None, notify_user_id
             _notify(
                 env,
                 [notify_user_id],
-                "Deal risk check finished",
-                f"{flagged} open opportunities are at risk ({newly} new).",
+                _("Deal risk check finished"),
+                _("{flagged} open opportunities are at risk ({new} new).", flagged=flagged, new=newly),
                 url="/a/crm.action_pipeline",
             )
     return out
@@ -777,7 +787,7 @@ def nba_context(env: Environment, record: Model, inputs: dict[str, Any]) -> dict
     from tessera.ai import Source
 
     if record is None or record._name != "crm.lead":
-        raise UserError("Next-best-action works on a lead or opportunity")
+        raise UserError(_("Next-best-action works on a lead or opportunity"))
     record.check_access("read")
     rec = record.elevated()
     return {
@@ -791,7 +801,7 @@ def score_narration_context(env: Environment, record: Model, inputs: dict[str, A
     from tessera.ai import Source
 
     if record is None or record._name != "crm.lead":
-        raise UserError("Lead scores are explained on a lead")
+        raise UserError(_("Lead scores are explained on a lead"))
     record.check_access("read")
     rec = record.elevated()
     factors = "\n".join(f"- {f['label']}: {f['direction']} (weight {f['weight']})" for f in rec.ai_score_factors or [])
@@ -966,9 +976,14 @@ def forecast_job(env: Any, team_id: int | None = None, narrative: bool = False, 
     _notify(
         env,
         [env.uid],
-        "Sales forecast ready",
-        f"{first.get('label', '')}: P50 {first.get('p50', 0):,.0f} (P10 {first.get('p10', 0):,.0f} to P90 "
-        f"{first.get('p90', 0):,.0f})",
+        _("Sales forecast ready"),
+        _(
+            "{period}: P50 {p50:,.0f} (P10 {p10:,.0f} to P90 {p90:,.0f})",
+            period=first.get("label", ""),
+            p50=first.get("p50", 0),
+            p10=first.get("p10", 0),
+            p90=first.get("p90", 0),
+        ),
         url="/a/crm.action_reports",
         model="crm.ai_forecast",
         res_id=record.ids[0],

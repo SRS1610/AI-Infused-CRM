@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from tessera.exceptions import ValidationError
+from tessera.i18n import _
 from tessera.orm import Model, api, fields
 
 
@@ -78,9 +79,9 @@ class Product(Model):
     def _check_prices(self) -> None:
         for p in self:
             if (p.list_price or 0) < 0:
-                raise ValidationError("The sales price cannot be negative", field="list_price")
+                raise ValidationError(_("The sales price cannot be negative"), field="list_price")
             if not 0 <= (p.tax_percent or 0) <= 100:
-                raise ValidationError("Tax must be between 0 and 100 %", field="tax_percent")
+                raise ValidationError(_("Tax must be between 0 and 100 %"), field="tax_percent")
 
     @api.depends("name", "default_code")
     def _compute_display_name(self) -> None:

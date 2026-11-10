@@ -4,6 +4,7 @@ import datetime as dt
 from decimal import ROUND_HALF_UP, Decimal
 
 from tessera.exceptions import UserError
+from tessera.i18n import _
 from tessera.orm import Model, fields
 
 
@@ -43,7 +44,7 @@ class Currency(Model):
                 return float(rate.rate)
         rate = rates.search([*domain, ("company_id", "is_not_set")], order="date desc", limit=1)
         if not rate:
-            raise UserError(f"No exchange rate for {self.name} on {date}", currency=self.name)
+            raise UserError(_("No exchange rate for {name} on {date}", name=self.name, date=date), currency=self.name)
         return float(rate.rate)
 
     def convert(

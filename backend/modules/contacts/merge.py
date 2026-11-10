@@ -16,6 +16,7 @@ import datetime as dt
 from typing import TYPE_CHECKING, Any
 
 from tessera.exceptions import UserError
+from tessera.i18n import _
 from tessera.orm import fields as F
 
 if TYPE_CHECKING:
@@ -57,12 +58,12 @@ def merge_partners(env: Environment, survivor: Model, others: Model, field_choic
     survivor.ensure_one()
     others = others - survivor
     if not others:
-        raise UserError("Select at least two different contacts to merge")
+        raise UserError(_("Select at least two different contacts to merge"))
     if len(others) > 10:
-        raise UserError("Merge at most 11 contacts at once")
+        raise UserError(_("Merge at most 11 contacts at once"))
     (survivor | others).check_access("write")
     if any(o.ids[0] in survivor.elevated()._ancestor_ids() for o in others):
-        raise UserError("A company cannot be merged into one of its own contacts")
+        raise UserError(_("A company cannot be merged into one of its own contacts"))
     sys_env = env.elevated("contact merge")
     survivor_s = survivor.with_env(sys_env)
     other_ids = list(others.ids)
@@ -221,9 +222,9 @@ def undo_merge(env: Environment, log: Model) -> None:
     """Put every moved reference back, restore the survivor's previous values, unarchive the merged contacts."""
     log = log.elevated()
     if log.undone:
-        raise UserError("This merge was already undone")
+        raise UserError(_("This merge was already undone"))
     if log.create_date and env.now() - log.create_date > UNDO_WINDOW:
-        raise UserError("The undo window for this merge has passed")
+        raise UserError(_("The undo window for this merge has passed"))
     cr = env.cr
     data = log.relinked or {}
     for item in data.get("m2o", []):

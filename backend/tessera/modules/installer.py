@@ -16,6 +16,8 @@ from packaging.version import Version
 from tessera.config import get_settings
 from tessera.db.engine import Cursor, get_engine
 from tessera.exceptions import ModuleError
+from tessera.i18n.apply import apply_module_translations
+from tessera.i18n.catalog import reset_catalogs
 from tessera.logging import get_logger
 from tessera.modules.data import DataLoader
 from tessera.modules.graph import auto_install_candidates, dependants_of, resolve_order
@@ -158,6 +160,7 @@ def _sync_model_metadata(env: Environment, registry: Registry) -> None:
 
 def install_modules(names: Sequence[str], *, database_url: str | None = None, demo: bool = False) -> InstallResult:
     started = time.perf_counter()
+    reset_catalogs()
     url = _resolve_url(database_url)
     manifests = discover()
     engine = get_engine(url)
@@ -190,6 +193,7 @@ def install_modules(names: Sequence[str], *, database_url: str | None = None, de
             module_rec = env["core.module"].search([("name", "=", name)])
             module_rec.write({"state": "installing"})
             _load_records(env, registry, manifest, mode="install", demo=demo)
+            apply_module_translations(env, name, modules=registry.module_order)
             _run_module_hook(manifest, env, manifest.post_init)
             module_rec.write({"state": "installed", "installed_version": manifest.version, "installed_at": env.now()})
             registry.installed_versions[name] = manifest.version
@@ -247,6 +251,7 @@ def _run_script(path: Path, env: Environment, module: str, from_version: str) ->
 
 def upgrade_modules(names: Sequence[str], *, database_url: str | None = None) -> InstallResult:
     started = time.perf_counter()
+    reset_catalogs()
     url = _resolve_url(database_url)
     manifests = discover(refresh=True)
     engine = get_engine(url)
@@ -288,6 +293,7 @@ def upgrade_modules(names: Sequence[str], *, database_url: str | None = None) ->
             manifest = manifests[name]
             from_version = installed[name]
             _load_records(env, registry, manifest, mode="upgrade", demo=False)
+            apply_module_translations(env, name, modules=registry.module_order)
             logs = env["core.module_migration_log"]
             for ver, folder in _migration_scripts(manifest, from_version, manifest.version):
                 entry = logs.create(
