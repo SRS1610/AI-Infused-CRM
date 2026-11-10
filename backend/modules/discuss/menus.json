@@ -1,0 +1,4 @@
+[
+  {"id": "menu_root", "name": "Discuss", "sequence": 1, "icon": "message-square", "action": "discuss.action_discuss", "groups": ["core.group_user"]},
+  {"id": "menu_channels_admin", "name": "Channels", "parent": "web.menu_settings_technical", "sequence": 90, "action": "discuss.action_channels"}
+]

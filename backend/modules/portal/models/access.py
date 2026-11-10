@@ -26,7 +26,9 @@ class PortalAccess(Model):
 
     partner_id = fields.Many2one("contacts.partner", "Contact", required=True, ondelete="cascade", index=True)
     user_id = fields.Many2one("core.user", "Portal user", ondelete="set_null")
-    state = fields.Selection([("invited", "Invited"), ("active", "Active"), ("revoked", "Revoked")], default="invited", required=True)
+    state = fields.Selection(
+        [("invited", "Invited"), ("active", "Active"), ("revoked", "Revoked")], default="invited", required=True
+    )
     invitation_token_hash = fields.Char(groups="core.group_system", copy=False)
     invited_at = fields.Datetime(readonly=True)
     invitation_expires_at = fields.Datetime(readonly=True)
@@ -97,9 +99,10 @@ class Partner(Model):
                 "email_to": me.email_normalized,
                 "subject": f"Your {company.name} customer portal",
                 "body_html": (
-                    f"<p>Hello {me.name},</p><p>You have been invited to the {company.name} customer portal, where you can "
-                    f"review and accept quotations and keep your details up to date.</p>"
-                    f'<p><a href="{link}">Set your password</a> (the link is valid for 7 days and can be used once).</p>'
+                    f"<p>Hello {me.name},</p><p>You have been invited to the {company.name} customer portal, "
+                    "where you can review and accept quotations and keep your details up to date.</p>"
+                    f'<p><a href="{link}">Set your password</a> '
+                    "(the link is valid for 7 days and can be used once).</p>"
                 ),
                 "model": "contacts.partner",
                 "res_id": self.ids[0],

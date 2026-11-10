@@ -1,0 +1,11 @@
+[
+  {"id": "access_channel_user", "model": "core.model_access", "values": {"name": "channel: user", "model_name": "discuss.channel", "group_id": "core.group_user", "perm_read": true, "perm_write": true, "perm_create": true, "perm_unlink": true}},
+  {"id": "access_channel_system", "model": "core.model_access", "values": {"name": "channel: admin", "model_name": "discuss.channel", "group_id": "core.group_system", "perm_read": true, "perm_write": true, "perm_create": true, "perm_unlink": true}},
+  {"id": "access_member_system", "model": "core.model_access", "values": {"name": "channel member: admin", "model_name": "discuss.member", "group_id": "core.group_system", "perm_read": true, "perm_write": true, "perm_create": true, "perm_unlink": true}},
+  {"id": "rule_channel_read", "model": "core.record_rule", "values": {"name": "Visible channels: public, my groups', or mine", "model_name": "discuss.channel", "group_ids": ["core.group_user"],
+    "perm_read": true, "perm_write": false, "perm_create": false, "perm_unlink": false,
+    "domain": {"any": [["privacy", "=", "public"], ["member_ids.user_id", "=", "$uid"], {"all": [["privacy", "=", "groups"], ["group_ids", "in", "$user.group_ids"]]}]}}},
+  {"id": "rule_channel_write", "model": "core.record_rule", "values": {"name": "Members change their channels", "model_name": "discuss.channel", "group_ids": ["core.group_user"],
+    "perm_read": false, "perm_write": true, "perm_create": false, "perm_unlink": true, "domain": [["member_ids.user_id", "=", "$uid"]]}},
+  {"id": "rule_channel_admin", "model": "core.record_rule", "values": {"name": "Administrators see every channel", "model_name": "discuss.channel", "group_ids": ["core.group_system"], "domain": {"all": []}}}
+]

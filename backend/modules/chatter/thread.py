@@ -37,6 +37,7 @@ class Thread(Model):
     _description = "Discussion thread mixin"
     _thread: ClassVar[bool] = True
     _track_create: ClassVar[bool] = True  # post a "created" entry in the thread
+    _follower_notifications: ClassVar[bool] = True  # chat-like threads (discuss) manage their own audience
     _view_hidden_fields: ClassVar[tuple[str, ...]] = (
         "activity_state",
         "activity_date_deadline",
@@ -293,7 +294,8 @@ def post_message(
             }
         )
     )
-    if author and message_type in ("comment", "note", "email"):
+    followers_on = getattr(type(env[model]), "_follower_notifications", True)
+    if author and message_type in ("comment", "note", "email") and followers_on:
         subscribe(env, model, res_id, [author])
     publish_after_commit(env.cr, f"record:{model}:{res_id}", "chatter", {"message_id": msg.ids[0], "uid": env.uid})
     if notify:
@@ -305,6 +307,8 @@ def _notify(env: Environment, msg: Model, mentions: list[int]) -> None:
     msg = msg.elevated()
     author = msg.author_id.ids[0] if msg.author_id else None
     followers = env["chatter.follower"].elevated().search([("model", "=", msg.model), ("res_id", "=", msg.res_id)])
+    if not getattr(type(env[msg.model]), "_follower_notifications", True):
+        followers = followers.browse([])
     subtype_id = msg.subtype_id.ids[0] if msg.subtype_id else None
     recipients: dict[int, str] = {}
     for follower in followers:

@@ -125,7 +125,7 @@ export function Chatter({ model, resId, canWrite = true }: { model: string; resI
   );
 }
 
-function MessageItem({ message: m, onChange }: { message: ChatterMessage; onChange: () => void }) {
+export function MessageItem({ message: m, onChange }: { message: ChatterMessage; onChange: () => void }) {
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(m.body);
   const isLog = m.type === "notification" || m.type === "system";
@@ -250,7 +250,7 @@ function MessageItem({ message: m, onChange }: { message: ChatterMessage; onChan
   );
 }
 
-function Composer({
+export function Composer({
   model,
   resId,
   internal,

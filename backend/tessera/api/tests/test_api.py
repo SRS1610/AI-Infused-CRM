@@ -314,7 +314,6 @@ def test_webhook_delivery_with_signature(admin: Session) -> None:
     assert not route.called  # delivery is a background job, dispatched after commit
     from tessera.config import get_settings
     from tessera.jobs import run_now
-
     from tessera.orm.environment import SYSTEM_UID, environment_for
 
     url = get_settings().database_url

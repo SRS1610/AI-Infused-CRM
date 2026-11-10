@@ -51,12 +51,31 @@ class Hub:
             id=uuid.uuid4().hex, uid=uid, dbname=dbname, loop=asyncio.get_running_loop(), queue=asyncio.Queue(MAX_QUEUE)
         )
         with self._lock:
+            first = not any(c.uid == uid and c.dbname == dbname for c in self._connections.values())
             self._connections[conn.id] = conn
+        if first:
+            self._announce(dbname, uid, True)
         return conn
 
     def disconnect(self, conn: Connection) -> None:
         with self._lock:
             self._connections.pop(conn.id, None)
+            last = not any(c.uid == conn.uid and c.dbname == conn.dbname for c in self._connections.values())
+        if last:
+            self._announce(conn.dbname, conn.uid, False)
+
+    # -- presence (users with at least one open connection in this process) ------------------
+    def online_uids(self, dbname: str) -> set[int]:
+        with self._lock:
+            return {c.uid for c in self._connections.values() if c.dbname == dbname}
+
+    def _announce(self, dbname: str, uid: int, online: bool) -> None:
+        try:
+            self.publish(
+                dbname, "presence", {"channel": "presence", "event": "presence", "data": {"uid": uid, "online": online}}
+            )
+        except Exception:
+            log.debug("presence announce failed", uid=uid)
 
     def subscribe(self, conn: Connection, channels: list[str]) -> None:
         with self._lock:

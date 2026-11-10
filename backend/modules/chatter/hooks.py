@@ -30,7 +30,8 @@ def thread_on_create(records: Model, vals_list: list[dict[str, Any]]) -> None:
         followers = [env.uid] if env.uid != SYSTEM_UID else []
         if _responsible(rec):
             followers.append(rec.user_id.ids[0])
-        subscribe(env, rec._name, rec.ids[0], followers)
+        if getattr(type(records), "_follower_notifications", True):
+            subscribe(env, rec._name, rec.ids[0], followers)
         if type(records)._track_create:
             post_message(
                 env,

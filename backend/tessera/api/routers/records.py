@@ -138,9 +138,7 @@ def _expand(model: Model, items: list[dict[str, Any]], names: list[str]) -> None
 
 
 @router.post("/{model_name}", status_code=201)
-def create_record(
-    model_name: str, body: CreateBody, ctx: RequestContext = Depends(authenticated)
-) -> dict[str, Any]:
+def create_record(model_name: str, body: CreateBody, ctx: RequestContext = Depends(authenticated)) -> dict[str, Any]:
     model = get_model(ctx, model_name)
     batch = body.values if isinstance(body.values, list) else [body.values]
     records = model.create([clean_input_values(model, v) for v in batch])
@@ -149,9 +147,7 @@ def create_record(
 
 
 @router.post("/{model_name}/read_group")
-def read_group(
-    model_name: str, body: ReadGroupBody, ctx: RequestContext = Depends(authenticated)
-) -> dict[str, Any]:
+def read_group(model_name: str, body: ReadGroupBody, ctx: RequestContext = Depends(authenticated)) -> dict[str, Any]:
     model = get_model(ctx, model_name)
     groups = model.read_group(
         body.domain, body.aggregates, body.groupby, offset=body.offset, limit=body.limit, orderby=body.orderby

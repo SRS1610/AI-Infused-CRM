@@ -1,0 +1,4 @@
+[
+  {"id": "action_discuss", "name": "Discuss", "kind": "client", "client_tag": "discuss"},
+  {"id": "action_channels", "name": "Channels", "model": "discuss.channel", "views": ["list", "form"], "groups": ["core.group_system"]}
+]

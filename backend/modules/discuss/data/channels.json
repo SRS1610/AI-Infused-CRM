@@ -1,0 +1,3 @@
+[
+  {"id": "channel_general", "model": "discuss.channel", "noupdate": true, "values": {"name": "general", "description": "Company-wide announcements and chat", "privacy": "public"}}
+]

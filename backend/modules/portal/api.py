@@ -20,7 +20,11 @@ EDITABLE = {"phone", "mobile", "function", "street", "street2", "city", "zip", "
 
 
 @router.post("/invite/accept")
-def accept(token: str = Body(..., embed=True), password: str = Body(..., embed=True), ctx: RequestContext = Depends(request_context)) -> dict[str, Any]:
+def accept(
+    token: str = Body(..., embed=True),
+    password: str = Body(..., embed=True),
+    ctx: RequestContext = Depends(request_context),
+) -> dict[str, Any]:
     if not limiter.allow(f"portal-invite:{current_remote_ip() or '?'}", 10):
         raise UserError("Too many attempts; try again in a minute")
     user = accept_invitation(ctx.env, token, password)
