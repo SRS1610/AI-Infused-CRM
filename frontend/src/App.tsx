@@ -9,6 +9,7 @@ import { LoginPage } from "./kernel/shell/LoginPage";
 import { SessionProvider, useSession } from "./kernel/session";
 import { ImportPage } from "./kernel/dataio/ImportPage";
 import { InvitePage, PortalApp } from "./modules/portal/PortalApp";
+import { InvoicePage } from "./modules/portal/InvoicePage";
 import { QuotePage } from "./modules/portal/QuotePage";
 import { ActionView } from "./kernel/views/ActionView";
 import { RecordView } from "./kernel/views/RecordView";
@@ -46,10 +47,15 @@ function Routed() {
   // public customer pages: token links from emails work without an account
   const token = new URLSearchParams(location.search).get("token");
   if (location.pathname === "/portal/invite") return <InvitePage />;
-  if (token && location.pathname.startsWith("/portal/quotes/") && !session?.user.share)
+  if (
+    token &&
+    (location.pathname.startsWith("/portal/quotes/") || location.pathname.startsWith("/portal/invoices/")) &&
+    !session?.user.share
+  )
     return (
       <Routes>
         <Route path="/portal/quotes/:id" element={<QuotePage />} />
+        <Route path="/portal/invoices/:id" element={<InvoicePage />} />
       </Routes>
     );
   if (!session) return <LoginPage />;

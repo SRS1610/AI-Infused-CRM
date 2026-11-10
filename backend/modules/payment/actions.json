@@ -1,0 +1,10 @@
+[
+  {"id": "action_transactions", "name": "Online payments", "model": "payment.transaction", "views": ["list", "form"],
+   "view_refs": {"list": "payment.view_transaction_list", "form": "payment.view_transaction_form"}, "search_view": "payment.view_transaction_search"},
+  {"id": "action_providers", "name": "Payment providers", "model": "payment.provider", "views": ["list", "form"],
+   "view_refs": {"list": "payment.view_provider_list", "form": "payment.view_provider_form"}},
+  {"id": "action_tokens", "name": "Saved payment methods", "model": "payment.token", "views": ["list", "form"],
+   "view_refs": {"list": "payment.view_token_list"}},
+  {"id": "action_events", "name": "Provider notifications", "model": "payment.event", "views": ["list", "form"],
+   "view_refs": {"list": "payment.view_event_list"}}
+]

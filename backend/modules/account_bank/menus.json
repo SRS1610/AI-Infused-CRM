@@ -1,0 +1,8 @@
+[
+  {"id": "menu_bank", "name": "Bank", "parent": "account.menu_root", "sequence": 25, "groups": ["account.group_account_user", "account.group_account_readonly"]},
+  {"id": "menu_bank_reconcile", "name": "Reconcile", "parent": "account_bank.menu_bank", "sequence": 10, "action": "account_bank.action_bank_reconcile"},
+  {"id": "menu_bank_statements", "name": "Statements", "parent": "account_bank.menu_bank", "sequence": 20, "action": "account_bank.action_bank_statements"},
+  {"id": "menu_bank_transactions", "name": "Transactions", "parent": "account_bank.menu_bank", "sequence": 30, "action": "account_bank.action_bank_transactions"},
+  {"id": "menu_statement_imports", "name": "Imports", "parent": "account_bank.menu_bank", "sequence": 40, "action": "account_bank.action_statement_imports"},
+  {"id": "menu_reconcile_models", "name": "Reconciliation rules", "parent": "account.menu_config", "sequence": 75, "action": "account_bank.action_reconcile_models"}
+]

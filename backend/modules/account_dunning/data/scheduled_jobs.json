@@ -1,0 +1,3 @@
+[
+  {"id": "sched_dunning", "model": "core.scheduled_job", "noupdate": true, "values": {"name": "Payment reminders (daily)", "job_name": "account_dunning.run", "cron": "23 5 * * *"}}
+]

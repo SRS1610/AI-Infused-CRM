@@ -1,0 +1,13 @@
+[
+  {"id": "action_bank_reconcile", "name": "Bank reconciliation", "kind": "client", "client_tag": "account_bank.reconcile"},
+  {"id": "action_bank_statements", "name": "Bank statements", "model": "account.bank_statement", "views": ["list", "form"],
+   "view_refs": {"list": "account_bank.view_bank_statement_list", "form": "account_bank.view_bank_statement_form"},
+   "search_view": "account_bank.view_bank_statement_search"},
+  {"id": "action_bank_transactions", "name": "Bank transactions", "model": "account.bank_statement_line", "views": ["list", "form"],
+   "view_refs": {"list": "account_bank.view_bank_statement_line_list", "form": "account_bank.view_bank_statement_line_form"},
+   "search_view": "account_bank.view_bank_statement_line_search"},
+  {"id": "action_statement_imports", "name": "Import a statement", "model": "account.bank_statement_import", "views": ["list", "form"],
+   "view_refs": {"list": "account_bank.view_statement_import_list", "form": "account_bank.view_statement_import_form"}},
+  {"id": "action_reconcile_models", "name": "Reconciliation rules", "model": "account.reconcile_model", "views": ["list", "form"],
+   "view_refs": {"list": "account_bank.view_reconcile_model_list", "form": "account_bank.view_reconcile_model_form"}}
+]

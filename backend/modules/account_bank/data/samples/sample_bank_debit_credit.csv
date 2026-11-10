@@ -1,0 +1,5 @@
+Buchungstag;Verwendungszweck;Auftraggeber;IBAN;Soll;Haben;Waehrung
+10.03.2026;Payment invoice INV/2026/00012;Lyon Robotics SA;FR1420041010050500013M02606;;1.200,00;EUR
+10.03.2026;Bank fees March 2026;;;45,50;;EUR
+11.03.2026;Bill 4711;Office Supplies GmbH;DE89370400440532013000;500,00;;EUR
+12.03.2026;Invoices INV/2026/00014 and INV/2026/00015;Rotterdam Logistics BV;NL91ABNA0417164300;;3.000,00;EUR

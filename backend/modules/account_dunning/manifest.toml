@@ -1,0 +1,15 @@
+name = "account_dunning"
+version = "1.0.0"
+summary = "Payment reminders: dunning levels, reminder runs, emails with pay links, letters and fees"
+category = "Accounting"
+phase = 2
+depends = ["account"]
+license = "Apache-2.0"
+installable = true
+
+[load]
+security = ["security/access.json"]
+data = ["data/scheduled_jobs.json"]
+views = ["views.json"]
+actions = "actions.json"
+menus = "menus.json"

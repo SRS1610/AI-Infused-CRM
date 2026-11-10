@@ -1,0 +1,16 @@
+name = "account_bank"
+version = "1.0.0"
+summary = "Bank statements: file import (CSV, OFX, CAMT.053, MT940), reconciliation rules and bank matching"
+category = "Accounting"
+phase = 2
+depends = ["account"]
+license = "Apache-2.0"
+installable = true
+post_init = "hooks:post_init"
+
+[load]
+security = ["security/access.json"]
+data = ["data/scheduled_jobs.json"]
+views = ["views.json"]
+actions = "actions.json"
+menus = "menus.json"

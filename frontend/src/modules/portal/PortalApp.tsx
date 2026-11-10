@@ -5,6 +5,7 @@ import { request } from "../../kernel/api/client";
 import { formatMonetary } from "../../kernel/format";
 import { t, tx } from "../../kernel/i18n";
 import { useSession } from "../../kernel/session";
+import { InvoicePage } from "./InvoicePage";
 import { QuotePage, quoteStateLabel } from "./QuotePage";
 
 interface Doc {
@@ -49,6 +50,7 @@ export function PortalApp() {
           <Route path="/portal" element={<Documents />} />
           <Route path="/portal/profile" element={<Profile />} />
           <Route path="/portal/quotes/:id" element={<QuotePage />} />
+          <Route path="/portal/invoices/:id" element={<InvoicePage />} />
           <Route path="*" element={<Navigate to="/portal" replace />} />
         </Routes>
       </main>

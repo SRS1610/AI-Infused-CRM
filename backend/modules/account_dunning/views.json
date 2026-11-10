@@ -1,0 +1,55 @@
+[
+  {"id": "view_dunning_level_list", "model": "account.dunning_level", "type": "list", "name": "account.dunning_level.list",
+   "columns": [{"field": "name"}, {"field": "delay_days"}, {"field": "send_email"}, {"field": "print_letter"}, {"field": "fee_amount"}, {"field": "company_id", "optional": "hide"}]},
+  {"id": "view_dunning_level_form", "model": "account.dunning_level", "type": "form", "name": "account.dunning_level.form",
+   "root": {"kind": "sheet", "children": [
+     {"kind": "field", "name": "name", "widget": "title"},
+     {"kind": "group", "name": "main", "columns": 2, "children": [
+       {"kind": "field", "name": "delay_days"}, {"kind": "field", "name": "company_id"},
+       {"kind": "field", "name": "send_email"}, {"kind": "field", "name": "print_letter"},
+       {"kind": "field", "name": "fee_amount"}, {"kind": "field", "name": "fee_product_id"},
+       {"kind": "field", "name": "active"}
+     ]},
+     {"kind": "field", "name": "subject"},
+     {"kind": "field", "name": "message"}
+   ]}},
+  {"id": "view_dunning_run_list", "model": "account.dunning_run", "type": "list", "name": "account.dunning_run.list",
+   "columns": [{"field": "date"}, {"field": "name"}, {"field": "line_count"}, {"field": "sent_count"}, {"field": "state", "widget": "badge"}, {"field": "company_id", "optional": "hide"}]},
+  {"id": "view_dunning_run_form", "model": "account.dunning_run", "type": "form", "name": "account.dunning_run.form", "chatter": true,
+   "root": {"kind": "sheet", "children": [
+     {"kind": "buttons", "children": [
+       {"kind": "button", "method": "action_prepare", "label": "Find customers to remind", "invisible": {"any": [["state", "!=", "draft"], ["line_count", ">", 0]]}},
+       {"kind": "button", "method": "action_send", "label": "Send reminders", "confirm": "Send the emails, charge the fees and print the letters?", "invisible": {"any": [["state", "!=", "draft"], ["line_count", "=", 0]]}}
+     ]},
+     {"kind": "field", "name": "name", "widget": "title", "readonly": true},
+     {"kind": "group", "name": "main", "columns": 2, "children": [
+       {"kind": "field", "name": "date"}, {"kind": "field", "name": "company_id"},
+       {"kind": "field", "name": "state", "widget": "badge"}, {"kind": "field", "name": "letter_id"},
+       {"kind": "field", "name": "line_count"}, {"kind": "field", "name": "sent_count"}
+     ]},
+     {"kind": "notebook", "pages": [
+       {"kind": "page", "name": "page_lines", "title": "Reminders", "children": [
+         {"kind": "field", "name": "line_ids", "columns": [{"field": "partner_id"}, {"field": "level_id"}, {"field": "overdue_amount"}, {"field": "max_days_overdue"}, {"field": "email_to"}, {"field": "state"}, {"field": "fee_move_id"}]}
+       ]}
+     ]}
+   ]}},
+  {"id": "view_dunning_line_list", "model": "account.dunning_run_line", "type": "list", "name": "account.dunning_run_line.list",
+   "columns": [{"field": "date"}, {"field": "partner_id"}, {"field": "level_id"}, {"field": "overdue_amount", "sum": true}, {"field": "max_days_overdue"}, {"field": "email_to"}, {"field": "state", "widget": "badge"}]},
+  {"id": "view_dunning_line_form", "model": "account.dunning_run_line", "type": "form", "name": "account.dunning_run_line.form",
+   "root": {"kind": "sheet", "children": [
+     {"kind": "group", "name": "main", "columns": 2, "children": [
+       {"kind": "field", "name": "run_id", "readonly": true}, {"kind": "field", "name": "partner_id", "readonly": true},
+       {"kind": "field", "name": "level_id", "readonly": true}, {"kind": "field", "name": "overdue_amount", "readonly": true},
+       {"kind": "field", "name": "max_days_overdue", "readonly": true}, {"kind": "field", "name": "email_to"},
+       {"kind": "field", "name": "state", "readonly": true}, {"kind": "field", "name": "fee_move_id"},
+       {"kind": "field", "name": "mail_id", "readonly": true}
+     ]},
+     {"kind": "field", "name": "subject"},
+     {"kind": "field", "name": "message"},
+     {"kind": "field", "name": "invoice_ids", "readonly": true}
+   ]}},
+  {"id": "view_company_form_dunning", "model": "core.company", "type": "form", "name": "core.company.form.dunning", "inherit": "web.view_company_form",
+   "operations": [{"op": "insert_after", "anchor": {"field": "vat"}, "node": {"kind": "field", "name": "dunning_min_amount"}}]},
+  {"id": "view_partner_form_dunning", "model": "contacts.partner", "type": "form", "name": "contacts.partner.form.dunning", "inherit": "contacts.view_partner_form",
+   "operations": [{"op": "insert_after", "anchor": {"field": "vat"}, "node": {"kind": "field", "name": "dunning_excluded"}}]}
+]

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+from typing import Any
 
 import typer
 from rich.console import Console
@@ -43,6 +44,57 @@ def install_chart_cmd(
             raise typer.BadParameter(f"No company {company!r}")
         counts = install_chart(found, chart)
         console.print(f"[green]{found.name}[/green]: chart {found.chart_template} — {json.dumps(counts)}")
+
+
+@app.command("import-statement")
+def import_statement_cmd(
+    file: str = typer.Argument(..., help="Statement file (CSV, OFX, CAMT.053 or MT940)"),
+    journal: str = typer.Option(..., "--journal", help="Bank journal code (e.g. BNK1)"),
+    company: str | None = typer.Option(None, "--company", help="Company name or id (default: the only match)"),
+    file_format: str | None = typer.Option(None, "--format", help="camt053, ofx, mt940 or csv (default: detected)"),
+    no_post: bool = typer.Option(False, "--no-post", help="Leave the statement open (no posting, no rules)"),
+    database_url: str | None = typer.Option(None, "--database-url", envvar="TESSERA_DATABASE_URL"),
+) -> None:
+    """Import a bank statement file into a journal (requires the ``account_bank`` module)."""
+    from pathlib import Path
+
+    try:
+        from modules.account_bank.importing import import_statements
+    except ImportError as exc:  # pragma: no cover - module not on the path
+        raise typer.BadParameter("The account_bank module is not available") from exc
+
+    path = Path(file)
+    if not path.is_file():
+        raise typer.BadParameter(f"No file {file!r}")
+    with _env(database_url) as env:
+        if "account.bank_statement" not in env.registry.models:
+            raise typer.BadParameter("Install the account_bank module first")
+        domain: list[Any] = [("code", "=", journal), ("type", "in", ["bank", "cash"])]
+        if company:
+            companies = env["core.company"]
+            found = (
+                companies.browse([int(company)]) if company.isdigit() else companies.search([("name", "=", company)])
+            )
+            domain.append(("company_id", "in", found.ids))
+        journals = env["account.journal"].search(domain)
+        if len(journals) != 1:
+            raise typer.BadParameter(f"{len(journals)} bank journals match {journal!r}; use --company")
+        attachment = env["core.attachment"].create(
+            {"name": path.name, "raw": path.read_bytes(), "company_id": journals.company_id.ids[0]}
+        )
+        result = import_statements(
+            journals.with_company(journals.company_id).env["account.journal"].browse(journals.ids),
+            path.read_bytes(),
+            path.name,
+            file_format=file_format,
+            attachment=attachment,
+            post=not no_post,
+            auto_reconcile=not no_post,
+        )
+        console.print(
+            f"[green]{result['format']}[/green]: {result['lines']} transactions imported, "
+            f"{result['duplicates']} already imported, {result['reconciled']} reconciled automatically"
+        )
 
 
 @app.command("integrity")

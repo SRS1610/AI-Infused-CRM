@@ -17,7 +17,8 @@ PHASE_MODULES = {
 # each phase's scenario includes the previous ones
 PHASE_MODULES[2] = [
     *PHASE_MODULES[1], "account", "account_analytic", "account_budget", "account_asset",
-    "account_reports", "account_tax",
+    "account_reports", "account_tax", "account_bank", "payment", "account_dunning", "account_einvoice",
+    "auth_saml",
 ]  # fmt: skip
 
 

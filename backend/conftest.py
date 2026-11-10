@@ -57,6 +57,10 @@ KERNEL_TEST_MODULES = [
     "account_reports",
     "account_tax",
     "auth_saml",
+    "account_bank",
+    "payment",
+    "account_dunning",
+    "account_einvoice",
 ]
 
 
