@@ -13,7 +13,7 @@ from zoneinfo import ZoneInfo
 from dateutil import parser as dateparser
 
 from tessera.exceptions import TesseraError, UserError, ValidationError
-from tessera.i18n import _
+from tessera.i18n import _, translatable
 from tessera.orm import fields as F
 
 if TYPE_CHECKING:
@@ -63,7 +63,7 @@ class Converter:
         self._names: dict[tuple[str, str], int | None] = {}
 
     def convert(self, path: str, raw: Any) -> tuple[str, Any]:
-        name, _, sub = path.partition("/")
+        name, _sep, sub = path.partition("/")
         f = self.model._fields[name]
         text = "" if raw is None else str(raw).strip()
         if isinstance(f, F.Many2one):
@@ -79,14 +79,14 @@ class Converter:
                 return name, True
             if low in FALSE:
                 return name, False
-            raise CellError(f"'{text}' is not a yes/no value")
+            raise CellError(_("'{text}' is not a yes/no value", text=text))
         if isinstance(f, F.Integer):
             try:
                 number = float(text.replace(" ", "").replace(",", ""))
             except ValueError as exc:
-                raise CellError(f"'{text}' is not a whole number") from exc
+                raise CellError(_("'{text}' is not a whole number", text=text)) from exc
             if not number.is_integer():
-                raise CellError(f"'{text}' is not a whole number")
+                raise CellError(_("'{text}' is not a whole number", text=text))
             return name, int(number)
         if isinstance(f, F.Float | F.Monetary):
             clean = text.replace(" ", "").replace(chr(0xA0), "")
@@ -97,12 +97,12 @@ class Converter:
             try:
                 return name, float(clean)
             except ValueError as exc:
-                raise CellError(f"'{text}' is not a number") from exc
+                raise CellError(_("'{text}' is not a number", text=text)) from exc
         if isinstance(f, F.Datetime):
             try:
                 value = dateparser.parse(text, dayfirst=self.dayfirst)
             except (ValueError, OverflowError) as exc:
-                raise CellError(f"'{text}' is not a date and time") from exc
+                raise CellError(_("'{text}' is not a date and time", text=text)) from exc
             if value.tzinfo is None:
                 value = value.replace(tzinfo=self.tz)
             return name, value.astimezone(dt.UTC)
@@ -110,20 +110,22 @@ class Converter:
             try:
                 return name, dateparser.parse(text, dayfirst=self.dayfirst).date()
             except (ValueError, OverflowError) as exc:
-                raise CellError(f"'{text}' is not a date") from exc
+                raise CellError(_("'{text}' is not a date", text=text)) from exc
         if isinstance(f, F.Selection):
             options = f.selection if isinstance(f.selection, list | tuple) else []
             for key, label in options:
                 if text == key or text.lower() == str(label).lower() or text.lower() == str(key).lower():
                     return name, key
-            raise CellError(f"'{text}' is not one of: {', '.join(str(lbl) for _, lbl in options)}")
+            raise CellError(
+                _("'{text}' is not one of: {values}", text=text, values=", ".join(str(lbl) for _, lbl in options))
+            )
         if isinstance(f, F.Json):
             import json
 
             try:
                 return name, json.loads(text)
             except ValueError as exc:
-                raise CellError("Invalid JSON") from exc
+                raise CellError(_("Invalid JSON")) from exc
         return name, text
 
     def _relation_id(self, f: F.Field, text: str, sub: str) -> int:
@@ -146,11 +148,19 @@ class Converter:
                     matches = comodel.name_search(text, operator="ilike", limit=2)
                     matches = [m for m in matches if str(m[1]).lower() == text.lower()]
                 if len(matches) > 1:
-                    raise CellError(f"'{text}' matches several {comodel._description} records")
+                    raise CellError(
+                        _(
+                            "'{text}' matches several {description} records",
+                            text=text,
+                            description=translatable(comodel._description),
+                        )
+                    )
                 found = matches[0][0] if matches else None
             self._names[key] = found
         if found is None:
-            raise CellError(f"No {comodel._description} named '{text}'")
+            raise CellError(
+                _("No {description} named '{text}'", description=translatable(comodel._description), text=text)
+            )
         return found
 
 

@@ -25,6 +25,7 @@ from typing import Any, Protocol
 import httpx
 
 from tessera.config import get_settings
+from tessera.i18n import _
 from tessera.logging import get_logger
 from tessera.security import crypto
 
@@ -65,7 +66,7 @@ class StaticToken:
         return self.token
 
     def refresh(self) -> str:
-        raise ReconnectRequired("The access token was refused and there is no refresh token")
+        raise ReconnectRequired(_("The access token was refused and there is no refresh token"))
 
 
 class BearerAuth(httpx.Auth):
@@ -104,11 +105,15 @@ def client_credentials(account: Any) -> tuple[str, str, str]:
         tenant = setting("tenant") or settings.microsoft_oauth_tenant or "common"
         url = MICROSOFT_TOKEN_URL.format(tenant=tenant)
     else:
-        raise ReconnectRequired(f"{provider} accounts do not use OAuth")
+        raise ReconnectRequired(_("{provider} accounts do not use OAuth", provider=provider))
     if not cid or not secret:
         raise ReconnectRequired(
-            f"No OAuth client is configured for {provider}: set it in the company setting {CLIENTS_SETTING} "
-            "or in the server configuration"
+            _(
+                "No OAuth client is configured for {provider}: set it in the company setting {setting} "
+                "or in the server configuration",
+                provider=provider,
+                setting=CLIENTS_SETTING,
+            )
         )
     return cid, secret, url
 
@@ -131,14 +136,14 @@ class AccountTokens:
         if self.can_refresh and (not token or expiring):
             return self.refresh()
         if not token:
-            raise ReconnectRequired("The account has no access token")
+            raise ReconnectRequired(_("The account has no access token"))
         return token
 
     def refresh(self) -> str:
         acc = self.account
         refresh_token = crypto.decrypt(acc.refresh_token) if acc.refresh_token else None
         if not refresh_token:
-            raise ReconnectRequired("The access token was refused and there is no refresh token")
+            raise ReconnectRequired(_("The access token was refused and there is no refresh token"))
         client_id, client_secret, url = client_credentials(acc)
         form = {
             "grant_type": "refresh_token",
@@ -152,7 +157,7 @@ class AccountTokens:
         try:
             resp = http.post(url, data=form, headers={"Accept": "application/json"})
         except httpx.HTTPError as exc:
-            raise TokenRefreshError(f"Token endpoint unreachable: {exc}") from exc
+            raise TokenRefreshError(_("Token endpoint unreachable: {exc}", exc=exc)) from exc
         finally:
             if self.client is None:
                 http.close()
@@ -168,9 +173,9 @@ class AccountTokens:
             "interaction_required",
         ):
             detail = data.get("error_description") or data["error"]
-            raise ReconnectRequired(f"The provider refused the refresh token ({str(detail)[:300]})")
+            raise ReconnectRequired(_("The provider refused the refresh token ({detail})", detail=str(detail)[:300]))
         if resp.status_code >= 400 or not data.get("access_token"):
-            raise TokenRefreshError(f"Token refresh failed with HTTP {resp.status_code}")
+            raise TokenRefreshError(_("Token refresh failed with HTTP {status_code}", status_code=resp.status_code))
         access = str(data["access_token"])
         vals: dict[str, Any] = {"access_token": access}
         expires_in = data.get("expires_in")

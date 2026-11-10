@@ -1315,7 +1315,9 @@ class Model:
             for rec in self.elevated():
                 value = rec[field.name]
                 if (value in (None, "", False) or (isinstance(value, Model) and not value)) and domain.evaluate(rec):
-                    raise ValidationError(f"Field '{field.label}' is required", field=field.name)
+                    raise ValidationError(
+                        _("Field '{field}' is required", field=translatable(field.label)), field=field.name
+                    )
 
     # ------------------------------------------------------------------ convenience
     def copy_data(self, default: Vals | None = None, *, nested: bool = False) -> list[Vals]:

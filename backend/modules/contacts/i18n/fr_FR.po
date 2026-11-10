@@ -256,6 +256,36 @@ msgid "Website"
 msgstr "Site web"
 
 #. field label
+#: field:contacts.partner.description
+msgid "About"
+msgstr "À propos"
+
+#. field help
+#: field:contacts.partner.description
+msgid "Public description of the company, e.g. from its website"
+msgstr "Description publique de la société, par ex. issue de son site web"
+
+#. field label
+#: field:contacts.partner.social_links
+msgid "Social Links"
+msgstr "Réseaux sociaux"
+
+#. field help
+#: field:contacts.partner.social_links
+msgid "Public profiles (LinkedIn, X, Facebook …), one link per line"
+msgstr "Profils publics (LinkedIn, X, Facebook…), un lien par ligne"
+
+#. field label
+#: field:contacts.partner.logo_url
+msgid "Logo URL"
+msgstr "URL du logo"
+
+#. field help
+#: field:contacts.partner.logo_url
+msgid "Address of the company's logo, e.g. on its website"
+msgstr "Adresse du logo de la société, par ex. sur son site web"
+
+#. field label
 #: field:contacts.partner.vat
 msgid "Tax ID"
 msgstr "N° de TVA"
@@ -347,7 +377,7 @@ msgstr "Étiquettes"
 msgid "Empty = shared by every company"
 msgstr "Vide = partagé par toutes les sociétés"
 
-#: ai_features.py:430
+#: ai_features.py:441
 #, python-brace-format
 msgid "Enrichment ready: {name}"
 msgstr "Enrichissement prêt : {name}"
@@ -362,21 +392,21 @@ msgstr "Doublon possible : {name}"
 msgid "Looks like {names}. Review and merge from the contact."
 msgstr "Ressemble à {names}. Vérifiez et fusionnez depuis le contact."
 
-#: ai_features.py:437
+#: ai_features.py:448
 msgid "No new information was found in the approved sources."
 msgstr "Aucune nouvelle information n'a été trouvée dans les sources approuvées."
 
-#: ai_features.py:421
+#: ai_features.py:432
 #, python-brace-format
 msgid "Enrichment unavailable: {name}"
 msgstr "Enrichissement indisponible : {name}"
 
-#: ai_features.py:432
+#: ai_features.py:443
 #, python-brace-format
 msgid "{count} suggested fields, each with its source. Review them on the contact."
 msgstr "{count} champs suggérés, chacun avec sa source. Vérifiez-les sur le contact."
 
-#: ai_features.py:434
+#: ai_features.py:445
 msgid "1 suggested field, with its source. Review it on the contact."
 msgstr "1 champ suggéré, avec sa source. Vérifiez-le sur le contact."
 
@@ -392,58 +422,58 @@ msgstr "Le contact à conserver doit faire partie des contacts sélectionnés"
 msgid "No such contact"
 msgstr "Contact introuvable"
 
-#: duplicates.py:210
+#: duplicates.py:211
 msgid "Same name"
 msgstr "Même nom"
 
-#: duplicates.py:218
+#: duplicates.py:219
 msgid "Same e-mail address"
 msgstr "Même adresse e-mail"
 
-#: duplicates.py:225
+#: duplicates.py:226
 msgid "Same phone number"
 msgstr "Même numéro de téléphone"
 
-#: duplicates.py:269
+#: duplicates.py:270
 msgid "Same company"
 msgstr "Même société"
 
-#: duplicates.py:271
+#: duplicates.py:272
 msgid "Same city"
 msgstr "Même ville"
 
-#: duplicates.py:355
+#: duplicates.py:357
 msgid "Choose at least one other contact to merge"
 msgstr "Choisissez au moins un autre contact à fusionner"
 
-#: duplicates.py:381
+#: duplicates.py:383
 msgid "A merge needs the contact to keep"
 msgstr "Une fusion nécessite le contact à conserver"
 
-#: duplicates.py:385
+#: duplicates.py:387
 msgid "One of the contacts to merge no longer exists"
 msgstr "L'un des contacts à fusionner n'existe plus"
 
-#: duplicates.py:212
+#: duplicates.py:213
 #, python-brace-format
 msgid "Very similar name ({percent}%)"
 msgstr "Nom très proche ({percent} %)"
 
-#: duplicates.py:231
+#: duplicates.py:232
 msgid "Same tax ID"
 msgstr "Même n° de TVA"
 
-#: duplicates.py:267
+#: duplicates.py:268
 #, python-brace-format
 msgid "Similar profile (semantic match {percent}%)"
 msgstr "Profil similaire (correspondance sémantique {percent} %)"
 
-#: duplicates.py:214
+#: duplicates.py:215
 #, python-brace-format
 msgid "Similar name ({percent}%)"
 msgstr "Nom proche ({percent} %)"
 
-#: duplicates.py:242
+#: duplicates.py:243
 #, python-brace-format
 msgid "Same domain ({domain})"
 msgstr "Même domaine ({domain})"
@@ -473,15 +503,15 @@ msgstr "Le délai d'annulation de cette fusion est dépassé"
 msgid "Unknown enrichment adapter '{adapter}' (known: {known})"
 msgstr "Adaptateur d'enrichissement « {adapter} » inconnu (connus : {known})"
 
-#: models/partner.py:144
+#: models/partner.py:147
 msgid "A contact needs a name"
 msgstr "Un contact doit avoir un nom"
 
-#: models/partner.py:146
+#: models/partner.py:149
 msgid "A contact cannot be its own company"
 msgstr "Un contact ne peut pas être sa propre société"
 
-#: models/partner.py:150 models/partner.py:181
+#: models/partner.py:153 models/partner.py:184
 msgid "Recursive company hierarchy"
 msgstr "Hiérarchie de sociétés récursive"
 
@@ -572,6 +602,11 @@ msgstr "Finance et assurance"
 #: views.json:view_partner_form
 msgid "Sales"
 msgstr "Ventes"
+
+#. view title
+#: views.json:view_partner_form
+msgid "Public profile"
+msgstr "Profil public"
 
 #. view label
 #: views.json:view_partner_search

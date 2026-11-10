@@ -198,6 +198,11 @@ msgstr ""
 msgid "Widget"
 msgstr ""
 
+#. field help
+#: field:studio.field.widget
+msgid "Client widget used where Studio places the field"
+msgstr ""
+
 #. field label
 #: field:studio.field.tracking
 msgid "Tracking"
@@ -221,6 +226,11 @@ msgstr ""
 #. selection value add_field
 #: selection:studio.change.kind
 msgid "Field added"
+msgstr ""
+
+#. selection value edit_field
+#: selection:studio.change.kind
+msgid "Field changed"
 msgstr ""
 
 #. selection value view_change
@@ -333,58 +343,161 @@ msgstr ""
 msgid "Every change after this one is undone when rolling back to the snapshot"
 msgstr ""
 
-#: api.py:124
+#: api.py:168
 msgid "No such change"
 msgstr ""
 
-#: api.py:147
+#: api.py:191
 msgid "No such snapshot"
 msgstr ""
 
-#: service.py:35
+#: service.py:72
 msgid "Studio is reserved to designers"
 msgstr ""
 
-#: service.py:54
+#: service.py:98
 #, python-brace-format
 msgid "'{model_name}' cannot be customised in Studio"
 msgstr ""
 
-#: service.py:97
+#: service.py:142
 msgid "Field names start with x_ and use lowercase letters, digits and underscores"
 msgstr ""
 
-#: service.py:99
+#: service.py:144
 #, python-brace-format
 msgid "'{model_name}' already has a field '{name}'"
 msgstr ""
 
-#: service.py:113
+#: service.py:158
 msgid "Choice fields need their options"
 msgstr ""
 
-#: service.py:130
+#: service.py:161
 #, python-brace-format
 msgid "Unknown field options: {unknown}"
 msgstr ""
 
-#: service.py:222
+#: service.py:256
+msgid "The default value does not suit the field's type"
+msgstr ""
+
+#: service.py:273
+#, python-brace-format
+msgid "'{name}' is not a Studio field of '{model_name}'"
+msgstr ""
+
+#: service.py:301
+#, python-brace-format
+msgid "These options cannot be changed: {unknown}"
+msgstr ""
+
+#: service.py:303
+msgid "The label cannot be empty"
+msgstr ""
+
+#: service.py:314 service.py:446
+msgid "Nothing to change"
+msgstr ""
+
+#: service.py:389
+msgid "operations must be a list"
+msgstr ""
+
+#: service.py:441 service.py:488
 #, python-brace-format
 msgid "Unknown view type '{view_type}'"
 msgstr ""
 
-#: service.py:313
+#: service.py:548
+msgid "A workflow needs at least one state"
+msgstr ""
+
+#: service.py:551
+msgid "Every state needs its own key"
+msgstr ""
+
+#: service.py:603
+#, python-brace-format
+msgid "'{model_name}' already has the workflow “{name}”"
+msgstr ""
+
+#: service.py:608
 #, python-brace-format
 msgid "'{model_name}' has no field '{state_field}'"
 msgstr ""
 
-#: service.py:103
+#: service.py:148
 msgid "Link fields need an existing target model"
 msgstr ""
 
-#: service.py:108
+#: service.py:153
 #, python-brace-format
 msgid "Amount fields need a currency field on '{model_name}'"
+msgstr ""
+
+#: service.py:216
+#, python-brace-format
+msgid "Unknown field in the condition: {unknown}"
+msgstr ""
+
+#: service.py:221
+msgid "Groups are a list of group references"
+msgstr ""
+
+#: service.py:230
+msgid "Invalid widget name"
+msgstr ""
+
+#: service.py:306
+msgid "Only choice fields have options, and they need at least one"
+msgstr ""
+
+#: service.py:309
+msgid "Options can be added or renamed, not removed"
+msgstr ""
+
+#: service.py:424
+#, python-brace-format
+msgid "'{name}' has no field '{fname}'"
+msgstr ""
+
+#: service.py:554
+msgid "Every transition needs a label"
+msgstr ""
+
+#: service.py:557
+#, python-brace-format
+msgid "Transition “{name}” uses an unknown state"
+msgstr ""
+
+#: service.py:770
+#, python-brace-format
+msgid "A later change relies on this one: roll it back first ({message})"
+msgstr ""
+
+#: service.py:212 service.py:563
+#, python-brace-format
+msgid "Invalid condition: {exc}"
+msgstr ""
+
+#: service.py:225 service.py:598
+#, python-brace-format
+msgid "Unknown group '{ref}'"
+msgstr ""
+
+#: service.py:397
+#, python-brace-format
+msgid "append_to needs a list ({keys}) and a node"
+msgstr ""
+
+#: service.py:427
+msgid "A filter needs a name and a label"
+msgstr ""
+
+#: service.py:431
+#, python-brace-format
+msgid "Invalid filter condition: {exc}"
 msgstr ""
 
 #. core.group.name

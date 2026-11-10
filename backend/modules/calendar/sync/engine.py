@@ -21,6 +21,7 @@ import httpx
 from modules.calendar.ics import RemoteEvent, content_hash, from_event
 from modules.calendar.sync.base import CalendarAdapter, SyncConflict
 from modules.calendar.sync.oauth import AccountTokens, ReconnectRequired
+from tessera.i18n import _
 from tessera.jobs import job
 from tessera.logging import get_logger
 from tessera.security import crypto
@@ -56,9 +57,11 @@ def needs_reconnection(account: Any, reason: str) -> None:
         return
     acc.env["core.notification"].notify(
         [acc.user_id.ids[0]],
-        f"Reconnect your calendar: {acc.name}",
-        "Tessera can no longer synchronise this calendar because the provider refused its access. "
-        "Connect the account again under Calendar → External calendars.",
+        _("Reconnect your calendar: {name}", name=acc.name),
+        _(
+            "Tessera can no longer synchronise this calendar because the provider refused its access. "
+            "Connect the account again under Calendar → External calendars."
+        ),
         kind="system",
         model="calendar.sync_account",
         res_id=acc.ids[0],

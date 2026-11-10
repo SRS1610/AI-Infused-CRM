@@ -828,15 +828,15 @@ msgstr ""
 msgid "Payload"
 msgstr ""
 
-#: ai_assist.py:58
+#: ai_assist.py:71
 msgid "Open a lead or opportunity first"
 msgstr ""
 
-#: ai_assist.py:61
+#: ai_assist.py:74
 msgid "This lead no longer exists"
 msgstr ""
 
-#: ai_assist.py:203
+#: ai_assist.py:216
 msgid "No such job"
 msgstr ""
 
@@ -882,53 +882,53 @@ msgstr ""
 msgid "The suggested filter cannot be used: {errors}"
 msgstr ""
 
-#: ai_insights.py:978
+#: ai_insights.py:979
 msgid "Sales forecast ready"
 msgstr ""
 
-#: ai_insights.py:979
+#: ai_insights.py:980
 #, python-brace-format
 msgid "{period}: P50 {p50:,.0f} (P10 {p10:,.0f} to P90 {p90:,.0f})"
 msgstr ""
 
-#: ai_insights.py:79
+#: ai_insights.py:80
 msgid "AI is not installed"
 msgstr ""
 
-#: ai_insights.py:338
+#: ai_insights.py:339
 #, python-brace-format
 msgid ""
 "Lead scoring model v{version} trained on {rows} closed deals (hold-out AUC {auc:.2f}); {rescored}"
 " open leads rescored."
 msgstr ""
 
-#: ai_insights.py:347
+#: ai_insights.py:348
 #, python-brace-format
 msgid "Not enough closed deals for a predictive model yet; {count} leads scored with the rules."
 msgstr ""
 
-#: ai_insights.py:353
+#: ai_insights.py:354
 msgid "Lead scores updated"
 msgstr ""
 
-#: ai_insights.py:789
+#: ai_insights.py:790
 msgid "Next-best-action works on a lead or opportunity"
 msgstr ""
 
-#: ai_insights.py:803
+#: ai_insights.py:804
 msgid "Lead scores are explained on a lead"
 msgstr ""
 
-#: ai_insights.py:482
+#: ai_insights.py:483
 msgid "Deal risk check finished"
 msgstr ""
 
-#: ai_insights.py:483
+#: ai_insights.py:484
 #, python-brace-format
 msgid "{flagged} open opportunities are at risk ({new} new)."
 msgstr ""
 
-#: ai_insights.py:471
+#: ai_insights.py:472
 #, python-brace-format
 msgid "Deal at risk: {lead}"
 msgstr ""

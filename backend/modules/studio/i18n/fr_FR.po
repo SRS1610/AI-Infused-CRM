@@ -200,6 +200,11 @@ msgstr "Identifiants externes des groupes autorisés à voir le champ"
 msgid "Widget"
 msgstr "Widget"
 
+#. field help
+#: field:studio.field.widget
+msgid "Client widget used where Studio places the field"
+msgstr "Widget client utilisé là où Studio place le champ"
+
 #. field label
 #: field:studio.field.tracking
 msgid "Tracking"
@@ -224,6 +229,11 @@ msgstr "Type"
 #: selection:studio.change.kind
 msgid "Field added"
 msgstr "Champ ajouté"
+
+#. selection value edit_field
+#: selection:studio.change.kind
+msgid "Field changed"
+msgstr "Champ modifié"
 
 #. selection value view_change
 #: selection:studio.change.kind
@@ -335,59 +345,162 @@ msgstr "Dernière modification"
 msgid "Every change after this one is undone when rolling back to the snapshot"
 msgstr "Toutes les modifications postérieures sont annulées lors du retour à l'instantané"
 
-#: api.py:124
+#: api.py:168
 msgid "No such change"
 msgstr "Modification introuvable"
 
-#: api.py:147
+#: api.py:191
 msgid "No such snapshot"
 msgstr "Instantané introuvable"
 
-#: service.py:35
+#: service.py:72
 msgid "Studio is reserved to designers"
 msgstr "Studio est réservé aux concepteurs"
 
-#: service.py:54
+#: service.py:98
 #, python-brace-format
 msgid "'{model_name}' cannot be customised in Studio"
 msgstr "« {model_name} » ne peut pas être personnalisé dans Studio"
 
-#: service.py:97
+#: service.py:142
 msgid "Field names start with x_ and use lowercase letters, digits and underscores"
 msgstr "Les noms de champ commencent par x_ et utilisent des minuscules, des chiffres et des tirets bas"
 
-#: service.py:99
+#: service.py:144
 #, python-brace-format
 msgid "'{model_name}' already has a field '{name}'"
 msgstr "« {model_name} » a déjà un champ « {name} »"
 
-#: service.py:113
+#: service.py:158
 msgid "Choice fields need their options"
 msgstr "Les champs à choix ont besoin de leurs options"
 
-#: service.py:130
+#: service.py:161
 #, python-brace-format
 msgid "Unknown field options: {unknown}"
 msgstr "Options de champ inconnues : {unknown}"
 
-#: service.py:222
+#: service.py:256
+msgid "The default value does not suit the field's type"
+msgstr "La valeur par défaut ne convient pas au type du champ"
+
+#: service.py:273
+#, python-brace-format
+msgid "'{name}' is not a Studio field of '{model_name}'"
+msgstr "« {name} » n'est pas un champ Studio de « {model_name} »"
+
+#: service.py:301
+#, python-brace-format
+msgid "These options cannot be changed: {unknown}"
+msgstr "Ces options ne peuvent pas être modifiées : {unknown}"
+
+#: service.py:303
+msgid "The label cannot be empty"
+msgstr "Le libellé ne peut pas être vide"
+
+#: service.py:314 service.py:446
+msgid "Nothing to change"
+msgstr "Rien à modifier"
+
+#: service.py:389
+msgid "operations must be a list"
+msgstr "operations doit être une liste"
+
+#: service.py:441 service.py:488
 #, python-brace-format
 msgid "Unknown view type '{view_type}'"
 msgstr "Type de vue « {view_type} » inconnu"
 
-#: service.py:313
+#: service.py:548
+msgid "A workflow needs at least one state"
+msgstr "Un workflow nécessite au moins un état"
+
+#: service.py:551
+msgid "Every state needs its own key"
+msgstr "Chaque état doit avoir sa propre clé"
+
+#: service.py:603
+#, python-brace-format
+msgid "'{model_name}' already has the workflow “{name}”"
+msgstr "« {model_name} » a déjà le workflow « {name} »"
+
+#: service.py:608
 #, python-brace-format
 msgid "'{model_name}' has no field '{state_field}'"
 msgstr "« {model_name} » n'a pas de champ « {state_field} »"
 
-#: service.py:103
+#: service.py:148
 msgid "Link fields need an existing target model"
 msgstr "Les champs de lien nécessitent un modèle cible existant"
 
-#: service.py:108
+#: service.py:153
 #, python-brace-format
 msgid "Amount fields need a currency field on '{model_name}'"
 msgstr "Les champs de montant nécessitent un champ de devise sur « {model_name} »"
+
+#: service.py:216
+#, python-brace-format
+msgid "Unknown field in the condition: {unknown}"
+msgstr "Champ inconnu dans la condition : {unknown}"
+
+#: service.py:221
+msgid "Groups are a list of group references"
+msgstr "Les groupes sont une liste de références de groupes"
+
+#: service.py:230
+msgid "Invalid widget name"
+msgstr "Nom de widget invalide"
+
+#: service.py:306
+msgid "Only choice fields have options, and they need at least one"
+msgstr "Seuls les champs à choix ont des options, et il en faut au moins une"
+
+#: service.py:309
+msgid "Options can be added or renamed, not removed"
+msgstr "Les options peuvent être ajoutées ou renommées, pas supprimées"
+
+#: service.py:424
+#, python-brace-format
+msgid "'{name}' has no field '{fname}'"
+msgstr "« {name} » n'a pas de champ « {fname} »"
+
+#: service.py:554
+msgid "Every transition needs a label"
+msgstr "Chaque transition doit avoir un libellé"
+
+#: service.py:557
+#, python-brace-format
+msgid "Transition “{name}” uses an unknown state"
+msgstr "La transition « {name} » utilise un état inconnu"
+
+#: service.py:770
+#, python-brace-format
+msgid "A later change relies on this one: roll it back first ({message})"
+msgstr "Une modification ultérieure dépend de celle-ci : annulez-la d'abord ({message})"
+
+#: service.py:212 service.py:563
+#, python-brace-format
+msgid "Invalid condition: {exc}"
+msgstr "Condition invalide : {exc}"
+
+#: service.py:225 service.py:598
+#, python-brace-format
+msgid "Unknown group '{ref}'"
+msgstr "Groupe « {ref} » inconnu"
+
+#: service.py:397
+#, python-brace-format
+msgid "append_to needs a list ({keys}) and a node"
+msgstr "append_to nécessite une liste ({keys}) et un nœud"
+
+#: service.py:427
+msgid "A filter needs a name and a label"
+msgstr "Un filtre nécessite un nom et un libellé"
+
+#: service.py:431
+#, python-brace-format
+msgid "Invalid filter condition: {exc}"
+msgstr "Condition de filtre invalide : {exc}"
 
 #. core.group.name
 #: security/groups.json:group_designer

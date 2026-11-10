@@ -252,6 +252,36 @@ msgid "Website"
 msgstr ""
 
 #. field label
+#: field:contacts.partner.description
+msgid "About"
+msgstr ""
+
+#. field help
+#: field:contacts.partner.description
+msgid "Public description of the company, e.g. from its website"
+msgstr ""
+
+#. field label
+#: field:contacts.partner.social_links
+msgid "Social Links"
+msgstr ""
+
+#. field help
+#: field:contacts.partner.social_links
+msgid "Public profiles (LinkedIn, X, Facebook …), one link per line"
+msgstr ""
+
+#. field label
+#: field:contacts.partner.logo_url
+msgid "Logo URL"
+msgstr ""
+
+#. field help
+#: field:contacts.partner.logo_url
+msgid "Address of the company's logo, e.g. on its website"
+msgstr ""
+
+#. field label
 #: field:contacts.partner.vat
 msgid "Tax ID"
 msgstr ""
@@ -343,7 +373,7 @@ msgstr ""
 msgid "Empty = shared by every company"
 msgstr ""
 
-#: ai_features.py:430
+#: ai_features.py:441
 #, python-brace-format
 msgid "Enrichment ready: {name}"
 msgstr ""
@@ -358,21 +388,21 @@ msgstr ""
 msgid "Looks like {names}. Review and merge from the contact."
 msgstr ""
 
-#: ai_features.py:437
+#: ai_features.py:448
 msgid "No new information was found in the approved sources."
-msgstr ""
-
-#: ai_features.py:421
-#, python-brace-format
-msgid "Enrichment unavailable: {name}"
 msgstr ""
 
 #: ai_features.py:432
 #, python-brace-format
+msgid "Enrichment unavailable: {name}"
+msgstr ""
+
+#: ai_features.py:443
+#, python-brace-format
 msgid "{count} suggested fields, each with its source. Review them on the contact."
 msgstr ""
 
-#: ai_features.py:434
+#: ai_features.py:445
 msgid "1 suggested field, with its source. Review it on the contact."
 msgstr ""
 
@@ -388,58 +418,58 @@ msgstr ""
 msgid "No such contact"
 msgstr ""
 
-#: duplicates.py:210
+#: duplicates.py:211
 msgid "Same name"
 msgstr ""
 
-#: duplicates.py:218
+#: duplicates.py:219
 msgid "Same e-mail address"
 msgstr ""
 
-#: duplicates.py:225
+#: duplicates.py:226
 msgid "Same phone number"
 msgstr ""
 
-#: duplicates.py:269
+#: duplicates.py:270
 msgid "Same company"
 msgstr ""
 
-#: duplicates.py:271
+#: duplicates.py:272
 msgid "Same city"
 msgstr ""
 
-#: duplicates.py:355
+#: duplicates.py:357
 msgid "Choose at least one other contact to merge"
 msgstr ""
 
-#: duplicates.py:381
+#: duplicates.py:383
 msgid "A merge needs the contact to keep"
 msgstr ""
 
-#: duplicates.py:385
+#: duplicates.py:387
 msgid "One of the contacts to merge no longer exists"
 msgstr ""
 
-#: duplicates.py:212
+#: duplicates.py:213
 #, python-brace-format
 msgid "Very similar name ({percent}%)"
 msgstr ""
 
-#: duplicates.py:231
+#: duplicates.py:232
 msgid "Same tax ID"
 msgstr ""
 
-#: duplicates.py:267
+#: duplicates.py:268
 #, python-brace-format
 msgid "Similar profile (semantic match {percent}%)"
 msgstr ""
 
-#: duplicates.py:214
+#: duplicates.py:215
 #, python-brace-format
 msgid "Similar name ({percent}%)"
 msgstr ""
 
-#: duplicates.py:242
+#: duplicates.py:243
 #, python-brace-format
 msgid "Same domain ({domain})"
 msgstr ""
@@ -469,15 +499,15 @@ msgstr ""
 msgid "Unknown enrichment adapter '{adapter}' (known: {known})"
 msgstr ""
 
-#: models/partner.py:144
+#: models/partner.py:147
 msgid "A contact needs a name"
 msgstr ""
 
-#: models/partner.py:146
+#: models/partner.py:149
 msgid "A contact cannot be its own company"
 msgstr ""
 
-#: models/partner.py:150 models/partner.py:181
+#: models/partner.py:153 models/partner.py:184
 msgid "Recursive company hierarchy"
 msgstr ""
 
@@ -567,6 +597,11 @@ msgstr ""
 #. view title
 #: views.json:view_partner_form
 msgid "Sales"
+msgstr ""
+
+#. view title
+#: views.json:view_partner_form
+msgid "Public profile"
 msgstr ""
 
 #. view label

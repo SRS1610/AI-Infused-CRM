@@ -245,7 +245,7 @@ msgid "Declined"
 msgstr "Refusé"
 
 #. field label
-#: field:calendar.attendee.access_token
+#: field:calendar.attendee.access_token field:calendar.sync_account.access_token
 msgid "Access Token"
 msgstr "Jeton d'accès"
 
@@ -377,8 +377,37 @@ msgstr "Secret"
 
 #. field help
 #: field:calendar.sync_account.secret
-msgid "Password (CalDAV) or OAuth refresh/access token; stored encrypted"
-msgstr "Mot de passe (CalDAV) ou jeton OAuth d'actualisation/d'accès ; stocké chiffré"
+msgid ""
+"Password (CalDAV); for Google / Microsoft accounts connected before OAuth refresh, their access "
+"token. Stored encrypted"
+msgstr ""
+"Mot de passe (CalDAV) ; pour les comptes Google / Microsoft connectés avant l'actualisation "
+"OAuth, leur jeton d'accès. Stocké chiffré"
+
+#. field label
+#: field:calendar.sync_account.refresh_token
+msgid "Refresh Token"
+msgstr "Jeton d'actualisation"
+
+#. field help
+#: field:calendar.sync_account.refresh_token
+msgid "OAuth refresh token (Google, Microsoft); stored encrypted"
+msgstr "Jeton d'actualisation OAuth (Google, Microsoft) ; stocké chiffré"
+
+#. field help
+#: field:calendar.sync_account.access_token
+msgid "Current OAuth access token, refreshed automatically; stored encrypted"
+msgstr "Jeton d'accès OAuth courant, actualisé automatiquement ; stocké chiffré"
+
+#. field label
+#: field:calendar.sync_account.token_expiry
+msgid "Token Expiry"
+msgstr "Expiration du jeton"
+
+#. field help
+#: field:calendar.sync_account.token_expiry
+msgid "When the current access token expires"
+msgstr "Date d'expiration du jeton d'accès courant"
 
 #. field label
 #. menu name
@@ -412,6 +441,11 @@ msgstr "Dernière erreur"
 #: selection:calendar.sync_account.state
 msgid "Error"
 msgstr "Erreur"
+
+#. selection value reconnect
+#: selection:calendar.sync_account.state
+msgid "Needs reconnection"
+msgstr "Reconnexion nécessaire"
 
 #. selection value paused
 #: selection:calendar.sync_account.state
@@ -468,11 +502,11 @@ msgstr "Empreinte du contenu"
 msgid "Hash of the synchronised fields as last pushed or pulled"
 msgstr "Empreinte des champs synchronisés lors du dernier envoi ou de la dernière récupération"
 
-#: ai_features.py:217
+#: ai_features.py:218
 msgid "A meeting brief is prepared for a meeting"
 msgstr "Une note de préparation est rédigée pour une réunion"
 
-#: ai_features.py:319
+#: ai_features.py:320
 #, python-brace-format
 msgid "Meeting brief ready: {event}"
 msgstr "Note de préparation prête : {event}"
@@ -525,16 +559,16 @@ msgstr "Réunion introuvable"
 msgid "Use ISO 8601 date-times"
 msgstr "Utilisez des dates-heures ISO 8601"
 
-#: models/booking.py:44
+#: models/booking.py:45
 msgid "Meetings last at least 5 minutes"
 msgstr "Les réunions durent au moins 5 minutes"
 
-#: models/booking.py:49
+#: models/booking.py:50
 #, python-brace-format
 msgid "Unknown time zone '{timezone}'"
 msgstr "Fuseau horaire « {timezone} » inconnu"
 
-#: models/booking.py:60
+#: models/booking.py:61
 #, python-brace-format
 msgid "Invalid availability window {window}"
 msgstr "Plage de disponibilité invalide {window}"
@@ -624,6 +658,56 @@ msgstr "Utilisez HH:MM pour la journée de travail"
 #, python-brace-format
 msgid "'{key}' must be an ISO 8601 date-time"
 msgstr "« {key} » doit être une date-heure ISO 8601"
+
+#: sync/engine.py:60
+#, python-brace-format
+msgid "Reconnect your calendar: {name}"
+msgstr "Reconnectez votre calendrier : {name}"
+
+#: sync/engine.py:61
+msgid ""
+"Tessera can no longer synchronise this calendar because the provider refused its access. Connect "
+"the account again under Calendar → External calendars."
+msgstr ""
+"Tessera ne peut plus synchroniser ce calendrier car le fournisseur a refusé son accès. Connectez "
+"à nouveau le compte dans Calendrier → Calendriers externes."
+
+#: sync/oauth.py:69 sync/oauth.py:146
+msgid "The access token was refused and there is no refresh token"
+msgstr "Le jeton d'accès a été refusé et il n'y a pas de jeton d'actualisation"
+
+#: sync/oauth.py:111
+#, python-brace-format
+msgid ""
+"No OAuth client is configured for {provider}: set it in the company setting {setting} or in the "
+"server configuration"
+msgstr ""
+"Aucun client OAuth n'est configuré pour {provider} : définissez-le dans le paramètre de société "
+"{setting} ou dans la configuration du serveur"
+
+#: sync/oauth.py:108
+#, python-brace-format
+msgid "{provider} accounts do not use OAuth"
+msgstr "Les comptes {provider} n'utilisent pas OAuth"
+
+#: sync/oauth.py:139
+msgid "The account has no access token"
+msgstr "Le compte n'a pas de jeton d'accès"
+
+#: sync/oauth.py:176
+#, python-brace-format
+msgid "The provider refused the refresh token ({detail})"
+msgstr "Le fournisseur a refusé le jeton d'actualisation ({detail})"
+
+#: sync/oauth.py:178
+#, python-brace-format
+msgid "Token refresh failed with HTTP {status_code}"
+msgstr "L'actualisation du jeton a échoué avec le code HTTP {status_code}"
+
+#: sync/oauth.py:160
+#, python-brace-format
+msgid "Token endpoint unreachable: {exc}"
+msgstr "Point de terminaison des jetons injoignable : {exc}"
 
 #. view label
 #: views.json:view_event_form

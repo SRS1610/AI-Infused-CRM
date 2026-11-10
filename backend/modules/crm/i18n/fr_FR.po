@@ -833,15 +833,15 @@ msgstr "Message-ID, URL de la page, client d'API…"
 msgid "Payload"
 msgstr "Charge utile"
 
-#: ai_assist.py:58
+#: ai_assist.py:71
 msgid "Open a lead or opportunity first"
 msgstr "Ouvrez d'abord une piste ou une opportunité"
 
-#: ai_assist.py:61
+#: ai_assist.py:74
 msgid "This lead no longer exists"
 msgstr "Cette piste n'existe plus"
 
-#: ai_assist.py:203
+#: ai_assist.py:216
 msgid "No such job"
 msgstr "Tâche introuvable"
 
@@ -887,20 +887,20 @@ msgstr "La réponse de l'IA n'était pas une liste de conditions"
 msgid "The suggested filter cannot be used: {errors}"
 msgstr "Le filtre suggéré ne peut pas être utilisé : {errors}"
 
-#: ai_insights.py:978
+#: ai_insights.py:979
 msgid "Sales forecast ready"
 msgstr "Prévision des ventes prête"
 
-#: ai_insights.py:979
+#: ai_insights.py:980
 #, python-brace-format
 msgid "{period}: P50 {p50:,.0f} (P10 {p10:,.0f} to P90 {p90:,.0f})"
 msgstr "{period} : P50 {p50:,.0f} (P10 {p10:,.0f} à P90 {p90:,.0f})"
 
-#: ai_insights.py:79
+#: ai_insights.py:80
 msgid "AI is not installed"
 msgstr "L'IA n'est pas installée"
 
-#: ai_insights.py:338
+#: ai_insights.py:339
 #, python-brace-format
 msgid ""
 "Lead scoring model v{version} trained on {rows} closed deals (hold-out AUC {auc:.2f}); {rescored}"
@@ -909,35 +909,35 @@ msgstr ""
 "Modèle de notation des pistes v{version} entraîné sur {rows} affaires clôturées (AUC sur "
 "l'échantillon de test {auc:.2f}) ; {rescored} pistes ouvertes renotées."
 
-#: ai_insights.py:347
+#: ai_insights.py:348
 #, python-brace-format
 msgid "Not enough closed deals for a predictive model yet; {count} leads scored with the rules."
 msgstr ""
 "Pas encore assez d'affaires clôturées pour un modèle prédictif ; {count} pistes notées avec les "
 "règles."
 
-#: ai_insights.py:353
+#: ai_insights.py:354
 msgid "Lead scores updated"
 msgstr "Scores des pistes mis à jour"
 
-#: ai_insights.py:789
+#: ai_insights.py:790
 msgid "Next-best-action works on a lead or opportunity"
 msgstr "La prochaine meilleure action s'applique à une piste ou une opportunité"
 
-#: ai_insights.py:803
+#: ai_insights.py:804
 msgid "Lead scores are explained on a lead"
 msgstr "Les scores sont expliqués sur une piste"
 
-#: ai_insights.py:482
+#: ai_insights.py:483
 msgid "Deal risk check finished"
 msgstr "Vérification des risques terminée"
 
-#: ai_insights.py:483
+#: ai_insights.py:484
 #, python-brace-format
 msgid "{flagged} open opportunities are at risk ({new} new)."
 msgstr "{flagged} opportunités ouvertes sont à risque ({new} nouvelles)."
 
-#: ai_insights.py:471
+#: ai_insights.py:472
 #, python-brace-format
 msgid "Deal at risk: {lead}"
 msgstr "Affaire à risque : {lead}"

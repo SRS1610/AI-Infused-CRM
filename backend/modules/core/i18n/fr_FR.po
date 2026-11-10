@@ -2102,7 +2102,7 @@ msgstr "La société courante doit faire partie des sociétés autorisées"
 msgid "AI gateway unreachable: {exc}"
 msgstr "Passerelle IA injoignable : {exc}"
 
-#: tessera/ai/evals.py:419
+#: tessera/ai/evals.py:427
 #, python-brace-format
 msgid "Eval case {case} watches unknown models: {unknown}"
 msgstr "Le cas d'évaluation {case} surveille des modèles inconnus : {unknown}"
@@ -2333,12 +2333,12 @@ msgstr "Seuls les champs many2one peuvent être développés (« {name} »)"
 msgid "The record was modified by someone else; reload and retry"
 msgstr "L'enregistrement a été modifié par quelqu'un d'autre ; rechargez et réessayez"
 
-#: tessera/api/serializers.py:71 tessera/orm/model.py:629
+#: tessera/api/serializers.py:71 tessera/orm/model.py:633
 #, python-brace-format
 msgid "Unknown field(s) {unknown} on {name}"
 msgstr "Champ(s) inconnu(s) {unknown} sur {name}"
 
-#: tessera/api/serializers.py:34 tessera/orm/model.py:748
+#: tessera/api/serializers.py:34 tessera/orm/model.py:752
 #, python-brace-format
 msgid "Unknown field '{field}' on {model}"
 msgstr "Champ « {field} » inconnu sur {model}"
@@ -2366,15 +2366,59 @@ msgstr "Les fichiers sont limités à {limit} lignes"
 msgid "Not a valid XLSX file: {exc}"
 msgstr "Fichier XLSX invalide : {exc}"
 
-#: tessera/dataio/importer.py:177
+#: tessera/dataio/importer.py:187
 #, python-brace-format
 msgid "Unknown fields in the mapping: {unknown}"
 msgstr "Champs inconnus dans la correspondance : {unknown}"
 
-#: tessera/dataio/importer.py:180
+#: tessera/dataio/importer.py:82
+#, python-brace-format
+msgid "'{text}' is not a yes/no value"
+msgstr "« {text} » n'est pas une valeur oui/non"
+
+#: tessera/dataio/importer.py:120
+#, python-brace-format
+msgid "'{text}' is not one of: {values}"
+msgstr "« {text} » ne fait pas partie de : {values}"
+
+#: tessera/dataio/importer.py:162
+#, python-brace-format
+msgid "No {description} named '{text}'"
+msgstr "Aucun enregistrement « {description} » nommé « {text} »"
+
+#: tessera/dataio/importer.py:190
 #, python-brace-format
 msgid "You cannot import into '{path}'"
 msgstr "Vous ne pouvez pas importer dans « {path} »"
+
+#: tessera/dataio/importer.py:87 tessera/dataio/importer.py:89
+#, python-brace-format
+msgid "'{text}' is not a whole number"
+msgstr "« {text} » n'est pas un nombre entier"
+
+#: tessera/dataio/importer.py:100
+#, python-brace-format
+msgid "'{text}' is not a number"
+msgstr "« {text} » n'est pas un nombre"
+
+#: tessera/dataio/importer.py:105
+#, python-brace-format
+msgid "'{text}' is not a date and time"
+msgstr "« {text} » n'est pas une date et heure"
+
+#: tessera/dataio/importer.py:113
+#, python-brace-format
+msgid "'{text}' is not a date"
+msgstr "« {text} » n'est pas une date"
+
+#: tessera/dataio/importer.py:128
+msgid "Invalid JSON"
+msgstr "JSON invalide"
+
+#: tessera/dataio/importer.py:152
+#, python-brace-format
+msgid "'{text}' matches several {description} records"
+msgstr "« {text} » correspond à plusieurs enregistrements « {description} »"
 
 #: tessera/expr.py:94
 msgid "Pattern too long"
@@ -2488,7 +2532,7 @@ msgstr "L'opérateur « {op} » ne peut pas être évalué en mémoire"
 msgid "Unknown domain operator '{key}' (expected all/any/not)"
 msgstr "Opérateur de domaine « {key} » inconnu (attendu : all/any/not)"
 
-#: tessera/orm/domain.py:256 tessera/orm/model.py:336
+#: tessera/orm/domain.py:256 tessera/orm/model.py:338
 #, python-brace-format
 msgid "Unknown domain variable '${name}'"
 msgstr "Variable de domaine « ${name} » inconnue"
@@ -2523,95 +2567,95 @@ msgstr "L'identifiant externe « {external_id} » doit être de la forme « modu
 msgid "External id '{external_id}' not found"
 msgstr "Identifiant externe « {external_id} » introuvable"
 
-#: tessera/orm/fields.py:411
+#: tessera/orm/fields.py:414
 #, python-brace-format
 msgid "'{value}' is not a date"
 msgstr "« {value} » n'est pas une date"
 
-#: tessera/orm/fields.py:446
+#: tessera/orm/fields.py:449
 #, python-brace-format
 msgid "'{value}' is not a datetime"
 msgstr "« {value} » n'est pas une date-heure"
 
-#: tessera/orm/fields.py:582
+#: tessera/orm/fields.py:585
 #, python-brace-format
 msgid "Binary field '{name}' expects bytes or base64"
 msgstr "Le champ binaire « {name} » attend des octets ou du base64"
 
-#: tessera/orm/fields.py:645 tessera/orm/fields.py:824
+#: tessera/orm/fields.py:648 tessera/orm/fields.py:827
 #, python-brace-format
 msgid "'{value}' is not a valid reference for field '{name}'"
 msgstr "« {value} » n'est pas une référence valide pour le champ « {name} »"
 
-#: tessera/orm/fields.py:720
+#: tessera/orm/fields.py:723
 #, python-brace-format
 msgid "Invalid x2many value {value}"
 msgstr "Valeur x2many invalide {value}"
 
-#: tessera/orm/fields.py:790
+#: tessera/orm/fields.py:793
 msgid "The id field cannot be written"
 msgstr "Le champ id ne peut pas être modifié"
 
-#: tessera/orm/fields.py:231 tessera/orm/fields.py:695
+#: tessera/orm/fields.py:234 tessera/orm/fields.py:698 tessera/orm/model.py:1319
 #, python-brace-format
 msgid "Field '{field}' is required"
 msgstr "Le champ « {field} » est obligatoire"
 
-#: tessera/orm/fields.py:363
+#: tessera/orm/fields.py:366
 #, python-brace-format
 msgid "Value too long for field '{name}' (max {size})"
 msgstr "Valeur trop longue pour le champ « {name} » (max. {size})"
 
-#: tessera/orm/fields.py:497
+#: tessera/orm/fields.py:500
 #, python-brace-format
 msgid "'{value}' is not a valid choice for field '{field}'"
 msgstr "« {value} » n'est pas un choix valide pour le champ « {field} »"
 
-#: tessera/orm/fields.py:544
+#: tessera/orm/fields.py:547
 #, python-brace-format
 msgid "Vector for field '{name}' must have {dimensions} dimensions, got {count}"
 msgstr "Le vecteur du champ « {name} » doit avoir {dimensions} dimensions, reçu {count}"
 
-#: tessera/orm/fields.py:801
+#: tessera/orm/fields.py:804
 msgid "Related() needs a field path"
 msgstr "Related() nécessite un chemin de champ"
 
-#: tessera/orm/fields.py:284
+#: tessera/orm/fields.py:287
 #, python-brace-format
 msgid "'{value}' is not an integer for field '{name}'"
 msgstr "« {value} » n'est pas un entier pour le champ « {name} »"
 
-#: tessera/orm/fields.py:312
+#: tessera/orm/fields.py:315
 #, python-brace-format
 msgid "'{value}' is not a number for field '{name}'"
 msgstr "« {value} » n'est pas un nombre pour le champ « {name} »"
 
-#: tessera/orm/fields.py:337
+#: tessera/orm/fields.py:340
 #, python-brace-format
 msgid "'{value}' is not an amount for field '{name}'"
 msgstr "« {value} » n'est pas un montant pour le champ « {name} »"
 
-#: tessera/orm/fields.py:418
+#: tessera/orm/fields.py:421
 #, python-brace-format
 msgid "'{value}' is not a date for field '{name}'"
 msgstr "« {value} » n'est pas une date pour le champ « {name} »"
 
-#: tessera/orm/fields.py:453
+#: tessera/orm/fields.py:456
 #, python-brace-format
 msgid "'{value}' is not a datetime for field '{name}'"
 msgstr "« {value} » n'est pas une date-heure pour le champ « {name} »"
 
-#: tessera/orm/fields.py:638
+#: tessera/orm/fields.py:641
 #, python-brace-format
 msgid "Many2one '{name}' expects a single record"
 msgstr "Le many2one « {name} » attend un seul enregistrement"
 
-#: tessera/orm/fields.py:519
+#: tessera/orm/fields.py:522
 #, python-brace-format
 msgid "Invalid JSON for field '{name}'"
 msgstr "JSON invalide pour le champ « {name} »"
 
-#: tessera/orm/fields.py:718
+#: tessera/orm/fields.py:721
 #, python-brace-format
 msgid "Invalid x2many command {item}"
 msgstr "Commande x2many invalide {item}"
@@ -2632,37 +2676,37 @@ msgstr "créer"
 msgid "delete"
 msgstr "supprimer"
 
-#: tessera/orm/model.py:956
+#: tessera/orm/model.py:960
 #, python-brace-format
 msgid "Database constraint violated: {constraint}"
 msgstr "Contrainte de base de données violée : {constraint}"
 
-#: tessera/orm/model.py:140
+#: tessera/orm/model.py:142
 #, python-brace-format
 msgid "Expected a single {name} record, got {count}"
 msgstr "Un seul enregistrement {name} attendu, reçu {count}"
 
-#: tessera/orm/model.py:264
+#: tessera/orm/model.py:266
 #, python-brace-format
 msgid "You are not allowed to {operation} '{description}' ({name}) records"
 msgstr "Vous n'êtes pas autorisé à {operation} les enregistrements « {description} » ({name})"
 
-#: tessera/orm/model.py:293
+#: tessera/orm/model.py:295
 #, python-brace-format
 msgid "You are not allowed to {operation} some of these '{description}' records"
 msgstr "Vous n'êtes pas autorisé à {operation} certains de ces enregistrements « {description} »"
 
-#: tessera/orm/model.py:470
+#: tessera/orm/model.py:474
 #, python-brace-format
 msgid "You are not allowed to read field '{field}' of {model}"
 msgstr "Vous n'êtes pas autorisé à lire le champ « {field} » de {model}"
 
-#: tessera/orm/model.py:571
+#: tessera/orm/model.py:575
 #, python-brace-format
 msgid "Record {name}({ids}) does not exist or has been deleted"
 msgstr "L'enregistrement {name}({ids}) n'existe pas ou a été supprimé"
 
-#: tessera/orm/model.py:946
+#: tessera/orm/model.py:950
 #, python-brace-format
 msgid ""
 "This '{description}' record is still referenced by other records and cannot be deleted or "
@@ -2671,46 +2715,46 @@ msgstr ""
 "Cet enregistrement « {description} » est encore référencé par d'autres enregistrements et ne peut"
 " être ni supprimé ni modifié."
 
-#: tessera/orm/model.py:955
+#: tessera/orm/model.py:959
 msgid "A record with the same unique value already exists."
 msgstr "Un enregistrement avec la même valeur unique existe déjà."
 
-#: tessera/orm/model.py:1126
+#: tessera/orm/model.py:1130
 #, python-brace-format
 msgid "{description} records cannot be restored"
 msgstr "Les enregistrements « {description} » ne peuvent pas être restaurés"
 
-#: tessera/orm/model.py:1351
+#: tessera/orm/model.py:1371
 #, python-brace-format
 msgid "{description} records cannot be archived"
 msgstr "Les enregistrements « {description} » ne peuvent pas être archivés"
 
-#: tessera/orm/model.py:563
+#: tessera/orm/model.py:567
 #, python-brace-format
 msgid "You are not allowed to read this '{description}' record"
 msgstr "Vous n'êtes pas autorisé à lire cet enregistrement « {description} »"
 
-#: tessera/orm/model.py:633
+#: tessera/orm/model.py:637
 #, python-brace-format
 msgid "You are not allowed to read field '{n}' of {model}"
 msgstr "Vous n'êtes pas autorisé à lire le champ « {n} » de {model}"
 
-#: tessera/orm/model.py:753
+#: tessera/orm/model.py:757
 #, python-brace-format
 msgid "You are not allowed to write field '{field}' of {model}"
 msgstr "Vous n'êtes pas autorisé à modifier le champ « {field} » de {model}"
 
-#: tessera/orm/model.py:941
+#: tessera/orm/model.py:945
 #, python-brace-format
 msgid "A referenced record does not exist ({name}): {detail}"
 msgstr "Un enregistrement référencé n'existe pas ({name}) : {detail}"
 
-#: tessera/orm/model.py:763
+#: tessera/orm/model.py:767
 #, python-brace-format
 msgid "Field '{field}' on {model} is computed and cannot be written"
 msgstr "Le champ « {field} » de {model} est calculé et ne peut pas être modifié"
 
-#: tessera/orm/model.py:1034
+#: tessera/orm/model.py:1038
 #, python-brace-format
 msgid "Unknown x2many command '{kind}'"
 msgstr "Commande x2many « {kind} » inconnue"

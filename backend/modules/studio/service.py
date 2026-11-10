@@ -209,23 +209,25 @@ def _check_options(env: Any, cls: Any, name: str, ttype: str, options: dict[str,
         try:
             used = {path.split(".")[0] for path in Domain(options[key]).fields()}
         except Exception as exc:
-            raise ValidationError(f"Invalid condition: {exc}", field=key) from exc
+            raise ValidationError(_("Invalid condition: {exc}", exc=exc), field=key) from exc
         unknown = used - set(cls._fields) - {name}
         if unknown:
-            raise ValidationError(f"Unknown field in the condition: {', '.join(sorted(unknown))}", field=key)
+            raise ValidationError(
+                _("Unknown field in the condition: {unknown}", unknown=", ".join(sorted(unknown))), field=key
+            )
     if "groups" in options:
         groups = options["groups"] or []
         if not isinstance(groups, list) or not all(isinstance(g, str) for g in groups):
-            raise ValidationError("Groups are a list of group references", field="groups")
+            raise ValidationError(_("Groups are a list of group references"), field="groups")
         for ref in groups:
             group = env.ref(ref, raise_if_not_found=False)
             if group is None or group._name != "core.group":
-                raise ValidationError(f"Unknown group '{ref}'", field="groups")
+                raise ValidationError(_("Unknown group '{ref}'", ref=ref), field="groups")
         options["groups"] = groups
     if "widget" in options:
         widget = options["widget"] or None
         if widget is not None and (not isinstance(widget, str) or not WIDGET.match(widget)):
-            raise ValidationError("Invalid widget name", field="widget")
+            raise ValidationError(_("Invalid widget name"), field="widget")
         options["widget"] = widget
     if "default" in options:
         options["default"] = _check_default(ttype, options["default"], selection)
@@ -251,7 +253,7 @@ def _check_default(ttype: str, value: Any, selection: Any) -> Any:
     else:
         ok = isinstance(value, str)
     if not ok:
-        raise ValidationError("The default value does not suit the field's type", field="default")
+        raise ValidationError(_("The default value does not suit the field's type"), field="default")
     return value
 
 
@@ -268,7 +270,7 @@ def _studio_field(env: Any, model_name: str, name: str) -> Any:
         [("model_name", "=", model_name), ("name", "=", name), ("active", "=", True)], limit=1
     )
     if not rec:
-        raise ValidationError(f"'{name}' is not a Studio field of '{model_name}'")
+        raise ValidationError(_("'{name}' is not a Studio field of '{model_name}'", name=name, model_name=model_name))
     return rec
 
 
@@ -296,20 +298,20 @@ def edit_field(env: Any, model_name: str, name: str, **changes: Any) -> Any:
     rec = _studio_field(env, model_name, name)
     unknown = set(changes) - set(EDITABLE_OPTIONS)
     if unknown:
-        raise ValidationError(f"These options cannot be changed: {', '.join(sorted(unknown))}")
+        raise ValidationError(_("These options cannot be changed: {unknown}", unknown=", ".join(sorted(unknown))))
     if "label" in changes and not str(changes["label"] or "").strip():
-        raise ValidationError("The label cannot be empty", field="label")
+        raise ValidationError(_("The label cannot be empty"), field="label")
     if "selection" in changes:
         if rec.ttype != "selection" or not changes["selection"]:
-            raise ValidationError("Only choice fields have options, and they need at least one", field="selection")
+            raise ValidationError(_("Only choice fields have options, and they need at least one"), field="selection")
         changes["selection"] = [[str(k), str(v)] for k, v in changes["selection"]]
         if not {str(opt[0]) for opt in rec.selection or []} <= {k for k, _ in changes["selection"]}:
-            raise ValidationError("Options can be added or renamed, not removed", field="selection")
+            raise ValidationError(_("Options can be added or renamed, not removed"), field="selection")
     _check_options(env, cls, name, rec.ttype, changes, changes.get("selection") or rec.selection)
     before = field_options(rec)
     changed = {k: v for k, v in changes.items() if before.get(k) != v}
     if not changed:
-        raise ValidationError("Nothing to change")
+        raise ValidationError(_("Nothing to change"))
     rec.with_context(studio_internal=True).write(_stored(changed))
     if set(changed) - {"widget"}:
         _rebuild(env, [model_name])
@@ -384,7 +386,7 @@ def _studio_ops(cls: Any, view_type: str, current: dict[str, Any], operations: A
     from modules.web.views import apply_operations, validate_operations
 
     if not isinstance(operations, list):
-        raise ValidationError("operations must be a list")
+        raise ValidationError(_("operations must be a list"))
     out = []
     for op in operations:
         if isinstance(op, dict) and op.get("op") == "append_column":
@@ -392,7 +394,7 @@ def _studio_ops(cls: Any, view_type: str, current: dict[str, Any], operations: A
         if isinstance(op, dict) and op.get("op") == "append_to":
             key = op.get("list")
             if key not in LIST_KEYS or not isinstance(op.get("node"), dict):
-                raise ValidationError(f"append_to needs a list ({', '.join(LIST_KEYS)}) and a node")
+                raise ValidationError(_("append_to needs a list ({keys}) and a node", keys=", ".join(LIST_KEYS)))
             ident = LIST_KEYS[key]
             items = [i for i in current.get(key) or [] if isinstance(i, dict) and i.get(ident)]
             if items:
@@ -419,14 +421,14 @@ def _check_nodes(cls: Any, view_type: str, op: dict[str, Any]) -> None:
     for node in nodes:
         fname = node.get("field") or (node.get("name") if node.get("kind") == "field" else None)
         if fname and str(fname).split(":")[0] not in cls._fields:
-            raise ValidationError(f"'{cls._name}' has no field '{fname}'")
+            raise ValidationError(_("'{name}' has no field '{fname}'", name=cls._name, fname=fname))
         if view_type == "search" and "field" not in node:
             if not node.get("name") or not node.get("label"):
-                raise ValidationError("A filter needs a name and a label")
+                raise ValidationError(_("A filter needs a name and a label"))
             try:
                 Domain(node.get("domain") or [])
             except Exception as exc:
-                raise ValidationError(f"Invalid filter condition: {exc}", field="domain") from exc
+                raise ValidationError(_("Invalid filter condition: {exc}", exc=exc), field="domain") from exc
 
 
 def change_view(env: Any, model_name: str, view_type: str, operations: list[dict[str, Any]], summary: str) -> Any:
@@ -441,7 +443,7 @@ def change_view(env: Any, model_name: str, view_type: str, operations: list[dict
     before = resolve_view(_sys(env), model_name, view_type)
     operations = _studio_ops(cls, view_type, before, operations)
     if not operations:
-        raise ValidationError("Nothing to change")
+        raise ValidationError(_("Nothing to change"))
     ext = _sys(env)["web.view"].create(
         {
             "name": f"{model_name}.{view_type} studio #{int(time.time() * 1000) % 10_000_000}",
@@ -483,7 +485,7 @@ def create_view(
     check_designer(env)
     cls = _model_cls(env, model_name)
     if view_type not in VIEW_TYPES:
-        raise ValidationError(f"Unknown view type '{view_type}'")
+        raise ValidationError(_("Unknown view type '{view_type}'", view_type=view_type))
     if definition is None:
         definition = default_view(_sys(env), model_name, view_type)
         for key in ("type", "model", "view_id", "generated"):
@@ -543,20 +545,22 @@ def add_automation(env: Any, values: dict[str, Any]) -> Any:
 
 def _check_workflow(states: list[dict[str, Any]], transitions: list[dict[str, Any]]) -> None:
     if not states:
-        raise ValidationError("A workflow needs at least one state", field="states")
+        raise ValidationError(_("A workflow needs at least one state"), field="states")
     keys = [str(s.get("key") or "").strip() for s in states]
     if not all(keys) or len(set(keys)) != len(keys):
-        raise ValidationError("Every state needs its own key", field="states")
+        raise ValidationError(_("Every state needs its own key"), field="states")
     for t in transitions:
         if not str(t.get("name") or "").strip():
-            raise ValidationError("Every transition needs a label", field="transitions")
+            raise ValidationError(_("Every transition needs a label"), field="transitions")
         if str(t.get("to")) not in keys or not {str(k) for k in t.get("from", [])} <= set(keys):
-            raise ValidationError(f"Transition “{t.get('name')}” uses an unknown state", field="transitions")
+            raise ValidationError(
+                _("Transition “{name}” uses an unknown state", name=t.get("name")), field="transitions"
+            )
         if t.get("condition"):
             try:
                 Domain(t["condition"])
             except Exception as exc:
-                raise ValidationError(f"Invalid condition: {exc}", field="transitions") from exc
+                raise ValidationError(_("Invalid condition: {exc}", exc=exc), field="transitions") from exc
 
 
 def create_workflow(
@@ -762,7 +766,9 @@ def _unlink_view(env: Any, view: Any) -> None:
         resolve_view(_sys(env), view.model_name, view.type)
     except ValidationError as exc:
         view.write({"active": True})
-        raise ValidationError(f"A later change relies on this one: roll it back first ({exc.message})") from exc
+        raise ValidationError(
+            _("A later change relies on this one: roll it back first ({message})", message=exc.message)
+        ) from exc
     view.unlink()
 
 

@@ -243,7 +243,7 @@ msgid "Declined"
 msgstr ""
 
 #. field label
-#: field:calendar.attendee.access_token
+#: field:calendar.attendee.access_token field:calendar.sync_account.access_token
 msgid "Access Token"
 msgstr ""
 
@@ -375,7 +375,34 @@ msgstr ""
 
 #. field help
 #: field:calendar.sync_account.secret
-msgid "Password (CalDAV) or OAuth refresh/access token; stored encrypted"
+msgid ""
+"Password (CalDAV); for Google / Microsoft accounts connected before OAuth refresh, their access "
+"token. Stored encrypted"
+msgstr ""
+
+#. field label
+#: field:calendar.sync_account.refresh_token
+msgid "Refresh Token"
+msgstr ""
+
+#. field help
+#: field:calendar.sync_account.refresh_token
+msgid "OAuth refresh token (Google, Microsoft); stored encrypted"
+msgstr ""
+
+#. field help
+#: field:calendar.sync_account.access_token
+msgid "Current OAuth access token, refreshed automatically; stored encrypted"
+msgstr ""
+
+#. field label
+#: field:calendar.sync_account.token_expiry
+msgid "Token Expiry"
+msgstr ""
+
+#. field help
+#: field:calendar.sync_account.token_expiry
+msgid "When the current access token expires"
 msgstr ""
 
 #. field label
@@ -409,6 +436,11 @@ msgstr ""
 #. selection value error
 #: selection:calendar.sync_account.state
 msgid "Error"
+msgstr ""
+
+#. selection value reconnect
+#: selection:calendar.sync_account.state
+msgid "Needs reconnection"
 msgstr ""
 
 #. selection value paused
@@ -466,11 +498,11 @@ msgstr ""
 msgid "Hash of the synchronised fields as last pushed or pulled"
 msgstr ""
 
-#: ai_features.py:217
+#: ai_features.py:218
 msgid "A meeting brief is prepared for a meeting"
 msgstr ""
 
-#: ai_features.py:319
+#: ai_features.py:320
 #, python-brace-format
 msgid "Meeting brief ready: {event}"
 msgstr ""
@@ -523,16 +555,16 @@ msgstr ""
 msgid "Use ISO 8601 date-times"
 msgstr ""
 
-#: models/booking.py:44
+#: models/booking.py:45
 msgid "Meetings last at least 5 minutes"
 msgstr ""
 
-#: models/booking.py:49
+#: models/booking.py:50
 #, python-brace-format
 msgid "Unknown time zone '{timezone}'"
 msgstr ""
 
-#: models/booking.py:60
+#: models/booking.py:61
 #, python-brace-format
 msgid "Invalid availability window {window}"
 msgstr ""
@@ -621,6 +653,52 @@ msgstr ""
 #: scheduling.py:167
 #, python-brace-format
 msgid "'{key}' must be an ISO 8601 date-time"
+msgstr ""
+
+#: sync/engine.py:60
+#, python-brace-format
+msgid "Reconnect your calendar: {name}"
+msgstr ""
+
+#: sync/engine.py:61
+msgid ""
+"Tessera can no longer synchronise this calendar because the provider refused its access. Connect "
+"the account again under Calendar → External calendars."
+msgstr ""
+
+#: sync/oauth.py:69 sync/oauth.py:146
+msgid "The access token was refused and there is no refresh token"
+msgstr ""
+
+#: sync/oauth.py:111
+#, python-brace-format
+msgid ""
+"No OAuth client is configured for {provider}: set it in the company setting {setting} or in the "
+"server configuration"
+msgstr ""
+
+#: sync/oauth.py:108
+#, python-brace-format
+msgid "{provider} accounts do not use OAuth"
+msgstr ""
+
+#: sync/oauth.py:139
+msgid "The account has no access token"
+msgstr ""
+
+#: sync/oauth.py:176
+#, python-brace-format
+msgid "The provider refused the refresh token ({detail})"
+msgstr ""
+
+#: sync/oauth.py:178
+#, python-brace-format
+msgid "Token refresh failed with HTTP {status_code}"
+msgstr ""
+
+#: sync/oauth.py:160
+#, python-brace-format
+msgid "Token endpoint unreachable: {exc}"
 msgstr ""
 
 #. view label
