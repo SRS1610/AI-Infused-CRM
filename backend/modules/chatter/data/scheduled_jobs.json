@@ -1,4 +1,5 @@
 [
   {"id": "sched_fetch_mail", "model": "core.scheduled_job", "noupdate": true, "values": {"name": "Fetch incoming mail (IMAP)", "job_name": "chatter.fetch_mail", "cron": "*/2 * * * *"}},
-  {"id": "sched_digest", "model": "core.scheduled_job", "noupdate": true, "values": {"name": "Daily notification digest", "job_name": "chatter.digest", "cron": "0 7 * * *"}}
+  {"id": "sched_digest", "model": "core.scheduled_job", "noupdate": true, "values": {"name": "Daily notification digest", "job_name": "chatter.digest", "cron": "0 7 * * *"}},
+  {"id": "sched_ai_daily_todo", "model": "core.scheduled_job", "noupdate": true, "values": {"name": "AI-ranked daily to-do (notify users)", "job_name": "chatter.ai_daily_todo", "cron": "40 5 * * 1-5"}}
 ]

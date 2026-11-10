@@ -251,7 +251,9 @@ def _tag_output(record: Model, tags: Model, parent_ids: list[int]) -> Callable[[
                 x for x in (", ".join(s["name"] for s in chosen), parent and f"company {parent['display_name']}") if x
             )
             ctx.proposals.append(
-                PendingProposal("write", "contacts.partner", record.ids[0], payload, f"Add {what} to {record.display_name}")
+                PendingProposal(
+                    "write", "contacts.partner", record.ids[0], payload, f"Add {what} to {record.display_name}"
+                )
             )
 
     return hook_
@@ -369,13 +371,34 @@ def _enrich_output(record: Model, allowed: dict[str, list[E.EnrichmentResult]]) 
                     "source_title": ctx.sources[sid].title if sid in ctx.sources else sid,
                     "source_url": support[0].source_url,
                     "entity": support[0].entity,
+                    "entities": sorted({r.entity for r in support}),
                 }
             )
+        # one proposal describes one outside entity: when results of several entities were mixed, keep
+        # the entity that supports most of the values and drop the rest
+        if len({k["entity"] for k in kept}) > 1:
+            counts: dict[str, int] = {}
+            for k in kept:
+                for ent in k["entities"]:
+                    counts[ent] = counts.get(ent, 0) + 1
+            best = max(sorted(counts), key=lambda e: counts[e])
+            for k in [k for k in kept if best not in k["entities"]]:
+                kept.remove(k)
+                payload.pop(k["target"], None)
+                dropped.append(
+                    {"field": k["field"], "value": k["value"], "source": k["source"], "why": "another entity"}
+                )
+        for k in kept:
+            k.pop("entities", None)
         data.update(suggestions=kept, dropped=dropped, payload=payload, raw_count=len(raw))
         if payload and _can_write(record):
             ctx.proposals.append(
                 PendingProposal(
-                    "write", "contacts.partner", record.ids[0], payload, f"Enrich {record.display_name} ({len(kept)} fields)"
+                    "write",
+                    "contacts.partner",
+                    record.ids[0],
+                    payload,
+                    f"Enrich {record.display_name} ({len(kept)} fields)",
                 )
             )
 
@@ -496,7 +519,7 @@ def tags_scorer(results: list[dict[str, Any]]) -> dict[str, float]:
 
 
 def enrich_scorer(results: list[dict[str, Any]]) -> dict[str, float]:
-    """``field_accuracy``: correct suggested values over (expected ∪ suggested fields), pooled;
+    """``field_accuracy``: correct suggested values over (expected or suggested fields), pooled;
     ``attribution``: share of kept suggestions that carry an approved source and a link."""
     correct = denominator = attributed = kept_total = raw_total = 0
     for r in results:
@@ -508,7 +531,9 @@ def enrich_scorer(results: list[dict[str, Any]]) -> dict[str, float]:
             correct += 1 if f in expected and f in got and same_value(f, got[f], expected[f]) else 0
         for s in data.get("suggestions") or []:
             kept_total += 1
-            attributed += 1 if str(s.get("source", "")).startswith("contacts.enrichment_source:") and s.get("source_url") else 0
+            attributed += (
+                1 if str(s.get("source", "")).startswith("contacts.enrichment_source:") and s.get("source_url") else 0
+            )
         raw_total += int(data.get("raw_count") or 0)
     return {
         "field_accuracy": correct / denominator if denominator else 1.0,

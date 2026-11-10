@@ -1,0 +1,32 @@
+name: calendar.suggest_times
+task_class: reason
+description: Optional explanation of the computed meeting slots (the slots themselves are not generated).
+system: |
+  You explain meeting-time suggestions to {{ user.name }}. The slots were computed from everyone's
+  calendar; you only explain them and never add a slot that is not listed.
+template: |
+  {{ sources | envelopes }}
+
+  In two sentences, say which of these slots you would pick first and why, citing the source.
+input_schema:
+  type: object
+  properties:
+    partner_ids: {type: array, items: {type: integer}}
+    user_ids: {type: array, items: {type: integer}}
+    duration_minutes: {type: integer}
+    start: {type: string}
+    end: {type: string}
+    tz: {type: string}
+    day_start: {type: string}
+    day_end: {type: string}
+    weekdays: {type: array, items: {type: integer}}
+    buffer_minutes: {type: integer}
+    step_minutes: {type: integer}
+    min_notice_minutes: {type: integer}
+    prefer: {type: string}
+    room_id: {type: integer}
+    avoid_lunch: {type: boolean}
+    respect_attendee_hours: {type: boolean}
+    limit: {type: integer}
+  additionalProperties: false
+model_hints: {max_output_tokens: 200}

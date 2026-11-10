@@ -58,7 +58,7 @@ class BookingLink(Model):
     def free_slots(self, start: dt.datetime, end: dt.datetime) -> list[dt.datetime]:
         """Slot starts in [start, end) inside the availability windows that don't clash with the host's busy
         time (their meetings plus buffer) and respect the notice period and booking horizon."""
-        from modules.calendar.models.event import expand
+        from modules.calendar.scheduling import busy_intervals, overlaps, slot_starts
 
         self.ensure_one()
         tz = ZoneInfo(self.timezone or "UTC")
@@ -68,46 +68,15 @@ class BookingLink(Model):
         if end <= start:
             return []
         host = self.user_id.elevated()
-        busy_events = expand(
-            self.env.elevated(),
-            start - dt.timedelta(days=1),
-            end + dt.timedelta(days=1),
-            [
-                ("show_as", "=", "busy"),
-                {
-                    "any": [
-                        ["user_id", "=", host.ids[0]],
-                        ["partner_ids", "=", host.partner_id.ids[0] if host.partner_id else 0],
-                    ]
-                },
-            ],
-        )
+        partner_id = host.partner_id.ids[0] if host.partner_id else None
+        busy = busy_intervals(
+            self.env, [partner_id] if partner_id else [], start - dt.timedelta(days=1), end + dt.timedelta(days=1)
+        ).get(f"partner:{partner_id}", [])
         pad = dt.timedelta(minutes=self.buffer_minutes or 0)
-        busy = [
-            (dt.datetime.fromisoformat(e["start"]) - pad, dt.datetime.fromisoformat(e["stop"]) + pad)
-            for e in busy_events
-        ]
         length = dt.timedelta(minutes=self.duration_minutes)
-        slots: list[dt.datetime] = []
-        day = start.astimezone(tz).date()
-        while dt.datetime.combine(day, dt.time(0), tz) < end:
-            for window in self.availability or []:
-                if int(window["weekday"]) != day.weekday():
-                    continue
-                cursor = dt.datetime.combine(day, dt.time.fromisoformat(window["start"]), tz)
-                stop = dt.datetime.combine(day, dt.time.fromisoformat(window["end"]), tz)
-                while cursor + length <= stop:
-                    s_utc = cursor.astimezone(dt.UTC)
-                    e_utc = s_utc + length
-                    if (
-                        s_utc >= start
-                        and e_utc <= end + length
-                        and not any(s_utc < b_end and b_start < e_utc for b_start, b_end in busy)
-                    ):
-                        slots.append(s_utc)
-                    cursor += length
-            day += dt.timedelta(days=1)
-        return sorted(slots)
+        # a slot may start up to the end of the asked range (it can finish after it)
+        starts = slot_starts(tz, start, end + length, list(self.availability or []), length, length)
+        return [s for s in starts if s < end + length and not overlaps(s, s + length, busy, pad)]
 
 
 class SyncAccount(Model):

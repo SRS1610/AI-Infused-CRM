@@ -60,6 +60,7 @@ ABBREVIATIONS = {
 # classifier weights (logistic regression form, hand-calibrated; see module docstring)
 W_BIAS = -4.0
 W_EMAIL = 5.0
+W_EMAIL_OTHER_NAME = -3.0  # one mailbox, clearly different names: a shared address (info@, a team inbox)
 W_PHONE = 3.0
 W_PHONE_OTHER_NAME = -1.5  # a shared switchboard number with a clearly different name: colleagues
 W_VAT = 5.0
@@ -67,9 +68,10 @@ W_VAT_CONFLICT = -3.0
 W_NAME = 7.0  # times the part of the name similarity above NAME_FLOOR, scaled to 0..1
 NAME_FLOOR = 0.55
 W_DOMAIN = 1.5
-W_DOMAIN_CONFLICT = -2.0
+W_DOMAIN_CONFLICT = -3.0  # both have a business domain and they differ: different employers / companies
 W_CITY = 0.6
-W_CITY_CONFLICT = -0.8
+W_CITY_CONFLICT = -1.0
+W_GIVEN_NAME_CONFLICT = -3.0  # people sharing a surname but not a first name (family, colleagues)
 W_PARENT_CONFLICT = -3.5
 W_KIND_CONFLICT = -1.5
 W_EMBED = 2.0  # times the part of the cosine above 0.5, scaled to 0..1
@@ -93,6 +95,16 @@ def _token_match(a: str, b: str) -> float:
     if len(a) == 1 or len(b) == 1:  # an initial: "J." matches "Jordan"
         return 0.85 if a[0] == b[0] else 0.0
     return difflib.SequenceMatcher(None, a, b).ratio()
+
+
+def given_name_conflict(a: str | None, b: str | None) -> bool:
+    """Two people's names share a token but another token has no plausible counterpart
+    ("Anna Sorensen" / "Erik Sorensen"); initials and typos are counterparts ("J." / "Jordan")."""
+    ta, tb = name_tokens(a), name_tokens(b)
+    if len(ta) < 2 or len(tb) < 2 or not set(ta) & set(tb):
+        return False
+    short, long_ = (ta, tb) if len(ta) <= len(tb) else (tb, ta)
+    return any(max(_token_match(t, u) for u in long_) < 0.6 for t in short)
 
 
 def name_similarity(a: str | None, b: str | None) -> float:
@@ -201,8 +213,11 @@ def score_pair(me: Model, other: Model, embed_cos: float | None) -> Candidate:
         reasons.append(f"Similar name ({round(nsim * 100)}%)")
     if me.email_normalized and me.email_normalized == other.email_normalized:
         s["email"] = True
-        z += W_EMAIL
+        z += W_EMAIL + (W_EMAIL_OTHER_NAME if nsim < 0.4 else 0.0)
         reasons.append("Same e-mail address")
+    if not me.is_company and not other.is_company and given_name_conflict(me.name, other.name):
+        s["given_name_conflict"] = True
+        z += W_GIVEN_NAME_CONFLICT
     if me.phone_normalized and me.phone_normalized == other.phone_normalized:
         s["phone"] = True
         z += W_PHONE + (W_PHONE_OTHER_NAME if nsim < 0.5 else 0.0)
@@ -276,15 +291,15 @@ def candidate_records(me: Model, limit: int = MAX_CANDIDATES) -> Model:
         tokens = sorted({t for t in name_tokens(name) if len(t) >= 4}, key=len, reverse=True)[:3]
         if tokens:
             domain: list[Any] = [{"any": [["name", "ilike", t] for t in tokens]}, ("id", "!=", me.ids[0])]
-            ids.update({i: None for i in partners.search(domain, limit=limit).ids})
+            ids.update(dict.fromkeys(partners.search(domain, limit=limit).ids))
     for dom in business_domains(me):
         found = partners.search(
             [{"any": [["email_normalized", "like", f"%@{dom}"], ["website", "ilike", dom]]}, ("id", "!=", me.ids[0])],
             limit=limit,
         )
-        ids.update({i: None for i in found.ids})
+        ids.update(dict.fromkeys(found.ids))
     if me.vat:
-        ids.update({i: None for i in partners.search([("vat", "=", me.vat), ("id", "!=", me.ids[0])], limit=10).ids})
+        ids.update(dict.fromkeys(partners.search([("vat", "=", me.vat), ("id", "!=", me.ids[0])], limit=10).ids))
     ids.pop(me.ids[0], None)
     # as the user: anything their record rules hide is dropped here, before scoring
     return partners.search([("id", "in", list(ids))], limit=limit * 2) if ids else partners

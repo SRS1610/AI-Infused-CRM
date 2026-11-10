@@ -3,6 +3,7 @@ import { useState } from "react";
 import { request } from "../../kernel/api/client";
 import { registerClientAction } from "../../kernel/extensions";
 import { formatNumber } from "../../kernel/format";
+import { AiForecastSection } from "./AiInsights";
 
 interface Velocity {
   open_opportunities: number;
@@ -109,6 +110,7 @@ export function CrmReports() {
           </tbody>
         </table>
       </section>
+      <AiForecastSection />
       <section aria-labelledby="forecast-h">
         <h2 id="forecast-h">Forecast by expected closing month</h2>
         <table className="pivot-table">

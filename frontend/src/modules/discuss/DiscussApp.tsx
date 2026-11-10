@@ -1,11 +1,23 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { Fragment, useEffect, useMemo, useRef, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { api, request } from "../../kernel/api/client";
 import { chatter } from "../../kernel/api/platform";
 import { Composer, MessageItem } from "../../kernel/chatter/Chatter";
 import { registerClientAction } from "../../kernel/extensions";
 import { useRealtime } from "../../kernel/realtime";
 import { useSession } from "../../kernel/session";
+import {
+  CatchUpButton,
+  CatchUpPanel,
+  loadSummaryRun,
+  requestSummary,
+  SummaryButton,
+  SummaryPanel,
+  TranslateControl,
+  TranslateLanguage,
+  type SummaryState,
+} from "./DiscussAi";
 
 interface ChannelInfo {
   id: number;
@@ -33,8 +45,12 @@ export function DiscussApp() {
     queryFn: () => request<{ online: number[] }>("GET", "/discuss/presence"),
   });
   const [online, setOnline] = useState<Set<number>>(new Set());
-  const [active, setActive] = useState<number | null>(null);
-  const [panel, setPanel] = useState<"browse" | "new" | "dm" | null>(null);
+  const [params, setParams] = useSearchParams();
+  const linked = Number(params.get("channel")) || null; // from a notification link
+  const [active, setActive] = useState<number | null>(linked);
+  const [panel, setPanel] = useState<"browse" | "new" | "dm" | "catchup" | null>(null);
+  const [focus, setFocus] = useState<number | null>(null);
+  const summaryRun = Number(params.get("summary")) || null;
 
   useEffect(() => setOnline(new Set(presence.data?.online ?? [])), [presence.data]);
   useEffect(() => {
@@ -55,6 +71,11 @@ export function DiscussApp() {
 
   const list = channels.data ?? [];
   const current = list.find((c) => c.id === active) ?? null;
+  const jump = (channelId: number, messageId: number) => {
+    setPanel(null);
+    setActive(channelId);
+    setFocus(messageId);
+  };
   const section = (title: string, items: ChannelInfo[]) => (
     <>
       <h2 className="discuss-section">{title}</h2>
@@ -65,7 +86,10 @@ export function DiscussApp() {
               type="button"
               className={`discuss-item${c.id === active ? " active" : ""}`}
               aria-current={c.id === active ? "true" : undefined}
-              onClick={() => setActive(c.id)}
+              onClick={() => {
+                setActive(c.id);
+                setFocus(null);
+              }}
             >
               {c.type === "dm" ? (
                 <span
@@ -91,6 +115,7 @@ export function DiscussApp() {
   return (
     <div className="discuss">
       <nav className="discuss-sidebar" aria-label="Conversations">
+        <CatchUpButton onClick={() => setPanel("catchup")} />
         {section(
           "Channels",
           list.filter((c) => c.type === "channel"),
@@ -112,7 +137,8 @@ export function DiscussApp() {
         </button>
       </nav>
       <section className="discuss-main" aria-label={current ? `Conversation ${current.name}` : "Conversation"}>
-        {panel && (
+        {panel === "catchup" && <CatchUpPanel onClose={() => setPanel(null)} onJump={jump} />}
+        {panel && panel !== "catchup" && (
           <ChannelPicker
             mode={panel}
             onClose={() => setPanel(null)}
@@ -123,15 +149,48 @@ export function DiscussApp() {
             }}
           />
         )}
-        {!panel && current && <Conversation channel={current} />}
+        {!panel && current && (
+          <Conversation
+            key={current.id}
+            channel={current}
+            focus={focus}
+            summaryRun={current.id === linked ? summaryRun : null}
+            onSummaryClosed={() => {
+              if (summaryRun) {
+                params.delete("summary");
+                setParams(params, { replace: true });
+              }
+            }}
+            onJump={jump}
+          />
+        )}
         {!panel && !current && <p className="muted">Join a channel or start a conversation.</p>}
       </section>
     </div>
   );
 }
 
-function Conversation({ channel }: { channel: ChannelInfo }) {
+function Conversation({
+  channel,
+  focus,
+  summaryRun,
+  onSummaryClosed,
+  onJump,
+}: {
+  channel: ChannelInfo;
+  focus: number | null;
+  summaryRun: number | null;
+  onSummaryClosed: () => void;
+  onJump: (channelId: number, messageId: number) => void;
+}) {
   const queryClient = useQueryClient();
+  const { session } = useSession();
+  const [lang, setLang] = useState(() => (session?.user.lang ?? "en").slice(0, 2));
+  const [summary, setSummary] = useState<SummaryState | null>(null);
+  const [summarising, setSummarising] = useState(false);
+  useEffect(() => {
+    if (summaryRun) void loadSummaryRun(summaryRun, channel.id).then(setSummary);
+  }, [summaryRun, channel.id]);
   const messages = useQuery({
     queryKey: ["chatter", "discuss.channel", channel.id, "messages"],
     queryFn: () => chatter.messages("discuss.channel", channel.id),
@@ -143,6 +202,10 @@ function Conversation({ channel }: { channel: ChannelInfo }) {
     if (event.event === "chatter") refresh();
   });
   useEffect(() => {
+    if (focus && messages.data) {
+      document.getElementById(`discuss-msg-${focus}`)?.scrollIntoView?.({ block: "center" });
+      return;
+    }
     bottom.current?.scrollIntoView?.({ block: "end" });
     const newest = messages.data?.items[0];
     if (newest && channel.member) {
@@ -150,7 +213,7 @@ function Conversation({ channel }: { channel: ChannelInfo }) {
         queryClient.invalidateQueries({ queryKey: ["discuss", "channels"] }),
       );
     }
-  }, [messages.data, channel.id, channel.member, queryClient]);
+  }, [messages.data, channel.id, channel.member, queryClient, focus]);
   return (
     <>
       <header className="discuss-header">
@@ -160,6 +223,15 @@ function Conversation({ channel }: { channel: ChannelInfo }) {
         </h1>
         {channel.description && <span className="muted">{channel.description}</span>}
         <span className="muted small">{channel.member_count} members</span>
+        <SummaryButton
+          busy={summarising}
+          onClick={async () => {
+            setSummarising(true);
+            setSummary(await requestSummary(channel.id));
+            setSummarising(false);
+          }}
+        />
+        <TranslateLanguage lang={lang} onChange={setLang} />
         {channel.member && (
           <label className="small">
             Notify me{" "}
@@ -177,9 +249,28 @@ function Conversation({ channel }: { channel: ChannelInfo }) {
           </label>
         )}
       </header>
+      {summary && (
+        <SummaryPanel
+          state={summary}
+          onJump={onJump}
+          onClose={() => {
+            setSummary(null);
+            onSummaryClosed();
+          }}
+        />
+      )}
       <ol className="chatter-messages discuss-messages" aria-live="polite">
         {ordered.map((m) => (
-          <MessageItem key={m.id} message={m} onChange={refresh} />
+          <Fragment key={m.id}>
+            <MessageItem message={m} onChange={refresh} />
+            <li
+              id={`discuss-msg-${m.id}`}
+              className={`discuss-ai-row${focus === m.id ? " focused" : ""}`}
+              aria-label={focus === m.id ? "Linked message" : undefined}
+            >
+              {m.body && m.author?.id !== session?.user.id && <TranslateControl messageId={m.id} lang={lang} />}
+            </li>
+          </Fragment>
         ))}
       </ol>
       <div ref={bottom} />

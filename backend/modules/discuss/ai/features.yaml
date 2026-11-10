@@ -14,6 +14,7 @@ features:
     outbound: false
     redaction: redact                 # authors are passed as core.user sources so their names are redacted
     risk_class: minimal
+    disclosure: ai_generated
     interactive: true                 # ≤ 50 messages; above that the API runs it as a background job + notification
     max_steps: 2
     eval:
@@ -32,6 +33,7 @@ features:
     outbound: false
     redaction: redact
     risk_class: minimal
+    disclosure: ai_generated
     interactive: true
     max_steps: 2
     eval:
@@ -69,6 +71,7 @@ features:
     outbound: false
     redaction: redact
     risk_class: minimal
+    disclosure: ai_generated
     interactive: true
     max_steps: 1
     eval:

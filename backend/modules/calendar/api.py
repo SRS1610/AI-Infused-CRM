@@ -162,3 +162,55 @@ def book(slug: str, data: BookingIn, ctx: RequestContext = Depends(request_conte
     env["calendar.attendee"].create({"event_id": event.ids[0], "partner_id": guest.ids[0], "state": "accepted"})
     event.action_send_invitations()
     return {"event_id": event.ids[0], "start": start.isoformat()}
+
+
+# -- AI: suggested times and meeting briefs (Phase 1.6) --------------------------------------------
+
+
+class SuggestIn(BaseModel):
+    event_id: int | None = None
+    partner_ids: list[int] = Field(default_factory=list, max_length=30)
+    user_ids: list[int] = Field(default_factory=list, max_length=30)
+    duration_minutes: int | None = None
+    start: str | None = None
+    end: str | None = None
+    tz: str | None = None
+    day_start: str | None = None
+    day_end: str | None = None
+    weekdays: list[int] | None = None
+    buffer_minutes: int | None = None
+    step_minutes: int | None = None
+    min_notice_minutes: int | None = None
+    prefer: str | None = None
+    room_id: int | None = None
+    avoid_lunch: bool = False
+    respect_attendee_hours: bool = True
+    limit: int = Field(5, ge=1, le=20)
+
+
+@router.post("/ai/suggest-times")
+def ai_suggest_times(data: SuggestIn, ctx: RequestContext = Depends(authenticated)) -> dict[str, Any]:
+    """Ranked free slots for the meeting's attendees (or ``partner_ids``) and the caller. Deterministic;
+    nothing is booked — moving or creating the meeting stays the user's own action."""
+    from modules.calendar.ai_features import SUGGEST, check_feature, suggest_for
+
+    check_feature(ctx.env, SUGGEST)
+    record = None
+    if data.event_id:
+        record = ctx.env["calendar.event"].browse([data.event_id])
+        if not record.exists():
+            raise MissingError("No such meeting")
+    inputs = data.model_dump(exclude_none=True, exclude={"event_id"})
+    return suggest_for(ctx.env, inputs, record)
+
+
+@router.get("/events/{event_id}/brief")
+def ai_latest_brief(event_id: int, ctx: RequestContext = Depends(authenticated)) -> dict[str, Any]:
+    """The caller's own latest brief of this meeting (prepared before the meeting or on demand)."""
+    from modules.calendar.ai_features import BRIEF, check_feature, latest_brief
+
+    check_feature(ctx.env, BRIEF)
+    event = ctx.env["calendar.event"].browse([event_id])
+    if not event.exists():
+        raise MissingError("No such meeting")
+    return {"brief": latest_brief(ctx.env, event)}

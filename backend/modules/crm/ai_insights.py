@@ -586,7 +586,7 @@ def suggest_assignee(lead: Model) -> dict[str, Any]:
             won, closed = hist[uid]
             rate = (won + 1) / (closed + 2)
             expertise = 2.0 * min(1.0, closed / 4.0) * (rate - team_rate)
-            balance = -0.6 * (loads[uid] - mean_load) / max(1.0, mean_load)
+            balance = -0.3 * (loads[uid] - mean_load) / max(1.0, mean_load)
             candidates.append(
                 {
                     "user_id": uid,
@@ -695,9 +695,9 @@ def lead_brief(lead: Model) -> str:
     risk = ML.deal_risk(sig)
     lines = [
         f"Name: {rec.name}",
-        f"Type: {rec.type}; stage: {rec.stage_id.name or '—'} for {sig['stage_age_days']} days",
-        f"Customer: {rec.partner_id.display_name or rec.partner_name or '—'}",
-        f"Salesperson: {rec.user_id.name or 'unassigned'}",
+        f"Type: {rec.type}; stage: {rec.stage_id.name if rec.stage_id else '—'} for {sig['stage_age_days']} days",
+        f"Customer: {(rec.partner_id.display_name if rec.partner_id else rec.partner_name) or '—'}",
+        f"Salesperson: {rec.user_id.name if rec.user_id else 'unassigned'}",
         f"Expected revenue: {rec.expected_revenue or 0:,.0f}; probability {rec.probability or 0:.0f}%",
         f"Expected closing: {rec.date_deadline.isoformat() if rec.date_deadline else 'not set'}",
         f"Quotations: {rec.quotation_count}",

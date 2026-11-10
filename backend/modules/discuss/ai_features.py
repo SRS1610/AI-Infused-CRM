@@ -108,7 +108,9 @@ def summary_domain(channel: Any, inputs: dict[str, Any]) -> list[Any]:
 
 def summary_messages(env: Any, channel: Any, inputs: dict[str, Any]) -> Any:
     """Messages in range, oldest first (the newest ``limit`` when the range holds more)."""
-    limit = min(int(inputs.get("limit") or (SUMMARY_MAX if inputs.get("since") else SUMMARY_DEFAULT_LIMIT)), SUMMARY_MAX)
+    limit = min(
+        int(inputs.get("limit") or (SUMMARY_MAX if inputs.get("since") else SUMMARY_DEFAULT_LIMIT)), SUMMARY_MAX
+    )
     found = env["chatter.message"].elevated().search(summary_domain(channel, inputs), order="id desc", limit=limit)
     return found.browse(list(reversed(found.ids)))
 
@@ -232,7 +234,7 @@ def catch_up_handler(env: Any, record: Any, inputs: dict[str, Any]) -> dict[str,
     groups = unread_messages(env, int(inputs.get("max_messages") or CATCH_UP_MAX))
     sources: list[Source] = []
     all_msgs = env["chatter.message"].elevated()
-    for channel, msgs in groups:
+    for _channel, msgs in groups:
         all_msgs |= msgs
     sources += participant_sources(all_msgs, "your channels")
     for channel, msgs in groups:

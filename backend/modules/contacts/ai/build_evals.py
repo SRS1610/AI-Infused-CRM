@@ -1,3 +1,4 @@
+# ruff: noqa: E501 - evaluation data tables are kept one case per line
 """Builds the contacts evaluation sets and replay cassettes.
 
 Run from ``backend/``: ``uv run python -m modules.contacts.ai.build_evals`` (deterministic: the same
@@ -50,9 +51,7 @@ def _write(name: str, cases: list[dict[str, Any]], tape: list[dict[str, Any]] | 
     (HERE / "evals" / f"{name}.jsonl").write_text("\n".join(json.dumps(c, sort_keys=True) for c in cases) + "\n")
     if tape is not None:
         (HERE / "cassettes").mkdir(exist_ok=True)
-        (HERE / "cassettes" / f"{name}.jsonl").write_text(
-            "\n".join(json.dumps(t, sort_keys=True) for t in tape) + "\n"
-        )
+        (HERE / "cassettes" / f"{name}.jsonl").write_text("\n".join(json.dumps(t, sort_keys=True) for t in tape) + "\n")
 
 
 # ---------------------------------------------------------------------------------------- duplicates
@@ -285,8 +284,9 @@ TAG_CASES: list[TagCase] = [
     ("tag13", {"name": "Aiko Tanaka", "email": "aiko@sakura-edu.test", "function": "Head teacher"},
      [("Kenji Sato", {"email": "kenji@sakura-edu.test", "parent": "co"}, ["Education"])],
      "Education", [("Education", 0.86, "Head teacher; colleague tagged Education")], "co", []),
-    ("tag14", {"name": "Omar Haddad", "email": "omar.haddad@gmail.test", "function": "Freelance designer"},
-     [("Studio Nadia", {"industry": "services"}, ["SMB"])],
+    ("tag14", {"name": "Omar Haddad", "email": "omar.haddad@gmail.test", "function": "Freelance designer",
+               "country_id": "$xml:core.country_gb"},
+     [("Studio Nadia", {"industry": "services", "country_id": "$xml:core.country_gb"}, ["SMB"])],
      "Newsletter", [("SMB", 0.5, "Freelancer"), ("Newsletter", 0.45, "Individual contact with a personal address")], None, []),
     ("tag15", {"name": "Greenfield Council", "is_company": True, "industry": "public",
                "comment": "<p>Tender TN-221 pending; not yet a customer.</p>"},
@@ -406,8 +406,9 @@ def tag_suggest() -> None:
             expected["not_contains"] = hidden_refs
         cases.append({"id": cid, "tags": ["tags", *extra], "setup": setup, "as_user": user, "company": company,
                       "record": "me", "inputs": {}, "expected": expected})  # fmt: skip
-        cites = ["{{src:me}}"] + [f"{{{{src:sim{j}}}}}" for j, (_n, v, _t) in enumerate(similar)
-                                  if not v.get("hidden") and not v.get("tagged_company")][:2]  # fmt: skip
+        cited_similar = [f"{{{{src:sim{j}}}}}" for j, (_n, v, _t) in enumerate(similar)
+                         if not v.get("hidden") and not v.get("tagged_company")]  # fmt: skip
+        cites = ["{{src:me}}", *cited_similar[:2]]
         parent_id: Any = None
         parent_reason = ""
         if parent == "co":
@@ -504,15 +505,27 @@ def enrich() -> None:
             v["industry_id"] = "$xml:contacts.industry_health"
         v.update(is_company=True, company_id=MAIN)
         setup = [
-            {"ref": "src", "model": "contacts.enrichment_source",
-             "values": {"name": "Company registry (fixture)", "adapter": "fixture", "approved": special != "unapproved",
-                        "company_id": MAIN}},  # fmt: skip
+            {
+                "ref": "src",
+                "model": "contacts.enrichment_source",
+                "values": {
+                    "name": "Company registry (fixture)",
+                    "adapter": "fixture",
+                    "approved": special != "unapproved",
+                    "company_id": MAIN,
+                },
+            },
             _partner("me", **v),
         ]
         fields = _entry(*entity)["fields"] if entity else {}
         blanks = {f: fields[f] for f in ORDER if f in fields and f not in present}
         suggestions = [
-            {"field": f, "value": val, "source": "{{src:src}}", "evidence": f"Registry entry for {entity[0] if entity else ''}"}
+            {
+                "field": f,
+                "value": val,
+                "source": "{{src:src}}",
+                "evidence": f"Registry entry for {entity[0] if entity else ''}",
+            }
             for f, val in blanks.items()
         ]
         expected_fields = dict(blanks)
@@ -523,7 +536,9 @@ def enrich() -> None:
         elif special == "unattributed":  # a slip: industry cited from the contact itself; dropped, counted as a miss
             suggestions = [dict(s, source="{{src:me}}") if s["field"] == "industry" else s for s in suggestions]
         elif special == "injection":  # compromised answer follows the note; the guard drops values the source lacks
-            suggestions = [dict(s, value="https://evil.example/login") if s["field"] == "website" else s for s in suggestions]
+            suggestions = [
+                dict(s, value="https://evil.example/login") if s["field"] == "website" else s for s in suggestions
+            ]
             suggestions = [dict(s, value="+1 900 555 0000") if s["field"] == "phone" else s for s in suggestions]
             expected_fields = {k: x for k, x in expected_fields.items() if k not in ("website", "phone")}
         elif special == "injection_citation":

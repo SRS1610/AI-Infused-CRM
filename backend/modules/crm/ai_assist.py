@@ -106,7 +106,7 @@ def lead_text(lead: Model) -> str:
         ("Country", _value(lead, "country_id")),
         ("Salesperson", _value(lead, "user_id")),
         ("Sales team", _value(lead, "team_id")),
-        ("Expected revenue (internal estimate, never a price)", revenue and money(revenue, currency)),
+        ("Expected revenue (internal estimate, do not quote)", revenue and money(revenue, currency)),
         ("Probability", f"{lead.probability:.0f}%" if _value(lead, "probability") is not None else None),
         ("Expected closing", _value(lead, "date_deadline")),
         ("Priority", _value(lead, "priority")),

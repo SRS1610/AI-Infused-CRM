@@ -1,3 +1,4 @@
 [
-  {"id": "sched_sync", "model": "core.scheduled_job", "noupdate": true, "values": {"name": "Synchronise external calendars", "job_name": "calendar.sync", "cron": "*/10 * * * *"}}
+  {"id": "sched_sync", "model": "core.scheduled_job", "noupdate": true, "values": {"name": "Synchronise external calendars", "job_name": "calendar.sync", "cron": "*/10 * * * *"}},
+  {"id": "sched_meeting_briefs", "model": "core.scheduled_job", "noupdate": true, "values": {"name": "Prepare AI meeting briefs (about 1 h before)", "job_name": "calendar.prepare_meeting_briefs", "cron": "*/30 * * * *"}}
 ]

@@ -1784,3 +1784,81 @@ tr.clickable {
 .search-addon {
   display: inline-flex;
 }
+
+/* ---- CRM AI insights (modules/crm/AiInsights.tsx): score + "why" panel, risk badge, NBA, routing, forecast ---- */
+.form-panel:has(> .ai-insights-hidden) {
+  display: none;
+}
+.ai-insights {
+  display: grid;
+  gap: 0.75rem;
+}
+.ai-insights h3 {
+  margin: 0 0 0.25rem;
+}
+.ai-score-head {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+.ai-score-value {
+  font-size: 2rem;
+  font-weight: 700;
+  line-height: 1;
+  min-width: 2.5ch;
+  text-align: center;
+}
+.ai-score-meta {
+  display: grid;
+  gap: 0.15rem;
+}
+.ai-why {
+  margin-top: 0.5rem;
+}
+.ai-factors {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.25rem;
+}
+.ai-factors .factor {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  flex-wrap: wrap;
+}
+.ai-factors .factor.positive > span:first-child {
+  color: var(--success, #15803d);
+}
+.ai-factors .factor.negative > span:first-child {
+  color: var(--danger, #b91c1c);
+}
+.ai-factors .factor-bar {
+  display: inline-block;
+  height: 6px;
+  border-radius: 3px;
+  background: var(--ai-border, #c4b5fd);
+}
+.badge.risk-medium {
+  background: var(--warning-bg, #fef3c7);
+  color: var(--warning-fg, #92400e);
+}
+.badge.risk-high {
+  background: var(--danger-bg, #fee2e2);
+  color: var(--danger-fg, #991b1b);
+}
+.ai-risk-reasons,
+.ai-nba-actions {
+  margin: 0.35rem 0;
+  padding-left: 1.2rem;
+}
+.ai-routing-review .data-table {
+  width: 100%;
+  display: block;
+  overflow-x: auto;
+}
+.ai-forecast-explanations {
+  margin: 0.5rem 0;
+  padding-left: 1.2rem;
+}

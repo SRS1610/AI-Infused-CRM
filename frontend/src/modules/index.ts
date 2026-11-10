@@ -2,4 +2,5 @@
 import "./ai_core/AiDashboard";
 import "./contacts/MergeDialog";
 import "./crm/CrmReports";
+import "./crm/AiInsights";
 import "./discuss/DiscussApp";
