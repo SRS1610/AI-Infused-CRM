@@ -1,0 +1,14 @@
+name = "studio"
+version = "1.0.0"
+summary = "Studio: add fields, edit and create views, automated actions and simple workflows without code; every change versioned with rollback and export as a module"
+category = "Platform"
+phase = 1
+depends = ["core", "web", "workflow"]
+license = "Apache-2.0"
+installable = true
+application = true
+
+[load]
+security = ["security/groups.json", "security/access.json"]
+actions = "actions.json"
+menus = "menus.json"

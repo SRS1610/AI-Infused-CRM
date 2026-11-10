@@ -1,0 +1,5 @@
+[
+  {"id": "access_field_designer", "model": "core.model_access", "values": {"name": "studio.field: designer", "model_name": "studio.field", "group_id": "studio.group_designer", "perm_read": true}},
+  {"id": "access_change_designer", "model": "core.model_access", "values": {"name": "studio.change: designer", "model_name": "studio.change", "group_id": "studio.group_designer", "perm_read": true}},
+  {"id": "access_snapshot_designer", "model": "core.model_access", "values": {"name": "studio.snapshot: designer", "model_name": "studio.snapshot", "group_id": "studio.group_designer", "perm_read": true}}
+]

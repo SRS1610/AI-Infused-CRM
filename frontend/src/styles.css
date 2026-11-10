@@ -1784,3 +1784,67 @@ tr.clickable {
 .search-addon {
   display: inline-flex;
 }
+
+/* Studio ------------------------------------------------------------------------------------- */
+.studio-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr));
+  gap: 16px;
+  align-items: start;
+}
+.studio-card {
+  border: 1px solid var(--border);
+  border-radius: var(--radius, 8px);
+  background: var(--surface);
+  padding: 16px;
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+}
+.studio-card h3 {
+  margin: 0;
+}
+.studio-layout,
+.studio-changes {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 4px;
+}
+.studio-layout li,
+.studio-changes li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 6px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface);
+}
+.studio-layout li[draggable="true"] {
+  cursor: grab;
+}
+.studio-layout li.hidden-field .studio-name {
+  text-decoration: line-through;
+  color: var(--text-muted);
+}
+.studio-name {
+  flex: 1;
+  min-width: 8rem;
+  font-family: var(--font-mono, monospace);
+  font-size: 0.85rem;
+}
+.studio-handle {
+  color: var(--text-muted);
+}
+.studio-changes li.rolled_back span:first-child {
+  text-decoration: line-through;
+  color: var(--text-muted);
+}
+.studio-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
