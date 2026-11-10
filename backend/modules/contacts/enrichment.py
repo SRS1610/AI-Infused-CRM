@@ -37,6 +37,9 @@ Writing a real adapter
   environment / secret store, never in the approval record.
 * Register the adapter at import time of your module (as :class:`FixtureAdapter` is below), then
   approve it under *Contacts → Configuration → Enrichment sources*.
+
+Shipped adapters: ``fixture`` (offline, tests and demo) and ``company_website``
+(:mod:`modules.contacts.website`: the company's public home page, no key needed).
 """
 
 from __future__ import annotations
@@ -51,7 +54,20 @@ if TYPE_CHECKING:
     from tessera.orm.environment import Environment
     from tessera.orm.model import Model
 
-FIELDS = ("website", "phone", "street", "city", "zip", "country", "industry", "vat")
+FIELDS = (
+    "name",
+    "website",
+    "phone",
+    "street",
+    "city",
+    "zip",
+    "country",
+    "industry",
+    "vat",
+    "description",
+    "social_links",
+    "logo_url",
+)
 QUERY_KEYS = ("name", "email_domain", "website_domain", "vat", "city", "country")
 
 
