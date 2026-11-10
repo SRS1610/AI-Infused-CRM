@@ -12,7 +12,7 @@ from fastapi.middleware.gzip import GZipMiddleware
 from tessera import __version__
 from tessera.api.errors import install_error_handlers
 from tessera.api.middleware import RateLimitMiddleware, RequestContextMiddleware, SecurityHeadersMiddleware
-from tessera.api.routers import attachments, auth, health, jsonrpc, metadata, realtime, records
+from tessera.api.routers import attachments, auth, dataio, health, jsonrpc, metadata, realtime, records
 from tessera.config import get_settings
 from tessera.logging import configure_logging, get_logger
 
@@ -61,6 +61,7 @@ def create_app() -> FastAPI:
     v1.include_router(records.router)
     v1.include_router(metadata.router)
     v1.include_router(attachments.router)
+    v1.include_router(dataio.router)
     v1.include_router(jsonrpc.router)
     v1.include_router(realtime.router)
     _load_default_registry()

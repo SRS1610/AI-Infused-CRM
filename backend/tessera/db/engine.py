@@ -8,6 +8,7 @@ psycopg 3 executes it.
 from __future__ import annotations
 
 import threading
+import weakref
 from collections.abc import Callable, Iterator, Mapping, Sequence
 from contextlib import contextmanager
 from typing import Any
@@ -90,6 +91,7 @@ class Cursor:
         self._trans = self._conn.begin()
         self._after_commit: list[Callable[[], None]] = []
         self._savepoint_depth = 0
+        self._rollback_listeners: list[weakref.WeakMethod[Callable[[], None]]] = []
         self.closed = False
 
     # -- execution -------------------------------------------------------------------
@@ -121,17 +123,32 @@ class Cursor:
         """Nested transaction; rolled back on exception, released otherwise."""
         nested = self._conn.begin_nested()
         self._savepoint_depth += 1
+        mark = len(self._after_commit)
         try:
             yield
         except BaseException:
             if nested.is_active:
                 nested.rollback()
+            # work done inside the savepoint is gone: so are its after-commit effects and cached values
+            del self._after_commit[mark:]
+            self._notify_rollback()
             raise
         else:
             if nested.is_active:
                 nested.commit()
         finally:
             self._savepoint_depth -= 1
+
+    def on_savepoint_rollback(self, method: Callable[[], None]) -> None:
+        """Register a bound method called when a savepoint rolls back (held weakly)."""
+        self._rollback_listeners = [ref for ref in self._rollback_listeners if ref() is not None]
+        self._rollback_listeners.append(weakref.WeakMethod(method))
+
+    def _notify_rollback(self) -> None:
+        for ref in list(self._rollback_listeners):
+            listener = ref()
+            if listener is not None:
+                listener()
 
     def after_commit(self, callback: Callable[[], None]) -> None:
         self._after_commit.append(callback)

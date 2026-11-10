@@ -43,6 +43,11 @@ class Transaction:
         self.envs: list[Environment] = []
         # external-id cache: (module, name) -> (model, res_id)
         self.xmlid_cache: dict[str, tuple[str, int]] = {}
+        cr.on_savepoint_rollback(self._savepoint_rolled_back)
+
+    def _savepoint_rolled_back(self) -> None:
+        self.cache.clear()
+        self.xmlid_cache.clear()
 
     def reset(self) -> None:
         self.cache.clear()

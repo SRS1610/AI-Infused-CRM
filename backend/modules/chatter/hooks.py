@@ -70,7 +70,7 @@ def thread_post_tracking(records: Model, vals: dict[str, Any], old_values: dict[
                 changes.append(
                     {
                         "field_name": name,
-                        "field_label": rec._fields[name].string,
+                        "field_label": rec._fields[name].label,
                         "old_display": old_display,
                         "new_display": new_display,
                         "old_value": {"v": old_raw},  # wrapped: a Json field reads a bare str as JSON text

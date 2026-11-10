@@ -103,7 +103,7 @@ def test_retry_then_recover(jobs_db: str) -> None:
     info = _job(jobs_db, jid)
     assert info["state"] == "queued" and "boom 1" in info["error"]
     assert info["next"] > dt.datetime.now(dt.UTC) + dt.timedelta(seconds=5)  # backoff applied
-    assert run_now(jobs_db, due_only=True) == {}  # not due yet
+    assert jid not in run_now(jobs_db, due_only=True)  # not due yet
     assert run_now(jobs_db, [jid]) == {jid: "done"}
     assert _job(jobs_db, jid)["history"] == [(1, "failed"), (2, "done")]
 

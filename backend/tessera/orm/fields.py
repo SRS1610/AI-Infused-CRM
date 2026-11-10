@@ -119,6 +119,18 @@ class Field:
 
     # -- metadata ------------------------------------------------------------------
     @property
+    def label(self) -> str:
+        """Human label: ``string``, else derived from the name (``country_id`` → Country, ``tag_ids`` → Tags)."""
+        if self.string:
+            return self.string
+        name = self.name
+        if name.endswith("_ids") and len(name) > 4:
+            return name[:-4].replace("_", " ").title() + "s"
+        if name.endswith("_id") and len(name) > 3:
+            name = name[:-3]
+        return name.replace("_", " ").title()
+
+    @property
     def has_default(self) -> bool:
         return self.default is not _UNSET
 
@@ -172,7 +184,7 @@ class Field:
         return {
             "name": self.name,
             "type": self.type_name,
-            "string": self.string or self.name.replace("_", " ").title(),
+            "string": self.label,
             "help": self.help,
             "required": self.required,
             "readonly": self.readonly or (self.computed and not self.inverse),

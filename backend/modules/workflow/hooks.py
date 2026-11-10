@@ -33,7 +33,7 @@ def guard_and_snapshot(records: Model, vals: dict[str, Any], old_values: dict[An
         changing = [r for r in records if wf.state_key(r) != _as_key(vals[wf.state_field])]
         if changing:
             raise ConflictError(
-                f"'{records._fields[wf.state_field].string}' follows the {wf.name} workflow: use its buttons",
+                f"'{records._fields[wf.state_field].label}' follows the {wf.name} workflow: use its buttons",
                 field=wf.state_field,
             )
     autos = automations_for(records, ("on_write", "on_create_or_write"))
