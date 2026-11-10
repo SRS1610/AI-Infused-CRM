@@ -170,4 +170,4 @@ cd frontend && npx playwright test e2e/demo.spec.ts e2e/ai.spec.ts e2e/studio.sp
 
 It was last executed on 2026-11-10 against `tessera seed demo` with the in-process gateway and the
 Local test provider. Docker Compose itself could not be started in that environment; the stack was run
-directly (see the Phase 1 summary).
+directly (see the [Phase 1 summary](../phase-1-summary.md)).

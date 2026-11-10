@@ -2,7 +2,30 @@
 
 All notable changes are recorded here, grouped by phase. Format follows [Keep a Changelog](https://keepachangelog.com/); versions follow the platform version, modules carry their own versions in their manifests.
 
-## [Unreleased] — Phase 1 in progress
+## [Unreleased] — Phase 1 complete, awaiting sign-off
+
+Summary of what works, what is stubbed and the known gaps: [docs/phase-1-summary.md](docs/phase-1-summary.md).
+
+### Sub-phase 1.7 — Studio, demo and phase summary
+- Studio (`studio`): add fields of every type to Studio-enabled models without a restart (per-database
+  dynamic fragments and a registry stamp, D-053), place them on the form and list, edit the form layout,
+  automated actions and simple workflows, change history with rollback per change or to a snapshot,
+  export as an installable `studio_customizations_<company>` module (D-054); designers only (403
+  otherwise). User guide: `docs/user/studio.md`.
+- `tessera seed demo --phase 1` prepares the demo scenario in one command: modules with demo data,
+  retrieval index, trained scoring models, risk and forecast, realistic answers for the test provider
+  (D-055). The walkthrough `docs/demos/phase-1.md` runs in the browser as `frontend/e2e/demo.spec.ts`.
+- Client internationalisation: gettext-style `t()` / `tn()`, an extractor script and a complete French
+  catalogue (645 strings).
+- Fixes found by the end-to-end suite: registry rebuilds are staged and published in one step, and a
+  released savepoint hands its rollback callbacks to the enclosing level (D-060); API rate limits are
+  per credential with a per-address ceiling, 429 responses carry `Retry-After` and the client retries
+  after it (D-059); the in-process gateway is imported at startup, so the first AI request after a
+  restart meets the first-token budget; accessibility fixes in the chatter and Studio.
+- Uninstalling a module renames its indexes and many-to-many tables instead of leaving them behind
+  (D-052).
+- Tests: backend 435, gateway 118, frontend 119, Playwright 38 scenarios on desktop and mobile; all 21
+  Phase 1 AI features meet their thresholds in replay.
 
 ### Sub-phase 1.6 — Phase 1 AI features
 Twenty-one features, each with a manifest entry, prompt, kill switch, evaluation set with
