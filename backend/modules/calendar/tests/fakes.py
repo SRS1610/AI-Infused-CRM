@@ -1,29 +1,88 @@
 """In-memory stand-ins for the Google Calendar and Microsoft Graph event APIs, with the semantics the
-adapters rely on (incremental tokens, etags/changeKeys, 412 on stale etags, deletions in deltas).
-Payload shapes follow the providers' documented responses."""
+adapters rely on (incremental tokens, etags/changeKeys, 412 on stale etags, deletions in deltas), and for
+the providers' OAuth token endpoints (refresh-token grant). Payload shapes follow the providers'
+documented responses."""
 
 from __future__ import annotations
 
 import itertools
 import json
+import urllib.parse
 from typing import Any
 
 import httpx
 
 
+class FakeTokenEndpoint:
+    """``POST /token`` with ``grant_type=refresh_token`` (Google) or ``/<tenant>/oauth2/v2.0/token``
+    (Microsoft identity platform). Issues access tokens the API fakes accept (``valid`` is shared with
+    them); ``rotate`` issues a new refresh token on every refresh, as Microsoft does."""
+
+    def __init__(self, client_id: str, client_secret: str, refresh_token: str, *, rotate: bool = False) -> None:
+        self.client_id, self.client_secret, self.rotate = client_id, client_secret, rotate
+        self.refresh_tokens = {refresh_token}
+        self.valid: set[str] = set()
+        self.expires_in = 3599
+        self.calls: list[dict[str, str]] = []
+        self.counter = itertools.count(1)
+        self.fail_with: int | None = None  # simulate an outage (e.g. 503)
+
+    def handler(self, request: httpx.Request) -> httpx.Response:
+        form = dict(urllib.parse.parse_qsl(request.content.decode()))
+        self.calls.append(form)
+        if self.fail_with:
+            return httpx.Response(self.fail_with, text="unavailable")
+        if form.get("client_id") != self.client_id or form.get("client_secret") != self.client_secret:
+            return httpx.Response(401, json={"error": "invalid_client", "error_description": "Unauthorized"})
+        if form.get("grant_type") != "refresh_token" or form.get("refresh_token") not in self.refresh_tokens:
+            return httpx.Response(
+                400, json={"error": "invalid_grant", "error_description": "Token has been expired or revoked."}
+            )
+        access = f"access-{next(self.counter)}"
+        self.valid.add(access)
+        body: dict[str, Any] = {"access_token": access, "expires_in": self.expires_in, "token_type": "Bearer"}
+        if self.rotate:
+            self.refresh_tokens.discard(form["refresh_token"])
+            new = f"refresh-{next(self.counter)}"
+            self.refresh_tokens.add(new)
+            body["refresh_token"] = new
+        return httpx.Response(200, json=body)
+
+    def expire_all(self) -> None:
+        """Every access token issued so far stops working (the provider answers 401)."""
+        self.valid.clear()
+
+    def revoke(self) -> None:
+        """The user revoked the app's access: refresh tokens no longer work."""
+        self.refresh_tokens.clear()
+        self.valid.clear()
+
+
+def _authorized(request: httpx.Request, valid: set[str] | None) -> bool:
+    auth = request.headers.get("authorization", "")
+    assert auth.startswith("Bearer ")
+    return valid is None or auth[7:] in valid
+
+
+def _unauthorized() -> httpx.Response:
+    return httpx.Response(401, json={"error": {"code": 401, "message": "Request had invalid credentials."}})
+
+
 class FakeGoogle:
-    def __init__(self) -> None:
+    def __init__(self, valid_tokens: set[str] | None = None) -> None:
         self.events: dict[str, dict[str, Any]] = {}
         self.log: list[tuple[int, str]] = []  # (sequence, event id)
         self.seq = itertools.count(1)
         self.ids = itertools.count(1)
+        self.valid_tokens = valid_tokens  # None: any bearer token is accepted
 
     def _token(self) -> str:
         return f"sync-{len(self.log)}"
 
     def handler(self, request: httpx.Request) -> httpx.Response:
         path = request.url.path
-        assert request.headers.get("authorization", "").startswith("Bearer ")
+        if not _authorized(request, self.valid_tokens):
+            return _unauthorized()
         event_id = path.rsplit("/events", 1)[1].strip("/") or None
         if request.method == "GET":
             token = request.url.params.get("syncToken")
@@ -57,15 +116,18 @@ class FakeGoogle:
 
 
 class FakeGraph:
-    def __init__(self) -> None:
+    def __init__(self, valid_tokens: set[str] | None = None) -> None:
         self.events: dict[str, dict[str, Any]] = {}
         self.removed: set[str] = set()
         self.log: list[str] = []
         self.ids = itertools.count(1)
         self.keys = itertools.count(1)
+        self.valid_tokens = valid_tokens
 
     def handler(self, request: httpx.Request) -> httpx.Response:
         path = request.url.path
+        if not _authorized(request, self.valid_tokens):
+            return httpx.Response(401, json={"error": {"code": "InvalidAuthenticationToken"}})
         if path.endswith("/events/delta"):
             since = int(request.url.params.get("since", "0"))
             ids = list(dict.fromkeys(self.log[since:])) if "since" in request.url.params else list(self.events)

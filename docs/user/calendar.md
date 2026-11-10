@@ -10,4 +10,7 @@
   people pick a free slot and the meeting lands in your calendar with an invitation.
 - **External calendars**: connect CalDAV (Nextcloud, Fastmail, iCloud …), Google Calendar or
   Microsoft 365 under *External calendars*. Changes on either side, including repeating meetings and
-  deletions, are synchronised every 10 minutes (or *Sync now*).
+  deletions, are synchronised every 10 minutes (or *Sync now*). Google and Microsoft sign-ins renew
+  themselves; if the provider stops accepting them (you removed Tessera's access, changed your password
+  or your administrator changed the app), the calendar shows **Needs reconnection**, synchronisation
+  pauses and you get a notification: connect the account again and it resumes.
