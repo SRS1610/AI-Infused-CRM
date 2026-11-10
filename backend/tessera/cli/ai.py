@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
+from typing import Any
 
 import typer
 from rich.console import Console
@@ -160,21 +161,32 @@ def provider(
 
     if kind not in TIERS:
         raise typer.BadParameter(f"no default tiers for '{kind}'; configure it under Settings → AI")
-    label = name or kind.capitalize()
     with environment_for(_url(database_url), su=True) as env:
-        Provider = env["ai_core.provider"]  # noqa: N806
-        rec = Provider.search([("name", "=", label), ("kind", "=", kind)], limit=1)
-        values = {"name": label, "kind": kind, "region": region, "approved_for_pii": approved_for_pii, "active": True}
-        if rec:
-            rec.write(values)
+        label, routed = configure_provider(env, kind, name=name, region=region, approved_for_pii=approved_for_pii)
+    for task_class, model in routed:
+        console.print(f"{task_class:<10} → {label} / {model}")
+
+
+def configure_provider(
+    env: Any, kind: str, *, name: str | None = None, region: str = "us", approved_for_pii: bool = False
+) -> tuple[str, list[tuple[str, str]]]:
+    """Create or update the provider and point the company-independent routes of its tiers at it."""
+    label = name or kind.capitalize()
+    Provider = env["ai_core.provider"]  # noqa: N806
+    rec = Provider.search([("name", "=", label), ("kind", "=", kind)], limit=1)
+    values = {"name": label, "kind": kind, "region": region, "approved_for_pii": approved_for_pii, "active": True}
+    if rec:
+        rec.write(values)
+    else:
+        rec = Provider.create(values)
+    Route = env["ai_core.route"]  # noqa: N806
+    routed: list[tuple[str, str]] = []
+    for task_class, model in TIERS[kind].items():
+        route_values = {"provider_id": rec.ids[0], "model": model, "params": {}, "active": True}
+        routes = Route.search([("company_id", "=", None), ("task_class", "=", task_class)])
+        if routes:
+            routes.write(route_values)
         else:
-            rec = Provider.create(values)
-        Route = env["ai_core.route"]  # noqa: N806
-        for task_class, model in TIERS[kind].items():
-            values = {"provider_id": rec.ids[0], "model": model, "params": {}, "active": True}
-            routes = Route.search([("company_id", "=", None), ("task_class", "=", task_class)])
-            if routes:
-                routes.write(values)
-            else:
-                Route.create({**values, "task_class": task_class})
-            console.print(f"{task_class:<10} → {label} / {model}")
+            Route.create({**route_values, "task_class": task_class})
+        routed.append((task_class, model))
+    return label, routed

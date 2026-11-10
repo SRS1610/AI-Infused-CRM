@@ -21,6 +21,26 @@ Useful options (`options`, JSON):
 | `pricing` | any | `{"model": {"input": 0.5, "output": 1.5}}` per million tokens, for negotiated or self-hosted rates |
 | `timeout`, `max_retries` | any | per-request timeout (s) and SDK retries |
 
+### From the command line
+
+```bash
+GATEWAY_ANTHROPIC_API_KEY=... tessera ai provider --kind anthropic --region us
+```
+
+creates (or updates) an *Anthropic* provider without storing a key — the gateway reads
+`GATEWAY_<KIND>_API_KEY` from its environment, in-process mode included — and points the default
+routes of every task class it serves at the default model tiers: Haiku for classification, extraction,
+translation and search, Sonnet for summaries and drafts, Opus for reasoning and vision (D-016).
+Company-specific routes and the embedding route are left alone.
+
+## Live evaluation
+
+`tessera ai eval run --mode live --save` runs every feature's evaluation set against the configured
+providers and stores accuracy, latency p95 and cost per feature (shown under **Usage and cost**). The
+nightly workflow (`.github/workflows/nightly.yml`) does this when the repository secret
+`ANTHROPIC_API_KEY` is set. Evaluations run in a rolled-back sandbox on their own corpus, so any
+database gives the same scores and nothing is written.
+
 ## Routing
 
 One route per task class (and optionally per company): a primary provider and model, and a fallback.

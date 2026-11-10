@@ -6,6 +6,46 @@ All notable changes are recorded here, grouped by phase. Format follows [Keep a 
 
 Summary of what works, what is stubbed and the known gaps: [docs/phase-1-summary.md](docs/phase-1-summary.md).
 
+### Phase 1 completion — acceptance gaps closed
+- **Server translations (U-8, D-061).** Everything the server sends is translatable: every module ships
+  gettext catalogues (`i18n/<module>.pot`, `i18n/<lang>.po`) and every Phase 1 module has a complete
+  French catalogue (2,174 strings). Field labels, help, selection values, model names, view labels, error
+  messages, notifications and printed quotations follow the user's language (user setting,
+  `X-Tessera-Lang`, or `Accept-Language` before login); menus, actions, stages and groups get their
+  translations on install and upgrade. New commands `tessera i18n extract | stats | load`; a test fails
+  when a catalogue drops below 95 % or breaks a placeholder.
+- **Studio v1 scope (1.7, D-062).** Fields take a widget, a default value, required / read-only conditions
+  written as plain rows ("when Stage is Won"; the server refuses a matching record left empty) and the
+  groups that may see them; Studio fields can be edited later. Form, list (order, hide, optional columns,
+  new columns) and kanban card layouts are edited by drag and drop; new form, list or kanban views start
+  from the generated layout and can become the default; search filters and group-bys are edited in place.
+  A workflow builder defines states and transitions (from, to, label, condition, group) on a choice or
+  link field or a new one. Every change is in the history, rolls back (refusing one a later change relies
+  on) and exports. Forms honour field-level read-only and required conditions; the client's French
+  catalogue covers all 765 strings.
+- **Calendar, Discuss, CRM, Contacts (D-063, D-064).** Google and Microsoft calendar accounts refresh their
+  OAuth tokens; an account the provider refuses shows "Needs reconnection" and notifies its owner. With
+  the Redis realtime backend, presence covers every API process. Lost opportunities stay in the retrieval
+  index with their lost reason, so objection handling learns from them; follow-up drafts also flag prices
+  typed without a currency. A keyless "Company website" enrichment source (approval required) suggests
+  name, description, phone, address, social profiles and logo from a company's public home page, with
+  SSRF protection; companies gain a "Public profile" tab. Calendar and Contacts are version 1.1.0
+  (`tessera db migrate`).
+- **AI evaluations (D-063).** `tessera ai eval run` runs each feature against its own corpus in a
+  rolled-back sandbox, so it scores the same on test, demo and production databases and writes nothing.
+  `tessera ai provider` routes the default task classes to a provider with the D-016 tiers; in-process
+  mode reads `GATEWAY_<KIND>_API_KEY` like the gateway service.
+- **Docker Compose verified (U-1, D-065, D-066).** On a fresh machine `make up` now builds and starts
+  every service, `tessera seed demo` runs through the gateway service, and all 74 Phase 1 menus open
+  without errors. Fixed on the way: the dev object store is SeaweedFS (MinIO images are gone from Docker
+  Hub) and the S3 backend creates its bucket; the web container proxied the API to itself; a process
+  started before modules were installed elsewhere now loads them; images pin uv; `.dockerignore`.
+- **Performance at volume (U-6, D-065).** `tessera perf lists` fills the primary models to 100k rows and
+  times their list views: p95 at most 108 ms (budget 300 ms) as administrator and as a salesperson under
+  record rules. Fixed on the way: database sessions lost their statement timeout after first use, and
+  PostgreSQL JIT added ~160 ms to list counts (now off for application sessions). A nightly workflow runs
+  the perf check and, when the `ANTHROPIC_API_KEY` secret is set, the live AI evaluation.
+
 ### Sub-phase 1.7 — Studio, demo and phase summary
 - Studio (`studio`): add fields of every type to Studio-enabled models without a restart (per-database
   dynamic fragments and a registry stamp, D-053), place them on the form and list, edit the form layout,

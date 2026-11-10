@@ -139,6 +139,8 @@ test("Contacts: merge two duplicates from the list and undo", async ({ page, isM
   await page.getByRole("searchbox").fill(`Dup Co ${tag}`);
   await page.keyboard.press("Enter");
   await expect(page.getByRole("cell", { name: `Dup Co ${tag} Ltd` }).first()).toBeVisible();
+  // the list must show only the two duplicates (header + 2 rows) before "Select all"
+  await expect(page.getByRole("row")).toHaveCount(3);
   await page.getByRole("checkbox", { name: /Select all/ }).check();
   await page.getByRole("button", { name: "Merge", exact: true }).click();
   const dialog = page.getByRole("dialog", { name: "Merge contacts" });
