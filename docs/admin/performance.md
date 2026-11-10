@@ -20,6 +20,38 @@ with an error when a p95 exceeds `--budget-ms`. Run it on a scratch database: it
 The nightly workflow runs it on a fresh demo database and keeps `perf.json` as an artifact. Last result
 (2026-11-10, PostgreSQL 16, one API process): p95 between 17 and 108 ms for every model and user.
 
+## Financial reports
+
+Acceptance criterion 2-l: `account` reports on 100,000 journal items render in under 2 s at the 95th
+percentile.
+
+```bash
+tessera seed demo --phase 2
+tessera perf reports --lines 100000 --json perf-reports.json
+```
+
+`tessera perf reports` brings a company (default: the main company) up to `--lines` posted journal items
+by copying its posted entries in SQL — whole entries, so every copy balances, dated back over the previous
+two years — then times, through the API as `--login` (an accounting user), the trial balance, profit and
+loss, balance sheet, general ledger (first page: every account unfolded with its first 80 items), aged
+receivable and partner ledger over the last two years and a half. It exits with an error when a p95
+exceeds `--budget-ms` (2,000). The nightly workflow runs it as the *perf-reports* job and keeps
+`perf-reports.json`.
+
+Last result (2026-11-10, PostgreSQL 16, one API process, 100,056 posted items, 20 runs each):
+
+| Report | p50 | p95 |
+|---|---|---|
+| Trial balance | 52 ms | 66 ms |
+| Profit and loss | 47 ms | 64 ms |
+| Balance sheet | 101 ms | 149 ms |
+| General ledger (first page, 914 lines) | 362 ms | 432 ms |
+| Aged receivable | 94 ms | 107 ms |
+| Partner ledger | 45 ms | 55 ms |
+
+No new index was needed: the queries group by account over `(company_id, date)` and use the `account`
+module's indexes on accounts, partners, reconciliation and matches.
+
 ## Database sessions
 
 The application turns PostgreSQL's JIT compiler off for its own sessions (`TESSERA_DB_JIT=false`, the
