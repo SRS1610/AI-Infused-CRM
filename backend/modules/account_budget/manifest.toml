@@ -1,0 +1,15 @@
+name = "account_budget"
+version = "1.0.0"
+summary = "Budgets on analytic or financial accounts with budget-vs-actual, theoretical amounts and variances"
+category = "Accounting"
+phase = 2
+depends = ["account_analytic"]
+license = "Apache-2.0"
+installable = true
+
+[load]
+security = ["security/access.json"]
+data = ["data/scheduled_jobs.json"]
+views = ["views.json"]
+actions = "actions.json"
+menus = "menus.json"

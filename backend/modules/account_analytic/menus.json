@@ -1,0 +1,14 @@
+[
+  {"id": "menu_analytic", "name": "Analytic", "parent": "account.menu_root", "sequence": 40,
+   "groups": ["account.group_account_user", "account.group_account_readonly"]},
+  {"id": "menu_analytic_lines", "name": "Analytic items", "parent": "account_analytic.menu_analytic", "sequence": 10,
+   "action": "account_analytic.action_analytic_lines", "groups": ["account.group_account_user"]},
+  {"id": "menu_analytic_report", "name": "Analytic report", "parent": "account_analytic.menu_analytic", "sequence": 20,
+   "action": "account_analytic.action_analytic_report", "groups": ["account.group_account_user", "account.group_account_readonly"]},
+  {"id": "menu_analytic_accounts", "name": "Analytic accounts", "parent": "account_analytic.menu_analytic", "sequence": 30,
+   "action": "account_analytic.action_analytic_accounts", "groups": ["account.group_account_user", "account.group_account_readonly"]},
+  {"id": "menu_analytic_plans", "name": "Analytic plans", "parent": "account_analytic.menu_analytic", "sequence": 40,
+   "action": "account_analytic.action_analytic_plans", "groups": ["account.group_account_user"]},
+  {"id": "menu_distribution_models", "name": "Distribution models", "parent": "account_analytic.menu_analytic", "sequence": 50,
+   "action": "account_analytic.action_distribution_models", "groups": ["account.group_account_user"]}
+]

@@ -1,0 +1,3 @@
+[
+  {"id": "sched_post_depreciation", "model": "core.scheduled_job", "noupdate": true, "values": {"name": "Post due depreciation entries", "job_name": "account_asset.post_depreciation", "cron": "25 2 * * *"}}
+]
