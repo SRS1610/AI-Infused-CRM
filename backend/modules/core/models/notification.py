@@ -12,6 +12,7 @@ from tessera.realtime import publish_after_commit
 class Notification(Model):
     _name = "core.notification"
     _description = "Notification"
+    _rule_check_after_write = True  # owner-scoped: cannot be handed to another user
     _order = "id desc"
     _rec_name = "title"
     _studio = False
@@ -94,6 +95,7 @@ def _localize_values(env: Any, vals_list: Any) -> Any:
 class PushSubscription(Model):
     _name = "core.push_subscription"
     _description = "Web Push subscription"
+    _rule_check_after_write = True  # owner-scoped: cannot be handed to another user
     _rec_name = "endpoint"
     _studio = False
 

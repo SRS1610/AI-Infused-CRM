@@ -41,6 +41,7 @@ PROPOSAL_STATES = [
 class Run(Model):
     _name = "ai_core.run"
     _description = "AI run"
+    _rule_check_after_write = True  # owner-scoped: cannot be handed to another user
     _order = "id desc"
     _rec_name = "feature"
     _indexes = [("record", ["res_model", "res_id"])]
@@ -101,6 +102,7 @@ class ToolCall(Model):
 class Proposal(Model):
     _name = "ai_core.proposal"
     _description = "AI proposal awaiting a human decision"
+    _rule_check_after_write = True  # owner-scoped: cannot be handed to another user
     _order = "id desc"
     _indexes = [("record", ["res_model", "res_id"])]
 
@@ -140,6 +142,7 @@ class Citation(Model):
 class Feedback(Model):
     _name = "ai_core.feedback"
     _description = "AI feedback"
+    _rule_check_after_write = True  # owner-scoped: cannot be handed to another user
     _order = "id desc"
 
     run_id = fields.Many2one("ai_core.run", required=True, ondelete="cascade", index=True)

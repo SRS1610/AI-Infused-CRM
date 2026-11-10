@@ -23,6 +23,7 @@ from markupsafe import Markup
 from tessera.exceptions import UserError
 from tessera.i18n import _
 
+ADMIN_ONLY_GROUP = "core.group_system"  # fields restricted to it hold secrets
 PAPER = {"A4": ("210mm", "297mm"), "Letter": ("8.5in", "11in"), "Legal": ("8.5in", "14in"), "A5": ("148mm", "210mm")}
 
 
@@ -44,6 +45,11 @@ class RecordProxy:
             return rec.display_name
         if name not in rec._fields:
             raise AttributeError(f"{rec._name} has no field '{name}'")
+        if rec.env.su and ADMIN_ONLY_GROUP in (rec._fields[name].groups or ()):
+            # administrator-only fields hold secrets (password hashes, TOTP seeds, tokens). Templates get some
+            # records elevated (company, user, a customer's quotation), which skips field access: such a
+            # record never shows them. Non-elevated records keep the ORM's own field access.
+            raise AttributeError(f"{rec._name}.{name} cannot be used in a template")
         return wrap(rec[name])
 
     def __iter__(self) -> Any:
@@ -204,9 +210,14 @@ img.qr {{ width: 30mm; height: 30mm; }}
 
 
 def render_pdf(html_doc: str) -> bytes:
+    """Print to PDF. Only ``data:`` resources are loaded: a template must not make the server fetch a URL
+    (``http://169.254.169.254/…``) or read a local file (``<a rel="attachment" href="file:///…">`` would embed
+    it in the PDF). Logos and QR codes are inlined as data URIs already."""
     from weasyprint import HTML
+    from weasyprint.urls import URLFetcher
 
-    return bytes(HTML(string=html_doc, base_url=None).write_pdf())
+    fetcher = URLFetcher(allowed_protocols={"data"}, allow_redirects=False)
+    return bytes(HTML(string=html_doc, base_url=None, url_fetcher=fetcher).write_pdf())
 
 
 # -- basic block editor --------------------------------------------------------------------------------

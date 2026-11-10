@@ -1,0 +1,458 @@
+"""Regression tests of the Phase 1 security review (``docs/security/asvs-phase-1.md``).
+
+Each test is named after the finding it closes (SEC-xx) and fails on the code before the fix.
+"""
+
+from __future__ import annotations
+
+import json
+import uuid
+from typing import Any
+
+import pyotp
+import pytest
+from fastapi.testclient import TestClient
+from starlette.requests import Request
+
+from tessera.api.middleware import limiter
+from tessera.api.tests.conftest import Session
+from tessera.config import Settings, get_settings
+from tessera.exceptions import AccessDenied, AccessError, UserError
+
+pytestmark = pytest.mark.db
+
+
+def _uniq(prefix: str) -> str:
+    return f"{prefix}-{uuid.uuid4().hex[:8]}"
+
+
+def _new_user(admin: Session, *group_xmlids: str, password: str = "password1234") -> dict[str, Any]:
+    group_ids = []
+    for xmlid in group_xmlids:
+        module, name = xmlid.split(".")
+        rows = admin.get(
+            "/api/v1/models/core.module_record",
+            params={"domain": json.dumps([["module", "=", module], ["name", "=", name]]), "fields": "res_id"},
+        ).json()["items"]
+        group_ids.append(rows[0]["res_id"])
+    login = _uniq("sec").lower()
+    vals = {"login": login, "name": login, "password": password, "group_ids": [["set", group_ids]]}
+    created = admin.post("/api/v1/models/core.user", json={"values": vals, "fields": ["login"]})
+    assert created.status_code == 201, created.text
+    return {"id": created.json()["id"], "login": login, "password": password}
+
+
+def _draft_book(admin: Session) -> int:
+    made = admin.post("/api/v1/models/ktest.book", json={"values": {"name": _uniq("secret draft"), "status": "draft"}})
+    assert made.status_code == 201, made.text
+    return int(made.json()["id"])
+
+
+# -- SEC-01: a caller-supplied context cannot widen the company scope -----------------------------------------
+
+
+def test_sec01_client_context_cannot_widen_company_scope(commit_env, reader: Session) -> None:  # type: ignore[no-untyped-def]
+    main = commit_env.ref("core.main_company")
+    other = commit_env["core.company"].create({"name": _uniq("Other Co"), "currency_id": main.currency_id.ids[0]})
+    book = commit_env["ktest.book"].create({"name": _uniq("other company book"), "status": "published"})
+    book.write({"company_id": other.ids[0]})
+    commit_env.cr.commit()
+    plain = reader.get(f"/api/v1/models/ktest.book/{book.ids[0]}")
+    assert plain.status_code in (403, 404)
+    widened = reader.get(
+        f"/api/v1/models/ktest.book/{book.ids[0]}",
+        params={"context": json.dumps({"allowed_company_ids": [other.ids[0]], "company_id": other.ids[0]})},
+    )
+    assert widened.status_code in (403, 404), widened.text
+    listed = reader.get(
+        "/api/v1/models/ktest.book",
+        params={
+            "domain": json.dumps([["id", "=", book.ids[0]]]),
+            "context": json.dumps({"allowed_company_ids": [other.ids[0]]}),
+        },
+    ).json()
+    assert listed["items"] == []
+
+
+def test_sec01_client_context_keeps_presentation_keys_only() -> None:
+    from tessera.api.routers.records import client_context
+
+    kept = client_context(
+        {
+            "lang": "fr_FR",
+            "active_test": False,
+            "default_status": "draft",
+            "allowed_company_ids": [99],
+            "company_id": 99,
+            "workflow_transition": 1,
+            "automation_disable": True,
+            "tracking_disable": True,
+            "force_delete": True,
+            "_recompute_write": True,
+        }
+    )
+    assert kept == {"lang": "fr_FR", "active_test": False, "default_status": "draft"}
+
+
+# -- SEC-02: owner-scoped records cannot be handed to another user ----------------------------------------------
+
+
+def test_sec02_api_key_cannot_be_repointed_at_another_user(app, librarian: Session) -> None:  # type: ignore[no-untyped-def]
+    created = librarian.post("/api/v1/auth/api-keys", json={"name": "mine"}).json()
+    # JSON-RPC ``write`` answers ``true`` without reading the record back, so nothing else stops the write
+    moved = librarian.post(
+        "/api/v1/jsonrpc",
+        json={
+            "jsonrpc": "2.0",
+            "id": 1,
+            "method": "write",
+            "params": {"model": "core.api_key", "ids": [created["id"]], "values": {"user_id": 2}},
+        },
+    ).json()
+    assert "error" in moved and moved["error"]["data"]["error"] == "AccessError", moved
+    patched = librarian.patch(f"/api/v1/models/core.api_key/{created['id']}", json={"values": {"user_id": 2}})
+    assert patched.status_code == 403
+    anon = TestClient(app, base_url="http://localhost")
+    info = anon.get("/api/v1/auth/session", headers={"Authorization": f"Bearer {created['key']}"}).json()
+    assert info["user"]["login"] == "librarian"
+
+
+def test_sec02_record_cannot_be_moved_to_a_foreign_company(commit_env, librarian: Session) -> None:  # type: ignore[no-untyped-def]
+    main = commit_env.ref("core.main_company")
+    other = commit_env["core.company"].create({"name": _uniq("Foreign Co"), "currency_id": main.currency_id.ids[0]})
+    commit_env.cr.commit()
+    book = librarian.post("/api/v1/models/ktest.book", json={"values": {"name": _uniq("mine")}}).json()
+    moved = librarian.post(
+        "/api/v1/jsonrpc",
+        json={
+            "jsonrpc": "2.0",
+            "id": 1,
+            "method": "write",
+            "params": {"model": "ktest.book", "ids": [book["id"]], "values": {"company_id": other.ids[0]}},
+        },
+    ).json()
+    assert "error" in moved and moved["error"]["data"]["error"] == "AccessError", moved
+    assert librarian.get(f"/api/v1/models/ktest.book/{book['id']}").status_code == 200
+
+
+# -- SEC-03: attachments follow the access of the record they belong to -----------------------------------------
+
+
+def test_sec03_attachment_of_unreadable_record_is_hidden_from_the_generic_api(admin: Session, reader: Session) -> None:
+    book_id = _draft_book(admin)  # readers only see published books (and their own)
+    up = admin.post(
+        "/api/v1/attachments",
+        files={"file": ("contract.txt", b"confidential terms", "text/plain")},
+        data={"model": "ktest.book", "res_id": str(book_id)},
+    ).json()
+    att = up["id"]
+    # read through the REST API, the JSON-RPC API and the listing
+    assert reader.get(f"/api/v1/models/core.attachment/{att}", params={"fields": "raw"}).status_code == 403
+    assert reader.get(f"/api/v1/models/core.attachment/{att}", params={"fields": "name"}).status_code == 403
+    rpc = reader.post(
+        "/api/v1/jsonrpc",
+        json={"jsonrpc": "2.0", "id": 1, "method": "read", "params": {"model": "core.attachment", "ids": [att]}},
+    ).json()
+    assert "error" in rpc
+    listed = reader.get(
+        "/api/v1/models/core.attachment", params={"domain": json.dumps([["id", "=", att]]), "fields": "name"}
+    ).json()
+    assert listed["items"] == []
+    # nor can it be changed, published or shared
+    assert reader.patch(f"/api/v1/models/core.attachment/{att}", json={"values": {"public": True}}).status_code == 403
+    shared = reader.post(f"/api/v1/models/core.attachment/{att}/call/generate_access_token", json={})
+    assert shared.status_code == 403
+    assert reader.get(f"/api/v1/attachments/{att}/content").status_code == 403
+    # the owner of the record still can
+    assert admin.get(f"/api/v1/attachments/{att}/content").content == b"confidential terms"
+
+
+def test_sec03_unlinked_upload_belongs_to_its_uploader(admin: Session, reader: Session, librarian: Session) -> None:
+    up = reader.post("/api/v1/attachments", files={"file": ("draft.txt", b"my notes", "text/plain")}).json()
+    assert reader.get(f"/api/v1/attachments/{up['id']}/content").content == b"my notes"
+    assert librarian.get(f"/api/v1/attachments/{up['id']}/content").status_code == 403
+    assert librarian.get(f"/api/v1/models/core.attachment/{up['id']}", params={"fields": "raw"}).status_code == 403
+
+
+def test_sec03_context_default_cannot_set_restricted_field(admin: Session, reader: Session) -> None:
+    secret = admin.post(
+        "/api/v1/attachments", files={"file": ("payroll.txt", b"salaries", "text/plain")}, data={"public": "false"}
+    ).json()
+    store_key = f"{secret['checksum'][:2]}/{secret['checksum'][2:4]}/{secret['checksum']}"
+    rpc = reader.post(
+        "/api/v1/jsonrpc",
+        json={
+            "jsonrpc": "2.0",
+            "id": 1,
+            "method": "create",
+            "params": {
+                "model": "core.attachment",
+                "values": {"name": "x"},
+                "context": {"default_store_key": store_key},
+            },
+        },
+    ).json()
+    assert "error" in rpc and rpc["error"]["data"]["error"] == "AccessError", rpc
+
+
+# -- SEC-04: downloads cannot run script in the application's origin --------------------------------------------
+
+
+def test_sec04_active_content_is_downloaded_not_rendered(admin: Session) -> None:
+    book_id = _draft_book(admin)
+    up = admin.post(
+        "/api/v1/attachments",
+        files={"file": ('évil".html', b"<script>alert(1)</script>", "text/html")},
+        data={"model": "ktest.book", "res_id": str(book_id)},
+    ).json()
+    down = admin.get(f"/api/v1/attachments/{up['id']}/content")
+    assert down.status_code == 200
+    disposition = down.headers["content-disposition"]
+    assert disposition.startswith("attachment;") and "filename*=UTF-8''%C3%A9vil" in disposition
+    assert "default-src 'none'" in down.headers["content-security-policy"]
+    assert down.headers["x-content-type-options"] == "nosniff"
+    text = admin.post(
+        "/api/v1/attachments",
+        files={"file": ("ok.txt", b"plain", "text/plain")},
+        data={"model": "ktest.book", "res_id": str(book_id)},
+    ).json()
+    assert admin.get(f"/api/v1/attachments/{text['id']}/content").headers["content-disposition"].startswith("inline;")
+
+
+# -- SEC-05: a Studio designer cannot grant themselves rights through an automation ------------------------------
+
+
+def test_sec05_designer_automation_cannot_target_platform_models(env, env_for) -> None:  # type: ignore[no-untyped-def]
+    from modules.studio import service as S
+
+    designer_group = env.ref("studio.group_designer")
+    login = _uniq("designer").lower()
+    env["core.user"].create({"login": login, "name": login, "group_ids": [("set", [designer_group.ids[0]])]})
+    designer = env_for(login)
+    grant_key = {
+        "name": "backdoor",
+        "model_name": "ktest.book",
+        "trigger": "on_create",
+        "actions": [
+            {
+                "type": "create_record",
+                "model": "core.api_key",
+                "values": {"name": "'k'", "user_id": "2", "key_hash": "'" + "0" * 64 + "'"},
+            }
+        ],
+    }
+    with pytest.raises(AccessError):
+        S.add_automation(designer, grant_key)
+    on_users = {
+        "name": "promote",
+        "model_name": "core.user",
+        "trigger": "on_write",
+        "actions": [{"type": "update", "values": {"active": "True"}}],
+    }
+    with pytest.raises(AccessError):
+        S.add_automation(designer, on_users)
+    S._check_automation_scope(env, grant_key)  # administrators keep full control
+
+
+# -- SEC-06: printing never reads local files or URLs, nor secrets ---------------------------------------------
+
+
+def test_sec06_pdf_rendering_loads_data_uris_only() -> None:
+    from tessera.reports.engine import render_pdf
+
+    pdf = render_pdf(
+        '<p>x</p><a rel="attachment" href="file:///etc/hostname">a</a>'
+        '<img src="file:///etc/hostname"><img src="http://169.254.169.254/latest/meta-data/">'
+    )
+    assert pdf.startswith(b"%PDF") and b"/EmbeddedFile" not in pdf
+
+
+def test_sec06_templates_cannot_print_administrator_only_fields(env) -> None:  # type: ignore[no-untyped-def]
+    from tessera.reports.engine import render_html, wrap
+
+    admin_user = env["core.user"].elevated().browse([2])
+    with pytest.raises(UserError):
+        render_html("{{ user.password_hash }}", {"docs": None, "user": wrap(admin_user)})
+    assert admin_user.login in render_html("{{ user.login }}", {"docs": None, "user": wrap(admin_user)})
+
+
+# -- SEC-07: OIDC links an existing account only through a verified e-mail ----------------------------------------
+
+
+def test_sec07_oidc_unverified_email_does_not_take_over_an_account(env) -> None:  # type: ignore[no-untyped-def]
+    from tessera.security.auth import user_for_oidc_claims
+
+    sys_env = env.elevated()
+    provider = sys_env["core.sso_provider"].create(
+        {"name": "IdP", "code": _uniq("idp"), "issuer": "https://idp.example.test", "client_id": "c"}
+    )
+    admin_login = sys_env["core.user"].browse([2]).login
+    claims = {"sub": _uniq("attacker"), "email": admin_login}
+    with pytest.raises(AccessDenied):
+        user_for_oidc_claims(sys_env, provider, claims)
+    with pytest.raises(AccessDenied):
+        user_for_oidc_claims(sys_env, provider, {**claims, "email_verified": False})
+    linked = user_for_oidc_claims(sys_env, provider, {**claims, "email_verified": True})
+    assert linked.ids == [2]
+
+
+# -- SEC-08: the second factor resists brute force and silent removal -------------------------------------------
+
+
+def test_sec08_totp_failures_lock_the_account_and_setup_cannot_replace_it(app, admin: Session) -> None:  # type: ignore[no-untyped-def]
+    user = _new_user(admin, "kernel_test_a.group_reader")
+    me = Session(TestClient(app, base_url="http://localhost"), user["login"], user["password"])
+    secret = me.post("/api/v1/auth/totp/setup").json()["secret"]
+    assert me.post("/api/v1/auth/totp/enable", json={"code": pyotp.TOTP(secret).now()}).status_code == 200
+    # a second setup would drop the enabled factor without a code
+    assert me.post("/api/v1/auth/totp/setup").status_code == 400
+    client = TestClient(app, base_url="http://localhost")
+    for _ in range(get_settings().login_lockout_attempts):
+        limiter._hits.clear()
+        step = client.post("/api/v1/auth/login", json={"login": user["login"], "password": user["password"]}).json()
+        bad = client.post("/api/v1/auth/totp", json={"pre_auth_token": step["pre_auth_token"], "code": "000000"})
+        assert bad.status_code == 401
+    limiter._hits.clear()
+    locked = client.post("/api/v1/auth/login", json={"login": user["login"], "password": user["password"]})
+    assert locked.status_code == 401 and locked.json().get("locked") is True
+
+
+# -- SEC-09: X-Forwarded-For is only believed from a trusted proxy -----------------------------------------------
+
+
+def _request(peer: str, forwarded: str | None) -> Request:
+    headers = [(b"x-forwarded-for", forwarded.encode())] if forwarded else []
+    return Request({"type": "http", "method": "GET", "path": "/", "headers": headers, "client": (peer, 1234)})
+
+
+def test_sec09_forwarded_for_is_only_trusted_from_proxies() -> None:
+    from tessera.api.middleware import client_ip
+
+    assert client_ip(_request("203.0.113.5", "1.2.3.4")) == "203.0.113.5"  # direct client: header ignored
+    # behind the proxy: the address the proxy appended, not what the client wrote before it
+    assert client_ip(_request("10.0.0.2", "1.2.3.4, 198.51.100.7")) == "198.51.100.7"
+    assert client_ip(_request("127.0.0.1", "198.51.100.7, 10.0.0.9")) == "198.51.100.7"
+    assert client_ip(_request("10.0.0.2", None)) == "10.0.0.2"
+
+
+def test_sec09_spoofed_forwarded_for_does_not_reset_the_login_limit(client: TestClient) -> None:
+    limit = get_settings().login_rate_limit_per_minute
+    codes = [
+        client.post(
+            "/api/v1/auth/login",
+            json={"login": "nobody", "password": "x"},
+            headers={"X-Forwarded-For": f"198.51.100.{i}"},
+        ).status_code
+        for i in range(limit + 1)
+    ]
+    assert codes[-1] == 429
+
+
+# -- SEC-10: production refuses development secrets and a wildcard CORS origin ---------------------------------
+
+
+def test_sec10_production_check_refuses_dev_master_key_and_wildcard_cors() -> None:
+    from tessera.config import DEV_MASTER_KEY
+
+    base = {"env": "production", "secret_key": "x" * 40, "ai_gateway_token": "t" * 32}
+    with pytest.raises(RuntimeError, match="TESSERA_MASTER_KEY"):
+        Settings(**base, master_key=DEV_MASTER_KEY).check()
+    good_key = "cmFuZG9tLXByb2R1Y3Rpb24ta2V5LXdpdGgtMzItYnl0ZXMhIQ=="
+    with pytest.raises(RuntimeError, match="TESSERA_SECRET_KEY"):
+        Settings(
+            **{**base, "secret_key": "change-me-32-bytes-minimum-for-session-signing"}, master_key=good_key
+        ).check()
+    with pytest.raises(RuntimeError, match="CORS"):
+        Settings(**base, master_key=good_key, cors_origins=["*"]).check()
+    Settings(**base, master_key=good_key).check()
+
+
+# -- SEC-11: user-configured outbound calls cannot reach the server's own network ---------------------------------
+
+
+def test_sec11_outbound_url_policy() -> None:
+    from tessera.net import OutboundRefused, check_outbound_url
+
+    def resolver(answer: str):  # type: ignore[no-untyped-def]
+        return lambda host, port: [answer]
+
+    for url in ("http://169.254.169.254/latest/meta-data/", "http://127.0.0.1:8100/v1", "http://[::1]/", "file:///etc"):
+        with pytest.raises(OutboundRefused):
+            check_outbound_url(url, allow_private=False)
+    with pytest.raises(OutboundRefused):
+        check_outbound_url("https://internal.example.test/", resolver=resolver("10.1.2.3"), allow_private=False)
+    assert check_outbound_url("https://hooks.example.test/x", resolver=resolver("93.184.215.14"), allow_private=False)
+    assert check_outbound_url("http://localhost:9000/", allow_private=True)
+
+
+def test_sec11_caldav_refuses_private_addresses_in_production(monkeypatch) -> None:  # type: ignore[no-untyped-def]
+    import httpx
+
+    from modules.calendar.sync.caldav import CalDavAdapter
+    from tessera.net import OutboundRefused
+
+    monkeypatch.setattr(get_settings(), "outbound_allow_private", False)
+    with pytest.raises(OutboundRefused):
+        CalDavAdapter("http://169.254.169.254/dav/", None, None)
+    # a public server cannot send the client on to an internal address either
+    client = httpx.Client(transport=httpx.MockTransport(lambda request: httpx.Response(200)))
+    adapter = CalDavAdapter("https://93.184.215.14/dav/", None, None, client=client)
+    with pytest.raises(OutboundRefused):
+        adapter.client.get("http://10.0.0.5/secret.ics")
+
+
+# -- SEC-12: API-rendered HTML runs no script; request ids cannot forge log lines ----------------------------------
+
+
+def test_sec12_api_html_gets_a_content_security_policy() -> None:
+    from fastapi import FastAPI
+    from fastapi.responses import HTMLResponse
+
+    from tessera.api.middleware import SecurityHeadersMiddleware
+
+    app = FastAPI()
+    app.add_middleware(SecurityHeadersMiddleware)
+
+    @app.get("/api/v1/page")
+    def page() -> HTMLResponse:
+        return HTMLResponse("<p>hi</p>")
+
+    @app.get("/api/v1/data")
+    def data() -> dict[str, str]:
+        return {"ok": "yes"}
+
+    with TestClient(app) as c:
+        assert "default-src 'none'" in c.get("/api/v1/page").headers["content-security-policy"]
+        assert "content-security-policy" not in c.get("/api/v1/data").headers
+
+
+def test_sec12_request_id_header_is_sanitised(client: TestClient) -> None:
+    forged = 'abc" level=error msg="forged'
+    assert client.get("/healthz", headers={"X-Request-Id": forged}).headers["x-request-id"] != forged
+    assert client.get("/healthz", headers={"X-Request-Id": "req-123"}).headers["x-request-id"] == "req-123"
+
+
+# -- SEC-13: the merge undo log cannot inject SQL identifiers ----------------------------------------------------
+
+
+def test_sec13_merge_undo_log_identifiers_are_checked(env) -> None:  # type: ignore[no-untyped-def]
+    from modules.contacts.merge import _check_identifiers
+
+    with pytest.raises(UserError):
+        _check_identifiers(env, {"generic": [{"table": "core_user; DROP TABLE x", "column": "id", "rows": []}]})
+    with pytest.raises(UserError):
+        _check_identifiers(env, {"generic": [{"table": "no_such_table", "column": "id", "rows": []}]})
+    _check_identifiers(env, {"generic": [{"table": "core_attachment", "column": "res_id", "rows": []}]})
+
+
+# -- SEC-14: one JSON-RPC request cannot carry an unbounded batch ------------------------------------------------
+
+
+def test_sec14_jsonrpc_batch_is_capped(admin: Session) -> None:
+    from tessera.api.routers.jsonrpc import MAX_BATCH
+
+    call = {"jsonrpc": "2.0", "method": "search_count", "params": {"model": "ktest.tag"}}
+    ok = admin.post("/api/v1/jsonrpc", json=[{**call, "id": i} for i in range(3)]).json()
+    assert isinstance(ok, list) and len(ok) == 3
+    refused = admin.post("/api/v1/jsonrpc", json=[{**call, "id": i} for i in range(MAX_BATCH + 1)]).json()
+    assert isinstance(refused, dict) and refused["error"]["code"] == -32600

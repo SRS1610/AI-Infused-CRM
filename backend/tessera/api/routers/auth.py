@@ -13,10 +13,12 @@ from tessera.api.deps import RequestContext, admin_only, authenticated, authenti
 from tessera.config import get_settings
 from tessera.exceptions import AccessDenied, MissingError, UserError
 from tessera.i18n import _
+from tessera.logging import get_logger
 from tessera.runtime import current_remote_ip, user_agent_var
 from tessera.security import auth as auth_lib
 from tessera.security.crypto import new_token
 
+log = get_logger(__name__)
 router = APIRouter(prefix="/auth", tags=["auth"])
 
 _OIDC_STATE_COOKIE = "tessera_oidc"
@@ -119,9 +121,15 @@ def login(body: LoginRequest, response: Response, ctx: RequestContext = Depends(
 def login_totp(body: TotpRequest, response: Response, ctx: RequestContext = Depends(request_context)) -> dict[str, Any]:
     sys_env = ctx.system_env()
     user = auth_lib.consume_pre_auth(sys_env, body.pre_auth_token)
+    if hasattr(user, "is_locked") and user.is_locked():
+        raise AccessDenied(_("Too many failed attempts; this account is temporarily locked"), locked=True)
     code = body.code.strip()
     if not auth_lib.totp_verify(user.elevated().totp_secret, code) and not user.consume_recovery_code(code):
+        if hasattr(user, "record_failed_login"):
+            user.record_failed_login()  # wrong codes count towards the lockout like wrong passwords
         raise AccessDenied(_("Invalid authentication code"))
+    if hasattr(user, "login_succeeded"):
+        user.login_succeeded()
     return _finish_login(ctx, response, user, totp_verified=True)
 
 
@@ -159,6 +167,10 @@ def change_password(body: PasswordChangeRequest, ctx: RequestContext = Depends(a
 @router.post("/totp/setup")
 def totp_setup(ctx: RequestContext = Depends(authenticated_any)) -> dict[str, Any]:
     user = ctx.env.user.elevated()
+    if user.totp_enabled:
+        # replacing the secret would silently remove the second factor (e.g. from a stolen session):
+        # turning it off needs a valid code (``/totp/disable``)
+        raise UserError(_("Two-factor authentication is already on; turn it off first"))
     secret = auth_lib.totp_new_secret()
     user.with_context(_recompute_write=True)._write_columns({"totp_secret": secret, "totp_enabled": False})
     return {"secret": secret, "uri": auth_lib.totp_provisioning_uri(secret, user.login)}
@@ -261,7 +273,9 @@ def oidc_callback(code: str, request: Request, ctx: RequestContext = Depends(req
         raise AccessDenied(_("State mismatch"))
     auth_code = request.query_params.get("code")
     if not auth_code:
-        raise AccessDenied(request.query_params.get("error_description") or "Identity provider returned no code")
+        # the provider's error text is not echoed back (it is attacker-controllable through the URL)
+        log.info("oidc login refused by provider", error=(request.query_params.get("error") or "")[:100])
+        raise AccessDenied(_("The identity provider did not complete the login"))
     client = auth_lib.OidcClient(provider)
     tokens = client.exchange_code(auth_code, str(request.url_for("oidc_callback", code=code)), verifier, nonce)
     user = auth_lib.user_for_oidc_claims(ctx.system_env(), provider, tokens.claims)

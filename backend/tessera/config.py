@@ -20,6 +20,8 @@ DEFAULT_MODULE_PATH = BACKEND_ROOT / "modules"
 
 Env = Literal["development", "test", "production"]
 
+DEV_MASTER_KEY = "ZGV2LW9ubHktbWFzdGVyLWtleS1jaGFuZ2UtbWUtMzItYnl0ZXMh"  # "dev-only-master-key-change-me-32-bytes!"
+
 
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_prefix="TESSERA_", env_file=".env", extra="ignore")
@@ -41,7 +43,7 @@ class Settings(BaseSettings):
 
     # web
     secret_key: str = "dev-only-secret-key-change-me-please-32b"  # noqa: S105 - rejected by check() in production
-    master_key: str = "ZGV2LW9ubHktbWFzdGVyLWtleS1jaGFuZ2UtbWUtMzItYnl0ZXMh"
+    master_key: str = DEV_MASTER_KEY  # rejected by check() in production
     base_url: str = "http://localhost:8000"
     allowed_hosts: Annotated[list[str], NoDecode] = Field(default_factory=lambda: ["localhost", "127.0.0.1"])
     cors_origins: Annotated[list[str], NoDecode] = Field(default_factory=lambda: ["http://localhost:5173"])
@@ -54,6 +56,15 @@ class Settings(BaseSettings):
     login_lockout_minutes: int = 15
     api_rate_limit_per_minute: int = 600  # per session or API key
     api_ip_rate_limit_per_minute: int = 6000  # per client address (many users can share one)
+    # Reverse proxies whose X-Forwarded-For is believed (addresses or CIDR ranges). A request from anyone
+    # else is identified by its own address, so a client cannot pick the address used for rate limiting,
+    # lockout and the audit log by sending the header itself.
+    trusted_proxies: Annotated[list[str], NoDecode] = Field(
+        default_factory=lambda: ["127.0.0.0/8", "::1/128", "10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16"]
+    )
+    # Outbound calls configured by users (webhooks, automation webhooks, CalDAV) may reach private, loopback
+    # and link-local addresses: None → only outside production.
+    outbound_allow_private: bool | None = None
 
     # modules
     module_paths: Annotated[list[Path], NoDecode] = Field(default_factory=lambda: [DEFAULT_MODULE_PATH])
@@ -105,7 +116,7 @@ class Settings(BaseSettings):
             return [Path(p).expanduser() for p in value.split(":") if p]
         return value
 
-    @field_validator("allowed_hosts", "cors_origins", mode="before")
+    @field_validator("allowed_hosts", "cors_origins", "trusted_proxies", mode="before")
     @classmethod
     def _split_hosts(cls, value: object) -> object:
         if isinstance(value, str):
@@ -121,6 +132,10 @@ class Settings(BaseSettings):
         return self.env == "production"
 
     @property
+    def outbound_private_allowed(self) -> bool:
+        return not self.is_production if self.outbound_allow_private is None else self.outbound_allow_private
+
+    @property
     def master_key_bytes(self) -> bytes:
         return base64.b64decode(self.master_key)
 
@@ -129,12 +144,16 @@ class Settings(BaseSettings):
         if not self.is_production:
             return
         problems = []
-        if "dev-only" in self.secret_key or len(self.secret_key) < 32:
+        if "dev-only" in self.secret_key or "change-me" in self.secret_key or len(self.secret_key) < 32:
             problems.append("TESSERA_SECRET_KEY must be a random value of at least 32 characters")
         if len(self.master_key_bytes) < 32:
             problems.append("TESSERA_MASTER_KEY must decode to at least 32 bytes")
+        if self.master_key == DEV_MASTER_KEY or b"dev-only" in self.master_key_bytes:
+            problems.append("TESSERA_MASTER_KEY must be a random value, not the development key")
         if "dev-only" in self.ai_gateway_token:
             problems.append("TESSERA_AI_GATEWAY_TOKEN must be set")
+        if "*" in self.cors_origins:
+            problems.append("TESSERA_CORS_ORIGINS must list origins: '*' would accept credentialed calls from any site")
         if problems:
             raise RuntimeError("Unsafe production configuration:\n - " + "\n - ".join(problems))
 

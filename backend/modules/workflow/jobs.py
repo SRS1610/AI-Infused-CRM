@@ -7,6 +7,7 @@ from typing import Any
 import httpx
 
 from tessera.jobs import job
+from tessera.net import check_outbound_url
 
 
 @job("workflow.run_timed", max_attempts=1, as_system=True)
@@ -18,6 +19,7 @@ def run_timed_job(env: Any) -> dict[str, Any]:
 
 @job("workflow.call_webhook", queue="webhooks", max_attempts=6, backoff_seconds=60)
 def call_webhook_job(env: Any, url: str, payload: dict[str, Any]) -> dict[str, Any]:
+    check_outbound_url(url)  # an automation's URL is set by a designer: not the server's own network
     resp = httpx.post(url, json=payload, timeout=10)
     resp.raise_for_status()  # non-2xx raises → retried with backoff
     return {"status": resp.status_code}

@@ -164,6 +164,7 @@ class Filter(Model):
 
     _name = "web.filter"
     _description = "Saved filter"
+    _rule_check_after_write = True  # owner-scoped: cannot be handed to another user
     _order = "name"
 
     name = fields.Char(required=True)

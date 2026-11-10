@@ -37,6 +37,9 @@ if TYPE_CHECKING:
 log = get_logger(__name__)
 
 API_KEY_PREFIX = "tsk_"
+ASYMMETRIC_ALGORITHMS = frozenset(
+    {"RS256", "RS384", "RS512", "PS256", "PS384", "PS512", "ES256", "ES384", "ES512", "EdDSA"}
+)
 
 
 # -- sessions -----------------------------------------------------------------------------------
@@ -262,7 +265,11 @@ class OidcClient:
         jwks_resp = httpx.get(cfg["jwks_uri"], timeout=self.timeout)
         jwks_resp.raise_for_status()
         key_set = JsonWebKey.import_key_set(jwks_resp.json())
-        jwt = JsonWebToken(cfg.get("id_token_signing_alg_values_supported", ["RS256"]))
+        # signatures with the provider's published (asymmetric) keys only: never "none", never an HMAC
+        # whose "secret" would be a public key
+        offered = cfg.get("id_token_signing_alg_values_supported") or ["RS256"]
+        algorithms = [a for a in offered if a in ASYMMETRIC_ALGORITHMS] or ["RS256"]
+        jwt = JsonWebToken(algorithms)
         claims = jwt.decode(
             id_token,
             key_set,
@@ -276,14 +283,27 @@ class OidcClient:
         return dict(claims)
 
 
+def _email_verified(claims: dict[str, Any]) -> bool:
+    value = claims.get("email_verified")
+    return value is True or (isinstance(value, str) and value.strip().lower() == "true")
+
+
 def user_for_oidc_claims(env: Environment, provider: Model, claims: dict[str, Any]) -> Model:
-    """Find or provision the user for validated OIDC claims (``env`` must be elevated)."""
+    """Find or provision the user for validated OIDC claims (``env`` must be elevated).
+
+    A returning user is found by (provider, subject). The e-mail address is only trusted to link an existing
+    account or to create one when the provider asserts it is verified (``email_verified``): otherwise anyone
+    able to put an arbitrary address in their profile at the provider could sign in as that account."""
     email = (claims.get("email") or "").strip().lower()
     subject = claims.get("sub")
     if not subject:
         raise AccessDenied(_("Identity token has no subject"))
     users = env["core.user"].with_context(active_test=False)
     user = users.search([("sso_provider_id", "=", provider.ids[0]), ("sso_subject", "=", subject)], limit=1)
+    if not user and email and not _email_verified(claims):
+        raise AccessDenied(
+            _("The identity provider did not confirm this e-mail address; ask an administrator to link your account")
+        )
     if not user and email:
         user = users.search([("login", "=", email)], limit=1)
         if user:

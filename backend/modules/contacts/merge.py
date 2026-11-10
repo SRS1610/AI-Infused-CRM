@@ -13,6 +13,7 @@ so the merge can be undone within the undo window.
 from __future__ import annotations
 
 import datetime as dt
+import re
 from typing import TYPE_CHECKING, Any
 
 from tessera.exceptions import UserError
@@ -218,6 +219,30 @@ def _plain(value: Any) -> Any:
     return value
 
 
+_IDENTIFIER = re.compile(r"^[a-z_][a-z0-9_]{0,62}$")
+
+
+def _check_identifiers(env: Environment, data: dict[str, Any]) -> None:
+    """The undo log names tables and columns that are spliced into SQL: they must be plain identifiers of
+    tables this database has (the log is a JSON field, so it is never trusted blindly)."""
+    names: set[str] = set()
+    tables: set[str] = set()
+    for item in data.get("m2o", []) + data.get("generic", []):
+        tables.add(str(item.get("table")))
+        names.add(str(item.get("column")))
+    for item in data.get("m2m", []):
+        tables.add(str(item.get("relation")))
+        names.update({str(item.get("partner")), str(item.get("own"))})
+    if not all(_IDENTIFIER.match(n) for n in names | tables):
+        raise UserError(_("This merge log is damaged and cannot be undone"))
+    known = {
+        r[0]
+        for r in env.cr.fetchall("SELECT tablename FROM pg_tables WHERE tablename = ANY(:t)", {"t": sorted(tables)})
+    }
+    if tables - known:
+        raise UserError(_("This merge log is damaged and cannot be undone"))
+
+
 def undo_merge(env: Environment, log: Model) -> None:
     """Put every moved reference back, restore the survivor's previous values, unarchive the merged contacts."""
     log = log.elevated()
@@ -227,6 +252,7 @@ def undo_merge(env: Environment, log: Model) -> None:
         raise UserError(_("The undo window for this merge has passed"))
     cr = env.cr
     data = log.relinked or {}
+    _check_identifiers(env, data)
     for item in data.get("m2o", []):
         for rid, old in item["rows"]:
             cr.execute(f"UPDATE {item['table']} SET {item['column']} = :old WHERE id = :id", {"old": old, "id": rid})

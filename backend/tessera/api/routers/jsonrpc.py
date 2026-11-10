@@ -17,6 +17,7 @@ from tessera.orm.model import Model
 router = APIRouter(tags=["jsonrpc"])
 
 ERR_PARSE, ERR_REQUEST, ERR_METHOD, ERR_PARAMS, ERR_INTERNAL = -32700, -32600, -32601, -32602, -32603
+MAX_BATCH = 100  # one request must not hold the transaction for an unbounded number of calls
 
 
 def _execute(ctx: RequestContext, method: str, params: dict[str, Any]) -> Any:
@@ -122,5 +123,13 @@ async def jsonrpc(request: Request, ctx: RequestContext = Depends(authenticated)
     except ValueError:
         return JSONResponse({"jsonrpc": "2.0", "id": None, "error": {"code": ERR_PARSE, "message": "Parse error"}})
     if isinstance(payload, list):
+        if len(payload) > MAX_BATCH:
+            return JSONResponse(
+                {
+                    "jsonrpc": "2.0",
+                    "id": None,
+                    "error": {"code": ERR_REQUEST, "message": f"At most {MAX_BATCH} calls per batch"},
+                }
+            )
         return JSONResponse([_handle(ctx, item) for item in payload])
     return JSONResponse(_handle(ctx, payload))

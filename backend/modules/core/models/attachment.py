@@ -4,8 +4,9 @@ from __future__ import annotations
 
 import mimetypes
 import secrets
+from typing import Any
 
-from tessera.exceptions import AccessError
+from tessera.exceptions import AccessError, MissingError
 from tessera.i18n import _
 from tessera.orm import Model, api, fields
 from tessera.storage import content_key, get_storage
@@ -63,25 +64,83 @@ class Attachment(Model):
     @api.expose
     def generate_access_token(self) -> str:
         self.ensure_one()
+        self.check_record_access("read")
         token = self.elevated().access_token
         if not token:
             token = secrets.token_urlsafe(32)
             self.elevated().write({"access_token": token})
         return str(token)
 
+    # -- object-level access -------------------------------------------------------------------
+    # Attachments carry no record rule: who may see one depends on the record it is linked to. These
+    # overrides apply that check on every ORM path (REST, JSON-RPC, exposed methods), not only in the
+    # download endpoint.
+
     def check_record_access(self, operation: str = "read") -> None:
-        """An attachment is readable/writable if its linked record is."""
-        for att in self:
-            if self.env.is_system or (att.public and operation == "read"):
+        """An attachment is readable if its linked record is readable (or it is public), and may be
+        changed or deleted if the linked record may be written. Creating one needs read access on the
+        record it is attached to. An attachment linked to no record belongs to whoever uploaded it."""
+        if self.env.is_system:
+            return
+        target_op = "read" if operation in ("read", "create") else "write"
+        for att in self.elevated("attachment access"):
+            if att.public and operation == "read":
                 continue
-            model_name, res_id = att.elevated().model, att.elevated().res_id
-            if model_name and res_id and model_name in self.env:
+            model_name, res_id = att.model, att.res_id
+            if model_name and res_id:
+                if model_name not in self.env:
+                    raise AccessError(_("You are not allowed to access this attachment"), attachment=att.ids[0])
                 try:
-                    self.env[model_name].browse([res_id]).check_access(operation)
-                except AccessError as exc:
+                    self.env[model_name].browse([res_id]).check_access(target_op)
+                except (AccessError, MissingError) as exc:
                     raise AccessError(
                         _("You are not allowed to access this attachment"), attachment=att.ids[0]
                     ) from exc
+            elif att.create_uid.ids != [self.env.uid]:
+                raise AccessError(_("You are not allowed to access this attachment"), attachment=att.ids[0])
+
+    def check_access_rule(self, operation: str) -> None:
+        super().check_access_rule(operation)
+        self.check_record_access(operation)
+
+    def read(self, fields: Any = None, load: str = "display") -> list[dict[str, Any]]:
+        self.check_record_access("read")
+        return super().read(fields, load)
+
+    def search(self, domain: Any = None, offset: int = 0, limit: int | None = None, order: str | None = None) -> Model:
+        found = super().search(domain, offset=offset, limit=limit, order=order)
+        if self.env.is_system or not found:
+            return found
+        return found.browse(found._readable_ids())
+
+    def _readable_ids(self) -> list[int]:
+        """The ids of ``self`` the current user may read (one query per linked model)."""
+        uid = self.env.uid
+        rows = self.elevated("attachment access").read(["public", "model", "res_id", "create_uid"], load="raw")
+        by_model: dict[str, set[int]] = {}
+        for row in rows:
+            if row["model"] and row["res_id"] and not row["public"]:
+                by_model.setdefault(row["model"], set()).add(row["res_id"])
+        visible: dict[str, set[int]] = {}
+        for model_name, res_ids in by_model.items():
+            if model_name not in self.env:
+                visible[model_name] = set()
+                continue
+            target = self.env[model_name].with_context(active_test=False)
+            if not target.check_access_rights("read", raise_exception=False):
+                visible[model_name] = set()
+                continue
+            visible[model_name] = set(target.search([("id", "in", sorted(res_ids))]).ids)
+        out = []
+        for row in rows:
+            if row["public"]:
+                out.append(row["id"])
+            elif row["model"] and row["res_id"]:
+                if row["res_id"] in visible.get(row["model"], set()):
+                    out.append(row["id"])
+            elif row["create_uid"] == uid:
+                out.append(row["id"])
+        return out
 
     @api.expose
     def action_download(self) -> dict[str, object]:

@@ -13,6 +13,7 @@ from tessera.orm import Model, api, fields
 class ImportJob(Model):
     _name = "core.import_job"
     _description = "Import"
+    _rule_check_after_write = True  # owner-scoped: cannot be handed to another user
     _order = "id desc"
     _rec_name = "filename"
 
@@ -134,6 +135,7 @@ def import_run_job(env: Any, import_id: int) -> dict[str, Any]:
 class ImportMapping(Model):
     _name = "core.import_mapping"
     _description = "Saved import mapping"
+    _rule_check_after_write = True  # owner-scoped: cannot be handed to another user
     _order = "model_name, name"
 
     name = fields.Char(required=True)
@@ -151,6 +153,7 @@ class ImportMapping(Model):
 class ExportTemplate(Model):
     _name = "core.export_template"
     _description = "Export template"
+    _rule_check_after_write = True  # owner-scoped: cannot be handed to another user
     _order = "model_name, name"
 
     name = fields.Char(required=True)

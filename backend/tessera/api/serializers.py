@@ -5,6 +5,7 @@ from __future__ import annotations
 import hashlib
 from collections.abc import Sequence
 from typing import Any
+from urllib.parse import quote
 
 from tessera.exceptions import ValidationError
 from tessera.i18n import _
@@ -70,6 +71,15 @@ def parse_fields_param(raw: str | None, model: Model) -> list[str] | None:
     if unknown:
         raise ValidationError(_("Unknown field(s) {unknown} on {name}", unknown=unknown, name=model._name))
     return names
+
+
+def content_disposition(filename: str, *, inline: bool = False) -> str:
+    """A ``Content-Disposition`` value that cannot break the header: an ASCII fallback name with quotes,
+    backslashes and control characters removed, plus the exact name RFC 5987-encoded (``filename*``)."""
+    kind = "inline" if inline else "attachment"
+    name = "".join(ch for ch in str(filename) if ch.isprintable()).strip() or "download"
+    fallback = "".join(ch if 32 <= ord(ch) < 127 and ch not in '"\\' else "_" for ch in name)
+    return f"{kind}; filename=\"{fallback}\"; filename*=UTF-8''{quote(name, safe='')}"
 
 
 def ensure_sequence(value: Any) -> Sequence[Any]:
