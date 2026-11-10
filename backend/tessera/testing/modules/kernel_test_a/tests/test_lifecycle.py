@@ -140,7 +140,7 @@ def test_scaffold_install_upgrade_uninstall(registry, database_url: str, temp_mo
 def test_uninstall_refuses_core_and_dependants(registry, database_url: str):  # type: ignore[no-untyped-def]
     with pytest.raises(ModuleError, match="core module cannot be uninstalled"):
         uninstall_modules(["core"], database_url=database_url)
-    with pytest.raises(ModuleError, match="still required by kernel_test_b"):
+    with pytest.raises(ModuleError, match=r"still required by .*kernel_test_b"):
         uninstall_modules(["kernel_test_a"], database_url=database_url)
 
 

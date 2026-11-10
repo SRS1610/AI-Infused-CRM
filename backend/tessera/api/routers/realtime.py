@@ -77,8 +77,11 @@ def authorize_channels(uid: int, channels: list[str]) -> tuple[list[str], list[s
                     if model_name in registry.models and rid.isdigit():
                         env[model_name].browse([int(rid)]).check_access("read")
                         ok = True
-                elif kind in ("job", "ai"):
-                    ok = True  # owner check happens when the job/run publishes (channel ids are unguessable uuids)
+                elif kind == "job" and rest.isdigit() and "core.job" in registry.models:
+                    env["core.job"].browse([int(rest)]).check_access("read")
+                    ok = True
+                elif kind == "ai":
+                    ok = len(rest) >= 32  # AI run channels are random uuids handed only to the run's owner
             except (AccessError, MissingError):
                 ok = False
             (allowed if ok else denied).append(channel)

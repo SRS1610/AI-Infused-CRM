@@ -99,7 +99,12 @@ class User(Model):
         column1="core_user_id",
         column2="core_group_id",
     )
-    share = fields.Boolean("External user", default=False, help="Portal/public users have no access to the back office")
+    share = fields.Boolean(
+        "External user",
+        compute="_compute_share",
+        store=True,
+        help="Portal/public users (not in Internal user, directly or via implied groups) have no back-office access",
+    )
     totp_secret = fields.Char(groups="core.group_system", copy=False)
     totp_enabled = fields.Boolean(default=False)
     last_login = fields.Datetime(readonly=True, copy=False)
@@ -108,6 +113,14 @@ class User(Model):
     totp_recovery_hashes = fields.Json(copy=False, groups="core.group_system", help="SHA-256 of unused recovery codes")
     signature = fields.Html()
     notification_preference = fields.Selection([("inbox", "In-app"), ("email", "Email")], default="inbox")
+
+    @api.depends("group_ids", "group_ids.implied_ids")
+    def _compute_share(self) -> None:
+        internal = self.env.ref("core.group_user", raise_if_not_found=False)
+        internal_id = internal.ids[0] if internal else None
+        for user in self:
+            groups = user.elevated().group_ids.transitive_implied()
+            user.share = internal_id is None or internal_id not in groups.ids
 
     # -- validation ----------------------------------------------------------------------
     @api.constrains("login")

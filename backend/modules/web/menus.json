@@ -21,5 +21,11 @@
   {"id": "menu_ui_views", "name": "Views", "parent": "web.menu_settings_technical", "sequence": 80, "action": "web.action_views"},
   {"id": "menu_ui_actions", "name": "Actions", "parent": "web.menu_settings_technical", "sequence": 90, "action": "web.action_actions"},
   {"id": "menu_preferences_root", "name": "My account", "sequence": 2000, "icon": "user"},
-  {"id": "menu_api_keys", "name": "API keys", "parent": "web.menu_preferences_root", "sequence": 10, "action": "web.action_api_keys"}
+  {"id": "menu_api_keys", "name": "API keys", "parent": "web.menu_preferences_root", "sequence": 10, "action": "web.action_api_keys"},
+  {"id": "menu_jobs", "name": "Background jobs", "parent": "web.menu_settings_technical", "sequence": 80, "action": "web.action_jobs"},
+  {"id": "menu_scheduled_jobs", "name": "Scheduled jobs", "parent": "web.menu_settings_technical", "sequence": 81, "action": "web.action_scheduled_jobs"},
+  {"id": "menu_settings_email", "name": "Email", "parent": "web.menu_settings_root", "sequence": 30},
+  {"id": "menu_mail_servers", "name": "Outgoing mail servers", "parent": "web.menu_settings_email", "sequence": 10, "action": "web.action_mail_servers"},
+  {"id": "menu_mail_aliases", "name": "Mail aliases", "parent": "web.menu_settings_email", "sequence": 20, "action": "web.action_mail_aliases"},
+  {"id": "menu_mail_queue", "name": "Outgoing email", "parent": "web.menu_settings_email", "sequence": 30, "action": "web.action_mail_queue"}
 ]

@@ -1,0 +1,6 @@
+[
+  {"id": "subtype_comment", "model": "chatter.subtype", "values": {"name": "Discussions", "default": true, "internal": false, "sequence": 1}},
+  {"id": "subtype_note", "model": "chatter.subtype", "values": {"name": "Internal notes", "default": false, "internal": true, "sequence": 2}},
+  {"id": "subtype_tracking", "model": "chatter.subtype", "values": {"name": "Changes", "default": true, "internal": true, "sequence": 3}},
+  {"id": "subtype_activity", "model": "chatter.subtype", "values": {"name": "Activities", "default": false, "internal": true, "sequence": 4}}
+]

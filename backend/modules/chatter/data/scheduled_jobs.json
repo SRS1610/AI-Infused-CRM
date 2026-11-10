@@ -1,0 +1,4 @@
+[
+  {"id": "sched_fetch_mail", "model": "core.scheduled_job", "noupdate": true, "values": {"name": "Fetch incoming mail (IMAP)", "job_name": "chatter.fetch_mail", "cron": "*/2 * * * *"}},
+  {"id": "sched_digest", "model": "core.scheduled_job", "noupdate": true, "values": {"name": "Daily notification digest", "job_name": "chatter.digest", "cron": "0 7 * * *"}}
+]

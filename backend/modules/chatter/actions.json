@@ -1,0 +1,7 @@
+[
+  {"id": "action_my_activities", "name": "My activities", "kind": "client", "client_tag": "activities"},
+  {"id": "action_activity_types", "name": "Activity types", "model": "chatter.activity_type", "views": ["list", "form"], "groups": ["core.group_system"]},
+  {"id": "action_subtypes", "name": "Message subtypes", "model": "chatter.subtype", "views": ["list", "form"], "groups": ["core.group_system"]},
+  {"id": "action_messages", "name": "Messages", "model": "chatter.message", "views": ["list", "form"], "groups": ["core.group_system"]},
+  {"id": "action_fetch_servers", "name": "Incoming mail servers", "model": "chatter.fetch_server", "views": ["list", "form"], "groups": ["core.group_system"]}
+]

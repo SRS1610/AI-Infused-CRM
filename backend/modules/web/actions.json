@@ -17,5 +17,11 @@
   {"id": "action_attachments", "name": "Attachments", "model": "core.attachment", "views": ["list", "form"]},
   {"id": "action_menus", "name": "Menus", "model": "web.menu", "views": ["list", "form"], "groups": ["core.group_system"]},
   {"id": "action_views", "name": "Views", "model": "web.view", "views": ["list", "form"], "groups": ["core.group_system"]},
-  {"id": "action_actions", "name": "Actions", "model": "web.action", "views": ["list", "form"], "groups": ["core.group_system"]}
+  {"id": "action_actions", "name": "Actions", "model": "web.action", "views": ["list", "form"], "groups": ["core.group_system"]},
+  {"id": "action_jobs", "name": "Background jobs", "model": "core.job", "views": ["list", "form"], "groups": ["core.group_system"]},
+  {"id": "action_scheduled_jobs", "name": "Scheduled jobs", "model": "core.scheduled_job", "views": ["list", "form"], "groups": ["core.group_system"]},
+  {"id": "action_mail_queue", "name": "Outgoing email", "model": "core.mail_queue", "views": ["list", "form"], "groups": ["core.group_system"]},
+  {"id": "action_mail_servers", "name": "Outgoing mail servers", "model": "core.mail_server", "views": ["list", "form"], "groups": ["core.group_system"]},
+  {"id": "action_mail_aliases", "name": "Mail aliases", "model": "core.mail_alias", "views": ["list", "form"], "groups": ["core.group_system"]},
+  {"id": "action_notifications", "name": "Notifications", "model": "core.notification", "views": ["list", "form"]}
 ]

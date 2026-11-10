@@ -1,0 +1,8 @@
+[
+  {"id": "menu_activities", "name": "Activities", "sequence": 5, "icon": "check-square", "action": "chatter.action_my_activities", "groups": ["core.group_user"]},
+  {"id": "menu_settings_discuss", "name": "Discussion", "parent": "web.menu_settings_root", "sequence": 40},
+  {"id": "menu_activity_types", "name": "Activity types", "parent": "chatter.menu_settings_discuss", "sequence": 10, "action": "chatter.action_activity_types"},
+  {"id": "menu_subtypes", "name": "Message subtypes", "parent": "chatter.menu_settings_discuss", "sequence": 20, "action": "chatter.action_subtypes"},
+  {"id": "menu_messages", "name": "Messages", "parent": "chatter.menu_settings_discuss", "sequence": 30, "action": "chatter.action_messages"},
+  {"id": "menu_fetch_servers", "name": "Incoming mail servers", "parent": "chatter.menu_settings_discuss", "sequence": 40, "action": "chatter.action_fetch_servers"}
+]

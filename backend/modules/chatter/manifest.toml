@@ -1,0 +1,15 @@
+name = "chatter"
+version = "1.0.0"
+summary = "Message threads, internal notes, followers, field tracking, reactions, scheduled activities, notifications and inbound email"
+category = "Platform"
+phase = 1
+depends = ["core", "web"]
+license = "Apache-2.0"
+installable = true
+auto_install = true
+
+[load]
+security = ["security/access.json"]
+data = ["data/subtypes.json", "data/activity_types.json", "data/scheduled_jobs.json"]
+actions = "actions.json"
+menus = "menus.json"

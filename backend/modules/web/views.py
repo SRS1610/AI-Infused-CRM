@@ -287,9 +287,11 @@ def _visible_fields(model: Model) -> list[F.Field]:
 
 def default_view(env: Environment, model_name: str, view_type: str) -> dict[str, Any]:
     model = env[model_name]
-    fields_ = _visible_fields(model)
+    hidden = set(getattr(model, "_view_hidden_fields", ()))
+    fields_ = [f for f in _visible_fields(model) if f.name not in hidden]
     rec = model._rec_name if model._rec_name in model._fields else None
     simple = [f for f in fields_ if not isinstance(f, F.One2many | F.Many2many | F.Html | F.Text)]
+    stored = [f for f in simple if f.store]  # calendar / pivot / group-by need columns
     if view_type == "form":
         head = [{"kind": "field", "name": rec, "widget": "title"}] if rec else []
         body = [{"kind": "field", "name": f.name} for f in simple if f.name != rec]
@@ -303,7 +305,7 @@ def default_view(env: Environment, model_name: str, view_type: str) -> dict[str,
                 "kind": "sheet",
                 "children": [*head, {"kind": "group", "columns": 2, "children": body}, *texts, *x2m],
             },
-            "chatter": "chatter.thread" in model._mixin_names,
+            "chatter": bool(getattr(model, "_thread", False)),
         }
     if view_type == "list":
         cols = ([rec] if rec else []) + [f.name for f in simple if f.name != rec][:7]
@@ -321,7 +323,7 @@ def default_view(env: Environment, model_name: str, view_type: str) -> dict[str,
             if "active" in model._fields
             else []
         )
-        groupable = [f.name for f in simple if isinstance(f, F.Many2one | F.Selection)][:5]
+        groupable = [f.name for f in stored if isinstance(f, F.Many2one | F.Selection)][:5]
         return {
             "type": "search",
             "model": model_name,
@@ -331,7 +333,7 @@ def default_view(env: Environment, model_name: str, view_type: str) -> dict[str,
             "group_bys": [{"field": g} for g in groupable],
         }
     if view_type == "calendar":
-        date_field = next((f.name for f in simple if isinstance(f, F.Datetime | F.Date)), None)
+        date_field = next((f.name for f in stored if isinstance(f, F.Datetime | F.Date)), None)
         return {
             "type": "calendar",
             "model": model_name,
@@ -340,8 +342,8 @@ def default_view(env: Environment, model_name: str, view_type: str) -> dict[str,
             "title": rec or "display_name",
         }
     if view_type in ("pivot", "graph"):
-        measures = [f.name for f in simple if isinstance(f, F.Integer | F.Float | F.Monetary)][:3]
-        row = next((f.name for f in simple if isinstance(f, F.Many2one | F.Selection)), None)
+        measures = [f.name for f in stored if isinstance(f, F.Integer | F.Float | F.Monetary)][:3]
+        row = next((f.name for f in stored if isinstance(f, F.Many2one | F.Selection)), None)
         return {
             "type": view_type,
             "model": model_name,
