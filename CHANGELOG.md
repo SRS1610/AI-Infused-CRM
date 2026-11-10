@@ -2,6 +2,21 @@
 
 All notable changes are recorded here, grouped by phase. Format follows [Keep a Changelog](https://keepachangelog.com/); versions follow the platform version, modules carry their own versions in their manifests.
 
+## [Unreleased] — Phase 2 (Sales and Accounting), in progress
+
+### Sub-phase 2.2 — Product 2.0
+- **Units, variants and pricelists (`product` 2.0.0, D-070, D-071).** Units have a type (reference /
+  bigger / smaller, one reference per category) and a rounding precision; quantities and prices convert
+  within a category. Attributes and values (with extra prices) turn a product into a template whose
+  *Generate variants* creates one child product per combination, archives the ones no longer possible and
+  keeps the shared fields in sync (refused when written on a variant); `is_sellable` marks products that
+  can go on a line. Pricelists (currency, company, countries) with rules on all products, a category, a
+  product or a variant, minimum quantities and dates; fixed, discount or formula prices (rounding,
+  surcharge, margins), based on the sales price, the cost or another pricelist, with currency conversion
+  and a recursion guard; `_for_partner` picks the partner's, the regional or the company's pricelist.
+  New *Catalogue* menu; demo T-shirt variants and *Wholesale* / *Europe (EUR)* lists. `tessera db migrate`
+  types existing units.
+
 ## [Unreleased] — Phase 1 complete, awaiting sign-off
 
 Summary of what works, what is stubbed and the known gaps: [docs/phase-1-summary.md](docs/phase-1-summary.md).

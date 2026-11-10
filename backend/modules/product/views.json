@@ -1,19 +1,39 @@
 [
   {"id": "view_product_form", "model": "product.product", "type": "form", "name": "product.product.form",
    "root": {"kind": "sheet", "children": [
-     {"kind": "field", "name": "name", "widget": "title"},
-     {"kind": "group", "name": "main", "columns": 2, "children": [
-       {"kind": "field", "name": "type"}, {"kind": "field", "name": "category_id"},
-       {"kind": "field", "name": "default_code"}, {"kind": "field", "name": "barcode"},
-       {"kind": "field", "name": "list_price"}, {"kind": "field", "name": "standard_price"},
-       {"kind": "field", "name": "uom_id"}, {"kind": "field", "name": "tax_percent"},
-       {"kind": "field", "name": "sale_ok"}, {"kind": "field", "name": "company_id"}
+     {"kind": "buttons", "children": [
+       {"kind": "button", "method": "action_generate_variants", "label": "Generate variants", "invisible": ["is_template", "=", false]}
      ]},
-     {"kind": "field", "name": "description_sale"},
-     {"kind": "field", "name": "image", "widget": "image"}
+     {"kind": "field", "name": "name", "widget": "title", "readonly_if": ["template_id", "!=", null]},
+     {"kind": "group", "name": "main", "columns": 2, "children": [
+       {"kind": "field", "name": "type", "readonly_if": ["template_id", "!=", null]},
+       {"kind": "field", "name": "category_id", "readonly_if": ["template_id", "!=", null]},
+       {"kind": "field", "name": "default_code"}, {"kind": "field", "name": "barcode"},
+       {"kind": "field", "name": "list_price", "readonly_if": ["template_id", "!=", null]},
+       {"kind": "field", "name": "standard_price", "readonly_if": ["template_id", "!=", null]},
+       {"kind": "field", "name": "uom_id", "readonly_if": ["template_id", "!=", null]},
+       {"kind": "field", "name": "tax_percent", "readonly_if": ["template_id", "!=", null]},
+       {"kind": "field", "name": "sale_ok", "readonly_if": ["template_id", "!=", null]},
+       {"kind": "field", "name": "company_id", "readonly_if": ["template_id", "!=", null]},
+       {"kind": "field", "name": "template_id", "readonly": true, "invisible": ["template_id", "=", null]},
+       {"kind": "field", "name": "price_extra", "readonly": true, "invisible": ["template_id", "=", null]},
+       {"kind": "field", "name": "attribute_value_ids", "widget": "tags", "invisible": ["template_id", "=", null]},
+       {"kind": "field", "name": "is_template", "readonly": true, "invisible": ["is_template", "=", false]}
+     ]},
+     {"kind": "notebook", "pages": [
+       {"kind": "page", "name": "page_sales", "title": "Sales", "children": [
+         {"kind": "field", "name": "description_sale", "readonly_if": ["template_id", "!=", null]},
+         {"kind": "field", "name": "image", "widget": "image", "readonly_if": ["template_id", "!=", null]}
+       ]},
+       {"kind": "page", "name": "page_variants", "title": "Attributes & variants", "invisible": ["template_id", "!=", null], "children": [
+         {"kind": "field", "name": "attribute_line_ids", "editable": "bottom", "columns": [{"field": "sequence", "widget": "handle"}, {"field": "attribute_id"}, {"field": "value_ids", "widget": "tags"}]},
+         {"kind": "field", "name": "variant_count", "readonly": true, "invisible": ["is_template", "=", false]},
+         {"kind": "field", "name": "variant_ids", "readonly": true, "invisible": ["is_template", "=", false], "columns": [{"field": "default_code"}, {"field": "attribute_value_ids", "widget": "tags"}, {"field": "barcode"}, {"field": "price_extra"}, {"field": "list_price"}]}
+       ]}
+     ]}
    ]}},
   {"id": "view_product_list", "model": "product.product", "type": "list", "name": "product.product.list",
-   "columns": [{"field": "default_code"}, {"field": "name"}, {"field": "category_id"}, {"field": "type"}, {"field": "list_price"}, {"field": "standard_price", "optional": "hide"}, {"field": "uom_id", "optional": "hide"}]},
+   "columns": [{"field": "default_code"}, {"field": "name"}, {"field": "category_id"}, {"field": "type"}, {"field": "list_price"}, {"field": "standard_price", "optional": "hide"}, {"field": "uom_id", "optional": "hide"}, {"field": "variant_count", "optional": "hide"}]},
   {"id": "view_product_kanban", "model": "product.product", "type": "kanban", "name": "product.product.kanban",
    "root": {"kind": "card", "children": [{"kind": "field", "name": "display_name", "widget": "title"}, {"kind": "field", "name": "list_price"}, {"kind": "field", "name": "category_id"}]}},
   {"id": "view_product_search", "model": "product.product", "type": "search", "name": "product.product.search",
@@ -21,7 +41,88 @@
    "filters": [
      {"name": "services", "label": "Services", "domain": [["type", "=", "service"]]},
      {"name": "goods", "label": "Goods", "domain": [["type", "=", "goods"]]},
+     {"name": "templates", "label": "With variants", "domain": [["is_template", "=", true]]},
+     {"name": "variants", "label": "Variants", "domain": [["template_id", "is_set"]]},
+     {"name": "sellable", "label": "Sellable on a line", "domain": [["is_sellable", "=", true]]},
      {"name": "archived", "label": "Archived", "domain": [["active", "=", false]]}
    ],
-   "group_bys": [{"field": "category_id"}, {"field": "type"}]}
+   "group_bys": [{"field": "category_id"}, {"field": "type"}, {"field": "template_id"}]},
+  {"id": "view_variant_list", "model": "product.product", "type": "list", "name": "product.product.variant.list",
+   "columns": [{"field": "default_code"}, {"field": "name"}, {"field": "attribute_value_ids", "widget": "tags"}, {"field": "template_id", "optional": "hide"}, {"field": "barcode", "optional": "hide"}, {"field": "price_extra"}, {"field": "list_price"}]},
+
+  {"id": "view_attribute_form", "model": "product.attribute", "type": "form", "name": "product.attribute.form",
+   "root": {"kind": "sheet", "children": [
+     {"kind": "field", "name": "name", "widget": "title"},
+     {"kind": "group", "name": "main", "columns": 2, "children": [
+       {"kind": "field", "name": "display_type"}, {"kind": "field", "name": "sequence"}
+     ]},
+     {"kind": "field", "name": "value_ids", "editable": "bottom", "columns": [{"field": "sequence", "widget": "handle"}, {"field": "name"}, {"field": "code"}, {"field": "html_color", "widget": "color"}, {"field": "price_extra"}]}
+   ]}},
+  {"id": "view_attribute_list", "model": "product.attribute", "type": "list", "name": "product.attribute.list",
+   "columns": [{"field": "sequence", "widget": "handle"}, {"field": "name"}, {"field": "display_type"}]},
+  {"id": "view_attribute_search", "model": "product.attribute", "type": "search", "name": "product.attribute.search",
+   "fields": ["name"], "filters": [], "group_bys": [{"field": "display_type"}]},
+  {"id": "view_attribute_value_form", "model": "product.attribute_value", "type": "form", "name": "product.attribute_value.form",
+   "root": {"kind": "sheet", "children": [
+     {"kind": "field", "name": "name", "widget": "title"},
+     {"kind": "group", "name": "main", "columns": 2, "children": [
+       {"kind": "field", "name": "attribute_id"}, {"kind": "field", "name": "code"},
+       {"kind": "field", "name": "html_color", "widget": "color"}, {"kind": "field", "name": "price_extra"},
+       {"kind": "field", "name": "sequence"}
+     ]}
+   ]}},
+
+  {"id": "view_pricelist_form", "model": "product.pricelist", "type": "form", "name": "product.pricelist.form",
+   "root": {"kind": "sheet", "children": [
+     {"kind": "field", "name": "name", "widget": "title"},
+     {"kind": "group", "name": "main", "columns": 2, "children": [
+       {"kind": "field", "name": "currency_id"}, {"kind": "field", "name": "company_id"},
+       {"kind": "field", "name": "country_ids", "widget": "tags"}, {"kind": "field", "name": "sequence"},
+       {"kind": "field", "name": "active"}
+     ]},
+     {"kind": "notebook", "pages": [
+       {"kind": "page", "name": "page_rules", "title": "Price rules", "children": [
+         {"kind": "field", "name": "item_ids", "editable": "bottom", "columns": [
+           {"field": "sequence", "widget": "handle"}, {"field": "applied_on"}, {"field": "category_id"}, {"field": "product_id"},
+           {"field": "variant_id"}, {"field": "min_quantity"}, {"field": "compute_price"}, {"field": "fixed_price"},
+           {"field": "percent_price"}, {"field": "base", "optional": "show"}, {"field": "price_discount", "optional": "show"},
+           {"field": "date_start", "optional": "hide"}, {"field": "date_end", "optional": "hide"}
+         ]}
+       ]}
+     ]}
+   ]}},
+  {"id": "view_pricelist_list", "model": "product.pricelist", "type": "list", "name": "product.pricelist.list",
+   "columns": [{"field": "sequence", "widget": "handle"}, {"field": "name"}, {"field": "currency_id"}, {"field": "company_id", "optional": "show"}, {"field": "country_ids", "widget": "tags", "optional": "show"}]},
+  {"id": "view_pricelist_search", "model": "product.pricelist", "type": "search", "name": "product.pricelist.search",
+   "fields": ["name", "country_ids"],
+   "filters": [
+     {"name": "regional", "label": "Regional", "domain": [["country_ids", "is_set"]]},
+     {"name": "archived", "label": "Archived", "domain": [["active", "=", false]]}
+   ],
+   "group_bys": [{"field": "currency_id"}, {"field": "company_id"}]},
+  {"id": "view_pricelist_item_form", "model": "product.pricelist_item", "type": "form", "name": "product.pricelist_item.form",
+   "root": {"kind": "sheet", "children": [
+     {"kind": "group", "name": "target", "title": "Applies to", "columns": 2, "children": [
+       {"kind": "field", "name": "pricelist_id"}, {"kind": "field", "name": "applied_on"},
+       {"kind": "field", "name": "category_id", "invisible": ["applied_on", "!=", "category"], "required_if": ["applied_on", "=", "category"]},
+       {"kind": "field", "name": "product_id", "invisible": ["applied_on", "!=", "product"], "required_if": ["applied_on", "=", "product"]},
+       {"kind": "field", "name": "variant_id", "invisible": ["applied_on", "!=", "variant"], "required_if": ["applied_on", "=", "variant"]},
+       {"kind": "field", "name": "min_quantity"}, {"kind": "field", "name": "sequence"},
+       {"kind": "field", "name": "date_start"}, {"kind": "field", "name": "date_end"}
+     ]},
+     {"kind": "group", "name": "price", "title": "Price", "columns": 2, "children": [
+       {"kind": "field", "name": "compute_price"},
+       {"kind": "field", "name": "fixed_price", "invisible": ["compute_price", "!=", "fixed"]},
+       {"kind": "field", "name": "base", "invisible": ["compute_price", "=", "fixed"]},
+       {"kind": "field", "name": "base_pricelist_id", "invisible": {"any": [["compute_price", "=", "fixed"], ["base", "!=", "pricelist"]]}},
+       {"kind": "field", "name": "percent_price", "invisible": ["compute_price", "!=", "percentage"]},
+       {"kind": "field", "name": "price_discount", "invisible": ["compute_price", "!=", "formula"]},
+       {"kind": "field", "name": "price_round", "invisible": ["compute_price", "!=", "formula"]},
+       {"kind": "field", "name": "price_surcharge", "invisible": ["compute_price", "!=", "formula"]},
+       {"kind": "field", "name": "price_min_margin", "invisible": ["compute_price", "!=", "formula"]},
+       {"kind": "field", "name": "price_max_margin", "invisible": ["compute_price", "!=", "formula"]}
+     ]}
+   ]}},
+  {"id": "view_pricelist_item_list", "model": "product.pricelist_item", "type": "list", "name": "product.pricelist_item.list",
+   "columns": [{"field": "pricelist_id"}, {"field": "display_name"}, {"field": "compute_price"}, {"field": "fixed_price"}, {"field": "percent_price"}, {"field": "date_start", "optional": "hide"}, {"field": "date_end", "optional": "hide"}]}
 ]

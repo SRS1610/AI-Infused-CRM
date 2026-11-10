@@ -1,0 +1,11 @@
+[
+  {"id": "pricelist_public", "model": "product.pricelist", "values": {"name": "Public prices", "sequence": 1, "currency_id": "core.USD", "company_id": "core.main_company"}},
+  {"id": "pricelist_wholesale", "model": "product.pricelist", "values": {"name": "Wholesale", "sequence": 20, "currency_id": "core.USD", "company_id": "core.main_company", "item_ids": [
+    {"applied_on": "all", "min_quantity": 10, "compute_price": "percentage", "percent_price": 10},
+    {"applied_on": "all", "min_quantity": 50, "compute_price": "percentage", "percent_price": 15}
+  ]}},
+  {"id": "pricelist_europe", "model": "product.pricelist", "values": {"name": "Europe (EUR)", "sequence": 10, "currency_id": "core.EUR", "company_id": null,
+    "country_ids": ["core.country_fr", "core.country_de"], "item_ids": [
+    {"applied_on": "all", "compute_price": "formula", "base": "list_price", "price_round": 1, "price_surcharge": -0.01}
+  ]}}
+]

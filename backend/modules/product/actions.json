@@ -1,5 +1,8 @@
 [
   {"id": "action_products", "name": "Products", "model": "product.product", "views": ["kanban", "list", "form"], "search_view": "product.view_product_search"},
+  {"id": "action_variants", "name": "Product variants", "model": "product.product", "views": ["list", "form"], "view_refs": {"list": "product.view_variant_list"}, "search_view": "product.view_product_search", "domain": [["template_id", "is_set"]], "help": "Variants are generated from a product with attributes (button \"Generate variants\")."},
   {"id": "action_categories", "name": "Product categories", "model": "product.category", "views": ["list", "form"]},
-  {"id": "action_uoms", "name": "Units of measure", "model": "product.uom", "views": ["list", "form"]}
+  {"id": "action_uoms", "name": "Units of measure", "model": "product.uom", "views": ["list", "form"]},
+  {"id": "action_attributes", "name": "Product attributes", "model": "product.attribute", "views": ["list", "form"], "search_view": "product.view_attribute_search"},
+  {"id": "action_pricelists", "name": "Pricelists", "model": "product.pricelist", "views": ["list", "form"], "search_view": "product.view_pricelist_search"}
 ]
