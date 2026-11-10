@@ -53,6 +53,7 @@ KERNEL_TEST_MODULES = [
     "account",
     "auth_saml",
     "account_bank",
+    "payment",
 ]
 
 
