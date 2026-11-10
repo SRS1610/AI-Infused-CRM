@@ -58,7 +58,7 @@ def _record_change(env: Any, kind: str, model_name: str | None, summary: str, **
     return _sys(env)["studio.change"].create({"kind": kind, "model_name": model_name, "summary": summary, **vals})
 
 
-def _rebuild(env: Any, sync_models: list[str]) -> None:
+def _rebuild(env: Any, sync_models: list[str], meta_models: list[str] | None = None) -> None:
     """Rebuild the in-process registry from this transaction's Studio fields, sync the schema of
     ``sync_models``, refresh field metadata and tell other processes."""
     from tessera.orm.schema import SchemaSync
@@ -68,7 +68,9 @@ def _rebuild(env: Any, sync_models: list[str]) -> None:
     registry.build(dynamic=build_fragments(rows_from_cursor(env.cr)))
     env.cr.on_rollback(registry.build)  # back to the committed state if this transaction fails
     SchemaSync(env.cr, registry).sync([registry.models[m] for m in sync_models if m in registry.models])
-    registry.run_hooks("sync_metadata", _sys(env))
+    from modules.core.hooks import sync_model_metadata
+
+    sync_model_metadata(_sys(env), only=list(meta_models if meta_models is not None else sync_models))
     registry.stamp = bump_registry_stamp(env.cr)
 
 
@@ -359,7 +361,7 @@ def rollback(env: Any, change: Any) -> bool:
                 rollback(env, dep)
         fld = env.registry.models[model_name]._fields.get(name)
         target.write({"active": False})
-        _rebuild(env, [])
+        _rebuild(env, [], meta_models=[model_name])
         stamp = time.strftime("%Y%m%d%H%M%S")
         table = env.registry.models[model_name]._table
         if isinstance(fld, F.Many2many):

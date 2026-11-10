@@ -193,13 +193,18 @@ def audit_unlink(records: Model) -> None:
 
 
 @hook("sync_metadata")
-def sync_model_metadata(env: Environment) -> None:
+def sync_model_metadata(env: Environment, only: list[str] | None = None) -> None:
+    """Refresh ``core.model`` / ``core.model_field`` from the registry (``only``: just these models, e.g.
+    after Studio changed one of them; models are then never removed)."""
     registry = env.registry
     models = env["core.model"].elevated()
     fields_model = env["core.model_field"].elevated()
     existing_models = {m.name: m for m in models.with_context(active_test=False).search([])}
     seen_models: set[str] = set()
-    for cls in list(registry.models.values()) + list(registry.abstract.values()):
+    classes = list(registry.models.values()) + list(registry.abstract.values())
+    if only is not None:
+        classes = [c for c in classes if c._name in only]
+    for cls in classes:
         desc = (
             registry.describe_model(cls._name)
             if not cls._abstract
@@ -272,5 +277,5 @@ def sync_model_metadata(env: Environment) -> None:
             if fname not in seen_fields and not frec.studio and frec.active:
                 frec.write({"active": False})
     for name, rec in existing_models.items():
-        if name not in seen_models:
+        if name not in seen_models and only is None:
             rec.unlink()
