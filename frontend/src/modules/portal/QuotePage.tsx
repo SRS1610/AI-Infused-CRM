@@ -13,8 +13,9 @@ interface QuoteLine {
   uom: string | null;
   price_unit: number;
   discount: number;
-  tax_percent: number;
+  taxes: string[];
   price_subtotal: number;
+  price_total?: number;
   is_optional: boolean;
 }
 
@@ -31,6 +32,8 @@ export interface Quote {
   amount_untaxed: number;
   amount_tax: number;
   amount_total: number;
+  payment_terms?: string | null;
+  can_add_options?: boolean;
   note: string | null;
   signed_by: string | null;
   signed_at: string | null;
@@ -42,7 +45,7 @@ export function quoteStateLabel(state: string): string {
   const labels: Record<string, string> = {
     draft: t("In preparation"),
     sent: t("Waiting for your answer"),
-    accepted: t("Accepted"),
+    accepted: t("Confirmed"),
     rejected: t("Declined"),
     expired: t("Expired"),
     cancelled: t("Cancelled"),
@@ -92,6 +95,15 @@ export function QuotePage() {
       setError(e instanceof Error ? e.message : String(e));
     }
   };
+  const addOption = async (lineId: number) => {
+    setError(null);
+    try {
+      const updated = await request<Quote>("POST", `/sale/quotes/${id}/optional/${lineId}`, { body: { token } });
+      queryClient.setQueryData(["portal-quote", id, token], updated);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : String(e));
+    }
+  };
   const pdf = `/api/v1/sale/quotes/${id}/pdf${token ? `?token=${encodeURIComponent(token)}` : ""}`;
 
   return (
@@ -118,6 +130,7 @@ export function QuotePage() {
               <th scope="col" className="num">
                 {t("Unit price")}
               </th>
+              <th scope="col">{t("Taxes")}</th>
               <th scope="col" className="num">
                 {t("Amount")}
               </th>
@@ -127,13 +140,13 @@ export function QuotePage() {
             {q.lines.map((line) =>
               line.display_type === "section" ? (
                 <tr key={line.id} className="section">
-                  <th scope="rowgroup" colSpan={4}>
+                  <th scope="rowgroup" colSpan={5}>
                     {line.name}
                   </th>
                 </tr>
               ) : line.display_type === "note" ? (
                 <tr key={line.id}>
-                  <td colSpan={4} className="muted">
+                  <td colSpan={5} className="muted">
                     {line.name}
                   </td>
                 </tr>
@@ -143,11 +156,25 @@ export function QuotePage() {
                     {line.name}
                     {line.is_optional && <span className="badge">{t("Optional")}</span>}
                     {line.discount ? <span className="muted"> (−{line.discount} %)</span> : null}
+                    {line.is_optional && q.can_add_options && (
+                      <>
+                        {" "}
+                        <button
+                          type="button"
+                          className="btn small"
+                          onClick={() => void addOption(line.id)}
+                          aria-label={t("Add {name} to my order", { name: line.name })}
+                        >
+                          {t("Add to my order")}
+                        </button>
+                      </>
+                    )}
                   </td>
                   <td className="num">
                     {line.quantity} {line.uom ?? ""}
                   </td>
                   <td className="num">{money(line.price_unit)}</td>
+                  <td>{(line.taxes ?? []).join(", ")}</td>
                   <td className="num">{money(line.price_subtotal)}</td>
                 </tr>
               ),
@@ -155,19 +182,19 @@ export function QuotePage() {
           </tbody>
           <tfoot>
             <tr>
-              <th scope="row" colSpan={3}>
+              <th scope="row" colSpan={4}>
                 {t("Untaxed")}
               </th>
               <td className="num">{money(q.amount_untaxed)}</td>
             </tr>
             <tr>
-              <th scope="row" colSpan={3}>
+              <th scope="row" colSpan={4}>
                 {t("Taxes")}
               </th>
               <td className="num">{money(q.amount_tax)}</td>
             </tr>
             <tr>
-              <th scope="row" colSpan={3}>
+              <th scope="row" colSpan={4}>
                 {t("Total")}
               </th>
               <td className="num total">{money(q.amount_total)}</td>
@@ -175,6 +202,7 @@ export function QuotePage() {
           </tfoot>
         </table>
       </div>
+      {q.payment_terms && <p className="muted">{t("Payment terms: {terms}", { terms: q.payment_terms })}</p>}
       {q.note && <div className="quote-note" dangerouslySetInnerHTML={{ __html: q.note }} />}
       <div className="button-row">
         <a className="btn" href={pdf} target="_blank" rel="noreferrer">

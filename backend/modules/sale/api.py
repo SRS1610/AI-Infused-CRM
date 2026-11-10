@@ -55,6 +55,8 @@ def quote_payload(q: Any) -> dict[str, Any]:
         "amount_untaxed": q.amount_untaxed,
         "amount_tax": q.amount_tax,
         "amount_total": q.amount_total,
+        "payment_terms": q.payment_term_id.name if q.payment_term_id else None,
+        "can_add_options": q.state == "sent" and not (q.validity_date and q.validity_date < q.env.today()),
         "note": q.note,
         "signed_by": q.signed_by,
         "signed_at": q.signed_at.isoformat() if q.signed_at else None,
@@ -67,11 +69,13 @@ def quote_payload(q: Any) -> dict[str, Any]:
                 "uom": line.uom_id.name if line.uom_id else None,
                 "price_unit": line.price_unit,
                 "discount": line.discount,
-                "tax_percent": line.tax_percent,
+                "taxes": [t.description or t.name for t in line.tax_ids],
                 "price_subtotal": line.price_subtotal,
+                "price_total": line.price_total,
                 "is_optional": line.is_optional,
             }
             for line in q.line_ids
+            if not line.is_downpayment
         ],
     }
 
@@ -112,4 +116,17 @@ def reject(
 ) -> dict[str, Any]:
     q = _quote(ctx, quote_id, token)
     q.reject(reason)
+    return quote_payload(q)
+
+
+@router.post("/{quote_id}/optional/{line_id}")
+def add_optional(
+    quote_id: int,
+    line_id: int,
+    token: str | None = Body(None, embed=True),
+    ctx: RequestContext = Depends(request_context),
+) -> dict[str, Any]:
+    """The customer adds an optional product to the quotation (it then counts in the totals)."""
+    q = _quote(ctx, quote_id, token)
+    q.add_optional_line(line_id)
     return quote_payload(q)

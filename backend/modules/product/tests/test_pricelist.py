@@ -218,7 +218,8 @@ def test_pricelist_for_partner(env: Any) -> None:
     american = partners.create({"name": "Client US", "country_id": env.ref("core.country_us").ids[0]})
     german_co = partners.create({"name": "GmbH", "is_company": True, "country_id": env.ref("core.country_de").ids[0]})
     german_contact = partners.create({"name": "Hans", "parent_id": german_co.ids[0]})
-    assert "pricelist_id" not in partners._fields  # added by sale later
+    # ``pricelist_id`` is added by sale; these partners have none of their own
+    assert "pricelist_id" not in partners._fields or not (french | american | german_contact).mapped("pricelist_id")
     assert pricelists._for_partner(french) == europe
     assert pricelists._for_partner(german_contact) == europe  # the company's country
     assert pricelists._for_partner(american) == public  # the default prefers lists without countries

@@ -36,6 +36,20 @@ All notable changes are recorded here, grouped by phase. Format follows [Keep a 
   and a recursion guard; `_for_partner` picks the partner's, the regional or the company's pricelist.
   New *Catalogue* menu; demo T-shirt variants and *Wholesale* / *Europe (EUR)* lists. `tessera db migrate`
   types existing units.
+- **Sales orders and invoicing (`sale` 2.0.0, D-011, D-074).** Quotations become sales orders when accepted
+  or confirmed (*Confirm*), lock once fully invoiced, and take the customer's pricelist, fiscal position and
+  payment terms; line prices come from the pricelist unless typed, line taxes are `account.tax` records from
+  the product mapped by the fiscal position, totals use the tax engine. Quotation templates with optional
+  products, optional products suggested from products and added by customers on the portal, promotions
+  (automatic or code; minimum amount / quantity / products / categories; percentage on the order or on the
+  cheapest line, fixed amount, free product) with idempotent reward lines. Invoicing policies (ordered /
+  delivered), delivered / invoiced / returned quantities, invoice status, regular invoices grouped per
+  customer and currency, down payments (percentage or fixed, deducted on the final invoice) on the customer
+  deposits account, credit notes for returns, invoice reversals kept linked. New Sales menus (orders, to
+  invoice, customers, products, promotions, templates, sales analysis). The 2.0.0 migration maps Phase 1
+  `tax_percent` values to sales taxes and drops the line column (`down.py` restores it); `tessera db migrate`
+  installs new dependencies first. `portal` no longer depends on `sale` (dependency cycle with `account`).
+  Guide: [docs/user/sale.md](docs/user/sale.md).
 
 ### Sub-phase 2.7 — SAML single sign-on
 - **SAML 2.0 single sign-on (`auth_saml`, D-013, D-069).** Administrators add SAML identity providers under

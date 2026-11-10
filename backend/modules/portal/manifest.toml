@@ -3,10 +3,10 @@ version = "1.0.0"
 summary = "Customer portal: invitations, profile, documents, online quotations"
 category = "Sales"
 phase = 1
-depends = ["contacts", "sale"]
+depends = ["contacts"]
 license = "Apache-2.0"
 installable = true
-auto_install = true
+auto_install = false
 
 [load]
 security = ["security/access.json"]

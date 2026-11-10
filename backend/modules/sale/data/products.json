@@ -1,0 +1,6 @@
+[
+  {"id": "product_downpayment", "model": "product.product", "noupdate": true,
+   "values": {"name": "Down payment", "default_code": "DOWNPAYMENT", "type": "service", "sale_ok": false, "purchase_ok": false,
+              "invoice_policy": "order", "list_price": 0, "taxes_id": [], "supplier_taxes_id": [],
+              "description_sale": "Advance payment on a sales order, deducted from the final invoice"}}
+]

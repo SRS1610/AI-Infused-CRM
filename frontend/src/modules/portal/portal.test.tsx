@@ -32,7 +32,7 @@ const quote: Quote = {
       uom: null,
       price_unit: 0,
       discount: 0,
-      tax_percent: 0,
+      taxes: [],
       price_subtotal: 0,
       is_optional: false,
     },
@@ -44,7 +44,7 @@ const quote: Quote = {
       uom: "Unit(s)",
       price_unit: 100,
       discount: 0,
-      tax_percent: 20,
+      taxes: ["VAT 20%"],
       price_subtotal: 200,
       is_optional: false,
     },
@@ -90,6 +90,56 @@ describe("customer portal", () => {
     await userEvent.click(screen.getByRole("button", { name: "Accept and sign" }));
     expect(await screen.findByText(/Accepted by Jordan Lee/)).toBeInTheDocument();
     expect(bodies[0]).toEqual({ name: "Jordan Lee", token: "tok" });
+  });
+
+  it("shows taxes and lets the customer add an optional product", async () => {
+    const bodies: any[] = [];
+    const withOption: Quote = {
+      ...quote,
+      can_add_options: true,
+      payment_terms: "30 days",
+      lines: [
+        ...quote.lines,
+        {
+          id: 3,
+          display_type: null,
+          name: "Extended warranty",
+          quantity: 1,
+          uom: null,
+          price_unit: 50,
+          discount: 0,
+          taxes: ["VAT 20%"],
+          price_subtotal: 50,
+          is_optional: true,
+        },
+      ],
+    };
+    mockFetch({
+      "GET /api/v1/auth/session": () =>
+        new Response(JSON.stringify({ error: "AccessDenied", message: "no" }), { status: 401 }),
+      "GET /api/v1/sale/quotes/5": () => withOption,
+      "POST /api/v1/sale/quotes/5/optional/3": (_u, init) => {
+        bodies.push(JSON.parse(String(init.body)));
+        return {
+          ...withOption,
+          amount_untaxed: 250,
+          amount_total: 300,
+          lines: withOption.lines.map((l) => (l.id === 3 ? { ...l, is_optional: false } : l)),
+        };
+      },
+    });
+    wrap(
+      <Routes>
+        <Route path="/portal/quotes/:id" element={<QuotePage />} />
+      </Routes>,
+      "/portal/quotes/5?token=tok",
+    );
+    expect(await screen.findByText("Payment terms: 30 days")).toBeInTheDocument();
+    expect(screen.getAllByText("VAT 20%")).toHaveLength(2);
+    await userEvent.click(screen.getByRole("button", { name: "Add Extended warranty to my order" }));
+    expect(await screen.findByText("$300.00")).toBeInTheDocument();
+    expect(bodies[0]).toEqual({ token: "tok" });
+    expect(screen.queryByRole("button", { name: /to my order/ })).not.toBeInTheDocument();
   });
 
   it("lists documents and updates the profile for portal users", async () => {

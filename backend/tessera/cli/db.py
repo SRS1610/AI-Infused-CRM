@@ -32,6 +32,8 @@ def migrate(
     from tessera.modules.installer import upgrade_pending
 
     result = upgrade_pending(database_url=database_url)
+    if result.installed:
+        console.print(f"[green]Installed new dependencies[/green] {', '.join(result.installed)}")
     if not result.upgraded:
         console.print("Nothing to upgrade.")
     else:

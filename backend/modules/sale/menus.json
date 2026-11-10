@@ -1,8 +1,21 @@
 [
   {"id": "menu_root", "name": "Sales", "sequence": 30, "icon": "file-text", "groups": ["sale.group_sale_user"]},
-  {"id": "menu_quotations", "name": "Quotations", "parent": "sale.menu_root", "sequence": 10, "action": "sale.action_quotations"},
-  {"id": "menu_products", "name": "Products", "parent": "sale.menu_root", "sequence": 20, "action": "sale.action_products"},
+  {"id": "menu_orders_root", "name": "Orders", "parent": "sale.menu_root", "sequence": 10},
+  {"id": "menu_quotations", "name": "Quotations", "parent": "sale.menu_orders_root", "sequence": 10, "action": "sale.action_quotations"},
+  {"id": "menu_orders", "name": "Orders", "parent": "sale.menu_orders_root", "sequence": 20, "action": "sale.action_orders"},
+  {"id": "menu_customers", "name": "Customers", "parent": "sale.menu_orders_root", "sequence": 30, "action": "sale.action_customers"},
+  {"id": "menu_invoicing_root", "name": "To invoice", "parent": "sale.menu_root", "sequence": 20},
+  {"id": "menu_to_invoice", "name": "Orders to invoice", "parent": "sale.menu_invoicing_root", "sequence": 10, "action": "sale.action_orders_to_invoice"},
+  {"id": "menu_products_root", "name": "Products", "parent": "sale.menu_root", "sequence": 30},
+  {"id": "menu_products", "name": "Products", "parent": "sale.menu_products_root", "sequence": 10, "action": "sale.action_products"},
+  {"id": "menu_variants", "name": "Product variants", "parent": "sale.menu_products_root", "sequence": 20, "action": "product.action_variants"},
+  {"id": "menu_pricelists", "name": "Pricelists", "parent": "sale.menu_products_root", "sequence": 30, "action": "product.action_pricelists"},
+  {"id": "menu_promotions", "name": "Promotions", "parent": "sale.menu_products_root", "sequence": 40, "action": "sale.action_promotions"},
+  {"id": "menu_reporting", "name": "Reporting", "parent": "sale.menu_root", "sequence": 40},
+  {"id": "menu_sales_analysis", "name": "Sales analysis", "parent": "sale.menu_reporting", "sequence": 10, "action": "sale.action_sales_analysis"},
   {"id": "menu_config", "name": "Configuration", "parent": "sale.menu_root", "sequence": 90, "groups": ["sale.group_sale_manager"]},
+  {"id": "menu_templates", "name": "Quotation templates", "parent": "sale.menu_config", "sequence": 5, "action": "sale.action_templates"},
   {"id": "menu_categories", "name": "Product categories", "parent": "sale.menu_config", "sequence": 10, "action": "product.action_categories"},
+  {"id": "menu_attributes", "name": "Product attributes", "parent": "sale.menu_config", "sequence": 15, "action": "product.action_attributes"},
   {"id": "menu_uoms", "name": "Units of measure", "parent": "sale.menu_config", "sequence": 20, "action": "product.action_uoms"}
 ]
