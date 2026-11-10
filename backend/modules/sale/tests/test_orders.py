@@ -20,6 +20,10 @@ def test_salesperson_confirms_without_signature(env: Any) -> None:
     q.action_confirm()
     assert q.state == "accepted" and q.confirmation_date and not q.signed_by
     assert q.invoice_status == "to_invoice"
+    q.line_ids.write({"tax_ids": [("set", env["account.tax"].search([("name", "=", "Sales tax 20%")]).ids)]})
+    q.write({"payment_term_id": env.ref("account.term_30").ids[0]})
+    html = env.ref("sale.report_quotation").render(q.ids, "html")[0].decode()
+    assert f"Sales order {q.name}" in html and "20%" in html and "Payment terms: 30 days" in html
     with pytest.raises(UserError, match="Only draft or sent"):
         q.action_confirm()
     empty = order(env, customer(env, "Empty"), [])

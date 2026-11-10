@@ -106,7 +106,9 @@ msgstr "Position fiscale"
 #. field help
 #: field:sale.quotation.fiscal_position_id
 msgid "Maps the products' taxes (default: the customer's, or the one detected from their country)"
-msgstr "Fait correspondre les taxes des produits (par défaut : celle du client, ou celle détectée d'après son pays)"
+msgstr ""
+"Fait correspondre les taxes des produits (par défaut : celle du client, ou celle détectée d'après"
+" son pays)"
 
 #. field label
 #: field:sale.order_template.payment_term_id field:sale.quotation.payment_term_id
@@ -477,7 +479,7 @@ msgstr "Comment la quantité livrée est connue (saisie à la main jusqu'à l'ar
 #. selection value manual
 #: selection:sale.quotation_line.qty_delivered_method
 msgid "Manual"
-msgstr "Manuel"
+msgstr "Manuelle"
 
 #. selection value milestones
 #: selection:sale.quotation_line.qty_delivered_method
@@ -540,7 +542,9 @@ msgstr "Livraison du service"
 #. field help
 #: field:product.product.service_policy
 msgid "How delivered quantities of a service are tracked (entered on the order line in both cases)"
-msgstr "Comment les quantités livrées d'un service sont suivies (saisies sur la ligne de commande dans les deux cas)"
+msgstr ""
+"Comment les quantités livrées d'un service sont suivies (saisies sur la ligne de commande dans "
+"les deux cas)"
 
 #. selection value manual
 #: selection:product.product.service_policy
@@ -602,7 +606,7 @@ msgstr "Les promotions s'appliquent dans cet ordre"
 #. field label
 #: field:sale.order_template.active field:sale.promotion.active
 msgid "Active"
-msgstr "Active"
+msgstr "Actif"
 
 #. field help
 #: field:sale.promotion.company_id
@@ -622,7 +626,9 @@ msgstr "S'applique"
 #. field help
 #: field:sale.promotion.program_type
 msgid "Automatic promotions apply to every eligible order; code promotions once the code is entered"
-msgstr "Les promotions automatiques s'appliquent à toute commande éligible ; les promotions à code une fois le code saisi"
+msgstr ""
+"Les promotions automatiques s'appliquent à toute commande éligible ; les promotions à code une "
+"fois le code saisi"
 
 #. selection value automatic
 #. view label
@@ -711,7 +717,7 @@ msgstr "Montant HT de la commande (avant remises)"
 #. field label
 #: field:sale.promotion_rule.minimum_qty
 msgid "Minimum quantity"
-msgstr "Quantité minimum"
+msgstr "Quantité minimale"
 
 #. field help
 #: field:sale.promotion_rule.minimum_qty
@@ -835,45 +841,45 @@ msgstr "Lien invalide ou expiré"
 msgid "The down payment product is missing: upgrade the sale module"
 msgstr "Le produit d'acompte est manquant : mettez à jour le module des ventes"
 
-#: invoicing.py:152
+#: invoicing.py:158
 msgid "There is nothing to invoice: check the delivered quantities and the invoicing policies"
 msgstr "Il n'y a rien à facturer : vérifiez les quantités livrées et les politiques de facturation"
 
-#: invoicing.py:161
+#: invoicing.py:167
 #, python-format
 msgid "A down payment is a positive amount, and at most 100 % of the order"
 msgstr "Un acompte est un montant positif d'au plus 100 % de la commande"
 
-#: invoicing.py:173
+#: invoicing.py:179
 #, python-brace-format
 msgid "Down payment of {date}: {percent} %"
 msgstr "Acompte du {date} : {percent} %"
 
-#: invoicing.py:175
+#: invoicing.py:181
 #, python-brace-format
 msgid "Down payment of {date}"
 msgstr "Acompte du {date}"
 
-#: invoicing.py:236
+#: invoicing.py:243
 msgid "No returned quantity is waiting for a credit note"
 msgstr "Aucune quantité retournée n'attend d'avoir"
 
-#: invoicing.py:55
+#: invoicing.py:56
 #, python-brace-format
 msgid "Only sales orders can be invoiced ({name}): confirm the quotation first"
 msgstr "Seules les commandes clients peuvent être facturées ({name}) : confirmez d'abord le devis"
 
-#: invoicing.py:146
+#: invoicing.py:152
 #, python-brace-format
 msgid "Down payment deduction: {name}"
 msgstr "Déduction d'acompte : {name}"
 
-#: invoicing.py:168 invoicing.py:205
+#: invoicing.py:174 invoicing.py:210
 #, python-brace-format
 msgid "Order {name} has no amount to pay in advance"
 msgstr "La commande {name} n'a aucun montant à payer d'avance"
 
-#: invoicing.py:170
+#: invoicing.py:176
 #, python-brace-format
 msgid "The down payment is larger than the order total ({total})"
 msgstr "L'acompte dépasse le total de la commande ({total})"
@@ -898,7 +904,7 @@ msgstr "Le nombre maximum d'utilisations ne peut pas être négatif"
 msgid "Minimums cannot be negative"
 msgstr "Les minimums ne peuvent pas être négatifs"
 
-#: models/promotion.py:175 models/quotation.py:830
+#: models/promotion.py:175 models/quotation.py:824
 msgid "A discount is between 0 and 100 %"
 msgstr "Une remise est comprise entre 0 et 100 %"
 
@@ -910,107 +916,107 @@ msgstr "Une remise fixe a besoin d'un montant positif"
 msgid "Choose the free product and its quantity"
 msgstr "Choisissez le produit offert et sa quantité"
 
-#: models/quotation.py:279 models/quotation.py:327 models/quotation.py:860 models/quotation.py:890
-#: models/quotation.py:930 promotions.py:234
+#: models/quotation.py:277 models/quotation.py:325 models/quotation.py:857 models/quotation.py:887
+#: models/quotation.py:929 promotions.py:236
 #, python-brace-format
 msgid "Sales order {name} is locked: unlock it to change it"
 msgstr "La commande {name} est verrouillée : déverrouillez-la pour la modifier"
 
-#: models/quotation.py:331
+#: models/quotation.py:329
 #, python-brace-format
 msgid "Sales order {name} has invoices: cancel or credit them before cancelling the order"
 msgstr "La commande {name} a des factures : annulez-les ou émettez des avoirs avant d'annuler la commande"
 
-#: models/quotation.py:385
+#: models/quotation.py:383
 msgid "Add at least one line before sending"
 msgstr "Ajoutez au moins une ligne avant l'envoi"
 
-#: models/quotation.py:387
+#: models/quotation.py:385
 msgid "Only draft or sent quotations can be sent"
 msgstr "Seuls les devis en brouillon ou envoyés peuvent être envoyés"
 
-#: models/quotation.py:393
+#: models/quotation.py:391
 msgid "The customer has no email address"
 msgstr "Le client n'a pas d'adresse e-mail"
 
-#: models/quotation.py:452
+#: models/quotation.py:450
 msgid "Type your full name to accept"
 msgstr "Saisissez votre nom complet pour accepter"
 
-#: models/quotation.py:454
+#: models/quotation.py:452
 msgid "This quotation can no longer be accepted"
 msgstr "Ce devis ne peut plus être accepté"
 
-#: models/quotation.py:456 models/quotation.py:481
+#: models/quotation.py:454 models/quotation.py:479
 msgid "This quotation has expired"
 msgstr "Ce devis a expiré"
 
-#: models/quotation.py:471
+#: models/quotation.py:469
 msgid "This quotation can no longer be rejected"
 msgstr "Ce devis ne peut plus être refusé"
 
-#: models/quotation.py:479
+#: models/quotation.py:477
 msgid "Options can only be added to a quotation waiting for your answer"
 msgstr "Les options ne peuvent être ajoutées qu'à un devis en attente de votre réponse"
 
-#: models/quotation.py:484
+#: models/quotation.py:482
 msgid "This option is not available"
 msgstr "Cette option n'est pas disponible"
 
-#: models/quotation.py:848
+#: models/quotation.py:842
 #, python-brace-format
 msgid "'{product}' cannot be sold: choose a product that can be sold (not a template)"
 msgstr "« {product} » ne peut pas être vendu : choisissez un produit vendable (pas un modèle)"
 
-#: models/quotation.py:363
+#: models/quotation.py:361
 msgid "The validity date is before the quotation date"
 msgstr "La date de validité est antérieure à la date du devis"
 
-#: models/quotation.py:503
+#: models/quotation.py:501
 #, python-brace-format
 msgid "Only draft or sent quotations can be confirmed ({name})"
 msgstr "Seuls les devis en brouillon ou envoyés peuvent être confirmés ({name})"
 
-#: models/quotation.py:505
+#: models/quotation.py:503
 msgid "Add at least one line before confirming"
 msgstr "Ajoutez au moins une ligne avant de confirmer"
 
-#: models/quotation.py:541
+#: models/quotation.py:539
 #, python-brace-format
 msgid "Only sales orders can be locked ({name})"
 msgstr "Seules les commandes clients peuvent être verrouillées ({name})"
 
-#: models/quotation.py:560
+#: models/quotation.py:558
 msgid "Choose a quotation template first"
 msgstr "Choisissez d'abord un modèle de devis"
 
-#: models/quotation.py:562
+#: models/quotation.py:560
 msgid "Templates can only be applied to draft or sent quotations"
 msgstr "Les modèles ne s'appliquent qu'aux devis en brouillon ou envoyés"
 
-#: models/quotation.py:606
+#: models/quotation.py:604
 #, python-brace-format
 msgid "Unknown invoicing method '{method}'"
 msgstr "Méthode de facturation inconnue « {method} »"
 
-#: models/quotation.py:832 models/template.py:103
+#: models/quotation.py:826 models/template.py:103
 msgid "Quantities cannot be negative"
 msgstr "Les quantités ne peuvent pas être négatives"
 
-#: models/quotation.py:834
+#: models/quotation.py:828
 msgid "Delivered and returned quantities cannot be negative"
 msgstr "Les quantités livrées et retournées ne peuvent pas être négatives"
 
-#: models/quotation.py:837
+#: models/quotation.py:831
 #, python-brace-format
 msgid "More is returned than was ordered or delivered ({name})"
 msgstr "La quantité retournée dépasse la quantité commandée ou livrée ({name})"
 
-#: models/quotation.py:603
+#: models/quotation.py:601
 msgid "Give the down payment amount"
 msgstr "Indiquez le montant de l'acompte"
 
-#: models/quotation.py:932
+#: models/quotation.py:931
 #, python-brace-format
 msgid "Invoiced line '{name}' cannot be deleted"
 msgstr "La ligne facturée « {name} » ne peut pas être supprimée"
@@ -1027,40 +1033,40 @@ msgstr "Une section ou une note a besoin d'un texte"
 msgid "Choose a product or write a description"
 msgstr "Choisissez un produit ou saisissez une description"
 
-#: promotions.py:77
+#: promotions.py:79
 msgid "This promotion is no longer active"
 msgstr "Cette promotion n'est plus active"
 
-#: promotions.py:79
+#: promotions.py:81
 msgid "This promotion is not available for this company"
 msgstr "Cette promotion n'est pas disponible pour cette société"
 
-#: promotions.py:81
+#: promotions.py:83
 msgid "This promotion has not started yet"
 msgstr "Cette promotion n'a pas encore commencé"
 
-#: promotions.py:83
+#: promotions.py:85
 msgid "This promotion has ended"
 msgstr "Cette promotion est terminée"
 
-#: promotions.py:85
+#: promotions.py:87
 msgid "This promotion has been used the maximum number of times"
 msgstr "Cette promotion a atteint son nombre maximum d'utilisations"
 
-#: promotions.py:87
+#: promotions.py:89
 msgid "The order does not meet the promotion's conditions"
 msgstr "La commande ne remplit pas les conditions de la promotion"
 
-#: promotions.py:212
+#: promotions.py:214
 #, python-brace-format
 msgid "Unknown promotion code '{code}'"
 msgstr "Code promotionnel inconnu « {code} »"
 
-#: promotions.py:236
+#: promotions.py:238
 msgid "Promotions apply to quotations and sales orders only"
 msgstr "Les promotions ne s'appliquent qu'aux devis et aux commandes clients"
 
-#: promotions.py:240
+#: promotions.py:242
 #, python-brace-format
 msgid "The promotions of {name} are already invoiced"
 msgstr "Les promotions de {name} sont déjà facturées"
@@ -1314,7 +1320,7 @@ msgstr "Notes"
 #. view label
 #: views.json:view_promotion_search
 msgid "Archived"
-msgstr "Archivées"
+msgstr "Archivés"
 
 #. menu name
 #: menus.json:menu_root
@@ -1389,10 +1395,14 @@ msgstr "Unités de mesure"
 #. action help
 #: actions.json:action_orders
 msgid "A quotation becomes a sales order when the customer accepts it online or when you confirm it."
-msgstr "Un devis devient une commande client quand le client l'accepte en ligne ou quand vous le confirmez."
+msgstr ""
+"Un devis devient une commande client quand le client l'accepte en ligne ou quand vous le "
+"confirmez."
 
 #. action help
 #: actions.json:action_orders_to_invoice
 msgid "Sales orders with ordered or delivered quantities not invoiced yet (or returns to credit)."
-msgstr "Commandes clients dont des quantités commandées ou livrées ne sont pas encore facturées (ou des retours à créditer)."
+msgstr ""
+"Commandes clients dont des quantités commandées ou livrées ne sont pas encore facturées (ou des "
+"retours à créditer)."
 

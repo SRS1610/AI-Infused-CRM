@@ -60,7 +60,7 @@ LOCKED_ORDER_FIELDS = {
     "promotion_code_ids",
 }
 LOCKED_LINE_WRITABLE = {"qty_delivered", "qty_returned", "sequence"}
-# invoice-policy-related line fields filled by the module (never typed)
+# links to invoices are shown to users who may read invoices
 INVOICE_LINE_GROUPS = ("account.group_account_invoice", "account.group_account_readonly")
 
 

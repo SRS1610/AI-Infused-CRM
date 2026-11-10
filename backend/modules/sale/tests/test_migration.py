@@ -79,7 +79,8 @@ def test_phase1_tax_percent_becomes_taxes(env: Any) -> None:
     eu_line = eu_quote.line_ids
     assert eu_line.tax_ids.amount == 20 and eu_line.tax_ids.name == "VAT 20%" and eu_quote.amount_total == 120
     taxes = old_product.elevated().taxes_id
-    assert sorted(taxes.mapped("amount")) == [7.0, 7.0] and len(taxes.mapped("company_id")) == 2
+    charted = env["core.company"].elevated().search_count([("chart_template", "!=", None)])
+    assert set(taxes.mapped("amount")) == {7.0} and len(taxes.mapped("company_id")) == len(taxes) == charted
     # running it again changes nothing
     _script("post").migrate(env.elevated(), "1.0.0")
     assert work.tax_ids == created and q.amount_total == pytest.approx(302.2)
@@ -105,5 +106,6 @@ def test_fresh_install_converts_product_percentages(env: Any) -> None:
     q = order(env, customer(env, "Fresh buyer"), [(item, 1)])
     assert not q.line_ids.tax_ids
     post_init(env.elevated())
-    assert sorted(item.elevated().taxes_id.mapped("amount")) == [12.0, 12.0]
+    taxes = item.elevated().taxes_id
+    assert set(taxes.mapped("amount")) == {12.0} and len(taxes.mapped("company_id")) == len(taxes) >= 2
     assert q.line_ids.tax_ids.amount == 12 and q.amount_total == pytest.approx(11.2)
