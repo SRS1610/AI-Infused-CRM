@@ -27,6 +27,7 @@ from tessera.orm.schema import Drift, check_drift, sync_schema
 log = get_logger(__name__)
 
 RECORD_KINDS = ("security", "data")
+EXTRA_KIND_ORDER = ["views", "reports", "actions", "menus", "ai", "i18n"]
 
 
 @dataclass
@@ -104,7 +105,11 @@ def _load_records(env: Environment, registry: Registry, manifest: Manifest, *, m
         loader = DataLoader(env, manifest.name, mode=mode)
         for path in manifest.files(kind):
             loader.load_file(path)
-    for kind, files in manifest.load.items():
+    # fixed order so references resolve: views before actions (view refs), actions before menus
+    ordered = sorted(
+        manifest.load.items(), key=lambda kv: EXTRA_KIND_ORDER.index(kv[0]) if kv[0] in EXTRA_KIND_ORDER else 99
+    )
+    for kind, files in ordered:
         if kind in RECORD_KINDS or kind == "demo":
             continue
         handler = registry.data_loaders.get(kind)

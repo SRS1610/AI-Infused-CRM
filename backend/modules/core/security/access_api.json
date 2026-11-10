@@ -1,0 +1,11 @@
+[
+  {"id": "access_session_system", "model": "core.model_access", "values": {"name": "session: admin", "model_name": "core.session", "group_id": "core.group_system", "perm_read": true, "perm_write": true, "perm_unlink": true}},
+  {"id": "access_api_key_user", "model": "core.model_access", "values": {"name": "api key: user", "model_name": "core.api_key", "group_id": "core.group_user", "perm_read": true, "perm_write": true, "perm_create": true, "perm_unlink": true}},
+  {"id": "access_api_key_system", "model": "core.model_access", "values": {"name": "api key: admin", "model_name": "core.api_key", "group_id": "core.group_system", "perm_read": true, "perm_write": true, "perm_create": true, "perm_unlink": true}},
+  {"id": "access_sso_provider_user", "model": "core.model_access", "values": {"name": "sso provider: user read", "model_name": "core.sso_provider", "group_id": "core.group_user", "perm_read": true}},
+  {"id": "access_sso_provider_system", "model": "core.model_access", "values": {"name": "sso provider: admin", "model_name": "core.sso_provider", "group_id": "core.group_system", "perm_read": true, "perm_write": true, "perm_create": true, "perm_unlink": true}},
+  {"id": "access_webhook_system", "model": "core.model_access", "values": {"name": "webhook: admin", "model_name": "core.webhook", "group_id": "core.group_system", "perm_read": true, "perm_write": true, "perm_create": true, "perm_unlink": true}},
+  {"id": "access_webhook_delivery_system", "model": "core.model_access", "values": {"name": "webhook delivery: admin", "model_name": "core.webhook_delivery", "group_id": "core.group_system", "perm_read": true, "perm_write": true, "perm_unlink": true}},
+  {"id": "rule_api_key_own", "model": "core.record_rule", "values": {"name": "Users manage their own API keys", "model_name": "core.api_key", "group_ids": ["core.group_user"], "domain": [["user_id", "=", "$uid"]]}},
+  {"id": "rule_api_key_admin", "model": "core.record_rule", "values": {"name": "Administrators see every API key", "model_name": "core.api_key", "group_ids": ["core.group_system"], "domain": {"all": []}}}
+]

@@ -1,0 +1,13 @@
+[
+  {"id": "access_action_user", "model": "core.model_access", "values": {"name": "action: user read", "model_name": "web.action", "group_id": "core.group_user", "perm_read": true}},
+  {"id": "access_action_system", "model": "core.model_access", "values": {"name": "action: admin", "model_name": "web.action", "group_id": "core.group_system", "perm_read": true, "perm_write": true, "perm_create": true, "perm_unlink": true}},
+  {"id": "access_menu_user", "model": "core.model_access", "values": {"name": "menu: user read", "model_name": "web.menu", "group_id": "core.group_user", "perm_read": true}},
+  {"id": "access_menu_system", "model": "core.model_access", "values": {"name": "menu: admin", "model_name": "web.menu", "group_id": "core.group_system", "perm_read": true, "perm_write": true, "perm_create": true, "perm_unlink": true}},
+  {"id": "access_view_user", "model": "core.model_access", "values": {"name": "view: user read", "model_name": "web.view", "group_id": "core.group_user", "perm_read": true}},
+  {"id": "access_view_system", "model": "core.model_access", "values": {"name": "view: admin", "model_name": "web.view", "group_id": "core.group_system", "perm_read": true, "perm_write": true, "perm_create": true, "perm_unlink": true}},
+  {"id": "access_filter_user", "model": "core.model_access", "values": {"name": "filter: user", "model_name": "web.filter", "group_id": "core.group_user", "perm_read": true, "perm_write": true, "perm_create": true, "perm_unlink": true}},
+  {"id": "access_filter_portal", "model": "core.model_access", "values": {"name": "filter: portal", "model_name": "web.filter", "group_id": "core.group_portal", "perm_read": true, "perm_write": true, "perm_create": true, "perm_unlink": true}},
+  {"id": "rule_filter_own_or_shared", "model": "core.record_rule", "values": {"name": "Filters: own or shared", "model_name": "web.filter", "group_ids": ["core.group_user", "core.group_portal"], "domain": {"any": [["user_id", "=", "$uid"], ["user_id", "is_not_set"]]}}},
+  {"id": "rule_filter_write_own", "model": "core.record_rule", "values": {"name": "Filters: only edit your own", "model_name": "web.filter", "group_ids": ["core.group_user", "core.group_portal"], "domain": [["user_id", "=", "$uid"]], "perm_read": false, "perm_write": true, "perm_create": false, "perm_unlink": true}},
+  {"id": "rule_filter_admin", "model": "core.record_rule", "values": {"name": "Filters: administrators see all", "model_name": "web.filter", "group_ids": ["core.group_system"], "domain": {"all": []}}}
+]

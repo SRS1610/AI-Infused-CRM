@@ -49,7 +49,7 @@ class Model:
     # declaration attributes (class-level, overridable per fragment)
     _name: ClassVar[str] = ""
     _extend: ClassVar[str | None] = None
-    _inherit: ClassVar[tuple[str, ...]] = ()
+    _inherit: ClassVar[tuple[str, ...] | list[str]] = ()
     _abstract: ClassVar[bool] = False
     _description: ClassVar[str] = ""
     _order: ClassVar[str] = "id"
@@ -473,7 +473,7 @@ class Model:
 
         if not self._ids:
             return
-        requested = [self._fields[n] for n in field_names]
+        requested = [self._fields[n] for n in field_names if n != "id"]
         wanted: list[F.Field] = []
         for fld in requested:
             if fld.store and not isinstance(fld, _SCALAR_BULK_FETCH_EXCLUDE):
@@ -508,6 +508,14 @@ class Model:
         rule = self._rule_domain("read")
         if rule is not None:
             node = combine_and(node, rule)
+        hide_trashed = (
+            self._soft_delete
+            and "deleted_at" in self._fields
+            and not self.env.is_system
+            and not self.env.context.get("include_deleted")
+        )
+        if hide_trashed:
+            node = combine_and(node, Leaf("deleted_at", "is_not_set"))
         stmt = select(*cols).where(query.where(node))
         rows = self.env.cr.execute(stmt).mappings().all()
         seen: set[int] = set()
@@ -518,7 +526,10 @@ class Model:
                 self.env.cache.set(f, rid, f.convert_to_cache(row[f.name], self), qualifiers[f])
         missing = [i for i in ids if i not in seen]
         if missing and self._ids[0] in missing:
-            existing = {r[0] for r in self.env.cr.fetchall(select(table.c.id).where(table.c.id.in_(missing)))}
+            exists_stmt = select(table.c.id).where(table.c.id.in_(missing))
+            if hide_trashed:
+                exists_stmt = exists_stmt.where(table.c.deleted_at.is_(None))
+            existing = {r[0] for r in self.env.cr.fetchall(exists_stmt)}
             if self._ids[0] in existing:
                 raise AccessError(
                     f"You are not allowed to read this '{self._description}' record",
@@ -588,7 +599,7 @@ class Model:
         for n in names:
             if not self._check_field_access(self._fields[n], "read"):
                 raise AccessError(f"You are not allowed to read field '{n}' of {self._name}", model=self._name, field=n)
-        stored = [n for n in names if self._fields[n].store and not isinstance(self._fields[n], F.Binary)]
+        stored = [n for n in names if n != "id" and self._fields[n].store and not isinstance(self._fields[n], F.Binary)]
         if stored:
             self._fetch(stored)
         out: list[dict[str, Any]] = []

@@ -38,11 +38,16 @@ class Settings(BaseSettings):
 
     # web
     secret_key: str = "dev-only-secret-key-change-me-please-32b"  # noqa: S105 - rejected by check() in production
-    master_key: str = "ZGV2LW9ubHktbWFzdGVyLWtleS0zMi1ieXRlcy0hIQ=="
+    master_key: str = "ZGV2LW9ubHktbWFzdGVyLWtleS1jaGFuZ2UtbWUtMzItYnl0ZXMh"
     base_url: str = "http://localhost:8000"
     allowed_hosts: Annotated[list[str], NoDecode] = Field(default_factory=lambda: ["localhost", "127.0.0.1"])
+    cors_origins: Annotated[list[str], NoDecode] = Field(default_factory=lambda: ["http://localhost:5173"])
+    session_cookie_name: str = "tessera_session"
+    cookie_secure: bool | None = None  # None → secure in production only
     session_idle_minutes: int = 60 * 8
     session_absolute_hours: int = 24 * 7
+    login_rate_limit_per_minute: int = 10
+    api_rate_limit_per_minute: int = 600
 
     # modules
     module_paths: Annotated[list[Path], NoDecode] = Field(default_factory=lambda: [DEFAULT_MODULE_PATH])
@@ -83,12 +88,16 @@ class Settings(BaseSettings):
             return [Path(p).expanduser() for p in value.split(":") if p]
         return value
 
-    @field_validator("allowed_hosts", mode="before")
+    @field_validator("allowed_hosts", "cors_origins", mode="before")
     @classmethod
     def _split_hosts(cls, value: object) -> object:
         if isinstance(value, str):
             return [h.strip() for h in value.split(",") if h.strip()]
         return value
+
+    @property
+    def secure_cookies(self) -> bool:
+        return self.is_production if self.cookie_secure is None else self.cookie_secure
 
     @property
     def is_production(self) -> bool:

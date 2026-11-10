@@ -1,0 +1,21 @@
+[
+  {"id": "action_users", "name": "Users", "model": "core.user", "views": ["list", "form"], "search_view": "web.view_user_search", "groups": ["core.group_system"], "context": {"active_test": true}},
+  {"id": "action_groups", "name": "Groups", "model": "core.group", "views": ["list", "form"], "groups": ["core.group_system"]},
+  {"id": "action_companies", "name": "Companies", "model": "core.company", "views": ["list", "form"], "groups": ["core.group_system"]},
+  {"id": "action_currencies", "name": "Currencies", "model": "core.currency", "views": ["list", "form"], "groups": ["core.group_system"]},
+  {"id": "action_languages", "name": "Languages", "model": "core.language", "views": ["list", "form"], "groups": ["core.group_system"]},
+  {"id": "action_countries", "name": "Countries", "model": "core.country", "views": ["list", "form"], "groups": ["core.group_system"]},
+  {"id": "action_sequences", "name": "Sequences", "model": "core.sequence", "views": ["list", "form"], "groups": ["core.group_system"]},
+  {"id": "action_access_rights", "name": "Access rights", "model": "core.model_access", "views": ["list", "form"], "groups": ["core.group_system"]},
+  {"id": "action_record_rules", "name": "Record rules", "model": "core.record_rule", "views": ["list", "form"], "groups": ["core.group_system"]},
+  {"id": "action_modules", "name": "Modules", "model": "core.module", "views": ["kanban", "list", "form"], "groups": ["core.group_system"]},
+  {"id": "action_models", "name": "Models", "model": "core.model", "views": ["list", "form"], "groups": ["core.group_system"]},
+  {"id": "action_audit_log", "name": "Audit log", "model": "core.audit_log", "views": ["list", "form"], "groups": ["core.group_system"]},
+  {"id": "action_api_keys", "name": "API keys", "model": "core.api_key", "views": ["list", "form"]},
+  {"id": "action_webhooks", "name": "Webhooks", "model": "core.webhook", "views": ["list", "form"], "groups": ["core.group_system"]},
+  {"id": "action_sso_providers", "name": "Identity providers", "model": "core.sso_provider", "views": ["list", "form"], "groups": ["core.group_system"]},
+  {"id": "action_attachments", "name": "Attachments", "model": "core.attachment", "views": ["list", "form"]},
+  {"id": "action_menus", "name": "Menus", "model": "web.menu", "views": ["list", "form"], "groups": ["core.group_system"]},
+  {"id": "action_views", "name": "Views", "model": "web.view", "views": ["list", "form"], "groups": ["core.group_system"]},
+  {"id": "action_actions", "name": "Actions", "model": "web.action", "views": ["list", "form"], "groups": ["core.group_system"]}
+]

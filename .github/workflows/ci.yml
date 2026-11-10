@@ -59,7 +59,7 @@ jobs:
       TESSERA_DATABASE_URL: postgresql://tessera:tessera@localhost:5432/tessera_test
       TESSERA_REDIS_URL: redis://localhost:6379/0
       TESSERA_SECRET_KEY: ci-only-secret-key-not-for-production-32b
-      TESSERA_MASTER_KEY: Y2ktb25seS1tYXN0ZXIta2V5LTMyLWJ5dGVzLS0tLS0hIQ==
+      TESSERA_MASTER_KEY: Y2ktb25seS1tYXN0ZXIta2V5LW5vdC1mb3ItcHJvZHVjdGlvbi0zMmI=
     steps:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v5

@@ -1,0 +1,61 @@
+"""FastAPI application factory."""
+
+from __future__ import annotations
+
+from fastapi import APIRouter, FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.gzip import GZipMiddleware
+
+from tessera import __version__
+from tessera.api.errors import install_error_handlers
+from tessera.api.middleware import RateLimitMiddleware, RequestContextMiddleware, SecurityHeadersMiddleware
+from tessera.api.routers import attachments, auth, health, jsonrpc, metadata, records
+from tessera.config import get_settings
+from tessera.logging import configure_logging
+
+API_PREFIX = "/api/v1"
+
+
+def create_app() -> FastAPI:
+    settings = get_settings()
+    configure_logging()
+    app = FastAPI(
+        title="Tessera API",
+        version=__version__,
+        description="Auto-generated REST and JSON-RPC access to every installed model, under the caller's permissions.",
+        docs_url="/api/docs",
+        redoc_url=None,
+        openapi_url="/api/openapi.json",
+    )
+    app.add_middleware(GZipMiddleware, minimum_size=1024)
+    app.add_middleware(SecurityHeadersMiddleware)
+    app.add_middleware(RateLimitMiddleware)
+    app.add_middleware(RequestContextMiddleware)
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=settings.cors_origins,
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+        expose_headers=["ETag", "X-Request-Id", "Server-Timing"],
+    )
+    install_error_handlers(app)
+
+    app.include_router(health.router)
+    v1 = APIRouter(prefix=API_PREFIX)
+    v1.include_router(auth.router)
+    v1.include_router(records.router)
+    v1.include_router(metadata.router)
+    v1.include_router(attachments.router)
+    v1.include_router(jsonrpc.router)
+    for extra in _module_routers():
+        v1.include_router(extra)
+    app.include_router(v1)
+    return app
+
+
+def _module_routers() -> list[APIRouter]:
+    """Routers contributed by installed platform modules (web, chatter, ...)."""
+    from tessera.api.registry import contributed_routers
+
+    return contributed_routers()

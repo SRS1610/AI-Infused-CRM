@@ -193,18 +193,27 @@ class Registry:
             self.m2m_tables.clear()
             self.triggers.clear()
 
+            # collect every fragment first: within a module, import order (alphabetical files) must
+            # not matter, so an extension may be registered before the fragment that defines the model
             fragments: dict[str, list[type[Model]]] = defaultdict(list)
             order: list[str] = []
+            extension_owner: dict[str, str] = {}
             for module in self.module_order:
                 for frag in fragments_for(module):
                     name = frag.__dict__.get("_name") or frag.__dict__.get("_extend")
                     if not name:
                         raise RegistryError(f"{frag.__module__}.{frag.__name__} has neither _name nor _extend")
-                    if "_extend" in frag.__dict__ and name not in fragments:
-                        raise RegistryError(f"Module '{module}' extends unknown model '{name}' ({frag.__name__})")
+                    if "_extend" in frag.__dict__:
+                        extension_owner.setdefault(name, module)
                     if name not in fragments:
                         order.append(name)
                     fragments[name].append(frag)
+            for name, frags in fragments.items():
+                bases = [f for f in frags if "_name" in f.__dict__]
+                if not bases:
+                    raise RegistryError(f"Module '{extension_owner.get(name, '?')}' extends unknown model '{name}'")
+                # base definition(s) first, then extensions, each group in registration order
+                fragments[name] = bases + [f for f in frags if "_name" not in f.__dict__]
 
             composed: dict[str, type[Model]] = {}
 

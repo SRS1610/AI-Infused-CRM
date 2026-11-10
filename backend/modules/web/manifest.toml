@@ -1,0 +1,16 @@
+name = "web"
+version = "1.0.0"
+summary = "Menus, actions, views as data (with inheritance), saved filters, client metadata API"
+category = "Platform"
+phase = 1
+depends = ["core"]
+license = "Apache-2.0"
+installable = true
+auto_install = true
+
+[load]
+security = ["security/access.json"]
+data = ["data/filters.json"]
+menus = "menus.json"
+actions = "actions.json"
+views = ["views/core.json"]

@@ -59,6 +59,7 @@ class Attachment(Model):
                 vals["mimetype"] = mimetypes.guess_type(att.name or "")[0] or "application/octet-stream"
             att.elevated().with_context(_recompute_write=True)._write_columns(vals)
 
+    @api.expose
     def generate_access_token(self) -> str:
         self.ensure_one()
         token = self.elevated().access_token

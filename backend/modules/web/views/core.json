@@ -1,0 +1,75 @@
+[
+  {"id": "view_user_form", "model": "core.user", "type": "form", "name": "core.user.form",
+   "root": {"kind": "sheet", "children": [
+     {"kind": "field", "name": "name", "widget": "title"},
+     {"kind": "group", "name": "main", "columns": 2, "children": [
+       {"kind": "field", "name": "login"},
+       {"kind": "field", "name": "email"},
+       {"kind": "field", "name": "company_id"},
+       {"kind": "field", "name": "company_ids", "widget": "many2many_tags"},
+       {"kind": "field", "name": "lang"},
+       {"kind": "field", "name": "tz"},
+       {"kind": "field", "name": "active"},
+       {"kind": "field", "name": "share"}
+     ]},
+     {"kind": "notebook", "pages": [
+       {"kind": "page", "name": "page_access", "title": "Access rights", "children": [{"kind": "field", "name": "group_ids", "widget": "many2many_checkboxes"}]},
+       {"kind": "page", "name": "page_security", "title": "Security", "children": [{"kind": "field", "name": "totp_enabled", "readonly": true}, {"kind": "field", "name": "last_login", "readonly": true}, {"kind": "field", "name": "password", "widget": "password"}]}
+     ]}
+   ]}},
+  {"id": "view_user_list", "model": "core.user", "type": "list", "name": "core.user.list",
+   "columns": [{"field": "name"}, {"field": "login"}, {"field": "email"}, {"field": "company_id"}, {"field": "lang"}, {"field": "last_login"}, {"field": "active", "optional": "hide"}]},
+  {"id": "view_user_search", "model": "core.user", "type": "search", "name": "core.user.search",
+   "fields": ["name", "login", "email"],
+   "filters": [
+     {"name": "internal", "label": "Internal users", "domain": [["share", "=", false]]},
+     {"name": "portal", "label": "Portal users", "domain": [["share", "=", true]]},
+     {"name": "archived", "label": "Archived", "domain": [["active", "=", false]]}
+   ],
+   "group_bys": [{"field": "company_id"}, {"field": "lang"}]},
+  {"id": "view_company_form", "model": "core.company", "type": "form", "name": "core.company.form",
+   "root": {"kind": "sheet", "children": [
+     {"kind": "field", "name": "logo", "widget": "image", "class": "avatar"},
+     {"kind": "field", "name": "name", "widget": "title"},
+     {"kind": "group", "name": "address", "columns": 2, "children": [
+       {"kind": "field", "name": "street"}, {"kind": "field", "name": "street2"}, {"kind": "field", "name": "city"}, {"kind": "field", "name": "zip"},
+       {"kind": "field", "name": "state_id", "domain": [["country_id", "=", "$country_id"]]}, {"kind": "field", "name": "country_id"},
+       {"kind": "field", "name": "currency_id"}, {"kind": "field", "name": "parent_id"},
+       {"kind": "field", "name": "email"}, {"kind": "field", "name": "phone"}, {"kind": "field", "name": "website"}, {"kind": "field", "name": "vat"}
+     ]},
+     {"kind": "notebook", "pages": [
+       {"kind": "page", "name": "page_branding", "title": "Branding", "children": [{"kind": "field", "name": "primary_color", "widget": "color"}, {"kind": "field", "name": "report_header"}, {"kind": "field", "name": "report_footer"}]}
+     ]}
+   ]}},
+  {"id": "view_company_list", "model": "core.company", "type": "list", "name": "core.company.list",
+   "columns": [{"field": "name"}, {"field": "currency_id"}, {"field": "country_id"}, {"field": "parent_id"}, {"field": "email"}]},
+  {"id": "view_module_kanban", "model": "core.module", "type": "kanban", "name": "core.module.kanban", "default_group_by": "category",
+   "root": {"kind": "card", "children": [
+     {"kind": "field", "name": "name", "widget": "title"},
+     {"kind": "field", "name": "summary"},
+     {"kind": "field", "name": "state", "widget": "badge"},
+     {"kind": "field", "name": "version"}
+   ]}},
+  {"id": "view_module_list", "model": "core.module", "type": "list", "name": "core.module.list",
+   "columns": [{"field": "name"}, {"field": "summary"}, {"field": "category"}, {"field": "phase"}, {"field": "version"}, {"field": "installed_version"}, {"field": "state", "widget": "badge"}]},
+  {"id": "view_audit_log_list", "model": "core.audit_log", "type": "list", "name": "core.audit_log.list",
+   "columns": [{"field": "timestamp"}, {"field": "user_id"}, {"field": "model"}, {"field": "res_id"}, {"field": "operation", "widget": "badge"}, {"field": "request_id", "optional": "hide"}]},
+  {"id": "view_audit_log_search", "model": "core.audit_log", "type": "search", "name": "core.audit_log.search",
+   "fields": ["model", "request_id"],
+   "filters": [{"name": "today", "label": "Today", "domain": [["timestamp", ">=", "$today"]]}],
+   "group_bys": [{"field": "user_id"}, {"field": "model"}, {"field": "operation"}, {"field": "timestamp:day", "label": "Day"}]},
+  {"id": "view_api_key_list", "model": "core.api_key", "type": "list", "name": "core.api_key.list",
+   "columns": [{"field": "name"}, {"field": "key_prefix"}, {"field": "user_id"}, {"field": "expires_at"}, {"field": "last_used_at"}, {"field": "active"}]},
+  {"id": "view_webhook_form", "model": "core.webhook", "type": "form", "name": "core.webhook.form",
+   "root": {"kind": "sheet", "children": [
+     {"kind": "field", "name": "name", "widget": "title"},
+     {"kind": "group", "columns": 2, "children": [
+       {"kind": "field", "name": "model_name", "widget": "model_selector"}, {"kind": "field", "name": "url"},
+       {"kind": "field", "name": "events", "widget": "tags"}, {"kind": "field", "name": "active"},
+       {"kind": "field", "name": "secret", "widget": "password"}, {"kind": "field", "name": "user_id"},
+       {"kind": "field", "name": "domain", "widget": "domain", "options": {"model_field": "model_name"}}
+     ]},
+     {"kind": "buttons", "children": [{"kind": "button", "method": "action_test", "label": "Send test"}]},
+     {"kind": "field", "name": "delivery_ids", "widget": "one2many", "columns": [{"field": "event"}, {"field": "res_id"}, {"field": "status"}, {"field": "response_status"}, {"field": "attempts"}]}
+   ]}}
+]

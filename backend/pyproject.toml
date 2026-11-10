@@ -134,7 +134,10 @@ markers = [
   "slow: long-running test",
   "perf: performance assertion on seeded data",
 ]
-filterwarnings = ["error::DeprecationWarning:tessera.*"]
+filterwarnings = [
+  "error::DeprecationWarning:tessera.*",
+  "ignore:authlib.jose module is deprecated:DeprecationWarning",
+]
 
 [tool.coverage.run]
 source = ["tessera", "modules"]
