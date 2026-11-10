@@ -43,6 +43,7 @@ KERNEL_TEST_MODULES = [
     "product",
     "sale",
     "crm",
+    "portal",
 ]
 
 

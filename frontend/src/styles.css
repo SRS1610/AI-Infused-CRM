@@ -1473,3 +1473,62 @@ kbd {
   vertical-align: middle;
   max-width: 160px;
 }
+.portal-shell .content {
+  max-width: 980px;
+  margin: 0 auto;
+  width: 100%;
+}
+.portal-page {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 8px 0 24px;
+}
+.portal-quote-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.portal-quote-head h1 {
+  margin: 4px 0;
+}
+.quote-lines {
+  width: 100%;
+}
+.quote-lines tr.section th {
+  background: var(--surface-2);
+}
+.quote-lines tr.optional td {
+  color: var(--text-muted);
+}
+.quote-note {
+  margin: 12px 0;
+  padding: 8px 12px;
+  border-left: 3px solid var(--border);
+}
+.portal-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-width: 480px;
+  margin: 12px 0;
+}
+.portal-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.badge.state-accepted {
+  background: color-mix(in srgb, var(--success) 18%, transparent);
+}
+.badge.state-sent {
+  background: var(--primary-soft);
+}
+.badge.state-rejected,
+.badge.state-expired {
+  background: color-mix(in srgb, var(--danger) 15%, transparent);
+}
+tr.clickable {
+  cursor: pointer;
+}

@@ -315,7 +315,12 @@ def test_webhook_delivery_with_signature(admin: Session) -> None:
     from tessera.config import get_settings
     from tessera.jobs import run_now
 
-    assert set(run_now(get_settings().database_url).values()) == {"done"}
+    from tessera.orm.environment import SYSTEM_UID, environment_for
+
+    url = get_settings().database_url
+    with environment_for(url, SYSTEM_UID, su=True) as sys_env:
+        queued = sys_env["core.job"].search([("name", "=", "core.webhook_deliver"), ("state", "=", "queued")]).ids
+    assert queued and set(run_now(url, queued).values()) == {"done"}
     assert route.called
     request = route.calls.last.request
     body = json.loads(request.content)

@@ -165,6 +165,13 @@ Format: `D-nnn · date · status (Proposed | Accepted | Superseded)`
 ### D-040 · 2026-11-10 · Accepted — Developer docs live in `docs/dev/`
 - **Decision:** BUILD_PLAN paths `docs/developer/*` map to `docs/dev/*` (existing since 1.1); administrator docs are in `docs/admin/`.
 
+### D-041 · 2026-11-10 · Accepted — Generic record APIs are for internal users only
+- **Decision:** `/api/v1/models/*`, `/api/v1/jsonrpc` and `/api/v1/meta/*` require an internal (non-share) user. Portal users and anonymous token holders use purpose-built endpoints (`/portal/*`, `/sale/quotes/*`, `/chatter/*`) that expose only the fields and actions a customer needs; record rules still apply underneath.
+- **Rationale:** Record rules limit *which rows* a customer reaches, but the generic API would still let them call any exposed method or read any field of those rows (1.4-n: "cannot call any non-portal method"). A narrow, reviewed customer surface is easier to keep safe than per-method portal flags.
+
+### D-042 · 2026-11-10 · Accepted — Data files can extend another module's many2many links with `$add`
+- **Decision:** `{"implied_ids": {"$add": ["sale.group_sale_manager"]}}` adds links without replacing them (a plain list still means "set"). Used so the administrator group implies the Sales and CRM administrator groups.
+
 ### D-023 · 2026-11-09 · Proposed — Public web surfaces before Phase 7 use `*_website` bridge modules
 - **Decision:** Modules that need a public page before the `website` builder exists (recruitment job postings, event pages, eLearning courses, blog, forum, survey invitations) depend only on `portal` for their minimal public rendering in their own phase; `recruitment_website`, `events_website`, `elearning_website`, `blog_website`, `forum_website` bridge modules (auto-installed when `website` is present) move those pages into the website builder in Phase 7.
 - **Rationale:** Preserves the layering rule (no dependency on a later phase) while still shipping usable public pages when each module lands.

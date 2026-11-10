@@ -6,14 +6,14 @@ from typing import Any
 
 from fastapi import APIRouter, Depends
 
-from tessera.api.deps import RequestContext, authenticated_any
+from tessera.api.deps import RequestContext, authenticated
 from tessera.exceptions import MissingError
 
 router = APIRouter(prefix="/metadata", tags=["metadata"])
 
 
 @router.get("/models")
-def list_models(ctx: RequestContext = Depends(authenticated_any)) -> list[dict[str, Any]]:
+def list_models(ctx: RequestContext = Depends(authenticated)) -> list[dict[str, Any]]:
     out = []
     for name, cls in sorted(ctx.registry.models.items()):
         if not ctx.env[name].check_access_rights("read", raise_exception=False):
@@ -23,7 +23,7 @@ def list_models(ctx: RequestContext = Depends(authenticated_any)) -> list[dict[s
 
 
 @router.get("/models/{model_name}")
-def describe_model(model_name: str, ctx: RequestContext = Depends(authenticated_any)) -> dict[str, Any]:
+def describe_model(model_name: str, ctx: RequestContext = Depends(authenticated)) -> dict[str, Any]:
     if model_name not in ctx.registry.models:
         raise MissingError(f"Unknown model '{model_name}'")
     model = ctx.env[model_name]

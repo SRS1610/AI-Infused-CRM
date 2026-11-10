@@ -1,0 +1,243 @@
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useState } from "react";
+import { useParams, useSearchParams } from "react-router-dom";
+import { request } from "../../kernel/api/client";
+import { formatMonetary } from "../../kernel/format";
+
+interface QuoteLine {
+  id: number;
+  display_type: "section" | "note" | null;
+  name: string;
+  quantity: number;
+  uom: string | null;
+  price_unit: number;
+  discount: number;
+  tax_percent: number;
+  price_subtotal: number;
+  is_optional: boolean;
+}
+
+export interface Quote {
+  id: number;
+  name: string;
+  state: string;
+  date_order: string | null;
+  validity_date: string | null;
+  customer: string;
+  company: { name: string; email: string | null; phone: string | null };
+  salesperson: string | null;
+  currency: string;
+  amount_untaxed: number;
+  amount_tax: number;
+  amount_total: number;
+  note: string | null;
+  signed_by: string | null;
+  signed_at: string | null;
+  lines: QuoteLine[];
+}
+
+const STATE_LABEL: Record<string, string> = {
+  sent: "Waiting for your answer",
+  accepted: "Accepted",
+  rejected: "Declined",
+  expired: "Expired",
+};
+
+/** A quotation as the customer sees it: by token link (no login) or as a signed-in portal user. */
+export function QuotePage() {
+  const { id = "" } = useParams();
+  const [params] = useSearchParams();
+  const token = params.get("token") ?? undefined;
+  const queryClient = useQueryClient();
+  const quote = useQuery({
+    queryKey: ["portal-quote", id, token],
+    queryFn: () => request<Quote>("GET", `/sale/quotes/${id}`, { query: { token } }),
+  });
+  const [name, setName] = useState("");
+  const [reason, setReason] = useState("");
+  const [mode, setMode] = useState<"accept" | "reject" | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  if (quote.isLoading)
+    return (
+      <div className="loading" role="status">
+        Loading…
+      </div>
+    );
+  if (quote.isError)
+    return (
+      <div className="portal-page">
+        <div className="alert error" role="alert">
+          {(quote.error as Error).message}
+        </div>
+      </div>
+    );
+  const q = quote.data!;
+  const money = (v: number) => formatMonetary(v, q.currency);
+  const act = async (kind: "accept" | "reject") => {
+    setError(null);
+    try {
+      const body = kind === "accept" ? { name, token } : { reason, token };
+      const updated = await request<Quote>("POST", `/sale/quotes/${id}/${kind}`, { body });
+      queryClient.setQueryData(["portal-quote", id, token], updated);
+      setMode(null);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : String(e));
+    }
+  };
+  const pdf = `/api/v1/sale/quotes/${id}/pdf${token ? `?token=${encodeURIComponent(token)}` : ""}`;
+
+  return (
+    <div className="portal-page">
+      <header className="portal-quote-head">
+        <div>
+          <p className="muted">{q.company.name}</p>
+          <h1>Quotation {q.name}</h1>
+          <p>
+            For <strong>{q.customer}</strong>
+            {q.validity_date && <> · valid until {q.validity_date}</>}
+          </p>
+        </div>
+        <span className={`badge state-${q.state}`}>{STATE_LABEL[q.state] ?? q.state}</span>
+      </header>
+      <div className="table-scroll">
+        <table className="pivot-table quote-lines">
+          <thead>
+            <tr>
+              <th scope="col">Description</th>
+              <th scope="col" className="num">
+                Quantity
+              </th>
+              <th scope="col" className="num">
+                Unit price
+              </th>
+              <th scope="col" className="num">
+                Amount
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {q.lines.map((line) =>
+              line.display_type === "section" ? (
+                <tr key={line.id} className="section">
+                  <th scope="rowgroup" colSpan={4}>
+                    {line.name}
+                  </th>
+                </tr>
+              ) : line.display_type === "note" ? (
+                <tr key={line.id}>
+                  <td colSpan={4} className="muted">
+                    {line.name}
+                  </td>
+                </tr>
+              ) : (
+                <tr key={line.id} className={line.is_optional ? "optional" : undefined}>
+                  <td>
+                    {line.name}
+                    {line.is_optional && <span className="badge">Optional</span>}
+                    {line.discount ? <span className="muted"> (−{line.discount} %)</span> : null}
+                  </td>
+                  <td className="num">
+                    {line.quantity} {line.uom ?? ""}
+                  </td>
+                  <td className="num">{money(line.price_unit)}</td>
+                  <td className="num">{money(line.price_subtotal)}</td>
+                </tr>
+              ),
+            )}
+          </tbody>
+          <tfoot>
+            <tr>
+              <th scope="row" colSpan={3}>
+                Untaxed
+              </th>
+              <td className="num">{money(q.amount_untaxed)}</td>
+            </tr>
+            <tr>
+              <th scope="row" colSpan={3}>
+                Taxes
+              </th>
+              <td className="num">{money(q.amount_tax)}</td>
+            </tr>
+            <tr>
+              <th scope="row" colSpan={3}>
+                Total
+              </th>
+              <td className="num total">{money(q.amount_total)}</td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+      {q.note && <div className="quote-note" dangerouslySetInnerHTML={{ __html: q.note }} />}
+      <div className="button-row">
+        <a className="btn" href={pdf} target="_blank" rel="noreferrer">
+          Download PDF
+        </a>
+        {q.state === "sent" && (
+          <>
+            <button type="button" className="btn primary" onClick={() => setMode("accept")}>
+              Accept
+            </button>
+            <button type="button" className="btn ghost" onClick={() => setMode("reject")}>
+              Decline
+            </button>
+          </>
+        )}
+      </div>
+      {mode === "accept" && (
+        <form
+          className="portal-form"
+          onSubmit={(e) => {
+            e.preventDefault();
+            void act("accept");
+          }}
+        >
+          <label>
+            Type your full name to accept this quotation
+            <input
+              className="input"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              required
+              autoComplete="name"
+            />
+          </label>
+          <button type="submit" className="btn primary">
+            Accept and sign
+          </button>
+        </form>
+      )}
+      {mode === "reject" && (
+        <form
+          className="portal-form"
+          onSubmit={(e) => {
+            e.preventDefault();
+            void act("reject");
+          }}
+        >
+          <label>
+            Tell us why (optional)
+            <textarea className="input" value={reason} onChange={(e) => setReason(e.target.value)} />
+          </label>
+          <button type="submit" className="btn">
+            Decline quotation
+          </button>
+        </form>
+      )}
+      {q.state === "accepted" && q.signed_by && (
+        <div className="alert info" role="status">
+          Accepted by {q.signed_by}. Thank you!
+        </div>
+      )}
+      {error && (
+        <div className="alert error" role="alert">
+          {error}
+        </div>
+      )}
+      <p className="muted small">
+        Questions? {q.salesperson && <>Your contact is {q.salesperson}. </>}
+        {q.company.email && <a href={`mailto:${q.company.email}`}>{q.company.email}</a>}
+      </p>
+    </div>
+  );
+}

@@ -11,7 +11,7 @@ from typing import Any
 from fastapi import APIRouter, Depends, Header, Query, Request, Response
 from pydantic import BaseModel, ConfigDict, Field
 
-from tessera.api.deps import RequestContext, authenticated_any
+from tessera.api.deps import RequestContext, authenticated
 from tessera.api.serializers import clean_input_values, default_read_fields, etag_for, parse_fields_param
 from tessera.exceptions import AccessError, ConcurrencyError, MissingError, ValidationError
 from tessera.orm import fields as F
@@ -87,7 +87,7 @@ def _serialize(records: Model, fields: list[str] | None) -> list[dict[str, Any]]
 @router.get("/{model_name}")
 def list_records(
     model_name: str,
-    ctx: RequestContext = Depends(authenticated_any),
+    ctx: RequestContext = Depends(authenticated),
     domain: str | None = Query(None, description="Domain as JSON"),
     fields: str | None = Query(None, description="Comma-separated field names"),
     order: str | None = None,
@@ -139,7 +139,7 @@ def _expand(model: Model, items: list[dict[str, Any]], names: list[str]) -> None
 
 @router.post("/{model_name}", status_code=201)
 def create_record(
-    model_name: str, body: CreateBody, ctx: RequestContext = Depends(authenticated_any)
+    model_name: str, body: CreateBody, ctx: RequestContext = Depends(authenticated)
 ) -> dict[str, Any]:
     model = get_model(ctx, model_name)
     batch = body.values if isinstance(body.values, list) else [body.values]
@@ -150,7 +150,7 @@ def create_record(
 
 @router.post("/{model_name}/read_group")
 def read_group(
-    model_name: str, body: ReadGroupBody, ctx: RequestContext = Depends(authenticated_any)
+    model_name: str, body: ReadGroupBody, ctx: RequestContext = Depends(authenticated)
 ) -> dict[str, Any]:
     model = get_model(ctx, model_name)
     groups = model.read_group(
@@ -160,7 +160,7 @@ def read_group(
 
 
 @router.get("/{model_name}/fields")
-def fields_get(model_name: str, ctx: RequestContext = Depends(authenticated_any)) -> dict[str, Any]:
+def fields_get(model_name: str, ctx: RequestContext = Depends(authenticated)) -> dict[str, Any]:
     model = get_model(ctx, model_name)
     model.check_access_rights("read")
     return {
@@ -176,7 +176,7 @@ def fields_get(model_name: str, ctx: RequestContext = Depends(authenticated_any)
 @router.get("/{model_name}/name_search")
 def name_search(
     model_name: str,
-    ctx: RequestContext = Depends(authenticated_any),
+    ctx: RequestContext = Depends(authenticated),
     q: str = "",
     domain: str | None = None,
     limit: int = Query(20, ge=1, le=200),
@@ -187,7 +187,7 @@ def name_search(
 
 @router.post("/{model_name}/call/{method}")
 def call_model_method(
-    model_name: str, method: str, body: CallBody, ctx: RequestContext = Depends(authenticated_any)
+    model_name: str, method: str, body: CallBody, ctx: RequestContext = Depends(authenticated)
 ) -> dict[str, Any]:
     model = get_model(ctx, model_name, body.context)
     return {"result": _call(model, method, body.args, body.keyword_args)}
@@ -198,7 +198,7 @@ def get_record(
     model_name: str,
     record_id: int,
     response: Response,
-    ctx: RequestContext = Depends(authenticated_any),
+    ctx: RequestContext = Depends(authenticated),
     fields: str | None = None,
     context: str | None = None,
 ) -> dict[str, Any]:
@@ -219,7 +219,7 @@ def update_record(
     record_id: int,
     body: UpdateBody,
     response: Response,
-    ctx: RequestContext = Depends(authenticated_any),
+    ctx: RequestContext = Depends(authenticated),
     if_match: str | None = Header(None, alias="If-Match"),
 ) -> dict[str, Any]:
     model = get_model(ctx, model_name)
@@ -238,7 +238,7 @@ def update_record(
 
 
 @router.delete("/{model_name}/{record_id}", status_code=204, response_class=Response)
-def delete_record(model_name: str, record_id: int, ctx: RequestContext = Depends(authenticated_any)) -> Response:
+def delete_record(model_name: str, record_id: int, ctx: RequestContext = Depends(authenticated)) -> Response:
     model = get_model(ctx, model_name)
     record = model.browse([record_id]).exists()
     if not record:
@@ -249,7 +249,7 @@ def delete_record(model_name: str, record_id: int, ctx: RequestContext = Depends
 
 @router.post("/{model_name}/{record_id}/call/{method}")
 def call_record_method(
-    model_name: str, record_id: int, method: str, body: CallBody, ctx: RequestContext = Depends(authenticated_any)
+    model_name: str, record_id: int, method: str, body: CallBody, ctx: RequestContext = Depends(authenticated)
 ) -> dict[str, Any]:
     model = get_model(ctx, model_name, body.context)
     record = model.browse([record_id]).exists()

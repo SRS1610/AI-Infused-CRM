@@ -7,7 +7,7 @@ from typing import Any
 from fastapi import APIRouter, Depends, Request
 from fastapi.responses import JSONResponse
 
-from tessera.api.deps import RequestContext, authenticated_any
+from tessera.api.deps import RequestContext, authenticated
 from tessera.api.routers.records import _call, get_model
 from tessera.api.serializers import clean_input_values, default_read_fields
 from tessera.exceptions import TesseraError, UserError, ValidationError
@@ -115,7 +115,7 @@ def _handle(ctx: RequestContext, payload: Any) -> dict[str, Any]:
 
 
 @router.post("/jsonrpc")
-async def jsonrpc(request: Request, ctx: RequestContext = Depends(authenticated_any)) -> JSONResponse:
+async def jsonrpc(request: Request, ctx: RequestContext = Depends(authenticated)) -> JSONResponse:
     try:
         payload = await request.json()
     except ValueError:
