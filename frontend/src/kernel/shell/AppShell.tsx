@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { api } from "../api/client";
 import type { MenuNode } from "../api/types";
@@ -7,6 +7,7 @@ import { useHotkeys } from "../hotkeys";
 import { useSession } from "../session";
 import { toggleTheme } from "../theme";
 import { CommandPalette, flattenMenus } from "./CommandPalette";
+import { NotificationBell } from "./NotificationBell";
 
 function useOnline(): boolean {
   const [online, setOnline] = useState(typeof navigator === "undefined" ? true : navigator.onLine);
@@ -95,6 +96,10 @@ export function AppShell({ children }: { children: ReactNode }) {
   const items = useMemo(() => flattenMenus(menus.data ?? [], open), [menus.data]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useHotkeys({ "mod+k": () => setPalette(true) });
+  const openHit = useCallback(
+    (hit: { model: string; id: number }) => navigate(`/m/${hit.model}/${hit.id}`),
+    [navigate],
+  );
 
   return (
     <div className="shell">
@@ -139,6 +144,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         >
           ⌘K
         </button>
+        <NotificationBell />
         <CompanySwitcher />
         <div className="dropdown">
           <button
@@ -177,7 +183,13 @@ export function AppShell({ children }: { children: ReactNode }) {
           {children}
         </main>
       </div>
-      {palette && <CommandPalette items={items} onClose={() => setPalette(false)} />}
+      {palette && (
+        <CommandPalette
+          items={items}
+          onClose={() => setPalette(false)}
+          searchRecords={session?.modules.includes("web") ? openHit : undefined}
+        />
+      )}
     </div>
   );
 }

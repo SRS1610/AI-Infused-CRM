@@ -41,3 +41,4 @@ backend/var/
 # test artefacts
 frontend/test-results/
 frontend/coverage/
+*.tsbuildinfo

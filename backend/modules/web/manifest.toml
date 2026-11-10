@@ -13,4 +13,4 @@ security = ["security/access.json"]
 data = ["data/filters.json"]
 menus = "menus.json"
 actions = "actions.json"
-views = ["views/core.json"]
+views = ["views/core.json", "views/platform.json"]

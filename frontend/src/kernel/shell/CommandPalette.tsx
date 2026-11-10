@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { search, type SearchHit } from "../api/platform";
 import type { MenuNode } from "../api/types";
 
 export interface PaletteItem {
@@ -33,11 +34,47 @@ export function fuzzyScore(query: string, text: string): number {
   return 10;
 }
 
-export function CommandPalette({ items, onClose }: { items: PaletteItem[]; onClose: () => void }) {
+export function CommandPalette({
+  items,
+  onClose,
+  searchRecords,
+}: {
+  items: PaletteItem[];
+  onClose: () => void;
+  searchRecords?: (hit: SearchHit) => void;
+}) {
   const [query, setQuery] = useState("");
   const [active, setActive] = useState(0);
+  const [records, setRecords] = useState<PaletteItem[]>([]);
   const input = useRef<HTMLInputElement>(null);
   useEffect(() => input.current?.focus(), []);
+  useEffect(() => {
+    if (!searchRecords || query.trim().length < 2) {
+      setRecords([]);
+      return;
+    }
+    let cancelled = false;
+    const timer = window.setTimeout(async () => {
+      try {
+        const found = await search.global(query);
+        if (!cancelled)
+          setRecords(
+            found.records.map((hit) => ({
+              id: `rec:${hit.model}:${hit.id}`,
+              label: hit.title,
+              hint: hit.model_label,
+              run: () => searchRecords(hit),
+            })),
+          );
+      } catch {
+        if (!cancelled) setRecords([]);
+      }
+    }, 200);
+    return () => {
+      cancelled = true;
+      window.clearTimeout(timer);
+    };
+  }, [query, searchRecords]);
   const results = useMemo(
     () =>
       items
@@ -48,8 +85,10 @@ export function CommandPalette({ items, onClose }: { items: PaletteItem[]; onClo
         .filter((r) => r.score > 0)
         .sort((a, b) => b.score - a.score)
         .slice(0, 12)
-        .map((r) => r.item),
-    [items, query],
+        .map((r) => r.item)
+        .concat(records)
+        .slice(0, 20),
+    [items, query, records],
   );
   return (
     <div className="palette-backdrop" onMouseDown={onClose}>

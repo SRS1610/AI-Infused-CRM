@@ -33,6 +33,7 @@ def test_read_table_csv_and_xlsx() -> None:
 
 def test_mapping_suggestions(env: Any) -> None:
     book = env["ktest.book"]
+    assert suggest_mapping(env["ktest.author"], ["Author Name"]) == {"Author Name": "name"}  # model prefix stripped
     mapping = suggest_mapping(book, ["External ID", "Title", "Author", "Tags/id", "Page count", "Publish date", "zzz"])
     assert mapping == {
         "External ID": "id",
@@ -75,6 +76,12 @@ def test_conversions_relations_and_external_ids(env: Any) -> None:
     # same external id again → update, not duplicate
     again = run_import(env, "ktest.book", ["id", "Pages"], [["imp_book_1", "300"]], {"id": "id", "Pages": "page_count"})
     assert (again.created, again.updated) == (0, 1) and book.page_count == 300
+
+
+def test_unique_constraint_error_names_the_column(env: Any) -> None:
+    env["ktest.tag"].create({"name": "dup-tag"})
+    result = run_import(env, "ktest.tag", ["Name"], [["dup-tag"]], {"Name": "name"})
+    assert result.errors == [{"row": 2, "column": "Name", "field": "name", "message": "Tag names must be unique"}]
 
 
 def test_required_field_must_be_mapped(env: Any) -> None:
@@ -174,7 +181,10 @@ def test_csv_export_neutralises_formulas() -> None:
 
 
 def test_http_upload_dry_run_and_export(librarian, reader) -> None:  # type: ignore[no-untyped-def]
-    content = _csv([["Name", "Colour"], ["http-imp-1", "3"], ["http-imp-2", "oops"]])
+    import uuid
+
+    tag = f"http-imp-{uuid.uuid4().hex[:8]}"
+    content = _csv([["Name", "Colour"], [tag, "3"], [f"{tag}-2", "oops"]])
     up = librarian.post(
         "/api/v1/import/ktest.tag", files={"file": ("tags.csv", content, "text/csv")}, data={"options": "{}"}
     )

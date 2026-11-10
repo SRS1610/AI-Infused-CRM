@@ -57,6 +57,9 @@ def suggest_mapping(model: Model, headers: list[str], saved: dict[str, str] | No
         raw = header.strip()
         base, _, suffix = raw.partition("/")
         key = _norm(base)
+        model_prefix = _norm(model._description or "")
+        if model_prefix and key.startswith(model_prefix) and key != model_prefix and key[len(model_prefix) :] in by_key:
+            key = key[len(model_prefix) :]  # "Company Name" on companies → name
         if key in ("id", "externalid", "xmlid"):
             result[header] = "id"
             continue

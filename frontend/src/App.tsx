@@ -5,7 +5,9 @@ import { configureFormat } from "./kernel/format";
 import { AppShell, Home } from "./kernel/shell/AppShell";
 import { LoginPage } from "./kernel/shell/LoginPage";
 import { SessionProvider, useSession } from "./kernel/session";
+import { ImportPage } from "./kernel/dataio/ImportPage";
 import { ActionView } from "./kernel/views/ActionView";
+import { RecordView } from "./kernel/views/RecordView";
 
 export function createQueryClient(): QueryClient {
   return new QueryClient({
@@ -36,6 +38,8 @@ function Routed() {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/a/:actionRef" element={<ActionView />} />
+        <Route path="/m/:model/:id" element={<RecordView />} />
+        <Route path="/import/:model" element={<ImportPage />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </AppShell>

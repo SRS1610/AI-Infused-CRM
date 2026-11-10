@@ -92,7 +92,12 @@ async def upload_import(
         {"name": filename, "mimetype": file.content_type, "model": "core.import_job", "res_id": job.ids[0], "raw": data}
     )
     job.write({"attachment_id": attachment.ids[0]})
-    return {**_job_payload(job), "fields": importable_fields(target), "saved_mapping": saved.name if saved else None}
+    return {
+        **_job_payload(job),
+        "model_label": target._description,
+        "fields": importable_fields(target),
+        "saved_mapping": saved.name if saved else None,
+    }
 
 
 class ImportUpdate(BaseModel):

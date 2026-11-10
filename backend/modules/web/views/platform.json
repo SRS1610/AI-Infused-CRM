@@ -1,0 +1,55 @@
+[
+  {"id": "view_job_list", "model": "core.job", "type": "list", "name": "core.job.list",
+   "columns": [{"field": "id"}, {"field": "description"}, {"field": "name"}, {"field": "state"}, {"field": "attempts"}, {"field": "max_attempts", "optional": "hide"}, {"field": "next_attempt_at"}, {"field": "finished_at"}, {"field": "queue", "optional": "hide"}]},
+  {"id": "view_job_form", "model": "core.job", "type": "form", "name": "core.job.form",
+   "root": {"kind": "sheet", "children": [
+     {"kind": "buttons", "children": [
+       {"kind": "button", "method": "action_requeue", "label": "Re-queue", "invisible": ["state", "not_in", ["dead", "cancelled"]]},
+       {"kind": "button", "method": "action_cancel", "label": "Cancel", "invisible": ["state", "!=", "queued"]}
+     ]},
+     {"kind": "field", "name": "description", "widget": "title"},
+     {"kind": "group", "name": "main", "columns": 2, "children": [
+       {"kind": "field", "name": "name"}, {"kind": "field", "name": "state"},
+       {"kind": "field", "name": "queue"}, {"kind": "field", "name": "attempts"},
+       {"kind": "field", "name": "max_attempts"}, {"kind": "field", "name": "next_attempt_at"},
+       {"kind": "field", "name": "started_at"}, {"kind": "field", "name": "finished_at"},
+       {"kind": "field", "name": "progress"}, {"kind": "field", "name": "user_id"}
+     ]},
+     {"kind": "notebook", "pages": [
+       {"kind": "page", "name": "page_attempts", "title": "Attempts", "children": [{"kind": "field", "name": "attempt_ids"}]},
+       {"kind": "page", "name": "page_error", "title": "Last error", "children": [{"kind": "field", "name": "error", "readonly": true}]},
+       {"kind": "page", "name": "page_data", "title": "Arguments & result", "children": [{"kind": "field", "name": "kwargs"}, {"kind": "field", "name": "result"}]}
+     ]}
+   ]}},
+  {"id": "view_job_search", "model": "core.job", "type": "search", "name": "core.job.search",
+   "fields": ["description", "name"],
+   "filters": [
+     {"name": "dead", "label": "Failed (dead letter)", "domain": [["state", "=", "dead"]]},
+     {"name": "queued", "label": "Queued", "domain": [["state", "=", "queued"]]},
+     {"name": "running", "label": "Running", "domain": [["state", "=", "running"]]}
+   ],
+   "group_bys": [{"field": "state"}, {"field": "name"}, {"field": "queue"}]},
+  {"id": "view_scheduled_job_list", "model": "core.scheduled_job", "type": "list", "name": "core.scheduled_job.list",
+   "columns": [{"field": "name"}, {"field": "job_name"}, {"field": "cron"}, {"field": "interval_seconds"}, {"field": "next_run"}, {"field": "last_run"}, {"field": "active"}]},
+  {"id": "view_scheduled_job_form", "model": "core.scheduled_job", "type": "form", "name": "core.scheduled_job.form",
+   "root": {"kind": "sheet", "children": [
+     {"kind": "buttons", "children": [{"kind": "button", "method": "action_run_now", "label": "Run now"}]},
+     {"kind": "field", "name": "name", "widget": "title"},
+     {"kind": "group", "name": "main", "columns": 2, "children": [
+       {"kind": "field", "name": "job_name"}, {"kind": "field", "name": "active"},
+       {"kind": "field", "name": "cron"}, {"kind": "field", "name": "interval_seconds"},
+       {"kind": "field", "name": "next_run"}, {"kind": "field", "name": "last_run"},
+       {"kind": "field", "name": "user_id"}, {"kind": "field", "name": "last_job_id"}
+     ]},
+     {"kind": "field", "name": "kwargs"}
+   ]}},
+  {"id": "view_mail_queue_list", "model": "core.mail_queue", "type": "list", "name": "core.mail_queue.list",
+   "columns": [{"field": "create_date"}, {"field": "subject"}, {"field": "email_to"}, {"field": "state"}, {"field": "attempts"}, {"field": "sent_at"}, {"field": "error", "optional": "hide"}]},
+  {"id": "view_mail_queue_search", "model": "core.mail_queue", "type": "search", "name": "core.mail_queue.search",
+   "fields": ["subject", "email_to"],
+   "filters": [
+     {"name": "failed", "label": "Failed", "domain": [["state", "in", ["failed", "bounced"]]]},
+     {"name": "outgoing", "label": "Outgoing", "domain": [["state", "=", "outgoing"]]}
+   ],
+   "group_bys": [{"field": "state"}]}
+]

@@ -9,6 +9,7 @@ to every caller — controllers, imports, jobs and AI tools alike.
 from __future__ import annotations
 
 import datetime as dt
+import re
 from collections import defaultdict
 from collections.abc import Callable, Iterable, Iterator, Mapping, Sequence
 from typing import TYPE_CHECKING, Any, ClassVar
@@ -375,6 +376,15 @@ class Model:
         groupby = [groupby] if isinstance(groupby, str) else list(groupby)
         stmt = Query(self).read_group(node, aggregates, groupby, orderby, limit, offset)
         rows = self.env.cr.execute(stmt).mappings().all()
+        # one batched lookup per many2one group-by instead of one query per group
+        m2o_names: dict[str, dict[int, str]] = {}
+        for spec in groupby:
+            fname = spec.partition(":")[0]
+            field = self._fields[fname]
+            if isinstance(field, F.Many2one):
+                ids = sorted({row[spec.replace(":", "__")] for row in rows} - {None})
+                targets = self.env[field.comodel_name or ""].browse(ids).elevated()
+                m2o_names[fname] = {rec.ids[0]: rec.display_name for rec in targets}
         out: list[dict[str, Any]] = []
         for row in rows:
             item: dict[str, Any] = {}
@@ -385,8 +395,7 @@ class Model:
                 value = row[label]
                 field = self._fields[fname]
                 if isinstance(field, F.Many2one) and value is not None:
-                    target = self.env[field.comodel_name or ""].browse([value])
-                    item[spec] = {"id": value, "display_name": target.elevated().display_name}
+                    item[spec] = {"id": value, "display_name": m2o_names.get(fname, {}).get(value)}
                     group_domain.append(Leaf(fname, "=", value))
                 elif granularity and value is not None:
                     start = value
@@ -864,9 +873,11 @@ class Model:
         diag = getattr(orig, "diag", None)
         constraint = getattr(diag, "constraint_name", "") or ""
         sqlstate = getattr(orig, "sqlstate", "") or ""
-        for name, _definition, message in self._sql_constraints:
+        for name, definition, message in self._sql_constraints:
             if constraint == f"{self._table}_{name}"[:63]:
-                return ValidationError(message, constraint=name)
+                # UNIQUE (column) / CHECK on one column: report it as that field's error
+                cols = [c for c in re.findall(r"[a-z_][a-z0-9_]*", definition.split("(", 1)[-1]) if c in self._fields]
+                return ValidationError(message, constraint=name, **({"field": cols[0]} if len(set(cols)) == 1 else {}))
         if sqlstate == "23503":
             detail = getattr(diag, "message_detail", "") or ""
             if "is not present in table" in detail:

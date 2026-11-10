@@ -5,14 +5,19 @@ import { api } from "../api/client";
 import type { ActionDef, RecordData } from "../api/types";
 import { and } from "../domain";
 import { useHotkeys } from "../hotkeys";
+import { ActivityDashboard } from "../chatter/ActivityDashboard";
+import { ExportDialog } from "../dataio/ExportDialog";
+import { CalendarView } from "./CalendarView";
 import { FormView } from "./FormView";
+import { GraphView } from "./GraphView";
 import { KanbanView } from "./KanbanView";
 import { ListView } from "./ListView";
+import { PivotView } from "./PivotView";
 import { emptySearch, SearchBar, type SearchState } from "./SearchBar";
 import { buildDomain } from "./searchDomain";
 
-const MULTI_VIEWS = ["list", "kanban"] as const;
-const LATER = new Set(["calendar", "pivot", "graph", "activity", "gantt", "map"]);
+const LATER = new Set(["activity", "gantt", "map"]);
+const CLIENT_ACTIONS: Record<string, () => React.ReactElement> = { activities: () => <ActivityDashboard /> };
 
 /** Defaults passed through the action context (`default_<field>`). */
 function contextDefaults(action: ActionDef): RecordData {
@@ -29,6 +34,7 @@ export function ActionView() {
   const navigate = useNavigate();
   const searchInput = useRef<HTMLInputElement>(null);
   const [search, setSearch] = useState<SearchState>(emptySearch);
+  const [exporting, setExporting] = useState(false);
 
   const action = useQuery({ queryKey: ["action", actionRef], queryFn: () => api.action(actionRef) });
   const types = useMemo(() => {
@@ -86,6 +92,8 @@ export function ActionView() {
     window.location.assign(def.url);
     return null;
   }
+  if (def.kind === "client" && def.client_tag && CLIENT_ACTIONS[def.client_tag])
+    return CLIENT_ACTIONS[def.client_tag]();
   if (def.kind !== "window" || !def.model)
     return <div className="alert info">This action type ({def.kind}) is not available in the browser yet.</div>;
   if (views.isError || !views.data)
@@ -107,6 +115,14 @@ export function ActionView() {
               New
             </button>
           )}
+          {meta.model.access.create && (
+            <button type="button" className="btn ghost" onClick={() => navigate(`/import/${def.model}`)}>
+              Import
+            </button>
+          )}
+          <button type="button" className="btn ghost" onClick={() => setExporting(true)}>
+            Export
+          </button>
           <SearchBar
             model={def.model}
             meta={meta}
@@ -166,10 +182,31 @@ export function ActionView() {
           onOpen={(id) => go({ id: String(id) })}
         />
       )}
+      {viewType === "calendar" && meta.views.calendar && (
+        <CalendarView
+          model={def.model}
+          meta={meta}
+          view={meta.views.calendar}
+          domain={domain}
+          onOpen={(id) => go({ id: String(id) })}
+        />
+      )}
+      {viewType === "pivot" && meta.views.pivot && (
+        <PivotView model={def.model} meta={meta} view={meta.views.pivot} domain={domain} />
+      )}
+      {viewType === "graph" && meta.views.graph && (
+        <GraphView model={def.model} meta={meta} view={meta.views.graph} domain={domain} />
+      )}
       {LATER.has(viewType) && (
-        <div className="alert info">
-          The {viewType} view renderer ships in a later sub-phase; switch to {MULTI_VIEWS.join(" or ")}.
-        </div>
+        <div className="alert info">The {viewType} view arrives with a later phase; pick another view above.</div>
+      )}
+      {exporting && (
+        <ExportDialog
+          model={def.model}
+          domain={domain}
+          initial={(meta.views.list?.columns ?? []).map((c) => c.field).filter((f) => f in meta.fields)}
+          onClose={() => setExporting(false)}
+        />
       )}
       {!meta.views[viewType] && !LATER.has(viewType) && viewType !== "form" && (
         <button type="button" className="btn" onClick={() => navigate(-1)}>

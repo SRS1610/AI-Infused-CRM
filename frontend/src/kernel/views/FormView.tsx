@@ -5,7 +5,11 @@ import type { FieldsMeta, RecordData, ViewDef, ViewNode, ViewsResponse } from ".
 import { evaluate } from "../domain";
 import { FieldInput } from "../fields/FieldInput";
 import { useHotkeys } from "../hotkeys";
+import { reports } from "../api/platform";
+import { Chatter } from "../chatter/Chatter";
 import { useRealtime, type RealtimeEvent } from "../realtime";
+import { useSession } from "../session";
+import { StatusBar } from "./StatusBar";
 
 interface Props {
   model: string;
@@ -43,6 +47,13 @@ function toWrite(fields: FieldsMeta, name: string, value: any): any {
 
 export function FormView({ model, recordId, meta, view, defaults, onSaved, onBack }: Props) {
   const queryClient = useQueryClient();
+  const { session } = useSession();
+  const modules = new Set(session?.modules ?? []);
+  const printable = useQuery({
+    queryKey: ["reports", model],
+    queryFn: () => reports.forModel(model),
+    enabled: recordId !== null && modules.has("reports"),
+  });
   const fieldNames = useMemo(() => {
     const names = collectFields(view.root);
     for (const f of Object.values(meta.fields)) if (f.type === "monetary") names.add(f.currency_field ?? "currency_id");
@@ -289,7 +300,8 @@ export function FormView({ model, recordId, meta, view, defaults, onSaved, onBac
     );
   };
 
-  return (
+  const showChatter = recordId !== null && !!view.chatter && modules.has("chatter");
+  const form = (
     <form
       className="form-view"
       aria-label={record.display_name ? String(record.display_name) : `New ${meta.model.description}`}
@@ -331,7 +343,20 @@ export function FormView({ model, recordId, meta, view, defaults, onSaved, onBac
             Delete
           </button>
         )}
+        {recordId !== null && (printable.data?.length ?? 0) > 0 && (
+          <PrintMenu templates={printable.data!} recordId={recordId} />
+        )}
       </div>
+      {recordId !== null && modules.has("workflow") && (
+        <StatusBar
+          model={model}
+          resId={recordId}
+          onChanged={() => {
+            void loaded.refetch();
+            void queryClient.invalidateQueries({ queryKey: ["list", model] });
+          }}
+        />
+      )}
       {message && (
         <div className={`alert ${message.kind}`} role="alert">
           {message.text}
@@ -352,6 +377,46 @@ export function FormView({ model, recordId, meta, view, defaults, onSaved, onBac
       )}
       {view.root ? render(view.root, "root") : null}
     </form>
+  );
+  if (!showChatter) return form;
+  return (
+    <div className="form-with-chatter">
+      {form}
+      <Chatter model={model} resId={recordId as number} canWrite={meta.model.access.write} />
+    </div>
+  );
+}
+
+function PrintMenu({ templates, recordId }: { templates: { id: number; name: string }[]; recordId: number }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <div className="dropdown">
+      <button
+        type="button"
+        className="btn ghost"
+        aria-haspopup="menu"
+        aria-expanded={open}
+        onClick={() => setOpen((o) => !o)}
+      >
+        Print
+      </button>
+      {open && (
+        <div className="dropdown-menu right" role="menu">
+          {templates.map((t) => (
+            <a
+              key={t.id}
+              role="menuitem"
+              className="btn ghost block"
+              href={reports.url(t.id, [recordId])}
+              target="_blank"
+              rel="noreferrer"
+            >
+              {t.name}
+            </a>
+          ))}
+        </div>
+      )}
+    </div>
   );
 }
 
