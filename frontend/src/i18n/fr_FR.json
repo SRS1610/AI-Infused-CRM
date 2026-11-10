@@ -763,5 +763,6 @@
   "{user} · due {date}": "{user} · échéance le {date}",
   "“{name}” follows the field {field}.": "« {name} » suit le champ {field}.",
   "“{name}” was not added: no contact you can see matches.": "« {name} » n'a pas été ajouté : aucun contact visible ne correspond.",
-  "“{name}” was not added: several contacts match ({matches}); add the right one yourself.": "« {name} » n'a pas été ajouté : plusieurs contacts correspondent ({matches}) ; ajoutez vous-même le bon."
+  "“{name}” was not added: several contacts match ({matches}); add the right one yourself.": "« {name} » n'a pas été ajouté : plusieurs contacts correspondent ({matches}) ; ajoutez vous-même le bon.",
+  "Confirm": "Confirmer"
 }

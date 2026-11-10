@@ -4,6 +4,26 @@ All notable changes are recorded here, grouped by phase. Format follows [Keep a 
 
 ## [Unreleased] — Phase 2 (Sales and Accounting), in progress
 
+### Sub-phase 2.1 — Accounting core
+- **Ledger (`account` 1.0.0, D-072, D-073, D-077).** Charts of accounts for the US, EU-style VAT and a
+  generic chart, installed on every company (and on companies created later) with tax grids, fiscal
+  positions and journals; `tessera account charts | install-chart | integrity`. Customer invoices, vendor
+  bills, credit notes and journal entries whose tax and payment-term lines follow the invoice lines;
+  gapless numbers per journal and fiscal year allocated at posting (`INV/2026/00001`); posted entries
+  read-only and never deleted; lock dates for everyone, for non-advisers and for taxes; a PostgreSQL
+  constraint trigger refusing unbalanced posted entries; SHA-256 chains on sales and purchase journals.
+- **Taxes.** Percentage, fixed, tax-included percentage and group taxes, price-included and cascading
+  taxes, invoice / credit-note distribution with tax-report grids, reverse charge; fiscal positions chosen
+  from the partner or detected from country and tax ID. A 40-case golden set covers the engine (2-e).
+- **Payments.** Payment terms with installments and early-payment discounts; payments registered from
+  invoices (partial, batch per partner, write-off, other currency), matching with realised exchange
+  differences, month-end unrealised revaluation reversed the next day (2-c); invoices *Not paid*,
+  *Partially paid*, *In payment*, *Paid* or *Reversed*.
+- **Customers and demo.** Invoice email with PDF and a token link, portal access to posted invoices,
+  `tessera seed demo --phase 2` adds invoices, bills, payments and a credit note per company.
+- **Forms.** Buttons can ask for parameters (amount, date, reason…) in a dialog before running.
+- Guide: [docs/admin/accounting.md](docs/admin/accounting.md).
+
 ### Sub-phase 2.2 — Product 2.0
 - **Units, variants and pricelists (`product` 2.0.0, D-070, D-071).** Units have a type (reference /
   bigger / smaller, one reference per category) and a rounding precision; quantities and prices convert
