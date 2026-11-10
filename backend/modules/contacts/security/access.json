@@ -1,0 +1,14 @@
+[
+  {"id": "access_partner_user", "model": "core.model_access", "values": {"name": "contact: user", "model_name": "contacts.partner", "group_id": "core.group_user", "perm_read": true, "perm_write": true, "perm_create": true, "perm_unlink": true}},
+  {"id": "access_partner_portal", "model": "core.model_access", "values": {"name": "contact: portal read", "model_name": "contacts.partner", "group_id": "core.group_portal", "perm_read": true}},
+  {"id": "rule_partner_portal", "model": "core.record_rule", "values": {"name": "Portal users see their own contact and company", "model_name": "contacts.partner", "group_ids": ["core.group_portal"], "domain": {"any": [["id", "=", "$user.partner_id"], ["commercial_partner_id", "=", "$user.partner_id.commercial_partner_id"]]}}},
+  {"id": "access_tag_user", "model": "core.model_access", "values": {"name": "contact tag: user", "model_name": "contacts.tag", "group_id": "core.group_user", "perm_read": true, "perm_write": true, "perm_create": true}},
+  {"id": "access_tag_manager", "model": "core.model_access", "values": {"name": "contact tag: manager", "model_name": "contacts.tag", "group_id": "contacts.group_contacts_manager", "perm_read": true, "perm_write": true, "perm_create": true, "perm_unlink": true}},
+  {"id": "access_industry_user", "model": "core.model_access", "values": {"name": "industry: user read", "model_name": "contacts.industry", "group_id": "core.group_user", "perm_read": true}},
+  {"id": "access_industry_manager", "model": "core.model_access", "values": {"name": "industry: manager", "model_name": "contacts.industry", "group_id": "contacts.group_contacts_manager", "perm_read": true, "perm_write": true, "perm_create": true, "perm_unlink": true}},
+  {"id": "access_title_user", "model": "core.model_access", "values": {"name": "title: user read", "model_name": "contacts.title", "group_id": "core.group_user", "perm_read": true}},
+  {"id": "access_title_manager", "model": "core.model_access", "values": {"name": "title: manager", "model_name": "contacts.title", "group_id": "contacts.group_contacts_manager", "perm_read": true, "perm_write": true, "perm_create": true, "perm_unlink": true}},
+  {"id": "access_merge_log_user", "model": "core.model_access", "values": {"name": "merge log: user", "model_name": "contacts.merge_log", "group_id": "core.group_user", "perm_read": true}},
+  {"id": "access_merge_log_system", "model": "core.model_access", "values": {"name": "merge log: admin", "model_name": "contacts.merge_log", "group_id": "core.group_system", "perm_read": true, "perm_write": true, "perm_create": true, "perm_unlink": true}},
+  {"id": "access_partner_system", "model": "core.model_access", "values": {"name": "contact: admin", "model_name": "contacts.partner", "group_id": "core.group_system", "perm_read": true, "perm_write": true, "perm_create": true, "perm_unlink": true}}
+]

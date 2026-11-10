@@ -1,0 +1,51 @@
+[
+  {"id": "view_partner_form", "model": "contacts.partner", "type": "form", "name": "contacts.partner.form", "chatter": true,
+   "root": {"kind": "sheet", "children": [
+     {"kind": "group", "name": "head", "columns": 2, "children": [
+       {"kind": "field", "name": "is_company", "label": "Company"},
+       {"kind": "field", "name": "image", "widget": "image"}
+     ]},
+     {"kind": "field", "name": "name", "widget": "title"},
+     {"kind": "field", "name": "parent_id", "invisible": ["is_company", "=", true]},
+     {"kind": "group", "name": "main", "columns": 2, "children": [
+       {"kind": "field", "name": "type", "invisible": ["parent_id", "=", null]},
+       {"kind": "field", "name": "function", "invisible": ["is_company", "=", true]},
+       {"kind": "field", "name": "email", "widget": "email"},
+       {"kind": "field", "name": "phone", "widget": "phone"},
+       {"kind": "field", "name": "mobile", "widget": "phone"},
+       {"kind": "field", "name": "website", "widget": "url"},
+       {"kind": "field", "name": "street"},
+       {"kind": "field", "name": "street2"},
+       {"kind": "field", "name": "city"},
+       {"kind": "field", "name": "zip"},
+       {"kind": "field", "name": "state_id"},
+       {"kind": "field", "name": "country_id"},
+       {"kind": "field", "name": "vat"},
+       {"kind": "field", "name": "tag_ids", "widget": "many2many_tags"}
+     ]},
+     {"kind": "notebook", "pages": [
+       {"kind": "page", "name": "page_contacts", "title": "Contacts & addresses", "invisible": ["is_company", "=", false], "children": [{"kind": "field", "name": "child_ids"}]},
+       {"kind": "page", "name": "page_sales", "title": "Sales", "children": [{"kind": "field", "name": "user_id"}, {"kind": "field", "name": "industry_id"}, {"kind": "field", "name": "ref"}, {"kind": "field", "name": "lang"}, {"kind": "field", "name": "company_id"}]},
+       {"kind": "page", "name": "page_notes", "title": "Notes", "children": [{"kind": "field", "name": "comment"}]}
+     ]}
+   ]}},
+  {"id": "view_partner_list", "model": "contacts.partner", "type": "list", "name": "contacts.partner.list",
+   "columns": [{"field": "display_name"}, {"field": "email"}, {"field": "phone"}, {"field": "city"}, {"field": "country_id"}, {"field": "user_id", "optional": "hide"}, {"field": "tag_ids", "optional": "hide"}]},
+  {"id": "view_partner_kanban", "model": "contacts.partner", "type": "kanban", "name": "contacts.partner.kanban",
+   "root": {"kind": "card", "children": [
+     {"kind": "field", "name": "display_name", "widget": "title"},
+     {"kind": "field", "name": "function"},
+     {"kind": "field", "name": "email"},
+     {"kind": "field", "name": "city"},
+     {"kind": "field", "name": "tag_ids", "widget": "many2many_tags"}
+   ]}},
+  {"id": "view_partner_search", "model": "contacts.partner", "type": "search", "name": "contacts.partner.search",
+   "fields": ["display_name", "email", "phone", "city"],
+   "filters": [
+     {"name": "companies", "label": "Companies", "domain": [["is_company", "=", true]]},
+     {"name": "individuals", "label": "Individuals", "domain": [["is_company", "=", false]]},
+     {"name": "mine", "label": "My contacts", "domain": [["user_id", "=", "$uid"]]},
+     {"name": "archived", "label": "Archived", "domain": [["active", "=", false]]}
+   ],
+   "group_bys": [{"field": "country_id"}, {"field": "user_id"}, {"field": "industry_id"}, {"field": "is_company"}]}
+]

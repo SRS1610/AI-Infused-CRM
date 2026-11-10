@@ -483,7 +483,7 @@ class Registry:
             if not fld.compute:
                 continue
             depends = list(fld.depends)
-            if fld.compute != "_compute_display_name" and not fld.related:
+            if not fld.related:  # @api.depends on the compute method (display_name overrides included)
                 for path in self._method_depends(cls, fld.compute):
                     if path not in depends:
                         depends.append(path)

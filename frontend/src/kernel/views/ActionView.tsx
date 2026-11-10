@@ -7,6 +7,7 @@ import { and } from "../domain";
 import { useHotkeys } from "../hotkeys";
 import { ActivityDashboard } from "../chatter/ActivityDashboard";
 import { ExportDialog } from "../dataio/ExportDialog";
+import { clientAction, registerClientAction } from "../extensions";
 import { CalendarView } from "./CalendarView";
 import { FormView } from "./FormView";
 import { GraphView } from "./GraphView";
@@ -17,7 +18,7 @@ import { emptySearch, SearchBar, type SearchState } from "./SearchBar";
 import { buildDomain } from "./searchDomain";
 
 const LATER = new Set(["activity", "gantt", "map"]);
-const CLIENT_ACTIONS: Record<string, () => React.ReactElement> = { activities: () => <ActivityDashboard /> };
+registerClientAction("activities", () => <ActivityDashboard />);
 
 /** Defaults passed through the action context (`default_<field>`). */
 function contextDefaults(action: ActionDef): RecordData {
@@ -92,8 +93,8 @@ export function ActionView() {
     window.location.assign(def.url);
     return null;
   }
-  if (def.kind === "client" && def.client_tag && CLIENT_ACTIONS[def.client_tag])
-    return CLIENT_ACTIONS[def.client_tag]();
+  const client = def.kind === "client" ? clientAction(def.client_tag) : undefined;
+  if (client) return client();
   if (def.kind !== "window" || !def.model)
     return <div className="alert info">This action type ({def.kind}) is not available in the browser yet.</div>;
   if (views.isError || !views.data)

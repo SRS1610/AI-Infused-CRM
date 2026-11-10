@@ -1,0 +1,7 @@
+[
+  {"id": "action_partners", "name": "Contacts", "model": "contacts.partner", "views": ["kanban", "list", "form"], "search_view": "contacts.view_partner_search", "context": {"default_is_company": false}},
+  {"id": "action_tags", "name": "Contact tags", "model": "contacts.tag", "views": ["list", "form"]},
+  {"id": "action_industries", "name": "Industries", "model": "contacts.industry", "views": ["list", "form"]},
+  {"id": "action_titles", "name": "Titles", "model": "contacts.title", "views": ["list", "form"]},
+  {"id": "action_merges", "name": "Merges", "model": "contacts.merge_log", "views": ["list", "form"], "groups": ["contacts.group_contacts_manager", "core.group_system"]}
+]

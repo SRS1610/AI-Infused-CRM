@@ -1,0 +1,9 @@
+[
+  {"id": "menu_root", "name": "Contacts", "sequence": 20, "icon": "users", "groups": ["core.group_user"]},
+  {"id": "menu_partners", "name": "Contacts", "parent": "contacts.menu_root", "sequence": 10, "action": "contacts.action_partners"},
+  {"id": "menu_config", "name": "Configuration", "parent": "contacts.menu_root", "sequence": 90},
+  {"id": "menu_tags", "name": "Tags", "parent": "contacts.menu_config", "sequence": 10, "action": "contacts.action_tags"},
+  {"id": "menu_industries", "name": "Industries", "parent": "contacts.menu_config", "sequence": 20, "action": "contacts.action_industries"},
+  {"id": "menu_titles", "name": "Titles", "parent": "contacts.menu_config", "sequence": 30, "action": "contacts.action_titles"},
+  {"id": "menu_merges", "name": "Merge history", "parent": "contacts.menu_config", "sequence": 40, "action": "contacts.action_merges"}
+]

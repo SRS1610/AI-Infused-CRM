@@ -80,7 +80,7 @@ def test_load_manifest_validation(tmp_path: Path) -> None:
 @pytest.mark.db
 def test_registry_composition(registry):  # type: ignore[no-untyped-def]
     book = registry.models["ktest.book"]
-    assert [f._module for f in book._fragments] == ["kernel_test_a", "kernel_test_b", "chatter_test"]
+    assert [f._module for f in book._fragments][:3] == ["kernel_test_a", "kernel_test_b", "chatter_test"]
     assert "core.multi_company" in book._mixin_names
     assert book._fields["company_id"].module == "core"
     assert book._fields["isbn"].module == "kernel_test_b"

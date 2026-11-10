@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import { api, ApiError } from "../api/client";
 import type { Domain, FieldMeta, GroupRow, ListColumn, RecordData, ViewDef, ViewsResponse } from "../api/types";
 import { and } from "../domain";
+import { selectionActionsFor } from "../extensions";
 import { FieldInput } from "../fields/FieldInput";
 import { displayValue } from "../format";
 
@@ -54,6 +55,8 @@ export function ListView({ model, meta, view, domain, groupBy, context, pageSize
   const [notice, setNotice] = useState<string | null>(null);
   const [conflict, setConflict] = useState<string | null>(null);
   const [showColumns, setShowColumns] = useState(false);
+  const [extension, setExtension] = useState<number | null>(null);
+  const extraActions = selectionActionsFor(model);
 
   useEffect(() => {
     setOffset(0);
@@ -202,8 +205,19 @@ export function ListView({ model, meta, view, domain, groupBy, context, pageSize
 
   const hasActive = "active" in meta.fields;
 
+  const activeExtension = extension !== null ? extraActions[extension] : undefined;
   return (
     <div className="list-view">
+      {activeExtension &&
+        activeExtension.render({
+          model,
+          ids: [...selected],
+          onDone: () => {
+            setExtension(null);
+            setSelected(new Set());
+            void queryClient.invalidateQueries({ queryKey: ["list", model] });
+          },
+        })}
       <div className="list-toolbar">
         {selected.size > 0 ? (
           <div className="bulk" role="toolbar" aria-label="Bulk actions">
@@ -226,6 +240,13 @@ export function ListView({ model, meta, view, domain, groupBy, context, pageSize
                 Delete
               </button>
             )}
+            {extraActions
+              .filter((a) => selected.size >= (a.min ?? 1))
+              .map((a, i) => (
+                <button key={a.label} type="button" className="btn small" onClick={() => setExtension(i)}>
+                  {a.label}
+                </button>
+              ))}
           </div>
         ) : (
           <span className="muted">

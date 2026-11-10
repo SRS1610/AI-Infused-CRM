@@ -2,6 +2,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useEffect } from "react";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { configureFormat } from "./kernel/format";
+import "./modules";
 import { AppShell, Home } from "./kernel/shell/AppShell";
 import { LoginPage } from "./kernel/shell/LoginPage";
 import { SessionProvider, useSession } from "./kernel/session";

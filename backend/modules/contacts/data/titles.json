@@ -1,0 +1,7 @@
+[
+  {"id": "title_dr", "model": "contacts.title", "noupdate": true, "values": {"name": "Doctor", "shortcut": "Dr."}},
+  {"id": "title_prof", "model": "contacts.title", "noupdate": true, "values": {"name": "Professor", "shortcut": "Prof."}},
+  {"id": "title_mx", "model": "contacts.title", "noupdate": true, "values": {"name": "Mx", "shortcut": "Mx"}},
+  {"id": "title_ms", "model": "contacts.title", "noupdate": true, "values": {"name": "Ms", "shortcut": "Ms"}},
+  {"id": "title_mr", "model": "contacts.title", "noupdate": true, "values": {"name": "Mr", "shortcut": "Mr"}}
+]

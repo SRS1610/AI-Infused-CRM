@@ -1,0 +1,18 @@
+name = "contacts"
+version = "1.0.0"
+summary = "Companies and people: hierarchy, addresses, tags, duplicate detection and merge"
+category = "Sales"
+phase = 1
+depends = ["core", "web", "chatter"]
+license = "Apache-2.0"
+installable = true
+application = true
+post_init = "hooks:post_init"
+
+[load]
+security = ["security/groups.json", "security/access.json"]
+data = ["data/titles.json", "data/industries.json"]
+demo = ["data/demo/partners.json"]
+views = ["views.json"]
+actions = "actions.json"
+menus = "menus.json"

@@ -38,6 +38,8 @@ KERNEL_TEST_MODULES = [
     "chatter_test",
     "workflow",
     "reports",
+    "contacts",
+    "contacts_test",
 ]
 
 

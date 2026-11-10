@@ -1,0 +1,13 @@
+[
+  {"id": "tag_customer", "model": "contacts.tag", "values": {"name": "Customer", "color": 2}},
+  {"id": "tag_prospect", "model": "contacts.tag", "values": {"name": "Prospect", "color": 4}},
+  {"id": "tag_vip", "model": "contacts.tag", "values": {"name": "VIP", "color": 1}},
+  {"id": "partner_acme", "model": "contacts.partner", "values": {"name": "Acme Robotics", "is_company": true, "email": "hello@acme-robotics.example", "phone": "+1 415 555 0100", "website": "https://acme-robotics.example", "street": "500 Market St", "city": "San Francisco", "zip": "94105", "country_id": "core.country_us", "industry_id": "contacts.industry_manufacturing", "tag_ids": ["contacts.tag_customer", "contacts.tag_vip"]}},
+  {"id": "partner_acme_jordan", "model": "contacts.partner", "values": {"name": "Jordan Lee", "parent_id": "contacts.partner_acme", "function": "Head of Operations", "email": "jordan.lee@acme-robotics.example", "phone": "+1 415 555 0101"}},
+  {"id": "partner_acme_invoice", "model": "contacts.partner", "values": {"name": "Accounts payable", "parent_id": "contacts.partner_acme", "type": "invoice", "email": "ap@acme-robotics.example", "street": "PO Box 77", "city": "San Francisco", "zip": "94105", "country_id": "core.country_us"}},
+  {"id": "partner_globex", "model": "contacts.partner", "values": {"name": "Globex Logistics", "is_company": true, "email": "contact@globex.example", "phone": "+33 1 55 55 01 02", "city": "Lyon", "country_id": "core.country_fr", "industry_id": "contacts.industry_services", "tag_ids": ["contacts.tag_prospect"]}},
+  {"id": "partner_globex_amelie", "model": "contacts.partner", "values": {"name": "Amélie Durand", "parent_id": "contacts.partner_globex", "function": "Purchasing manager", "email": "amelie.durand@globex.example"}},
+  {"id": "partner_initech", "model": "contacts.partner", "values": {"name": "Initech Software", "is_company": true, "email": "sales@initech.example", "city": "Bengaluru", "country_id": "core.country_in", "industry_id": "contacts.industry_software", "tag_ids": ["contacts.tag_customer"]}},
+  {"id": "partner_initech_priya", "model": "contacts.partner", "values": {"name": "Priya Raman", "parent_id": "contacts.partner_initech", "function": "CTO", "email": "priya@initech.example", "mobile": "+91 98 4555 0123"}},
+  {"id": "partner_sam", "model": "contacts.partner", "values": {"name": "Sam Okafor", "email": "sam.okafor@mail.example", "city": "Sydney", "country_id": "core.country_au", "tag_ids": ["contacts.tag_prospect"]}}
+]
