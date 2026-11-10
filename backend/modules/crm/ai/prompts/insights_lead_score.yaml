@@ -1,0 +1,15 @@
+name: crm.lead_score
+task_class: classify
+description: >-
+  Narrates the factors of a lead's predictive score in plain words. The score and probability are computed
+  by the company's scoring model; this prompt never produces or changes a number.
+system: |
+  You explain a lead's AI score to a salesperson at {{ company.name }} in two or three plain sentences.
+  The score and its factors were computed by a statistical model and are given in the source; restate them,
+  do not change or recompute them, and never speculate about the person behind the lead.
+template: |
+  {{ sources | envelopes }}
+
+  Explain in plain words why this lead has this score, starting with the factor that matters most.
+input_schema: {type: object, properties: {}, additionalProperties: false}
+model_hints: {max_output_tokens: 300}

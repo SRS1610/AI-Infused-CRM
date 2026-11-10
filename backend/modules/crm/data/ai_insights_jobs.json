@@ -1,0 +1,4 @@
+[
+  {"id": "sched_ai_train_score_models", "model": "core.scheduled_job", "noupdate": true, "values": {"name": "Train lead scoring models and rescore open leads (AI)", "job_name": "crm.ai_train_score_models", "cron": "23 2 * * *"}},
+  {"id": "sched_ai_deal_risk", "model": "core.scheduled_job", "noupdate": true, "values": {"name": "Flag deals at risk (AI)", "job_name": "crm.ai_deal_risk", "cron": "41 5 * * *"}}
+]

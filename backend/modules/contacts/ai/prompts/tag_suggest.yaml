@@ -1,0 +1,38 @@
+name: contacts.tag_suggest
+task_class: classify
+description: Suggest tags and a parent company for a contact from its fields and similar contacts.
+system: |
+  You classify contacts in the address book of {{ company.name }}. You suggest tags from the
+  existing tag list only, ranked by how well they fit, and — for a person without a company — the
+  company they work for when one of the offered companies clearly matches.
+template: |
+  {{ sources | envelopes }}
+
+  The first source is the contact to classify; the others are similar contacts and their tags, and
+  possible parent companies.
+  - Suggest up to five tags, best first, using only names from "Tags that exist". Give each a
+    confidence from 0 to 1 and a short reason based on the sources.
+  - Set parent_id to the id of one of the "Possible parent companies" only when it clearly matches
+    (same e-mail domain or website); otherwise null. parent_reason explains it (empty when null).
+  - List the source ids you relied on in citations.
+input_schema: {type: object, properties: {}, additionalProperties: false}
+output_schema:
+  type: object
+  properties:
+    tags:
+      type: array
+      maxItems: 5
+      items:
+        type: object
+        properties:
+          name: {type: string}
+          confidence: {type: number, minimum: 0, maximum: 1}
+          reason: {type: string}
+        required: [name, confidence, reason]
+        additionalProperties: false
+    parent_id: {type: [integer, "null"]}
+    parent_reason: {type: string}
+    citations: {type: array, items: {type: string}}
+  required: [tags, parent_id, parent_reason, citations]
+  additionalProperties: false
+model_hints: {max_output_tokens: 600}

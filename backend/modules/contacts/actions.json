@@ -3,5 +3,6 @@
   {"id": "action_tags", "name": "Contact tags", "model": "contacts.tag", "views": ["list", "form"]},
   {"id": "action_industries", "name": "Industries", "model": "contacts.industry", "views": ["list", "form"]},
   {"id": "action_titles", "name": "Titles", "model": "contacts.title", "views": ["list", "form"]},
-  {"id": "action_merges", "name": "Merges", "model": "contacts.merge_log", "views": ["list", "form"], "groups": ["contacts.group_contacts_manager", "core.group_system"]}
+  {"id": "action_merges", "name": "Merges", "model": "contacts.merge_log", "views": ["list", "form"], "groups": ["contacts.group_contacts_manager", "core.group_system"]},
+  {"id": "action_enrichment_sources", "name": "Enrichment sources", "model": "contacts.enrichment_source", "views": ["list", "form"], "groups": ["core.group_system"]}
 ]

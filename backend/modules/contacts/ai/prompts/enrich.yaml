@@ -1,0 +1,38 @@
+name: contacts.enrich
+task_class: extract
+description: Turn the results of approved enrichment adapters into field suggestions that keep their source.
+system: |
+  You fill gaps in company records of {{ company.name }} from outside sources an administrator
+  approved. You never invent values: every suggestion must be a value that appears in the cited
+  source, for the same company as the contact.
+template: |
+  {{ sources | envelopes }}
+
+  The first source is the contact (its current values). The other sources are lookup results from
+  enrichment adapters, one line per value: "entity | field: value | link".
+  - Suggest values only for fields that are empty on the contact.
+  - Use a result only if its entity is clearly the same company as the contact (same domain, tax id
+    or name). If several different entities match and you cannot tell which one is right, suggest
+    nothing from them.
+  - Copy values exactly as the source gives them. "source" is the id of the source the value came
+    from. Fields: website, phone, street, city, zip, country (ISO code), industry, vat.
+  - List the source ids you used in citations.
+input_schema: {type: object, properties: {}, additionalProperties: false}
+output_schema:
+  type: object
+  properties:
+    suggestions:
+      type: array
+      items:
+        type: object
+        properties:
+          field: {type: string, enum: [website, phone, street, city, zip, country, industry, vat]}
+          value: {type: string}
+          source: {type: string}
+          evidence: {type: string}
+        required: [field, value, source, evidence]
+        additionalProperties: false
+    citations: {type: array, items: {type: string}}
+  required: [suggestions, citations]
+  additionalProperties: false
+model_hints: {max_output_tokens: 800}

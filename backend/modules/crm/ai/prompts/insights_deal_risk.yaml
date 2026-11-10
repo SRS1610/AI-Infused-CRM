@@ -1,0 +1,14 @@
+name: crm.deal_risk
+task_class: classify
+description: >-
+  Reserved for an optional narration of deal risk reasons. Risk flags and reasons are computed by the
+  deterministic risk signals; Phase 1 does not call a model for this feature.
+system: |
+  You summarise why an opportunity at {{ company.name }} was flagged as at risk, in one or two sentences,
+  using only the reasons given in the source. Do not add reasons.
+template: |
+  {{ sources | envelopes }}
+
+  Summarise the risk of this opportunity for its salesperson.
+input_schema: {type: object, properties: {}, additionalProperties: false}
+model_hints: {max_output_tokens: 200}

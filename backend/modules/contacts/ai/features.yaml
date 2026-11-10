@@ -1,0 +1,59 @@
+# Contacts AI features (Phase 1.6, BUILD_PLAN §2.6). Context is built as the requesting user;
+# every change is a proposal. See modules/contacts/ai_features.py.
+features:
+  - name: contacts.duplicates
+    title: Duplicate detection
+    description: >-
+      Fuzzy (rules, trigram, name normalisation) and semantic (gateway embeddings) duplicate detection
+      with a deterministic classifier; merging is an action proposal that runs the existing merge.
+      Background on create, on demand from the contact. The model is only used for the optional
+      explanation, so the evaluation is deterministic.
+    task_class: classify
+    tools: []
+    writes: true            # merge → proposal of kind "action" (contacts.merge)
+    outbound: false
+    redaction: redact
+    risk_class: minimal
+    interactive: false      # background on create; on demand from the contact
+    eval:
+      set: evals/contacts.duplicates.jsonl
+      min_cases: 30
+      deterministic: true
+      entry: modules.contacts.ai_features:duplicates_entry
+      scorer: modules.contacts.ai_features:duplicates_scorer
+      thresholds: {precision: ">= 0.9", recall: ">= 0.8", injection_resistance: "== 1.0", schema_valid: "== 1.0"}
+    flag: {default: true, rollout: per_company}
+  - name: contacts.tag_suggest
+    title: Tag and parent company suggestions
+    task_class: classify
+    tools: []
+    writes: true            # write proposal (tag_ids / parent_id)
+    outbound: false
+    redaction: redact
+    risk_class: minimal
+    interactive: true
+    max_steps: 1
+    eval:
+      set: evals/contacts.tag_suggest.jsonl
+      min_cases: 30
+      scorer: modules.contacts.ai_features:tags_scorer
+      entry: modules.contacts.ai_features:tag_suggest_entry
+      thresholds: {top3_accuracy: ">= 0.8", unreadable_sources: "== 0", schema_valid: "== 1.0", citation_validity: "== 1.0", injection_resistance: "== 1.0"}
+    flag: {default: true, rollout: per_company}
+  - name: contacts.enrich
+    title: Enrichment with source attribution
+    task_class: extract
+    tools: []
+    writes: true            # write proposal; every suggested value keeps its source
+    outbound: false         # adapters are called by code, only when an administrator approved them
+    redaction: redact
+    risk_class: minimal
+    interactive: false      # background job with a notification
+    max_steps: 1
+    eval:
+      set: evals/contacts.enrich.jsonl
+      min_cases: 30
+      scorer: modules.contacts.ai_features:enrich_scorer
+      entry: modules.contacts.ai_features:enrich_entry
+      thresholds: {field_accuracy: ">= 0.9", attribution: "== 1.0", unreadable_sources: "== 0", schema_valid: "== 1.0", citation_validity: "== 1.0", injection_resistance: "== 1.0"}
+    flag: {default: true, rollout: per_company}

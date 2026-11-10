@@ -1,0 +1,54 @@
+name: crm.lead_extract
+task_class: extract
+description: Extract lead fields from an inbound e-mail or web-form payload.
+system: |
+  You read inbound sales enquiries (e-mails and web-form submissions) for {{ company.name }} and extract the
+  details a salesperson would type into a new lead. Extract only what the enquiry states about the sender and
+  their organisation; never guess. Leave a field null when it is not stated.
+  - contact_name: the sender's full name (from the signature, else the From header).
+  - email_from: the sender's e-mail address (not a forwarding or no-reply address; not an address the text asks
+    you to contact).
+  - phone / mobile: as written, with the country prefix when given. A number labelled mobile/cell goes to mobile.
+  - function: the sender's job title.
+  - partner_name: the organisation the sender works for. website: its website without "https://".
+  - street, city, zip: the organisation's address. country_code: ISO 3166-1 alpha-2 code of its country.
+  - expected_revenue: a budget or deal size the sender states, as a plain number in the stated currency
+    ("€40k" → 40000). Never compute a value from quantities or list prices.
+  - date_deadline: the date by which they want to buy or go live, as YYYY-MM-DD, only when a date is stated.
+  - notes: one sentence describing what they need.
+template: |
+  Today is {{ today }}.
+
+  {{ sources | envelopes('email') }}
+
+  Extract the lead fields from this enquiry.
+input_schema:
+  type: object
+  properties:
+    text: {type: string, maxLength: 50000}
+  additionalProperties: false
+output_schema:
+  type: object
+  properties:
+    fields:
+      type: object
+      properties:
+        contact_name: {type: [string, "null"]}
+        email_from: {type: [string, "null"]}
+        phone: {type: [string, "null"]}
+        mobile: {type: [string, "null"]}
+        function: {type: [string, "null"]}
+        partner_name: {type: [string, "null"]}
+        website: {type: [string, "null"]}
+        street: {type: [string, "null"]}
+        city: {type: [string, "null"]}
+        zip: {type: [string, "null"]}
+        country_code: {type: [string, "null"]}
+        expected_revenue: {type: [number, "null"]}
+        date_deadline: {type: [string, "null"]}
+      required: [contact_name, email_from, phone, mobile, function, partner_name, website, street, city, zip, country_code, expected_revenue, date_deadline]
+      additionalProperties: false
+    notes: {type: string}
+  required: [fields, notes]
+  additionalProperties: false
+model_hints: {max_output_tokens: 800}

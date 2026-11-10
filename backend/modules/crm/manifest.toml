@@ -10,7 +10,7 @@ application = true
 
 [load]
 security = ["security/groups.json", "security/access.json"]
-data = ["data/stages.json", "data/lost_reasons.json", "data/teams.json"]
+data = ["data/stages.json", "data/lost_reasons.json", "data/teams.json", "data/ai_insights_jobs.json"]
 demo = ["data/demo/crm.json"]
 views = ["views.json"]
 actions = "actions.json"

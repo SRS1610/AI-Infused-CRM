@@ -47,5 +47,15 @@
      {"name": "mine", "label": "My contacts", "domain": [["user_id", "=", "$uid"]]},
      {"name": "archived", "label": "Archived", "domain": [["active", "=", false]]}
    ],
-   "group_bys": [{"field": "country_id"}, {"field": "user_id"}, {"field": "industry_id"}, {"field": "is_company"}]}
+   "group_bys": [{"field": "country_id"}, {"field": "user_id"}, {"field": "industry_id"}, {"field": "is_company"}]},
+  {"id": "view_enrichment_source_list", "model": "contacts.enrichment_source", "type": "list", "name": "contacts.enrichment_source.list",
+   "columns": [{"field": "name"}, {"field": "adapter"}, {"field": "approved"}, {"field": "company_id"}]},
+  {"id": "view_enrichment_source_form", "model": "contacts.enrichment_source", "type": "form", "name": "contacts.enrichment_source.form",
+   "root": {"kind": "sheet", "children": [
+     {"kind": "field", "name": "name", "widget": "title"},
+     {"kind": "group", "name": "main", "columns": 2, "children": [
+       {"kind": "field", "name": "adapter"}, {"kind": "field", "name": "approved"}, {"kind": "field", "name": "company_id"}
+     ]},
+     {"kind": "field", "name": "note"}
+   ]}}
 ]

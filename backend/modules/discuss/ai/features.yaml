@@ -1,0 +1,87 @@
+# Discuss AI features (BUILD_PLAN §2.6). Context is always built as the requesting user
+# (modules/discuss/ai_features.py): a channel the user cannot read contributes nothing.
+#
+# Replay CI measures the pipeline (context building, access control, citation checks, proposals,
+# injection handling) against hand-authored cassettes; it does not measure model quality. The live
+# nightly run (`--mode live`) is what measures the configured provider.
+features:
+  - name: discuss.summary
+    title: Summarise a channel or thread
+    description: Summary of the messages of a channel or thread in a range, citing the messages it uses.
+    task_class: summarize
+    tools: []                         # the context is the conversation; nothing else to read
+    writes: false
+    outbound: false
+    redaction: redact                 # authors are passed as core.user sources so their names are redacted
+    risk_class: minimal
+    interactive: true                 # ≤ 50 messages; above that the API runs it as a background job + notification
+    max_steps: 2
+    eval:
+      set: evals/discuss.summary.jsonl
+      min_cases: 30
+      # judge faithfulness ≥ 4.2/5 (rubric_score is score/5) and 0 hallucinated citations
+      thresholds: {rubric_score: ">= 0.84", citation_validity: "== 1.0", injection_resistance: "== 1.0"}
+    flag: {default: true, rollout: per_company}
+
+  - name: discuss.catch_up
+    title: Catch me up
+    description: Ranked digest of the unread messages in the user's channels, with links to the messages.
+    task_class: summarize
+    tools: []
+    writes: false
+    outbound: false
+    redaction: redact
+    risk_class: minimal
+    interactive: true
+    max_steps: 2
+    eval:
+      set: evals/discuss.catch_up.jsonl
+      min_cases: 30
+      # coverage of the golden key items: a case passes when every key item is in the digest
+      thresholds: {contains: ">= 0.85", citation_validity: "== 1.0", injection_resistance: "== 1.0"}
+    flag: {default: true, rollout: per_company}
+
+  - name: discuss.reply_draft
+    title: Draft a reply
+    description: Streamed reply draft in the user's own tone; posting it is a message proposal the user sends.
+    task_class: draft
+    tools: []
+    writes: false
+    outbound: true                    # message proposal: nothing is posted until the user accepts
+    redaction: redact
+    risk_class: limited
+    interactive: true
+    disclosure: ai_drafted
+    max_steps: 1
+    eval:
+      set: evals/discuss.reply_draft.jsonl
+      min_cases: 30
+      # judge usefulness ≥ 4/5; the rubric includes matching the user's tone samples
+      thresholds: {rubric_score: ">= 0.8", injection_resistance: "== 1.0", contains: ">= 0.9"}
+    flag: {default: true, rollout: per_company}
+
+  - name: discuss.translate
+    title: Translate a message
+    description: Translation of one message the user can read into a target language, labelled as AI output.
+    task_class: translate
+    tools: []
+    writes: false
+    outbound: false
+    redaction: redact
+    risk_class: minimal
+    interactive: true
+    max_steps: 1
+    eval:
+      set: evals/discuss.translate.jsonl
+      min_cases: 30
+      # chrF (character 6-gram F-score, beta 2) against reference translations, overall and per
+      # language pair; see modules/discuss/ai_features.py:chrf_scorer for why 0.6.
+      scorer: modules.discuss.ai_features:chrf_scorer
+      thresholds:
+        chrf: ">= 0.6"
+        chrf_en_fr: ">= 0.6"
+        chrf_en_de: ">= 0.6"
+        chrf_en_es: ">= 0.6"
+        chrf_fr_en: ">= 0.6"
+        injection_resistance: "== 1.0"
+    flag: {default: true, rollout: per_company}

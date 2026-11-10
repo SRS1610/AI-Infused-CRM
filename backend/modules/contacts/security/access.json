@@ -10,5 +10,7 @@
   {"id": "access_title_manager", "model": "core.model_access", "values": {"name": "title: manager", "model_name": "contacts.title", "group_id": "contacts.group_contacts_manager", "perm_read": true, "perm_write": true, "perm_create": true, "perm_unlink": true}},
   {"id": "access_merge_log_user", "model": "core.model_access", "values": {"name": "merge log: user", "model_name": "contacts.merge_log", "group_id": "core.group_user", "perm_read": true}},
   {"id": "access_merge_log_system", "model": "core.model_access", "values": {"name": "merge log: admin", "model_name": "contacts.merge_log", "group_id": "core.group_system", "perm_read": true, "perm_write": true, "perm_create": true, "perm_unlink": true}},
-  {"id": "access_partner_system", "model": "core.model_access", "values": {"name": "contact: admin", "model_name": "contacts.partner", "group_id": "core.group_system", "perm_read": true, "perm_write": true, "perm_create": true, "perm_unlink": true}}
+  {"id": "access_partner_system", "model": "core.model_access", "values": {"name": "contact: admin", "model_name": "contacts.partner", "group_id": "core.group_system", "perm_read": true, "perm_write": true, "perm_create": true, "perm_unlink": true}},
+  {"id": "access_enrichment_source_user", "model": "core.model_access", "values": {"name": "enrichment source: user read", "model_name": "contacts.enrichment_source", "group_id": "core.group_user", "perm_read": true}},
+  {"id": "access_enrichment_source_system", "model": "core.model_access", "values": {"name": "enrichment source: admin", "model_name": "contacts.enrichment_source", "group_id": "core.group_system", "perm_read": true, "perm_write": true, "perm_create": true, "perm_unlink": true}}
 ]
