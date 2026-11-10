@@ -1,0 +1,8 @@
+Account statement export
+Account,US33 4000 1234 56
+Date,Description,Payee,Reference,Amount,Balance
+2026-03-02,INV/2026/00003 payment,Acme Corp,DEP-1,1500.00,6500.00
+2026-03-05,Monthly hosting,Cloud Hosting & Co,,-89.99,6410.01
+2026-03-05,Monthly hosting,Cloud Hosting & Co,,-89.99,6320.02
+2026-03-10,"Office cleaning, March",Office Cleaning LLC,CHK-1042,-250.00,6070.02
+2026-03-15,Bank fee,,,-12.50,6057.52
