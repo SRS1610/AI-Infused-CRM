@@ -1148,7 +1148,13 @@ class Model:
                 if not cache.contains(field, rid, qualifier):
                     cache.set(field, rid, None, qualifier)
             return
-        cache.computing.add(key)
+        # one compute method may assign several fields: all of them are being computed now
+        siblings = [
+            (self._name, f.name)
+            for f in self._fields.values()
+            if f.compute == field.compute and not f.related and (self._name, f.name) not in cache.computing
+        ] or [key]
+        cache.computing.update(siblings)
         try:
             if field.related:
                 records._compute_related(field)
@@ -1157,7 +1163,7 @@ class Model:
             else:
                 getattr(records, field.compute or "")()
         finally:
-            cache.computing.discard(key)
+            cache.computing.difference_update(siblings)
         for rid in ids:
             if not cache.contains(field, rid, qualifier):
                 cache.set(field, rid, None if not isinstance(field, F._X2many) else (), qualifier)

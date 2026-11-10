@@ -1,0 +1,15 @@
+[
+  {"id": "wf_quotation", "model": "workflow.definition", "values": {"name": "Quotation", "model_name": "sale.quotation", "state_field": "state", "strict": true}},
+  {"id": "st_draft", "model": "workflow.state", "values": {"definition_id": "sale.wf_quotation", "key": "draft", "name": "Draft", "sequence": 1}},
+  {"id": "st_sent", "model": "workflow.state", "values": {"definition_id": "sale.wf_quotation", "key": "sent", "name": "Sent", "sequence": 2}},
+  {"id": "st_accepted", "model": "workflow.state", "values": {"definition_id": "sale.wf_quotation", "key": "accepted", "name": "Accepted", "sequence": 3, "is_final": true}},
+  {"id": "st_rejected", "model": "workflow.state", "values": {"definition_id": "sale.wf_quotation", "key": "rejected", "name": "Rejected", "sequence": 4, "fold": true, "is_final": true}},
+  {"id": "st_expired", "model": "workflow.state", "values": {"definition_id": "sale.wf_quotation", "key": "expired", "name": "Expired", "sequence": 5, "fold": true, "is_final": true}},
+  {"id": "st_cancelled", "model": "workflow.state", "values": {"definition_id": "sale.wf_quotation", "key": "cancelled", "name": "Cancelled", "sequence": 6, "fold": true, "is_final": true}},
+  {"id": "tr_send", "model": "workflow.transition", "values": {"definition_id": "sale.wf_quotation", "name": "Mark as sent", "from_state_ids": ["sale.st_draft"], "to_state_id": "sale.st_sent", "sequence": 10}},
+  {"id": "tr_accept", "model": "workflow.transition", "values": {"definition_id": "sale.wf_quotation", "name": "Mark accepted", "from_state_ids": ["sale.st_sent"], "to_state_id": "sale.st_accepted", "highlight": true, "sequence": 20}},
+  {"id": "tr_reject", "model": "workflow.transition", "values": {"definition_id": "sale.wf_quotation", "name": "Mark rejected", "from_state_ids": ["sale.st_sent"], "to_state_id": "sale.st_rejected", "sequence": 30}},
+  {"id": "tr_expire", "model": "workflow.transition", "values": {"definition_id": "sale.wf_quotation", "name": "Expire", "from_state_ids": ["sale.st_sent"], "to_state_id": "sale.st_expired", "group_ids": ["core.group_system"], "sequence": 40}},
+  {"id": "tr_cancel", "model": "workflow.transition", "values": {"definition_id": "sale.wf_quotation", "name": "Cancel", "from_state_ids": ["sale.st_draft", "sale.st_sent"], "to_state_id": "sale.st_cancelled", "confirm": "Cancel this quotation?", "sequence": 50}},
+  {"id": "tr_draft", "model": "workflow.transition", "values": {"definition_id": "sale.wf_quotation", "name": "Back to draft", "from_state_ids": ["sale.st_rejected", "sale.st_expired", "sale.st_cancelled"], "to_state_id": "sale.st_draft", "sequence": 60}}
+]

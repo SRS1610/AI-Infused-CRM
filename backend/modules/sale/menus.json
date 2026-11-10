@@ -1,0 +1,8 @@
+[
+  {"id": "menu_root", "name": "Sales", "sequence": 30, "icon": "file-text", "groups": ["sale.group_sale_user"]},
+  {"id": "menu_quotations", "name": "Quotations", "parent": "sale.menu_root", "sequence": 10, "action": "sale.action_quotations"},
+  {"id": "menu_products", "name": "Products", "parent": "sale.menu_root", "sequence": 20, "action": "sale.action_products"},
+  {"id": "menu_config", "name": "Configuration", "parent": "sale.menu_root", "sequence": 90, "groups": ["sale.group_sale_manager"]},
+  {"id": "menu_categories", "name": "Product categories", "parent": "sale.menu_config", "sequence": 10, "action": "product.action_categories"},
+  {"id": "menu_uoms", "name": "Units of measure", "parent": "sale.menu_config", "sequence": 20, "action": "product.action_uoms"}
+]

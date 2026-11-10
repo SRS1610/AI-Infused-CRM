@@ -75,6 +75,7 @@ class Settings(BaseSettings):
     smtp_password: str | None = None
     smtp_tls: bool = False
     mail_from: str = "noreply@tessera.local"
+    public_url: str = "http://localhost:5173"  # base of links in emails (portal, password reset, …)
     mail_catchall_domain: str | None = None  # domain of inbound aliases and reply+ addresses
     mail_inbound_token: str | None = None  # shared secret for POST /api/v1/chatter/inbound (MTA webhook)
 

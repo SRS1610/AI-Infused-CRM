@@ -1,0 +1,27 @@
+[
+  {"id": "view_product_form", "model": "product.product", "type": "form", "name": "product.product.form",
+   "root": {"kind": "sheet", "children": [
+     {"kind": "field", "name": "name", "widget": "title"},
+     {"kind": "group", "name": "main", "columns": 2, "children": [
+       {"kind": "field", "name": "type"}, {"kind": "field", "name": "category_id"},
+       {"kind": "field", "name": "default_code"}, {"kind": "field", "name": "barcode"},
+       {"kind": "field", "name": "list_price"}, {"kind": "field", "name": "standard_price"},
+       {"kind": "field", "name": "uom_id"}, {"kind": "field", "name": "tax_percent"},
+       {"kind": "field", "name": "sale_ok"}, {"kind": "field", "name": "company_id"}
+     ]},
+     {"kind": "field", "name": "description_sale"},
+     {"kind": "field", "name": "image", "widget": "image"}
+   ]}},
+  {"id": "view_product_list", "model": "product.product", "type": "list", "name": "product.product.list",
+   "columns": [{"field": "default_code"}, {"field": "name"}, {"field": "category_id"}, {"field": "type"}, {"field": "list_price"}, {"field": "standard_price", "optional": "hide"}, {"field": "uom_id", "optional": "hide"}]},
+  {"id": "view_product_kanban", "model": "product.product", "type": "kanban", "name": "product.product.kanban",
+   "root": {"kind": "card", "children": [{"kind": "field", "name": "display_name", "widget": "title"}, {"kind": "field", "name": "list_price"}, {"kind": "field", "name": "category_id"}]}},
+  {"id": "view_product_search", "model": "product.product", "type": "search", "name": "product.product.search",
+   "fields": ["name", "default_code", "barcode"],
+   "filters": [
+     {"name": "services", "label": "Services", "domain": [["type", "=", "service"]]},
+     {"name": "goods", "label": "Goods", "domain": [["type", "=", "goods"]]},
+     {"name": "archived", "label": "Archived", "domain": [["active", "=", false]]}
+   ],
+   "group_bys": [{"field": "category_id"}, {"field": "type"}]}
+]

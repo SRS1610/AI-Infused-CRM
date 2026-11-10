@@ -130,6 +130,8 @@ class DataLoader:
             return self._ref_id(value["$ref"])
         if isinstance(value, dict) and "$refs" in value:
             return [("set", [self._ref_id(x) for x in value["$refs"]])]
+        if isinstance(value, dict) and "$add" in value:  # extend another module's links without replacing them
+            return [("add", self._ref_id(x)) for x in value["$add"]]
         if isinstance(field, F.Many2one) and isinstance(value, str):
             return self._ref_id(value)
         if isinstance(field, F._X2many) and isinstance(value, list):

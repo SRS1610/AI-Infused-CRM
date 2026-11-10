@@ -1,0 +1,41 @@
+[
+  {"id": "view_quotation_form", "model": "sale.quotation", "type": "form", "name": "sale.quotation.form", "chatter": true,
+   "root": {"kind": "sheet", "children": [
+     {"kind": "buttons", "children": [
+       {"kind": "button", "method": "action_send", "label": "Send by email", "invisible": ["state", "not_in", ["draft", "sent"]]}
+     ]},
+     {"kind": "field", "name": "name", "widget": "title", "readonly": true},
+     {"kind": "group", "name": "main", "columns": 2, "children": [
+       {"kind": "field", "name": "partner_id"}, {"kind": "field", "name": "validity_date"},
+       {"kind": "field", "name": "client_reference"}, {"kind": "field", "name": "date_order"},
+       {"kind": "field", "name": "user_id"}, {"kind": "field", "name": "currency_id"},
+       {"kind": "field", "name": "state", "readonly": true}
+     ]},
+     {"kind": "notebook", "pages": [
+       {"kind": "page", "name": "page_lines", "title": "Lines", "children": [
+         {"kind": "field", "name": "line_ids", "columns": [{"field": "product_id"}, {"field": "name"}, {"field": "quantity"}, {"field": "price_unit"}, {"field": "discount"}, {"field": "tax_percent"}, {"field": "price_subtotal"}]},
+         {"kind": "group", "name": "totals", "columns": 1, "children": [
+           {"kind": "field", "name": "amount_untaxed"}, {"kind": "field", "name": "amount_tax"}, {"kind": "field", "name": "amount_total"}
+         ]}
+       ]},
+       {"kind": "page", "name": "page_terms", "title": "Terms", "children": [{"kind": "field", "name": "note"}]},
+       {"kind": "page", "name": "page_signature", "title": "Acceptance", "children": [
+         {"kind": "field", "name": "signed_by"}, {"kind": "field", "name": "signed_at"}, {"kind": "field", "name": "signed_email"}, {"kind": "field", "name": "rejection_reason"}
+       ]}
+     ]}
+   ]}},
+  {"id": "view_quotation_list", "model": "sale.quotation", "type": "list", "name": "sale.quotation.list",
+   "columns": [{"field": "name"}, {"field": "date_order"}, {"field": "partner_id"}, {"field": "user_id"}, {"field": "validity_date"}, {"field": "amount_total", "sum": true}, {"field": "state", "widget": "badge"}]},
+  {"id": "view_quotation_kanban", "model": "sale.quotation", "type": "kanban", "name": "sale.quotation.kanban", "default_group_by": "state",
+   "root": {"kind": "card", "children": [{"kind": "field", "name": "name", "widget": "title"}, {"kind": "field", "name": "partner_id"}, {"kind": "field", "name": "amount_total"}]}},
+  {"id": "view_quotation_search", "model": "sale.quotation", "type": "search", "name": "sale.quotation.search",
+   "fields": ["name", "partner_id", "client_reference"],
+   "filters": [
+     {"name": "mine", "label": "My quotations", "domain": [["user_id", "=", "$uid"]]},
+     {"name": "sent", "label": "Waiting for the customer", "domain": [["state", "=", "sent"]]},
+     {"name": "accepted", "label": "Accepted", "domain": [["state", "=", "accepted"]]}
+   ],
+   "group_bys": [{"field": "state"}, {"field": "user_id"}, {"field": "partner_id"}]},
+  {"id": "view_quotation_pivot", "model": "sale.quotation", "type": "pivot", "name": "sale.quotation.pivot", "row": "user_id", "col": "state", "measures": ["amount_total"]},
+  {"id": "view_quotation_graph", "model": "sale.quotation", "type": "graph", "name": "sale.quotation.graph", "row": "state", "measures": ["amount_total"]}
+]

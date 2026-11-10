@@ -1,0 +1,5 @@
+[
+  {"id": "category_all", "model": "product.category", "noupdate": true, "values": {"name": "All"}},
+  {"id": "category_services", "model": "product.category", "noupdate": true, "values": {"name": "Services", "parent_id": "product.category_all"}},
+  {"id": "category_goods", "model": "product.category", "noupdate": true, "values": {"name": "Goods", "parent_id": "product.category_all"}}
+]

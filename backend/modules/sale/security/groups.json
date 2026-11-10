@@ -1,0 +1,6 @@
+[
+  {"id": "group_sale_user", "model": "core.group", "noupdate": true, "values": {"name": "Sales / Own documents", "category": "Sales", "comment": "Create quotations; see and edit their own", "implied_ids": ["core.group_user"]}},
+  {"id": "group_sale_all", "model": "core.group", "noupdate": true, "values": {"name": "Sales / All documents", "category": "Sales", "comment": "See and edit every quotation", "implied_ids": ["sale.group_sale_user"]}},
+  {"id": "group_sale_manager", "model": "core.group", "noupdate": true, "values": {"name": "Sales / Administrator", "category": "Sales", "comment": "Configure sales", "implied_ids": ["sale.group_sale_all", "product.group_product_manager"]}},
+  {"id": "core.group_system", "model": "core.group", "values": {"implied_ids": {"$add": ["sale.group_sale_manager"]}}}
+]

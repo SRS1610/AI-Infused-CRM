@@ -1,0 +1,17 @@
+name = "sale"
+version = "1.0.0"
+summary = "Quotations: lines, totals, PDF, send by email, customer acceptance online (Phase 1 subset, D-011)"
+category = "Sales"
+phase = 1
+depends = ["contacts", "product", "chatter", "workflow", "reports"]
+license = "Apache-2.0"
+installable = true
+application = true
+
+[load]
+security = ["security/groups.json", "security/access.json"]
+data = ["data/sequences.json", "data/workflow.json", "data/reports.json", "data/automations.json"]
+demo = ["data/demo/quotations.json"]
+views = ["views.json"]
+actions = "actions.json"
+menus = "menus.json"

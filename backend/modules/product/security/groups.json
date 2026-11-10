@@ -1,0 +1,3 @@
+[
+  {"id": "group_product_manager", "model": "core.group", "noupdate": true, "values": {"name": "Products / Manager", "category": "Sales", "comment": "Create and price products; see costs", "implied_ids": ["core.group_user"]}}
+]

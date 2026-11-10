@@ -1,0 +1,5 @@
+[
+  {"id": "action_products", "name": "Products", "model": "product.product", "views": ["kanban", "list", "form"], "search_view": "product.view_product_search"},
+  {"id": "action_categories", "name": "Product categories", "model": "product.category", "views": ["list", "form"]},
+  {"id": "action_uoms", "name": "Units of measure", "model": "product.uom", "views": ["list", "form"]}
+]

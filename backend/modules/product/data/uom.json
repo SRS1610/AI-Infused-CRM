@@ -1,0 +1,9 @@
+[
+  {"id": "uom_unit", "model": "product.uom", "noupdate": true, "values": {"name": "Unit(s)", "category": "unit", "factor": 1}},
+  {"id": "uom_dozen", "model": "product.uom", "noupdate": true, "values": {"name": "Dozen", "category": "unit", "factor": 12}},
+  {"id": "uom_hour", "model": "product.uom", "noupdate": true, "values": {"name": "Hour(s)", "category": "time", "factor": 1}},
+  {"id": "uom_day", "model": "product.uom", "noupdate": true, "values": {"name": "Day(s)", "category": "time", "factor": 8}},
+  {"id": "uom_kg", "model": "product.uom", "noupdate": true, "values": {"name": "kg", "category": "weight", "factor": 1}},
+  {"id": "uom_meter", "model": "product.uom", "noupdate": true, "values": {"name": "m", "category": "length", "factor": 1}},
+  {"id": "uom_liter", "model": "product.uom", "noupdate": true, "values": {"name": "L", "category": "volume", "factor": 1}}
+]

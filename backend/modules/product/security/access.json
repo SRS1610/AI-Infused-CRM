@@ -1,0 +1,11 @@
+[
+  {"id": "access_product_user", "model": "core.model_access", "values": {"name": "product: user read", "model_name": "product.product", "group_id": "core.group_user", "perm_read": true}},
+  {"id": "access_product_portal", "model": "core.model_access", "values": {"name": "product: portal read", "model_name": "product.product", "group_id": "core.group_portal", "perm_read": true}},
+  {"id": "access_product_manager", "model": "core.model_access", "values": {"name": "product: manager", "model_name": "product.product", "group_id": "product.group_product_manager", "perm_read": true, "perm_write": true, "perm_create": true, "perm_unlink": true}},
+  {"id": "access_product_system", "model": "core.model_access", "values": {"name": "product: admin", "model_name": "product.product", "group_id": "core.group_system", "perm_read": true, "perm_write": true, "perm_create": true, "perm_unlink": true}},
+  {"id": "access_category_user", "model": "core.model_access", "values": {"name": "product category: user read", "model_name": "product.category", "group_id": "core.group_user", "perm_read": true}},
+  {"id": "access_category_manager", "model": "core.model_access", "values": {"name": "product category: manager", "model_name": "product.category", "group_id": "product.group_product_manager", "perm_read": true, "perm_write": true, "perm_create": true, "perm_unlink": true}},
+  {"id": "access_uom_user", "model": "core.model_access", "values": {"name": "uom: user read", "model_name": "product.uom", "group_id": "core.group_user", "perm_read": true}},
+  {"id": "access_uom_portal", "model": "core.model_access", "values": {"name": "uom: portal read", "model_name": "product.uom", "group_id": "core.group_portal", "perm_read": true}},
+  {"id": "access_uom_manager", "model": "core.model_access", "values": {"name": "uom: manager", "model_name": "product.uom", "group_id": "product.group_product_manager", "perm_read": true, "perm_write": true, "perm_create": true, "perm_unlink": true}}
+]
