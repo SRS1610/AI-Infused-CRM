@@ -4,6 +4,7 @@ import "./calendar/CalendarAi";
 import "./contacts/ContactsAi";
 import "./studio/StudioApp";
 import "./contacts/MergeDialog";
+import "./account_reports/ReportViewer";
 import "./crm/CrmReports";
 import "./crm/AiInsights";
 import "./crm/AiAssist";

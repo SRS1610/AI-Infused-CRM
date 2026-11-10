@@ -49,7 +49,7 @@ app.add_typer(_module.app, name="module", help="Modules: scaffold, install, upgr
 app.add_typer(_jobs.app, name="jobs", help="Background jobs: run, list, requeue, tick")
 app.add_typer(_seed.app, name="seed", help="Demo data: install a phase's scenario")
 app.add_typer(_ai.app, name="ai", help="AI: evaluations, completeness report, classification, re-index")
-app.add_typer(_perf.app, name="perf", help="Performance checks: list views at volume (U-6)")
+app.add_typer(_perf.app, name="perf", help="Performance checks: list views (U-6) and financial reports (2-l) at volume")
 app.add_typer(_account.app, name="account", help="Accounting: charts of accounts, ledger integrity")
 app.command("serve")(_run.serve)
 app.command("worker")(_run.worker)
