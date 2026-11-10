@@ -230,8 +230,8 @@ def test_forecast_matches_sql_to_the_cent(env: Any) -> None:
     for month, count, pipeline, weighted in sql:
         key = month.isoformat() if month else None
         assert by_month[key]["count"] == count
-        assert by_month[key]["pipeline"] == pytest.approx(float(pipeline), abs=0.005)
-        assert by_month[key]["weighted"] == pytest.approx(float(weighted), abs=0.005)
+        assert by_month[key]["pipeline"] == pytest.approx(float(pipeline or 0), abs=0.005)
+        assert by_month[key]["weighted"] == pytest.approx(float(weighted or 0), abs=0.005)
 
 
 def test_reports_reconcile_with_read_group(env: Any) -> None:

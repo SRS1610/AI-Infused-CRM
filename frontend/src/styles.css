@@ -1979,3 +1979,122 @@ tr.clickable {
   font-size: 0.85rem;
 }
 /* ---- end Phase 1.6 Discuss / Activities AI ---- */
+
+/* ---- Phase 1.6 CRM assist (modules/crm/AiAssist.tsx) ---- */
+.form-panel:has(> .ai-panel-hidden) {
+  display: none;
+}
+.crm-assist {
+  display: grid;
+  gap: 0.5rem;
+  min-width: 0;
+}
+.crm-assist textarea,
+.crm-objection textarea {
+  width: 100%;
+  box-sizing: border-box;
+}
+.crm-call-summary ul,
+.crm-objections {
+  margin: 0.25rem 0;
+  padding-left: 1.1rem;
+}
+.crm-objection {
+  display: grid;
+  gap: 0.25rem;
+  margin-bottom: 0.5rem;
+}
+.crm-audit dl {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 0.15rem 0.75rem;
+  margin: 0.4rem 0 0;
+  font-size: 0.85rem;
+}
+.crm-audit dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+.crm-nl-search {
+  position: relative;
+}
+.crm-nl-panel {
+  min-width: min(560px, calc(100vw - 32px));
+}
+.crm-nl-form,
+.crm-nl-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+}
+.crm-nl-form .input {
+  flex: 1 1 260px;
+}
+.crm-nl-row {
+  margin: 0.25rem 0;
+}
+.crm-nl-row .input {
+  flex: 1 1 120px;
+  min-width: 0;
+}
+/* ---- end Phase 1.6 CRM assist ---- */
+
+/* ---- Phase 1.6 Calendar & Contacts AI (modules/calendar/CalendarAi.tsx, modules/contacts/ContactsAi.tsx) ---- */
+.form-panel:has(> .ai-panel-hidden) {
+  display: none;
+}
+.cal-ai,
+.contacts-ai {
+  display: grid;
+  gap: 0.5rem;
+  min-width: 0;
+}
+.cal-ai-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+}
+.cal-brief-text {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  font-size: 0.9rem;
+}
+.cal-slots,
+.contacts-ai-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 6px;
+}
+.cal-slots li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+.cal-nl {
+  position: relative;
+}
+.cal-nl-panel {
+  min-width: min(520px, calc(100vw - 32px));
+  display: grid;
+  gap: 0.5rem;
+}
+.cal-nl-input {
+  flex: 1 1 260px;
+  min-width: 0;
+}
+.cal-nl-input .input {
+  width: 100%;
+  box-sizing: border-box;
+}
+.contacts-ai-enrich {
+  display: grid;
+  gap: 0.5rem;
+  min-width: 0;
+  overflow-x: auto;
+}
+/* ---- end Phase 1.6 Calendar & Contacts AI ---- */

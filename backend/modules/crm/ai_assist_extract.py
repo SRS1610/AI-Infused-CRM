@@ -10,6 +10,7 @@ person accepts it; they get a notification linking to the lead.
 
 from __future__ import annotations
 
+import contextlib
 import datetime as dt
 import re
 from typing import TYPE_CHECKING, Any
@@ -90,21 +91,19 @@ def lead_values(env: Environment, fields: dict[str, Any]) -> dict[str, Any]:
         out["expected_revenue"] = float(revenue)
     deadline = fields.get("date_deadline")
     if isinstance(deadline, str):
-        try:
+        with contextlib.suppress(ValueError):
             out["date_deadline"] = dt.date.fromisoformat(deadline).isoformat()
-        except ValueError:
-            pass
     return out
 
 
 def _differs(current: Any, proposed: Any) -> bool:
     if hasattr(current, "_ids"):
-        return (current.ids[0] if current.ids else None) != proposed
+        return bool((current.ids[0] if current.ids else None) != proposed)
     if isinstance(current, dt.date):
-        return current.isoformat() != proposed
+        return bool(current.isoformat() != proposed)
     if isinstance(current, float | int) and isinstance(proposed, float | int):
         return abs(float(current) - float(proposed)) > 0.005
-    return (current or "") != proposed
+    return bool((current or "") != proposed)
 
 
 def changes_for(lead: Model, values: dict[str, Any]) -> dict[str, Any]:

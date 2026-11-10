@@ -95,7 +95,7 @@ def date_ranges(today: dt.date) -> dict[str, tuple[dt.date, dt.date]]:
 
 def _names(env: Environment, model: str, domain: list[Any] | None = None, limit: int = 40) -> list[str]:
     try:
-        return env[model].search(domain or [], limit=limit).mapped("display_name")
+        return [str(n) for n in env[model].search(domain or [], limit=limit).mapped("display_name")]
     except AccessError:
         return []
 
@@ -198,9 +198,12 @@ def _check_value(field: F.Field, leaf: Leaf) -> str | None:
                 dt.date.fromisoformat(str(v)[:10])
             except ValueError:
                 return f"'{leaf.path}' is a date, got {v!r}"
-        if isinstance(field, F.Selection) and isinstance(field.selection, list | tuple):
-            if v not in [k for k, _ in field.selection]:
-                return f"'{leaf.path}': {v!r} is not one of its values"
+        if (
+            isinstance(field, F.Selection)
+            and isinstance(field.selection, list | tuple)
+            and v not in [k for k, _ in field.selection]
+        ):
+            return f"'{leaf.path}': {v!r} is not one of its values"
     return None
 
 
@@ -251,7 +254,7 @@ def validate_domain(env: Environment, domain: Any) -> list[str]:
         try:
             with env.cr.savepoint():
                 env[LEAD].search_count(domain)
-        except Exception as exc:  # noqa: BLE001 - any compile/SQL error makes the domain unusable
+        except Exception as exc:  # any compile or SQL error makes the domain unusable
             errors.append(f"The filter cannot be applied: {getattr(exc, 'message', None) or type(exc).__name__}")
     return errors
 

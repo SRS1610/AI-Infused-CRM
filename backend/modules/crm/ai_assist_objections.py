@@ -26,12 +26,14 @@ if TYPE_CHECKING:
 
 FEATURE = "crm.objections"
 CLOSED: list[Any] = [("type", "=", "opportunity"), {"any": [["is_won", "=", True], ["lost", "=", True]]}]
-STOP = set(
-    "about above after again against also because been before being below between both but cannot could does doing "
-    "down during each from further have having here into itself just more most much must need only other over own "
-    "same should some such than that their them then there these they this those through under until very want "
-    "were what when where which while will with would your yours really think thing things going".split()
-)
+_STOPWORDS = """
+about above after again against also because been before being below between both but cannot could
+does doing down during each from further have having here into itself just more most much must need
+only other over own same should some such than that their them then there these they this those
+through under until very want were what when where which while will with would your yours really
+think thing things going
+"""
+STOP = frozenset(_STOPWORDS.split())
 WORD = re.compile(r"[a-zA-ZÀ-ɏ][a-zA-ZÀ-ɏ'-]{3,}")
 
 

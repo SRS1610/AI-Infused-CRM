@@ -75,7 +75,7 @@ def _value(rec: Model, name: str) -> Any:
             return ", ".join(value.mapped("display_name")) or None
         if isinstance(field, F.Html):
             return html_to_text(value or "").strip() or None
-        if isinstance(field, F.Selection):
+        if isinstance(field, F.Selection) and isinstance(field.selection, list | tuple):
             return dict(field.selection).get(value, value) if value else None
         return None if value is None or value is False or value == "" else value
     except AccessError:

@@ -688,7 +688,11 @@ class Model:
             if cur_id:
                 columns[name] = float(currencies.browse([int(cur_id)]).round(columns[name]))
 
-    def _split_vals(self, vals: Vals) -> tuple[Vals, dict[str, list[tuple[Any, ...]]], Vals]:
+    def _split_vals(
+        self, vals: Vals, defaulted: frozenset[str] | set[str] = frozenset()
+    ) -> tuple[Vals, dict[str, list[tuple[Any, ...]]], Vals]:
+        """``defaulted``: names whose values come from field defaults, not from the caller (a default on a
+        group-restricted field is the model's decision, so it is not subject to the caller's field access)."""
         columns: Vals = {}
         x2many: dict[str, list[tuple[Any, ...]]] = {}
         inverse: Vals = {}
@@ -698,7 +702,7 @@ class Model:
                 raise ValidationError(f"Unknown field '{name}' on {self._name}", field=name)
             if name == "id":
                 continue
-            if not self._check_field_access(field, "write"):
+            if name not in defaulted and not self._check_field_access(field, "write"):
                 raise AccessError(
                     f"You are not allowed to write field '{name}' of {self._name}",
                     model=self._name,
@@ -726,8 +730,9 @@ class Model:
         now = self.env.now()
         for vals in batch:
             missing = [n for n in self._fields if n not in vals]
-            vals = {**self.default_get(missing), **vals}
-            columns, x2many, inverse = self._split_vals(vals)
+            defaults = self.default_get(missing)
+            vals = {**defaults, **vals}
+            columns, x2many, inverse = self._split_vals(vals, defaulted=set(defaults))
             self._round_monetary(columns)
             for field in self._fields.values():
                 if field.required and not field.compute and field.store and field.name != "id":

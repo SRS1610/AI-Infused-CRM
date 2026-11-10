@@ -7,6 +7,7 @@ from __future__ import annotations
 import json
 import statistics
 import time
+from collections.abc import Callable
 from typing import Any
 
 import pytest
@@ -162,7 +163,7 @@ def test_intake_paths_queue_extraction_only_when_enabled(env: Any) -> None:
 
     def queued(intake: Any) -> int:
         key = f"crm.lead_extract:{intake.ids[0]}"
-        return env["core.job"].elevated().search_count([("idempotency_key", "=", key)])
+        return int(env["core.job"].elevated().search_count([("idempotency_key", "=", key)]))
 
     assert queued(intakes.create({"lead_id": lead.ids[0], "channel": "webform"})) == 1
     assert queued(intakes.create({"lead_id": lead.ids[0], "channel": "import"})) == 0
@@ -182,7 +183,7 @@ def test_webform_and_intake_api_queue_extraction(client: Any, admin: Any) -> Non
 
     url = get_settings().database_url
     with environment_for(url, SYSTEM_UID, su=True) as e:
-        token = e.ref("crm.team_sales").webform_token
+        token = e.ref("crm.team_sales").webform_token  # type: ignore[union-attr]
     resp = client.post(
         f"/api/v1/crm/webform/{token}",
         json={"name": "Wen Li", "email": "wen@li-optics.example", "company": "Li Optics", "message": "Need 4 arms"},
@@ -202,7 +203,7 @@ def test_webform_and_intake_api_queue_extraction(client: Any, admin: Any) -> Non
 
 
 def test_price_grounding_check() -> None:
-    pricing = ["- 6 × [HW-ARM6] Collaborative robot arm at 18,900.00 USD each = 113,400.00 USD\nTotal: 136,080.00 USD"]
+    pricing = ["- 6 x [HW-ARM6] Collaborative robot arm at 18,900.00 USD each = 113,400.00 USD\nTotal: 136,080.00 USD"]
     assert ungrounded_amounts("USD 18,900 each, $113,400 or 113.4k USD in total (USD 136,080 incl. tax)", pricing) == []
     assert ungrounded_amounts("A special price of USD 17,500 per arm, €2.000 off", pricing) == ["USD 17,500", "€2.000"]
     assert ungrounded_amounts("We met 6 people on 2026-11-10 at 10:30.", pricing) == []
@@ -213,7 +214,9 @@ def test_followup_draft_streams_a_message_proposal_with_price_check(env: Any) ->
     _script(env, "crm.followup_draft", {"text": "Hi Jordan,\n\nThe arms are USD 18,900 each as quoted. We can also "
             "offer a special rate of USD 15,000 for the extra cell.\n\nBest regards,\nAdministrator"})  # fmt: skip
     before = _counts(env, "crm.lead", opp.ids[0])
-    events = list(stream_feature(env, "crm.followup_draft", {}, record=opp, **HANDLERS["crm.followup_draft"](env, opp, {})))
+    events = list(
+        stream_feature(env, "crm.followup_draft", {}, record=opp, **HANDLERS["crm.followup_draft"](env, opp, {}))
+    )
     kinds = [e["event"] for e in events]
     assert kinds[0] == "start" and "delta" in kinds and kinds[-1] == "done"
     result = events[-1]["result"]
@@ -227,7 +230,9 @@ def test_followup_draft_streams_a_message_proposal_with_price_check(env: Any) ->
     assert _counts(env, "crm.lead", opp.ids[0]) == before  # nothing posted, nothing mailed
     p = env["ai_core.proposal"].browse([proposal["id"]])
     P.accept(env, p, {"body": "Hi Jordan, the arms are USD 18,900 each as quoted."})
-    posted = env["chatter.message"].elevated().search([("model", "=", "crm.lead"), ("res_id", "=", opp.ids[0])], limit=1)
+    posted = (
+        env["chatter.message"].elevated().search([("model", "=", "crm.lead"), ("res_id", "=", opp.ids[0])], limit=1)
+    )
     assert posted.ai_run_id == result["run_id"] and "18,900" in posted.body and p.state == "edited"
 
 
@@ -247,7 +252,9 @@ def test_followup_draft_through_the_chatter_api(admin: Any) -> None:
     """The path the composer's "Draft with AI" uses: SSE stream, AI-drafted until accepted, accept sends."""
     lead = admin.post(
         "/api/v1/models/crm.lead",
-        json={"values": {"name": "Composer draft", "type": "opportunity", "contact_name": "Paul Durand"}},
+        json={
+            "values": {"name": "Composer draft", "type": "lead", "contact_name": "Paul Durand", "expected_revenue": 0}
+        },
     )
     assert lead.status_code == 201, lead.text
     lead_id = int(lead.json()["id"])
@@ -259,7 +266,7 @@ def test_followup_draft_through_the_chatter_api(admin: Any) -> None:
     ) as resp:
         assert resp.status_code == 200
         events = [json.loads(line[5:]) for line in resp.iter_lines() if line.startswith("data:")]
-    assert [e["event"] for e in events][0] == "start" and events[-1]["event"] == "done"
+    assert events[0]["event"] == "start" and events[-1]["event"] == "done"
     (proposal,) = events[-1]["result"]["proposals"]
     msgs = admin.get(f"/api/v1/chatter/crm.lead/{lead_id}/messages").json()["items"]
     assert not any(m.get("ai_assisted") for m in msgs)
@@ -272,7 +279,7 @@ def test_followup_draft_through_the_chatter_api(admin: Any) -> None:
 # ------------------------------------------------------------------------------------------- call summary
 
 
-CALL = {
+CALL: dict[str, Any] = {
     "summary": "Novak Foods now wants two cells; Peter Hale (COO) decides.",
     "key_points": ["Two cells", "Budget about 120k"],
     "next_step": {"summary": "Send the two-cell proposal", "due_date": "2026-11-18"},
@@ -284,7 +291,7 @@ CALL = {
 def test_call_summary_background_job_proposes_note_fields_and_todo(env: Any, env_for: Any) -> None:
     demo = env_for("demo").with_company(env.ref("core.main_company").ids[0])
     lead = _opportunity(env, contact_name="Mia Novak").with_env(demo)
-    _script(env, "crm.call_summary", {"json": {**CALL, "fields": {**CALL["fields"], "stage": "Signed maybe"}}})
+    _script(env, "crm.call_summary", {"json": {**CALL, "fields": {**dict(CALL["fields"]), "stage": "Signed maybe"}}})
     before = _counts(env, "crm.lead", lead.ids[0])
     out = call_summary_job(demo, lead.ids[0], "Meeting with Mia and the new COO Peter Hale: two cells, ~120k.")
     assert out["status"] == "ok"
@@ -313,8 +320,10 @@ def test_call_summary_accept_some_reject_others(env: Any, env_for: Any) -> None:
     P.reject(demo, by_title["Expected revenue → 120,000.00"], "not confirmed yet")
     P.accept(demo, by_title["To-do: Send the two-cell proposal by 2026-11-18"])
     assert lead.stage_id == env.ref("crm.stage_proposition") and lead.expected_revenue == 60000
-    note = env["chatter.message"].elevated().search(
-        [("model", "=", "crm.lead"), ("res_id", "=", lead.ids[0]), ("ai_run_id", "=", run.ids[0])]
+    note = (
+        env["chatter.message"]
+        .elevated()
+        .search([("model", "=", "crm.lead"), ("res_id", "=", lead.ids[0]), ("ai_run_id", "=", run.ids[0])])
     )
     assert note.message_type == "note" and "Call summary" in note.body
     assert run.decision == "pending"  # two proposals still wait for a decision
@@ -338,7 +347,7 @@ def test_call_summary_api_queues_job_and_reports_the_run(admin: Any, app: Any) -
 
     url = get_settings().database_url
     with environment_for(url, SYSTEM_UID, su=True) as e:
-        lead_id = e.ref("crm.opp_7").ids[0]
+        lead_id = e.ref("crm.opp_7").ids[0]  # type: ignore[union-attr]
     assert admin.post(f"/api/v1/crm/ai/leads/{lead_id}/call-summary", json={"notes": "short"}).status_code == 422
     resp = admin.post(f"/api/v1/crm/ai/leads/{lead_id}/call-summary", json={"notes": "Sam confirmed the grant."})
     assert resp.status_code == 202, resp.text
@@ -438,8 +447,16 @@ def test_nl_search_166e_produces_a_reviewable_domain_that_applies(env: Any, env_
     countries = {c: env.ref(f"core.country_{c}").ids[0] for c in ("de", "us")}
     me, admin_uid = demo.uid, env.ref("core.user_admin").ids[0]
     leads = env["crm.lead"].elevated()
-    hit = leads.create({"name": "NL hit", "type": "opportunity", "expected_revenue": 25000, "user_id": me,
-                        "country_id": countries["de"], "date_deadline": mid})
+    hit = leads.create(
+        {
+            "name": "NL hit",
+            "type": "opportunity",
+            "expected_revenue": 25000,
+            "user_id": me,
+            "country_id": countries["de"],
+            "date_deadline": mid,
+        }
+    )
     misses = leads.create([
         {"name": "NL miss revenue", "type": "opportunity", "expected_revenue": 10000, "user_id": me,
          "country_id": countries["de"], "date_deadline": mid},
@@ -476,7 +493,9 @@ def test_nl_search_166e_produces_a_reviewable_domain_that_applies(env: Any, env_
 
 def test_nl_search_rejects_unknown_unreadable_and_mistyped_fields(env: Any, env_for: Any) -> None:
     demo = env_for("demo")
-    assert validate_domain(demo, [["region", "=", "EMEA"]]) == ["'region': 'region' is not a field of Lead / opportunity"]
+    assert validate_domain(demo, [["region", "=", "EMEA"]]) == [
+        "'region': 'region' is not a field of Lead / opportunity"
+    ]
     assert "you may not read 'password_hash'" in validate_domain(demo, [["user_id.password_hash", "is_set"]])[0]
     assert validate_domain(env, [["user_id.password_hash", "is_set"]]) == []  # the administrator may
     assert "is a number" in validate_domain(demo, [["expected_revenue", ">", "10k"]])[0]
@@ -504,7 +523,7 @@ def test_interactive_features_p95_under_3_seconds_on_the_mock(env: Any, env_for:
     _deals(env)
     demo = env_for("demo")
     opp = env.ref("crm.opp_1").with_env(demo)
-    runs = {
+    runs: dict[str, Callable[[], Any]] = {
         "crm.objections": lambda: run_feature(
             demo, "crm.objections", {"objection": "too expensive"}, record=opp,
             **HANDLERS["crm.objections"](demo, opp, {"objection": "too expensive"})),

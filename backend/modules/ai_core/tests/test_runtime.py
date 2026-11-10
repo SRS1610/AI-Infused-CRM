@@ -434,3 +434,18 @@ def test_builtin_read_tools(env: Any) -> None:
         B.read_record(ctx, "no.such_model", 1, None)
     with pytest.raises(AccessError):
         B.propose_write(ctx, "ai_test.ticket", t.ids[0], {"nonexistent_field": 1})
+
+
+def test_defaults_on_restricted_fields_do_not_block_create(env: Any, env_for: Any) -> None:
+    """A default on a group-restricted field is the model's decision; an explicit value still needs the group."""
+    field = env.registry.models["ai_test.ticket"]._fields["secret_note"]
+    saved = field.default
+    field.default = "set by default"
+    try:
+        demo = env_for("demo")
+        t = demo["ai_test.ticket"].create({"name": "Defaulted"})
+        assert t.elevated().secret_note == "set by default"
+        with pytest.raises(AccessError):
+            demo["ai_test.ticket"].create({"name": "Explicit", "secret_note": "nope"})
+    finally:
+        field.default = saved

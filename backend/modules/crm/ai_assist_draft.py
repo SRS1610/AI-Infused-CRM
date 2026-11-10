@@ -25,7 +25,7 @@ if TYPE_CHECKING:
     from tessera.orm.model import Model
 
 FEATURE = "crm.followup_draft"
-NUM = r"\d{1,3}(?:[,.  ' ]\d{3})+(?:[.,]\d{1,2})?|\d+(?:[.,]\d{1,2})?"
+NUM = r"\d{1,3}(?:[,.\u00a0\u202f' ]\d{3})+(?:[.,]\d{1,2})?|\d+(?:[.,]\d{1,2})?"
 CUR = r"[$€£¥₹]|\b(?:USD|EUR|GBP|CHF|JPY|INR|AUD|CAD|SGD)\b"
 CUR_AFTER = CUR + r"|\b(?:euros?|dollars?|pounds?)\b"
 SCALE = r"\s?(?:k|K|m|M|mn|million|thousand)\b"
@@ -38,17 +38,14 @@ ANY_NUMBER = re.compile(NUM)
 
 def parse_number(raw: str) -> float | None:
     """``18,900.00`` / ``18.900,00`` / ``18 900`` / ``113.4`` → float."""
-    s = re.sub(r"[  ' ]", "", raw)
+    s = re.sub(r"[\u00a0\u202f' ]", "", raw)
     if "," in s and "." in s:
         dec = "," if s.rfind(",") > s.rfind(".") else "."
         s = s.replace("." if dec == "," else ",", "").replace(dec, ".")
     elif "," in s or "." in s:
         sep = "," if "," in s else "."
         parts = s.split(sep)
-        if len(parts) == 2 and len(parts[1]) in (1, 2):
-            s = s.replace(sep, ".")
-        else:
-            s = s.replace(sep, "")
+        s = s.replace(sep, ".") if len(parts) == 2 and len(parts[1]) in (1, 2) else s.replace(sep, "")
     try:
         return float(s)
     except ValueError:
@@ -97,7 +94,7 @@ def quotation_sources(env: Environment, lead: Model, limit: int = 3) -> list[Sou
                 continue
             what = line.product_id.display_name if line.product_id else (line.name or "").split("\n")[0]
             qty = f"{line.quantity:g}"
-            text = f"- {qty} × {what} at {money(line.price_unit, cur)} each"
+            text = f"- {qty} x {what} at {money(line.price_unit, cur)} each"
             if line.discount:
                 text += f", discount {line.discount:g}%"
             text += f" = {money(line.price_subtotal, cur)}" + (" (optional)" if line.is_optional else "")

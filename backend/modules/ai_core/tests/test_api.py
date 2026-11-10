@@ -184,3 +184,15 @@ def test_cost_dashboard_matches_ledger_to_the_cent(admin: Session) -> None:
     draft = next(r for (c, f), r in rows.items() if f == "ai_test.draft")
     assert draft["acceptance_rate"] is not None and draft["feature_title"] == "Draft a reply"
     assert draft["latency_p95"] >= draft["latency_p50"]
+
+
+def test_run_content_only_for_its_owner(admin: Session, app: Any) -> None:
+    """Someone who can read the record sees the audit skeleton of another user's run, never its output."""
+    tid = _ticket(admin)
+    run_id = admin.post(
+        "/api/v1/ai/features/ai_test.draft/run", json={"res_model": "ai_test.ticket", "res_id": tid}
+    ).json()["run_id"]
+    demo = Session(TestClient(app, base_url="http://localhost"), "demo", "demo1234")
+    seen = demo.get(f"/api/v1/ai/runs/{run_id}").json()
+    assert seen["feature"] == "ai_test.draft" and "output_text" not in seen and "proposals" not in seen
+    assert "output_text" in admin.get(f"/api/v1/ai/runs/{run_id}").json()

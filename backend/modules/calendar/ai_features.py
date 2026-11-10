@@ -449,7 +449,7 @@ def suggest_times_entry(env: Environment, inputs: dict[str, Any], record: Model 
     pids = list(found["searched"]["attendees"])
     data = dict(inputs)
     if record is not None:
-        data.setdefault("duration_minutes", int(round((record.duration or 0.5) * 60)))
+        data.setdefault("duration_minutes", round((record.duration or 0.5) * 60))
         data.setdefault("exclude_event_id", record.ids[0])
         if record.room_id and "room_id" not in data:
             data["room_id"] = record.room_id.ids[0]

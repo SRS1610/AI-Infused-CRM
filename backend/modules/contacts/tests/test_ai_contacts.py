@@ -49,7 +49,7 @@ def _ids(env: Any) -> tuple[int, int]:
 def _counts(env: Any) -> dict[str, int]:
     env.flush()
     return {
-        t: int(env.cr.scalar(f"SELECT count(*) FROM {t}") or 0)  # noqa: S608
+        t: int(env.cr.scalar(f"SELECT count(*) FROM {t}") or 0)
         for t in ("contacts_partner", "contacts_partner__tag_ids", "contacts_merge_log", "core_mail_queue")
     } | {"active": int(env.cr.scalar("SELECT count(*) FROM contacts_partner WHERE active") or 0)}
 
@@ -121,7 +121,9 @@ def test_merge_is_a_proposal_until_accepted(env: Any, env_for: Any) -> None:
     main, _eu = _ids(env)
     other = partners.create({"name": "Brightwater Analytics", "is_company": True, "company_id": main})
     marie = env_for("marie").with_company(env.ref("core.demo_company_eu").ids[0])
-    mine = partners.create({"name": "Brightwater", "is_company": True, "company_id": env.ref("core.demo_company_eu").ids[0]})
+    mine = partners.create(
+        {"name": "Brightwater", "is_company": True, "company_id": env.ref("core.demo_company_eu").ids[0]}
+    )
     with pytest.raises(AccessError):
         D.propose_merge(marie, mine.with_env(marie), [other.ids[0]])
 
@@ -130,15 +132,19 @@ def test_duplicate_check_runs_in_background_and_notifies(env: Any, env_for: Any)
     demo = env_for("demo")
     partners = env["contacts.partner"].elevated()
     partners.create({"name": "Saltmarsh Brewing", "is_company": True, "city": "Whitby", "email": "hi@saltmarsh.test"})
-    new = demo["contacts.partner"].create({"name": "The Saltmarsh Brewery", "is_company": True, "email": "x@saltmarsh.test"})
+    new = demo["contacts.partner"].create(
+        {"name": "The Saltmarsh Brewery", "is_company": True, "email": "x@saltmarsh.test"}
+    )
     jobs = env["core.job"].elevated().search([("name", "=", "contacts.check_duplicates")], order="id desc", limit=1)
     assert jobs and jobs.kwargs == {"partner_id": new.ids[0]} and jobs.user_id.ids == [demo.uid]
     assert A.check_duplicates_job(demo, new.ids[0]) == 1
     note = env["core.notification"].elevated().search([("user_id", "=", demo.uid)], limit=1)
     assert note.title.startswith("Possible duplicate") and note.url == f"/m/contacts.partner/{new.ids[0]}"
     # system-created contacts (imports, users) are not checked in the background
+    jobs = env["core.job"].elevated()
+    queued = jobs.search_count([("name", "=", "contacts.check_duplicates")])
     partners.create({"name": "Imported Co", "is_company": True})
-    assert env["core.job"].elevated().search_count([("name", "=", "contacts.check_duplicates")]) == 1
+    assert jobs.search_count([("name", "=", "contacts.check_duplicates")]) == queued
     # switched off for the company: no work, no notification
     feature = env["ai_core.feature"].search([("name", "=", D.FEATURE)])
     feature.set_enabled(env.ref("core.main_company").ids[0], False)
@@ -169,13 +175,19 @@ def test_tag_suggestions_are_a_write_proposal(env: Any, env_for: Any) -> None:
     _script(env, [{"match": {"feature": A.TAG_FEATURE}, "respond": {"json": _tag_answer(
         [("Supplier", 0.9), ("Imaginary", 0.8), ("VIP", 0.3)], company.ids[0])}}])  # fmt: skip
     kwargs = HANDLERS[A.TAG_FEATURE](demo, lena.with_env(demo), {})
-    assert {s.id for s in kwargs["sources"]} >= {f"contacts.partner:{lena.ids[0]}", f"contacts.partner:{company.ids[0]}"}
+    assert {s.id for s in kwargs["sources"]} >= {
+        f"contacts.partner:{lena.ids[0]}",
+        f"contacts.partner:{company.ids[0]}",
+    }
     before = _counts(env)
     result = run_feature(demo, A.TAG_FEATURE, {}, record=lena.with_env(demo), **kwargs)
     (proposal,) = result.proposals
     assert [s["name"] for s in result.data["suggested"]] == ["Supplier", "VIP"]
     assert {"name": "Imaginary", "why": "not an existing tag"} in result.data["dropped"]
-    assert proposal.kind == "write" and proposal.payload == {"tag_ids": [["add", supplier.ids[0]]], "parent_id": company.ids[0]}
+    assert proposal.kind == "write" and proposal.payload == {
+        "tag_ids": [["add", supplier.ids[0]]],
+        "parent_id": company.ids[0],
+    }
     assert _counts(env) == before and not lena.tag_ids and not lena.parent_id
     P.accept(demo, proposal)
     assert lena.tag_ids == supplier and lena.parent_id == company
@@ -186,14 +198,22 @@ def test_tag_context_and_parent_never_cross_companies(env: Any, env_for: Any) ->
     partners = env["contacts.partner"].elevated()
     vip = env.ref("contacts.tag_vip")
     hidden = partners.create(
-        {"name": "Rosehip Board", "is_company": True, "email": "board@rosehip.test", "company_id": main, "tag_ids": [vip.ids[0]]}
+        {
+            "name": "Rosehip Board",
+            "is_company": True,
+            "email": "board@rosehip.test",
+            "company_id": main,
+            "tag_ids": [vip.ids[0]],
+        }
     )
     me = partners.create({"name": "Rosa Petal", "email": "rosa@rosehip.test", "company_id": eu})
     marie = env_for("marie").with_company(eu)
     kwargs = HANDLERS[A.TAG_FEATURE](marie, me.with_env(marie), {})
     assert all(s.res_id != hidden.ids[0] for s in kwargs["sources"])
     assert "Rosehip Board" not in json.dumps([s.text for s in kwargs["sources"]])
-    _script(env, [{"match": {"feature": A.TAG_FEATURE}, "respond": {"json": _tag_answer([("VIP", 0.99)], hidden.ids[0])}}])
+    _script(
+        env, [{"match": {"feature": A.TAG_FEATURE}, "respond": {"json": _tag_answer([("VIP", 0.99)], hidden.ids[0])}}]
+    )
     result = run_feature(marie, A.TAG_FEATURE, {}, record=me.with_env(marie), **kwargs)
     assert result.data["parent"] is None and result.data["payload"] == {"tag_ids": [["add", vip.ids[0]]]}
     assert "Rosehip Board" not in json.dumps(MockAdapter.captured)
@@ -216,7 +236,7 @@ def test_tag_suggestion_latency_p95_on_mock(env: Any, env_for: Any) -> None:
 
 
 def test_adapter_registry_and_approval(env: Any, env_for: Any) -> None:
-    main, eu = _ids(env)
+    _main, eu = _ids(env)
     assert "fixture" in E.ADAPTERS
     sources = env["contacts.enrichment_source"].elevated()
     demo_source = env.ref("contacts.enrichment_source_fixture")
@@ -248,12 +268,23 @@ def _enrich_answer(src: int, **values: str) -> dict[str, Any]:
 def test_enrichment_suggestions_carry_sources_and_wait_for_accept(env: Any, env_for: Any) -> None:
     demo = env_for("demo")
     src = env.ref("contacts.enrichment_source_fixture").ids[0]
-    partner = env["contacts.partner"].elevated().create(
-        {"name": "Northwind Traders", "is_company": True, "email": "sales@northwind-traders.test", "city": "Bristol"}
+    partner = (
+        env["contacts.partner"]
+        .elevated()
+        .create(
+            {
+                "name": "Northwind Traders",
+                "is_company": True,
+                "email": "sales@northwind-traders.test",
+                "city": "Bristol",
+            }
+        )
     )
     answer = _enrich_answer(src, website="https://northwind-traders.test", phone="+44 117 496 0321",
                             country="GB", industry="Retail & wholesale", street="99 Invented Street", city="Bristol")  # fmt: skip
-    answer["suggestions"].append({"field": "vat", "value": "GB451287700", "source": f"contacts.partner:{partner.ids[0]}", "evidence": "x"})
+    answer["suggestions"].append(
+        {"field": "vat", "value": "GB451287700", "source": f"contacts.partner:{partner.ids[0]}", "evidence": "x"}
+    )
     _script(env, [{"match": {"feature": A.ENRICH_FEATURE}, "respond": {"json": answer}}])
     before = _counts(env)
     kwargs = HANDLERS[A.ENRICH_FEATURE](demo, partner.with_env(demo), {})
@@ -263,7 +294,11 @@ def test_enrichment_suggestions_carry_sources_and_wait_for_accept(env: Any, env_
     assert set(kept) == {"website", "phone", "country", "industry"}
     assert all(s["source_url"].startswith("https://registry.fixture.test/") for s in kept.values())
     why = {d["field"]: d["why"] for d in result.data["dropped"]}
-    assert why == {"street": "value not found in the cited source", "city": "already set", "vat": "no approved source cited"}
+    assert why == {
+        "street": "value not found in the cited source",
+        "city": "already set",
+        "vat": "no approved source cited",
+    }
     (proposal,) = result.proposals
     gb = env.ref("core.country_gb").ids[0]
     assert proposal.payload == {"website": "https://northwind-traders.test", "phone": "+44 117 496 0321",
@@ -285,10 +320,15 @@ def test_enrichment_without_approved_adapter_sends_nothing_outside(env: Any, env
 def test_enrichment_job_notifies_with_link(env: Any, env_for: Any) -> None:
     demo = env_for("demo")
     src = env.ref("contacts.enrichment_source_fixture").ids[0]
-    partner = env["contacts.partner"].elevated().create(
-        {"name": "Woodgrove Bank", "is_company": True, "email": "it@woodgrove-bank.test"}
+    partner = (
+        env["contacts.partner"]
+        .elevated()
+        .create({"name": "Woodgrove Bank", "is_company": True, "email": "it@woodgrove-bank.test"})
     )
-    _script(env, [{"match": {"feature": A.ENRICH_FEATURE}, "respond": {"json": _enrich_answer(src, city="Zurich", zip="8001")}}])
+    _script(
+        env,
+        [{"match": {"feature": A.ENRICH_FEATURE}, "respond": {"json": _enrich_answer(src, city="Zurich", zip="8001")}}],
+    )
     out = A.enrich_partner_job(demo, partner.ids[0])
     assert out["suggestions"] == 2
     note = env["core.notification"].elevated().search([("user_id", "=", demo.uid)], limit=1)
@@ -312,7 +352,10 @@ def test_api_duplicates_merge_proposal_enrich_and_flags(admin: Session, app: Any
     assert found.status_code == 200 and {"candidates", "duplicates", "embedding"} <= set(found.json())
     prop = admin.post(f"/api/v1/contacts/{jordan}/ai/duplicates/propose-merge", json={"ids": [acme]})
     assert prop.status_code == 201 and prop.json()["kind"] == "action" and prop.json()["state"] == "pending"
-    assert admin.post(f"/api/v1/ai/proposals/{prop.json()['id']}/reject", json={"reason": "not the same"}).status_code == 200
+    assert (
+        admin.post(f"/api/v1/ai/proposals/{prop.json()['id']}/reject", json={"reason": "not the same"}).status_code
+        == 200
+    )
     queued = admin.post(f"/api/v1/contacts/{acme}/ai/enrich")
     assert queued.status_code == 202 and queued.json()["state"] == "queued"
     adapters = admin.get("/api/v1/contacts/ai/enrichment-adapters").json()

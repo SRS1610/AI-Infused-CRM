@@ -180,7 +180,10 @@ def _visible_run(ctx: RequestContext, run_id: int) -> Any:
 
 @router.get("/runs/{run_id}")
 def get_run(run_id: int, ctx: RequestContext = Depends(authenticated)) -> dict[str, Any]:
-    return _run_dict(_visible_run(ctx, run_id), full=True)
+    """Owners and administrators see the content; others who can read the record see only the audit
+    skeleton (the output may contain facts from records they cannot read)."""
+    run = _visible_run(ctx, run_id)
+    return _run_dict(run, full=run.user_id.ids[:1] == [ctx.env.uid] or _is_admin(ctx))
 
 
 @router.get("/runs")

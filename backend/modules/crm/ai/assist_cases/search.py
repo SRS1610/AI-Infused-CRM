@@ -1,3 +1,4 @@
+# ruff: noqa: E501 - hand-authored case data (prose)
 """crm.nl_search — 34 searches over a fixed set of 19 fixture leads.
 
 Each case creates the fixture leads (names start with ``[nlq]``) and saves the reference domain as a
@@ -183,7 +184,9 @@ CASES: list[tuple[str, str, list[dict[str, Any]], Any, str, str, list[str]]] = [
 
 def _domain(conditions: list[dict[str, Any]], match: str = "all") -> Any:
     leaves = [
-        [x["field"], x["operator"]] if x["operator"] in ("is_set", "is_not_set") else [x["field"], x["operator"], x["value"]]
+        [x["field"], x["operator"]]
+        if x["operator"] in ("is_set", "is_not_set")
+        else [x["field"], x["operator"], x["value"]]
         for x in conditions
     ]
     return {"any": leaves} if match == "any" and len(leaves) > 1 else leaves
@@ -203,5 +206,7 @@ def build() -> tuple[str, list[dict[str, Any]], list[dict[str, Any]]]:
             "inputs": {"query": query}, "expected": {"max_proposals": 0},
         })  # fmt: skip
         conditions = answer if answer is not None else reference
-        tape.append(entry(PV, cid, 0, structured({"match": match, "conditions": conditions, "explanation": explanation})))
+        tape.append(
+            entry(PV, cid, 0, structured({"match": match, "conditions": conditions, "explanation": explanation}))
+        )
     return "crm.nl_search", cases, tape
