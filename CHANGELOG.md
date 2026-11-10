@@ -4,6 +4,29 @@ All notable changes are recorded here, grouped by phase. Format follows [Keep a 
 
 ## [Unreleased] — Phase 1 in progress
 
+### Sub-phase 1.6 — Phase 1 AI features
+Twenty-one features, each with a manifest entry, prompt, kill switch, evaluation set with
+prompt-injection cases, replay recordings where a model is called, and tests that nothing changes
+until a person accepts the proposal (D-058 explains what the scores measure).
+- Discuss: channel and thread summary with cited messages, "Catch me up" across unread channels,
+  streamed reply draft, message translation (chrF measured against references).
+- Activities: AI-ranked daily to-do with reasons and a morning notification.
+- Calendar: meeting brief before each meeting (only facts the attendee may read), suggested meeting
+  times, scheduling from plain text into a reviewable event.
+- Contacts: duplicate detection (rules, trigram and embeddings) with a merge proposal, tag and parent
+  suggestions, enrichment through approved adapters with a source on every value (D-057).
+- CRM: per-company lead scoring with the top factors and a "why" panel and no protected attributes,
+  next-best-action, deal-risk alerts, lead routing (bulk review), forecast with P10/P50/P90 ranges
+  (D-056); lead extraction from intake e-mails and forms, streamed follow-up drafts whose prices must come
+  from quotations or products, call-notes summary with per-field proposals and audit trail, objection
+  handling with cited past deals, natural-language search turned into a reviewable filter.
+- Platform fixes found on the way: notifications open their link; evaluation cases may only watch real
+  models (outbound mail is `core.mail_queue`); test-database rebuilds drop the gateway ledger; other
+  users see only the audit skeleton of a run; defaults on group-restricted fields no longer block create.
+- Client: form side panels (`registerFormPanel`) and search-bar add-ons (`registerSearchAddon`).
+- Tests: backend 422 (coverage 87 %), frontend 102 (coverage 90 %), Playwright AI scenarios on desktop
+  and mobile (first streamed token under 1.5 s, AI-drafted label until edited, kill switch).
+
 ### Sub-phase 1.5 — AI platform
 - AI gateway service (`gateway/`): provider adapters for Anthropic, OpenAI, Azure OpenAI, Google Gemini,
   OpenAI-compatible self-hosted servers (vLLM, Ollama), Voyage embeddings and a deterministic mock;
