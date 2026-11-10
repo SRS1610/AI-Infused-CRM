@@ -151,7 +151,7 @@ class Move(Model):
         "Amount due (company currency)", currency_field="company_currency_id", readonly=True, copy=False
     )
     payment_state = fields.Selection(
-        PAYMENT_STATES, default="not_paid", readonly=True, copy=False, tracking=True, index=True
+        PAYMENT_STATES, "Payment status", default="not_paid", readonly=True, copy=False, tracking=True, index=True
     )
     reversed_entry_id = fields.Many2one("account.move", "Reversal of", readonly=True, copy=False, ondelete="set_null")
     reversal_move_ids = fields.One2many("account.move", "reversed_entry_id", "Reversals")

@@ -172,19 +172,39 @@
      "children": [
       {
        "kind": "field",
-       "name": "partner_id"
+       "name": "partner_id",
+       "readonly_if": [
+        "state",
+        "!=",
+        "draft"
+       ]
       },
       {
        "kind": "field",
-       "name": "invoice_date"
+       "name": "invoice_date",
+       "readonly_if": [
+        "state",
+        "!=",
+        "draft"
+       ]
       },
       {
        "kind": "field",
-       "name": "payment_reference"
+       "name": "payment_reference",
+       "readonly_if": [
+        "state",
+        "!=",
+        "draft"
+       ]
       },
       {
        "kind": "field",
-       "name": "payment_term_id"
+       "name": "payment_term_id",
+       "readonly_if": [
+        "state",
+        "!=",
+        "draft"
+       ]
       },
       {
        "kind": "field",
@@ -192,15 +212,30 @@
       },
       {
        "kind": "field",
-       "name": "invoice_date_due"
+       "name": "invoice_date_due",
+       "readonly_if": [
+        "state",
+        "!=",
+        "draft"
+       ]
       },
       {
        "kind": "field",
-       "name": "journal_id"
+       "name": "journal_id",
+       "readonly_if": [
+        "state",
+        "!=",
+        "draft"
+       ]
       },
       {
        "kind": "field",
-       "name": "currency_id"
+       "name": "currency_id",
+       "readonly_if": [
+        "state",
+        "!=",
+        "draft"
+       ]
       },
       {
        "kind": "field",
@@ -270,6 +305,11 @@
           {
            "field": "price_subtotal"
           }
+         ],
+         "readonly_if": [
+          "state",
+          "!=",
+          "draft"
          ]
         },
         {
@@ -350,23 +390,48 @@
          "children": [
           {
            "kind": "field",
-           "name": "invoice_user_id"
+           "name": "invoice_user_id",
+           "readonly_if": [
+            "state",
+            "!=",
+            "draft"
+           ]
           },
           {
            "kind": "field",
-           "name": "fiscal_position_id"
+           "name": "fiscal_position_id",
+           "readonly_if": [
+            "state",
+            "!=",
+            "draft"
+           ]
           },
           {
            "kind": "field",
-           "name": "invoice_origin"
+           "name": "invoice_origin",
+           "readonly_if": [
+            "state",
+            "!=",
+            "draft"
+           ]
           },
           {
            "kind": "field",
-           "name": "date"
+           "name": "date",
+           "readonly_if": [
+            "state",
+            "!=",
+            "draft"
+           ]
           },
           {
            "kind": "field",
-           "name": "auto_post_date"
+           "name": "auto_post_date",
+           "readonly_if": [
+            "state",
+            "!=",
+            "draft"
+           ]
           },
           {
            "kind": "field",
@@ -374,7 +439,12 @@
           },
           {
            "kind": "field",
-           "name": "company_id"
+           "name": "company_id",
+           "readonly_if": [
+            "state",
+            "!=",
+            "draft"
+           ]
           }
          ]
         },
@@ -479,11 +549,21 @@
      "children": [
       {
        "kind": "field",
-       "name": "date"
+       "name": "date",
+       "readonly_if": [
+        "state",
+        "!=",
+        "draft"
+       ]
       },
       {
        "kind": "field",
-       "name": "journal_id"
+       "name": "journal_id",
+       "readonly_if": [
+        "state",
+        "!=",
+        "draft"
+       ]
       },
       {
        "kind": "field",
@@ -491,11 +571,21 @@
       },
       {
        "kind": "field",
-       "name": "partner_id"
+       "name": "partner_id",
+       "readonly_if": [
+        "state",
+        "!=",
+        "draft"
+       ]
       },
       {
        "kind": "field",
-       "name": "currency_id"
+       "name": "currency_id",
+       "readonly_if": [
+        "state",
+        "!=",
+        "draft"
+       ]
       },
       {
        "kind": "field",
@@ -553,6 +643,11 @@
           {
            "field": "date_maturity"
           }
+         ],
+         "readonly_if": [
+          "state",
+          "!=",
+          "draft"
          ]
         }
        ]

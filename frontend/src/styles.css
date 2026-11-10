@@ -719,6 +719,9 @@ kbd {
   flex-direction: column;
   gap: 10px;
 }
+.tab-panel[hidden] {
+  display: none;
+}
 .thumb {
   max-width: 96px;
   max-height: 96px;
