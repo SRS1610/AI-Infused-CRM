@@ -2240,3 +2240,90 @@ tr.clickable {
 .workflow-diagram .badge {
   margin-left: 6px;
 }
+/* bank reconciliation (account_bank) */
+.bank-reconcile .toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 12px;
+}
+.bank-reconcile-panes {
+  display: grid;
+  grid-template-columns: minmax(280px, 2fr) minmax(320px, 3fr);
+  gap: 16px;
+  align-items: start;
+}
+@media (max-width: 900px) {
+  .bank-reconcile-panes {
+    grid-template-columns: 1fr;
+  }
+}
+.bank-line-list,
+.bank-suggestions {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 6px;
+}
+.bank-line {
+  display: grid;
+  grid-template-columns: auto 1fr auto auto;
+  gap: 4px 10px;
+  width: 100%;
+  text-align: left;
+  padding: 8px 10px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text);
+  cursor: pointer;
+}
+.bank-line.active {
+  border-color: var(--primary);
+  background: var(--primary-soft);
+}
+.bank-line .partner {
+  grid-column: 2;
+}
+.bank-line .negative {
+  color: var(--danger);
+}
+.bank-suggestion {
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  display: grid;
+  gap: 4px;
+}
+.bank-line-summary {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 2px 12px;
+  margin: 0 0 8px;
+}
+.bank-line-summary dt {
+  color: var(--text-muted);
+}
+.bank-line-summary dd {
+  margin: 0;
+}
+.bank-writeoff {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: end;
+}
+.bank-writeoff label {
+  display: grid;
+  gap: 2px;
+}
+/* portal invoice page (payment) */
+.portal-invoice .pay {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  margin: 12px 0;
+}
