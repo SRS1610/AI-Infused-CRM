@@ -26,7 +26,11 @@ msgid ""
 "Peppol electronic address scheme (EAS): 0088 GLN, 0060 DUNS, 0009 FR SIRET, 0208 BE enterprise "
 "number, 0192 NO organisation number, 0007 SE organisation number, 0106 NL KvK, 0204 DE Leitweg-"
 "ID, 9957 FR VAT, 9925 BE VAT, 9930 DE VAT, 9944 NL VAT, 9914 AT VAT, 9920 ES VAT, 0211 IT VAT …"
-msgstr "Schéma d'adresse électronique Peppol (EAS) : 0088 GLN, 0060 DUNS, 0009 SIRET (FR), 0208 numéro d'entreprise (BE), 0192 numéro d'organisation (NO), 0007 numéro d'organisation (SE), 0106 KvK (NL), 0204 Leitweg-ID (DE), 9957 TVA FR, 9925 TVA BE, 9930 TVA DE, 9944 TVA NL, 9914 TVA AT, 9920 TVA ES, 0211 TVA IT …"
+msgstr ""
+"Schéma d'adresse électronique Peppol (EAS) : 0088 GLN, 0060 DUNS, 0009 SIRET (FR), 0208 numéro "
+"d'entreprise (BE), 0192 numéro d'organisation (NO), 0007 numéro d'organisation (SE), 0106 KvK "
+"(NL), 0204 Leitweg-ID (DE), 9957 TVA FR, 9925 TVA BE, 9930 TVA DE, 9944 TVA NL, 9914 TVA AT, 9920"
+" TVA ES, 0211 TVA IT …"
 
 #. field label
 #: field:contacts.partner.peppol_endpoint field:core.company.peppol_endpoint

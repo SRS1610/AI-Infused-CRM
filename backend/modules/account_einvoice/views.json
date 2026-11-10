@@ -36,6 +36,13 @@
      {"op": "insert_after", "anchor": {"field": "vat"}, "node": {"kind": "field", "name": "peppol_eas"}},
      {"op": "insert_after", "anchor": {"field": "peppol_eas"}, "node": {"kind": "field", "name": "peppol_endpoint"}}
    ]},
+  {"id": "view_company_form_peppol", "model": "core.company", "type": "form", "name": "core.company.form.peppol", "inherit": "web.view_company_form",
+   "operations": [
+     {"op": "insert_after", "anchor": {"field": "vat"}, "node": {"kind": "field", "name": "company_registry"}},
+     {"op": "insert_after", "anchor": {"field": "company_registry"}, "node": {"kind": "field", "name": "peppol_eas"}},
+     {"op": "insert_after", "anchor": {"field": "peppol_eas"}, "node": {"kind": "field", "name": "peppol_endpoint"}},
+     {"op": "insert_after", "anchor": {"field": "peppol_endpoint"}, "node": {"kind": "field", "name": "peppol_access_point"}}
+   ]},
   {"id": "view_mock_transmission_list", "model": "account.edi_mock_transmission", "type": "list", "name": "account.edi_mock_transmission.list",
    "columns": [{"field": "create_date"}, {"field": "transmission_id"}, {"field": "sender"}, {"field": "receiver"}, {"field": "document_type"}, {"field": "state"}, {"field": "picked_up"}]}
 ]

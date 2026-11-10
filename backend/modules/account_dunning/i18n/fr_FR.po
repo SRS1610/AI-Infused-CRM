@@ -86,7 +86,9 @@ msgstr "Message"
 msgid ""
 "Placeholders: {partner}, {company}, {amount_due}, {level}, {max_days}, {count}. The list of "
 "overdue invoices and their pay links is added below the message."
-msgstr "Variables : {partner}, {company}, {amount_due}, {level}, {max_days}, {count}. La liste des factures échues et leurs liens de paiement est ajoutée sous le message."
+msgstr ""
+"Variables : {partner}, {company}, {amount_due}, {level}, {max_days}, {count}. La liste des "
+"factures échues et leurs liens de paiement est ajoutée sous le message."
 
 #. field label
 #: field:account.dunning_level.company_id field:account.dunning_run.company_id

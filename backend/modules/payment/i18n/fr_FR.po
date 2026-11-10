@@ -357,7 +357,9 @@ msgstr "Impossible d'attribuer une référence de transaction"
 
 #: service.py:54
 msgid "These invoices cannot be paid online (already paid, draft or not invoices)"
-msgstr "Ces factures ne peuvent pas être payées en ligne (déjà payées, en brouillon ou qui ne sont pas des factures)"
+msgstr ""
+"Ces factures ne peuvent pas être payées en ligne (déjà payées, en brouillon ou qui ne sont pas "
+"des factures)"
 
 #: service.py:56
 msgid "Invoices of different companies or currencies are paid separately"

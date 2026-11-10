@@ -37,6 +37,39 @@ All notable changes are recorded here, grouped by phase. Format follows [Keep a 
   New *Catalogue* menu; demo T-shirt variants and *Wholesale* / *Europe (EUR)* lists. `tessera db migrate`
   types existing units.
 
+### Sub-phase 2.3 — Bank, payments, dunning, e-invoicing
+- **Bank statements (`account_bank` 1.0.0, 2-d).** Statements and transactions per bank / cash journal;
+  posting books bank ↔ suspense, matching replaces the suspense item with counterparts on open invoices,
+  bills, credit notes or outstanding payments (partial matches leave the rest open; foreign items get their
+  exchange difference) and write-offs with optional tax, through draft → post of the transaction's entry;
+  undo restores the suspense item. Import of CAMT.053 (`.001.02`–`.08`, batched entries, references,
+  counterparty, instructed currency), OFX 1.x/2.x, MT940 (multi-statement, multi-line `:86:`) and CSV
+  (header detection, column mapping, date / decimal formats, debit / credit columns) with balance checks and
+  duplicate skipping (`UNIQUE (journal_id, unique_import_id)`); `POST /api/v1/account_bank/import`,
+  `tessera account import-statement FILE --journal CODE`. Reconciliation rules (invoice matching with
+  references, partner, amount and tolerance; write-off suggestions by label, amount, partner) shipped per
+  company, `suggest_matches()` with scores and reason codes, automatic reconciliation after import, from a
+  button and hourly. Reconciliation screen (*Accounting → Bank → Reconcile*). The demo CAMT.053 statement is
+  reconciled for more than 90 % by the shipped rules. Guide: [docs/admin/bank.md](docs/admin/bank.md).
+- **Online payments (`payment` 1.0.0, 2-j).** Payment providers (Stripe over its REST API with `httpx`,
+  and a test provider) with encrypted credentials, transactions, saved payment methods, notifications
+  recorded once per `(provider, event id)` so a replayed webhook is a no-op; `Stripe-Signature`
+  verification (HMAC-SHA256, 5-minute tolerance). *Pay now* on the customer invoice page
+  (`/portal/invoices/<id>`), confirmed payments booked in the provider's journal and matched with the
+  invoice; failed and cancelled payments keep the provider's message; token charges and refunds.
+  Guide: [docs/admin/payments.md](docs/admin/payments.md).
+- **Payment reminders (`account_dunning` 1.0.0).** Dunning levels per company (days overdue, email,
+  letter, fee); runs find each customer's overdue undisputed invoices (not *In payment*, not excluded),
+  never send a level twice within its delay, queue emails with the invoice list and pay links, create fee
+  invoices and print letters; daily job; replaceable message renderer for the AI feature of 2.6.
+  Guide: [docs/admin/dunning.md](docs/admin/dunning.md).
+- **E-invoicing (`account_einvoice` 1.0.0, 2-h).** UBL 2.1 Invoice / CreditNote per Peppol BIS Billing 3.0
+  (endpoints, VAT categories S/Z/E/AE/K/G with VATEX reasons, payment means, price allowances, tax currency)
+  validated with the vendored OASIS UBL 2.1 schemas, the CEN EN 16931 rules and the OpenPeppol BIS 3
+  schematron run by Saxon-HE (`saxonche`, new dependency); structured findings on `account.edi_document`;
+  *Send via Peppol*, a mock access point that delivers and receives, inbound documents as draft vendor
+  bills, status poll every 20 minutes. Guide: [docs/admin/einvoicing.md](docs/admin/einvoicing.md).
+
 ### Sub-phase 2.7 — SAML single sign-on
 - **SAML 2.0 single sign-on (`auth_saml`, D-013, D-069).** Administrators add SAML identity providers under
   Settings → Users & Companies; the login page offers them next to OIDC. Service-provider initiated login

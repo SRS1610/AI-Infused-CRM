@@ -173,7 +173,9 @@ msgstr "Chercher les références dans le libellé"
 #. field help
 #: field:account.reconcile_model.match_text_location
 msgid "Look for invoice numbers and payment references in the transaction's label and references"
-msgstr "Rechercher les numéros de facture et les références de paiement dans le libellé et les références de l'opération"
+msgstr ""
+"Rechercher les numéros de facture et les références de paiement dans le libellé et les références"
+" de l'opération"
 
 #. field label
 #: field:account.reconcile_model.match_same_amount
@@ -286,7 +288,9 @@ msgstr "Options d'import CSV"
 msgid ""
 "Remembered CSV layout, e.g. {\"columns\": {\"date\": \"Booking date\", \"amount\": \"Amount\"}, "
 "\"date_format\": \"%d/%m/%Y\"}"
-msgstr "Disposition CSV mémorisée, par ex. {\"columns\": {\"date\": \"Booking date\", \"amount\": \"Amount\"}, \"date_format\": \"%d/%m/%Y\"}"
+msgstr ""
+"Disposition CSV mémorisée, par ex. {\"columns\": {\"date\": \"Booking date\", \"amount\": "
+"\"Amount\"}, \"date_format\": \"%d/%m/%Y\"}"
 
 #. field label
 #: field:account.move.statement_line_id
@@ -617,7 +621,9 @@ msgstr "Le fichier est vide"
 msgid ""
 "Statement {name}: the opening balance {start} plus the transactions ({total}) does not equal the "
 "closing balance {end}"
-msgstr "Relevé {name} : le solde d'ouverture {start} plus les opérations ({total}) n'est pas égal au solde de clôture {end}"
+msgstr ""
+"Relevé {name} : le solde d'ouverture {start} plus les opérations ({total}) n'est pas égal au "
+"solde de clôture {end}"
 
 #: importers/base.py:142
 #, python-brace-format
@@ -627,7 +633,9 @@ msgstr "Le fichier n'est pas un XML valide : {error}"
 #: importers/camt.py:102
 #, python-brace-format
 msgid "Unsupported CAMT document ({namespace}); camt.053.001.02 to .08 are supported"
-msgstr "Document CAMT non pris en charge ({namespace}) ; les versions camt.053.001.02 à .08 sont prises en charge"
+msgstr ""
+"Document CAMT non pris en charge ({namespace}) ; les versions camt.053.001.02 à .08 sont prises "
+"en charge"
 
 #: importers/camt.py:135
 msgid "The CAMT file contains no statement"
@@ -643,7 +651,9 @@ msgstr "Une écriture CAMT n'a pas de date de comptabilisation"
 
 #: importers/csv_import.py:111
 msgid "No header row with a date and an amount column was found; give the column mapping"
-msgstr "Aucune ligne d'en-tête avec une colonne de date et une colonne de montant n'a été trouvée ; indiquez la correspondance des colonnes"
+msgstr ""
+"Aucune ligne d'en-tête avec une colonne de date et une colonne de montant n'a été trouvée ; "
+"indiquez la correspondance des colonnes"
 
 #: importers/csv_import.py:124
 #, python-brace-format
@@ -656,7 +666,9 @@ msgstr "Le fichier CSV est vide"
 
 #: importers/csv_import.py:170
 msgid "The column mapping needs a date and an amount (or debit and credit) column"
-msgstr "La correspondance des colonnes nécessite une colonne de date et une colonne de montant (ou de débit et crédit)"
+msgstr ""
+"La correspondance des colonnes nécessite une colonne de date et une colonne de montant (ou de "
+"débit et crédit)"
 
 #: importers/csv_import.py:101
 #, python-brace-format
@@ -809,7 +821,9 @@ msgstr "Ce fichier a déjà été importé"
 msgid ""
 "{lines} transactions imported, {duplicates} already imported, {reconciled} reconciled "
 "automatically"
-msgstr "{lines} opérations importées, {duplicates} déjà importées, {reconciled} rapprochées automatiquement"
+msgstr ""
+"{lines} opérations importées, {duplicates} déjà importées, {reconciled} rapprochées "
+"automatiquement"
 
 #: rules.py:44
 msgid "The label mentions the document's reference"

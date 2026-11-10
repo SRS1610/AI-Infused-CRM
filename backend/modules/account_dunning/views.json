@@ -48,6 +48,8 @@
      {"kind": "field", "name": "message"},
      {"kind": "field", "name": "invoice_ids", "readonly": true}
    ]}},
+  {"id": "view_company_form_dunning", "model": "core.company", "type": "form", "name": "core.company.form.dunning", "inherit": "web.view_company_form",
+   "operations": [{"op": "insert_after", "anchor": {"field": "vat"}, "node": {"kind": "field", "name": "dunning_min_amount"}}]},
   {"id": "view_partner_form_dunning", "model": "contacts.partner", "type": "form", "name": "contacts.partner.form.dunning", "inherit": "contacts.view_partner_form",
    "operations": [{"op": "insert_after", "anchor": {"field": "vat"}, "node": {"kind": "field", "name": "dunning_excluded"}}]}
 ]
