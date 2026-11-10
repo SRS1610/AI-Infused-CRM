@@ -489,6 +489,7 @@ def drop_everything(*, database_url: str | None = None) -> None:
     try:
         cr.execute("DROP SCHEMA public CASCADE")
         cr.execute("CREATE SCHEMA public")
+        cr.execute("DROP SCHEMA IF EXISTS ai_gateway CASCADE")  # the gateway ledger lives beside the app schema
         ensure_extensions(cr)
         cr.commit()
     finally:

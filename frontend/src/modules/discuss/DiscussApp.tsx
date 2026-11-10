@@ -51,6 +51,12 @@ export function DiscussApp() {
   const [panel, setPanel] = useState<"browse" | "new" | "dm" | "catchup" | null>(null);
   const [focus, setFocus] = useState<number | null>(null);
   const summaryRun = Number(params.get("summary")) || null;
+  useEffect(() => {
+    if (linked) {
+      setPanel(null);
+      setActive(linked);
+    }
+  }, [linked, summaryRun]);
 
   useEffect(() => setOnline(new Set(presence.data?.online ?? [])), [presence.data]);
   useEffect(() => {

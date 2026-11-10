@@ -167,6 +167,7 @@ export interface NotificationItem {
   kind: string;
   model: string | null;
   res_id: number | null;
+  url?: string | null;
   is_read: boolean;
   create_date?: string;
 }

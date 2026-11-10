@@ -185,6 +185,10 @@ def _check_value(field: F.Field, leaf: Leaf) -> str | None:
             if v not in VARIABLES:
                 return f"'{leaf.path}': unknown variable {v}"
             continue
+        if field.comodel_name:
+            if not isinstance(v, int | str) or isinstance(v, bool):
+                return f"'{leaf.path}' needs a record id or name, got {v!r}"
+            continue
         if isinstance(field, NUMERIC) and (not isinstance(v, int | float) or isinstance(v, bool)):
             return f"'{leaf.path}' is a number, got {v!r}"
         if isinstance(field, F.Boolean) and not isinstance(v, bool):
@@ -241,7 +245,7 @@ def validate_domain(env: Environment, domain: Any) -> list[str]:
                 errors.append(f"'{leaf.path}': '{seg}' has no sub-fields")
                 field = None
                 break
-        if field is not None and not field.comodel_name and (problem := _check_value(field, leaf)):
+        if field is not None and (problem := _check_value(field, leaf)):
             errors.append(problem)
     if not errors:
         try:
@@ -325,7 +329,7 @@ def canonical(domain: Any) -> str:
 def matches(env: Environment, domain: Any) -> set[int]:
     """Ids of the evaluation fixture leads (names start with ``[nlq]``) selected by ``domain``."""
     leads = env[LEAD]
-    return set(leads.search({"all": [["name", "=like", FIXTURE_MARK + "%"], domain]}).ids)
+    return set(leads.search({"all": [["name", "starts_with", FIXTURE_MARK], domain]}).ids)
 
 
 def eval_entry(env: Environment, inputs: dict[str, Any], record: Any) -> RunResult:

@@ -299,7 +299,7 @@ def predict_lead(artefact: dict[str, Any], values: dict[str, Any], top: int = 5)
                 "weight": round(float(contrib[i]), 4),
             }
         )
-    return {"probability": round(prob, 4), "score": int(round(prob * 100)), "logit": logit, "factors": factors}
+    return {"probability": round(prob, 4), "score": round(prob * 100), "logit": logit, "factors": factors}
 
 
 def factor_validity(artefact: dict[str, Any], values: dict[str, Any], prediction: dict[str, Any]) -> float:
@@ -453,7 +453,7 @@ def forecast(
     theta = np.column_stack([rng.beta(*posterior[s], size=simulations) for s in stages]) if stages else None
     slip = rng.beta(slipped + 1.0, on_time + 4.0, size=simulations)
     totals = np.zeros((simulations, periods))
-    if len(deals) and theta is not None:
+    if deals and theta is not None:
         p = theta[:, deal_stage]
         wins = rng.random((simulations, len(deals))) < p
         slips = rng.random((simulations, len(deals))) < slip[:, None]
@@ -507,7 +507,7 @@ def explain_period(row: dict[str, Any], label: str, currency: str = "") -> str:
     c = row["components"]
     cur = f" {currency}" if currency else ""
     parts = [
-        f"{label}: most likely {row['p50']:,.0f}{cur} (80% range {row['p10']:,.0f}–{row['p90']:,.0f}{cur}).",
+        f"{label}: most likely {row['p50']:,.0f}{cur} (80% range {row['p10']:,.0f} to {row['p90']:,.0f}{cur}).",
         f"{c['open_deals']} open deals worth {c['open_amount']:,.0f}{cur} are expected to close, "
         f"{c['weighted_amount']:,.0f}{cur} at the win rates of past deals in the same stages",
     ]

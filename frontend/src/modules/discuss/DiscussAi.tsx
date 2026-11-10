@@ -116,7 +116,8 @@ export async function loadSummaryRun(runId: number, channelId: number): Promise<
       `/ai/runs/${runId}`,
     );
     const links: AiLinks = {};
-    for (const c of run.citations) if (c.res_model === "chatter.message") links[String(c.res_id)] = { channel_id: channelId };
+    for (const c of run.citations)
+      if (c.res_model === "chatter.message") links[String(c.res_id)] = { channel_id: channelId };
     return { kind: "result", runId, text: run.output_text ?? "", flags: run.safety_flags ?? [], links };
   } catch (e) {
     return { kind: "error", message: aiErrorMessage(e) };

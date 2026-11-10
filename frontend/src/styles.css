@@ -1862,3 +1862,120 @@ tr.clickable {
   margin: 0.5rem 0;
   padding-left: 1.2rem;
 }
+
+/* ---- Phase 1.6: Discuss AI (summary, catch me up, translation) and the AI-ranked daily to-do ---- */
+.discuss-catch-up {
+  width: 100%;
+  justify-content: flex-start;
+  margin-bottom: 8px;
+}
+.discuss-ai-panel,
+.ai-todo {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  padding: 0.75rem;
+  margin: 8px 0;
+  min-width: 0;
+}
+.discuss-ai-panel header,
+.ai-todo header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 0.5rem;
+}
+.discuss-ai-panel header h2,
+.ai-todo header h2 {
+  font-size: 1rem;
+  margin: 0;
+}
+.discuss-ai-panel .spacer,
+.ai-todo .spacer {
+  flex: 1;
+}
+.discuss-ai-text {
+  margin: 0 0 0.5rem;
+  padding-left: 1.25rem;
+  overflow-wrap: anywhere;
+}
+.discuss-ai-text li {
+  margin: 0.2rem 0;
+}
+.discuss-cite {
+  padding: 0 0.3rem;
+  margin-left: 0.2rem;
+  min-height: 0;
+  line-height: 1.4;
+}
+.discuss-ai-row {
+  list-style: none;
+  min-height: 0;
+  margin: -4px 0 6px 2.25rem;
+}
+.discuss-ai-row.focused {
+  border-left: 3px solid var(--primary);
+  padding-left: 6px;
+}
+.discuss-translate .btn {
+  opacity: 0.75;
+}
+.discuss-translate .btn:hover,
+.discuss-translate .btn:focus-visible {
+  opacity: 1;
+}
+.discuss-translation {
+  background: var(--surface-2);
+  border-radius: var(--radius);
+  padding: 0.4rem 0.6rem;
+  margin-top: 4px;
+  overflow-wrap: anywhere;
+}
+.discuss-translation p {
+  margin: 0.25rem 0;
+}
+.activity-dashboard-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.ai-todo-list {
+  list-style: none;
+  margin: 0 0 0.5rem;
+  padding: 0;
+}
+.ai-todo-list > li {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid var(--border);
+}
+.ai-todo-main {
+  display: flex;
+  gap: 10px;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.ai-todo-rank {
+  flex: none;
+  width: 1.6rem;
+  height: 1.6rem;
+  border-radius: 50%;
+  background: var(--primary-soft);
+  color: var(--primary);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+}
+.ai-todo-reasons {
+  margin: 0.2rem 0 0;
+  padding-left: 1.1rem;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}
+/* ---- end Phase 1.6 Discuss / Activities AI ---- */

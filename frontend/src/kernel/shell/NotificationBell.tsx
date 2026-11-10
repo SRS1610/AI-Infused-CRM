@@ -17,7 +17,7 @@ export function NotificationBell() {
     queryFn: () =>
       api.list("core.notification", {
         domain: [["is_read", "=", false]],
-        fields: ["title", "body", "kind", "model", "res_id", "is_read", "create_date"],
+        fields: ["title", "body", "kind", "model", "res_id", "url", "is_read", "create_date"],
         order: "id desc",
         limit: 20,
         count: true,
@@ -68,7 +68,8 @@ export function NotificationBell() {
                   onClick={async () => {
                     await markRead([n.id]);
                     setOpen(false);
-                    if (n.model && n.res_id) navigate(`/m/${n.model}/${n.res_id}`);
+                    if (n.url?.startsWith("/") && !n.url.startsWith("//")) navigate(n.url);
+                    else if (n.model && n.res_id) navigate(`/m/${n.model}/${n.res_id}`);
                   }}
                 >
                   <strong>{n.title}</strong>

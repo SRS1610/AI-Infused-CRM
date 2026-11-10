@@ -126,10 +126,14 @@ def _write_ai(lead: Model, vals: dict[str, Any]) -> None:
     lead.elevated("ai insights").with_context(crm_scoring=True, tracking_disable=True, crm_ai=True).write(vals)
 
 
-def _notify(env: Environment, user_ids: list[int], title: str, body: str, *, url: str, model: str = "", res_id: int = 0) -> None:
+def _notify(
+    env: Environment, user_ids: list[int], title: str, body: str, *, url: str, model: str = "", res_id: int = 0
+) -> None:
     users = [u for u in dict.fromkeys(user_ids) if u]
     if users:
-        env["core.notification"].notify(users, title, body, kind="job", model=model or None, res_id=res_id or None, url=url)
+        env["core.notification"].notify(
+            users, title, body, kind="job", model=model or None, res_id=res_id or None, url=url
+        )
 
 
 def _companies(env: Environment, company_ids: list[int] | None) -> list[int]:
@@ -505,7 +509,7 @@ def _similar_history(env: Environment, lead: Model, user_ids: list[int]) -> dict
             ]
         )
     )
-    out = {u: (0, 0) for u in user_ids}
+    out = dict.fromkeys(user_ids, (0, 0))
     for c in closed:
         similar = bool(tags & set(c.tag_ids.ids)) if tags else (source is not None and c.source_id.ids[:1] == [source])
         if not similar:
@@ -789,9 +793,7 @@ def score_narration_context(env: Environment, record: Model, inputs: dict[str, A
         raise UserError("Lead scores are explained on a lead")
     record.check_access("read")
     rec = record.elevated()
-    factors = "\n".join(
-        f"- {f['label']}: {f['direction']} (weight {f['weight']})" for f in rec.ai_score_factors or []
-    )
+    factors = "\n".join(f"- {f['label']}: {f['direction']} (weight {f['weight']})" for f in rec.ai_score_factors or [])
     text = f"Score {rec.ai_score} / 100, win probability {rec.ai_probability or 0:.0%}\n{factors}"
     return {"sources": [Source(f"crm.lead:{rec.ids[0]}", rec.name, text)]}
 
@@ -818,9 +820,7 @@ def _months_between(a: dt.date, b: dt.date) -> int:
     return (b.year - a.year) * 12 + (b.month - a.month)
 
 
-def forecast_inputs(
-    env: Environment, company_id: int, team_id: int | None = None, periods: int = 3
-) -> dict[str, Any]:
+def forecast_inputs(env: Environment, company_id: int, team_id: int | None = None, periods: int = 3) -> dict[str, Any]:
     """Pipeline and history of one company (and team) in the shape :func:`ML.forecast` takes."""
     today = env.today()
     current = _month_start(today)
@@ -834,7 +834,13 @@ def forecast_inputs(
         k = max(0, _months_between(current, d.date_deadline))
         if k < periods and d.stage_id:
             pipeline.append(
-                {"id": d.ids[0], "name": d.name, "amount": float(d.expected_revenue or 0), "stage": d.stage_id.name, "period": k}
+                {
+                    "id": d.ids[0],
+                    "name": d.name,
+                    "amount": float(d.expected_revenue or 0),
+                    "stage": d.stage_id.name,
+                    "period": k,
+                }
             )
     since = dt.datetime.combine(_month_start(today, -12), dt.time(), dt.UTC)
     closed = leads.search([*scope, ("date_closed", ">=", since), {"any": [["is_won", "=", True], ["lost", "=", True]]}])
@@ -872,7 +878,9 @@ def forecast_inputs(
         "run_rate_history": history,
         "committed": committed,
         "labels": labels,
-        "unscheduled": leads.search_count([*scope, ("active", "=", True), ("is_won", "=", False), ("date_deadline", "=", None)]),
+        "unscheduled": leads.search_count(
+            [*scope, ("active", "=", True), ("is_won", "=", False), ("date_deadline", "=", None)]
+        ),
     }
 
 
@@ -939,9 +947,7 @@ def narrate_forecast(env: Environment, record: Model, rows: list[dict[str, Any]]
 
     text = "\n".join(r["explanation"] for r in rows)
     try:
-        result = run_feature(
-            env, FORECAST, {}, sources=[Source(f"crm.ai_forecast:{record.ids[0]}", record.name, text)]
-        )
+        result = run_feature(env, FORECAST, {}, sources=[Source(f"crm.ai_forecast:{record.ids[0]}", record.name, text)])
     except (AIError, UserError) as exc:
         log.info("forecast narrative skipped", reason=str(exc))
         return None
@@ -960,7 +966,7 @@ def forecast_job(env: Any, team_id: int | None = None, narrative: bool = False, 
         env,
         [env.uid],
         "Sales forecast ready",
-        f"{first.get('label', '')}: P50 {first.get('p50', 0):,.0f} (P10 {first.get('p10', 0):,.0f} – P90 "
+        f"{first.get('label', '')}: P50 {first.get('p50', 0):,.0f} (P10 {first.get('p10', 0):,.0f} to P90 "
         f"{first.get('p90', 0):,.0f})",
         url="/a/crm.action_reports",
         model="crm.ai_forecast",
@@ -1014,13 +1020,22 @@ def _run_for_view(env: Environment, name: str, lead: Model, output: dict[str, An
         return None
     runs = env["ai_core.run"].elevated()
     found = runs.search(
-        [("feature", "=", name), ("res_model", "=", "crm.lead"), ("res_id", "=", lead.ids[0]), ("user_id", "=", env.uid)],
+        [
+            ("feature", "=", name),
+            ("res_model", "=", "crm.lead"),
+            ("res_id", "=", lead.ids[0]),
+            ("user_id", "=", env.uid),
+        ],
         order="id desc",
         limit=1,
     )
     if found and (found.input_ref or {}).get("inputs", {}).get("stamp") == stamp:
         return int(found.ids[0])
-    return int(audit_run(env, name, record=lead, inputs={"stamp": stamp}, output=output, model=output.get("model_label", "")).ids[0])
+    return int(
+        audit_run(
+            env, name, record=lead, inputs={"stamp": stamp}, output=output, model=output.get("model_label", "")
+        ).ids[0]
+    )
 
 
 def lead_insights(env: Environment, lead: Model) -> dict[str, Any]:

@@ -77,7 +77,7 @@ def synthetic_lead(rng: random.Random, n: int) -> tuple[dict[str, Any], int]:
 
 
 def lead_history(seed: int = TRAINING_SEED, n: int = TRAINING_ROWS) -> tuple[list[dict[str, Any]], list[int]]:
-    rng = random.Random(seed)
+    rng = random.Random(seed)  # noqa: S311 - deterministic synthetic data
     rows, labels = [], []
     for i in range(n):
         v, y = synthetic_lead(rng, 10_000 + i)

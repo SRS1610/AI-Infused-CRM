@@ -146,7 +146,9 @@ export function ScoreBlock({ leadId, score }: { leadId: number; score: NonNullab
             {score.factors.map((f) => (
               <li key={f.feature} className={`factor ${f.direction}`}>
                 <span aria-hidden="true">{f.direction === "positive" ? "▲" : "▼"}</span>{" "}
-                <span className="sr-only">{f.direction === "positive" ? "Raises the score:" : "Lowers the score:"}</span>
+                <span className="sr-only">
+                  {f.direction === "positive" ? "Raises the score:" : "Lowers the score:"}
+                </span>
                 {f.label}
                 <span
                   className="factor-bar"
@@ -494,7 +496,11 @@ export function AiForecastSection() {
         <button type="button" className="btn small" onClick={refresh}>
           {fc ? "Refresh forecast" : "Compute forecast"}
         </button>
-        {queued && <span className="small" role="status">{queued}</span>}
+        {queued && (
+          <span className="small" role="status">
+            {queued}
+          </span>
+        )}
       </div>
     </section>
   );

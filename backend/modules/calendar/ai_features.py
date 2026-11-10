@@ -409,6 +409,8 @@ def validate_slot(env: Environment, partner_ids: list[int], c: S.Constraints, st
         broken.append("not on the slot grid")
     if c.avoid_lunch and ls.time() < dt.time(13) and le.time() > dt.time(12):
         broken.append("lunch")
+    if broken:
+        return broken
     pad = dt.timedelta(minutes=c.buffer_minutes)
     sys_env = env.elevated("slot validation")
     rows = env.cr.fetchall(
@@ -529,6 +531,8 @@ def resolve_attendees(env: Environment, names: list[str]) -> tuple[list[Model], 
             pick = exact or first or (list(found) if len(found) == 1 else [])
             if not pick and len(found) > 1:
                 pick = list(found)
+            if not found:  # a misspelt name: trigram candidates, re-filtered as the user, then a close match
+                pick = _close_matches(env, q)
         pick = [p for p in pick if not me or p.ids[0] != me.ids[0]]
         if len(pick) == 1:
             if all(r.ids[0] != pick[0].ids[0] for r in resolved):
@@ -538,6 +542,18 @@ def resolve_attendees(env: Environment, names: list[str]) -> tuple[list[Model], 
         else:
             unresolved.append({"name": q, "candidates": [{"id": p.ids[0], "name": p.display_name} for p in pick[:5]]})
     return resolved, unresolved
+
+
+def _close_matches(env: Environment, name: str) -> list[Model]:
+    from modules.contacts.duplicates import name_similarity
+
+    rows = env.cr.fetchall(
+        "SELECT id FROM contacts_partner WHERE active AND NOT is_company AND name IS NOT NULL "
+        "AND similarity(name, :n) > 0.3 ORDER BY similarity(name, :n) DESC LIMIT 10",
+        {"n": name},
+    )
+    visible = env["contacts.partner"].search([("id", "in", [r[0] for r in rows])]) if rows else []
+    return [p for p in visible if name_similarity(p.name, name) >= 0.85]
 
 
 @handler(NL)

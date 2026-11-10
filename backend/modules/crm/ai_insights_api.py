@@ -88,9 +88,8 @@ def latest_forecast(team_id: int | None = None, ctx: RequestContext = Depends(au
     enabled = AI.feature_enabled(ctx.env, AI.FORECAST, company)
     if not enabled:
         return {"enabled": False, "forecast": None}
-    found = (
-        ctx.env["crm.ai_forecast"]
-        .search([("company_id", "=", company), ("team_id", "=", team_id or None)], order="id desc", limit=1)
+    found = ctx.env["crm.ai_forecast"].search(
+        [("company_id", "=", company), ("team_id", "=", team_id or None)], order="id desc", limit=1
     )
     return {"enabled": True, "forecast": AI.forecast_dict(found) if found else None}
 

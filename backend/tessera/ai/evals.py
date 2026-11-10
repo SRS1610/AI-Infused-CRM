@@ -410,7 +410,11 @@ def run_case(env: Environment, spec: FeatureSpec, case: dict[str, Any], client: 
     record = refs.get(case.get("record", "")) if case.get("record") else None
     if record is not None:
         record = record.with_env(user_env)
-    watched = list(case.get("watch_models", ["contacts.partner", "crm.lead", "chatter.message", "core.mail"]))
+    default_watch = ["contacts.partner", "crm.lead", "chatter.message", "core.mail_queue"]
+    watched = list(case.get("watch_models", [m for m in default_watch if m in env.registry.models]))
+    unknown = [m for m in watched if m not in env.registry.models]
+    if unknown:  # a typo here would silently disable the no-mutation check
+        raise UserError(f"Eval case {case['id']} watches unknown models: {', '.join(unknown)}")
     before = _snapshot_counts(env, watched)
     started = time.monotonic()
     out: dict[str, Any] = {"case": case["id"], "status": "ok", "text": "", "data": None, "flags": []}

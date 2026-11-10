@@ -310,10 +310,18 @@ class Attendee(Model):
     event_id = fields.Many2one("calendar.event", required=True, ondelete="cascade", index=True)
     partner_id = fields.Many2one("contacts.partner", required=True, ondelete="cascade", index=True)
     state = fields.Selection(ATTENDEE_STATES, default="needs_action", required=True)
-    access_token = fields.Char(
-        copy=False, index=True, default=lambda self: secrets.token_urlsafe(18), groups="core.group_system"
-    )
+    # set in create() rather than as a field default: a default on a system-only field made the ORM
+    # refuse attendee creation by ordinary users (e.g. adding attendees from the meeting form)
+    access_token = fields.Char(copy=False, index=True, groups="core.group_system")
     responded_at = fields.Datetime(readonly=True)
+
+    def create(self, vals_list):  # type: ignore[no-untyped-def]
+        batch = [dict(vals_list)] if isinstance(vals_list, dict) else [dict(v) for v in vals_list]
+        tokens = [v.pop("access_token", None) if self.env.su else None for v in batch]
+        records = super().create(batch)
+        for rec, token in zip(records.elevated("rsvp token"), tokens, strict=True):
+            rec.write({"access_token": token or secrets.token_urlsafe(18)})
+        return records
 
 
 def expand(

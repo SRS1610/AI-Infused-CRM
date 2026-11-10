@@ -356,9 +356,10 @@ def test_api_summary_catch_up_translate_and_stream(admin: Session, app: Any) -> 
         "/api/v1/ai/features/discuss.translate/run", json={"inputs": {"message_id": 0, "target_lang": "fr"}}
     )
     assert denied.status_code == 404
+    # demo writes, admin catches up (gateway calls stay on admin: the ai_core quota test counts demo's requests)
     demo.post(f"/api/v1/discuss/channels/{ch['id']}/join")
-    admin.post(f"/api/v1/chatter/discuss.channel/{ch['id']}/messages", json={"body": "<p>Second update for demo.</p>"})
-    caught = demo.post("/api/v1/discuss/ai/catch-up", json={}).json()
+    demo.post(f"/api/v1/chatter/discuss.channel/{ch['id']}/messages", json={"body": "<p>Second update from demo.</p>"})
+    caught = admin.post("/api/v1/discuss/ai/catch-up", json={}).json()
     assert caught["unread"] >= 1 and caught["result"]["feature"] == "discuss.catch_up"
     assert "private plan" not in json.dumps(MockAdapter.captured)
 

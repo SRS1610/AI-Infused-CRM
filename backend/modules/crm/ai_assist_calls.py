@@ -63,9 +63,10 @@ def field_values(env: Environment, fields: dict[str, Any]) -> dict[str, tuple[An
     out: dict[str, tuple[Any, str]] = {}
     stage = fields.get("stage")
     if isinstance(stage, str) and stage.strip():
-        found = env["crm.stage"].search([("name", "=ilike", stage.strip())], limit=1)
+        wanted = stage.strip().lower()
+        found = env["crm.stage"].search([("name", "ilike", wanted)]).filtered(lambda s: s.name.lower() == wanted)
         if found:
-            out["stage_id"] = (found.ids[0], found.name)
+            out["stage_id"] = (found.ids[0], found[:1].name)
     if (revenue := _number(fields.get("expected_revenue"), 0.01, 1e12)) is not None:
         out["expected_revenue"] = (revenue, f"{revenue:,.2f}")
     if (probability := _number(fields.get("probability"), 0, 100)) is not None:

@@ -100,7 +100,9 @@ def score_deal_risk(results: list[dict[str, Any]]) -> dict[str, float]:
         "precision": ML.precision(flags, labels),
         "recall": ML.recall(flags, labels),
         "flag_rate": sum(flags) / len(flags) if flags else 0.0,
-        "reasons_given": sum(1 for r in ok if not r["data"]["flagged"] or r["data"]["reasons"]) / len(ok) if ok else 0.0,
+        "reasons_given": sum(1 for r in ok if not r["data"]["flagged"] or r["data"]["reasons"]) / len(ok)
+        if ok
+        else 0.0,
     }
     inv = _twin_invariance(results, "score")
     if inv is not None:
