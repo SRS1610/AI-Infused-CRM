@@ -209,6 +209,37 @@ def test_price_grounding_check() -> None:
     assert ungrounded_amounts("We met 6 people on 2026-11-10 at 10:30.", pricing) == []
 
 
+@pytest.mark.parametrize(
+    ("draft", "flagged"),
+    [
+        ("Hi Jordan, the total is 12,500.", ["12,500"]),
+        ("The total is 12500 if we drop the onboarding.", ["12500"]),
+        ("Price: 950 per unit.", ["950"]),
+        ("We can offer a discount of 2,000 on the cell.", ["2,000"]),
+        ("That leaves 1.500,00 off the quotation.", ["1.500,00"]),
+        ("The setup fee is 499.00.", ["499.00"]),
+        ("Budget around 12 500 for this.", ["12 500"]),
+        ("the total is 2000.", ["2000"]),
+        ("The price would be 12k.", ["12k"]),
+        # grounded in the quotation: never flagged, with or without separators
+        ("Each arm is 18,900 and the six come to 113,400 in total (136,080.00 with tax).", []),
+        ("Each arm is 18900.", []),
+        # dates, times, quantities, phone numbers, percentages, identifiers, years
+        ("We met 6 people on 2026-11-10 at 10:30 and again on 7 December or December 14, 2026.", []),
+        ("Our line produces 1,200 parts per hour on line 2, with a 30-minute changeover.", []),
+        ("Call me on +44 20 7946 0958, 020 7946 0958, 555-123-4567 or (555) 123 4567.", []),
+        ("A 15% discount, or 10 percent off, and 98 % uptime.", []),
+        ("Ticket #4500, order 12,345, booth 4500, HW-ARM6 v2.10, Q4 2026 and 12/03/2026 at 9am.", []),
+        ("In 2026 the price list stays the same; the quotation is valid for 30 days.", []),
+        ("We delivered 12 500 units last year to 75001 Paris; rated 4.5 stars.", []),
+        ("Install 6 arms with 3 shifts and 14 months payback; we can do 12k parts.", []),
+    ],
+)
+def test_price_check_flags_bare_amounts(draft: str, flagged: list[str]) -> None:
+    pricing = ["- 6 x [HW-ARM6] Collaborative robot arm at 18,900.00 USD each = 113,400.00 USD\nTotal: 136,080.00 USD"]
+    assert ungrounded_amounts(draft, pricing) == flagged
+
+
 def test_followup_draft_streams_a_message_proposal_with_price_check(env: Any) -> None:
     opp = env.ref("crm.opp_1")  # Acme: quotation with arms, grippers (10% off), onboarding, optional support
     _script(env, "crm.followup_draft", {"text": "Hi Jordan,\n\nThe arms are USD 18,900 each as quoted. We can also "
