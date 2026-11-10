@@ -2214,7 +2214,7 @@ tr.clickable {
   display: grid;
   gap: 6px;
 }
-.studio-transitions > li {
+.studio-transition {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
@@ -2223,7 +2223,7 @@ tr.clickable {
   border: 1px solid var(--border);
   border-radius: 6px;
 }
-.studio-transitions > li > details {
+.studio-transition > details {
   flex-basis: 100%;
 }
 .workflow-diagram {

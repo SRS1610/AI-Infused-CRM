@@ -336,80 +336,86 @@ function WorkflowForm({
       {!transitions.length && <p className="muted small">{t("Transitions become buttons on the record.")}</p>}
       <ul className="studio-transitions">
         {transitions.map((tr) => (
-          <li key={tr.id} role="group" aria-label={t("Transition {name}", { name: tr.name || "…" })}>
-            <input
-              className="input small"
-              aria-label={t("Button label")}
-              required
-              value={tr.name}
-              onChange={(e) => setTransition(tr.id, { name: e.target.value })}
-            />
-            <select
-              className="input small"
-              aria-label={t("From")}
-              multiple
-              size={Math.min(4, Math.max(2, stateOptions.length))}
-              value={tr.from}
-              onChange={(e) => setTransition(tr.id, { from: [...e.target.selectedOptions].map((o) => o.value) })}
+          <li key={tr.id}>
+            <div
+              className="studio-transition"
+              role="group"
+              aria-label={t("Transition {name}", { name: tr.name || "…" })}
             >
-              {stateOptions.map(([k, l]) => (
-                <option key={k} value={k}>
-                  {l}
-                </option>
-              ))}
-            </select>
-            <select
-              className="input small"
-              aria-label={t("To")}
-              required
-              value={tr.to}
-              onChange={(e) => setTransition(tr.id, { to: e.target.value })}
-            >
-              <option value="" />
-              {stateOptions.map(([k, l]) => (
-                <option key={k} value={k}>
-                  {l}
-                </option>
-              ))}
-            </select>
-            <select
-              className="input small"
-              aria-label={t("Allowed group")}
-              value={tr.groups?.[0] ?? ""}
-              onChange={(e) => setTransition(tr.id, { groups: e.target.value ? [e.target.value] : [] })}
-            >
-              <option value="">{t("Everyone who can edit")}</option>
-              {groups.map((g) => (
-                <option key={g.xmlid} value={g.xmlid}>
-                  {g.name}
-                </option>
-              ))}
-            </select>
-            <label className="checkbox small">
               <input
-                type="checkbox"
-                checked={!!tr.highlight}
-                onChange={(e) => setTransition(tr.id, { highlight: e.target.checked })}
-              />{" "}
-              {t("Main button")}
-            </label>
-            <button
-              type="button"
-              className="btn ghost small"
-              aria-label={t("Remove transition {name}", { name: tr.name || "…" })}
-              onClick={() => setTransitions(transitions.filter((x) => x.id !== tr.id))}
-            >
-              ×
-            </button>
-            <details className="studio-more">
-              <summary>{tr.condition ? t("Only when… (set)") : t("Only when…")}</summary>
-              <ConditionEditor
-                fields={fields}
-                value={tr.condition as Domain | null}
-                onChange={(d) => setTransition(tr.id, { condition: d })}
-                label={t("Condition of {name}", { name: tr.name || "…" })}
+                className="input small"
+                aria-label={t("Button label")}
+                required
+                value={tr.name}
+                onChange={(e) => setTransition(tr.id, { name: e.target.value })}
               />
-            </details>
+              <select
+                className="input small"
+                aria-label={t("From")}
+                multiple
+                size={Math.min(4, Math.max(2, stateOptions.length))}
+                value={tr.from}
+                onChange={(e) => setTransition(tr.id, { from: [...e.target.selectedOptions].map((o) => o.value) })}
+              >
+                {stateOptions.map(([k, l]) => (
+                  <option key={k} value={k}>
+                    {l}
+                  </option>
+                ))}
+              </select>
+              <select
+                className="input small"
+                aria-label={t("To")}
+                required
+                value={tr.to}
+                onChange={(e) => setTransition(tr.id, { to: e.target.value })}
+              >
+                <option value="" />
+                {stateOptions.map(([k, l]) => (
+                  <option key={k} value={k}>
+                    {l}
+                  </option>
+                ))}
+              </select>
+              <select
+                className="input small"
+                aria-label={t("Allowed group")}
+                value={tr.groups?.[0] ?? ""}
+                onChange={(e) => setTransition(tr.id, { groups: e.target.value ? [e.target.value] : [] })}
+              >
+                <option value="">{t("Everyone who can edit")}</option>
+                {groups.map((g) => (
+                  <option key={g.xmlid} value={g.xmlid}>
+                    {g.name}
+                  </option>
+                ))}
+              </select>
+              <label className="checkbox small">
+                <input
+                  type="checkbox"
+                  checked={!!tr.highlight}
+                  onChange={(e) => setTransition(tr.id, { highlight: e.target.checked })}
+                />{" "}
+                {t("Main button")}
+              </label>
+              <button
+                type="button"
+                className="btn ghost small"
+                aria-label={t("Remove transition {name}", { name: tr.name || "…" })}
+                onClick={() => setTransitions(transitions.filter((x) => x.id !== tr.id))}
+              >
+                ×
+              </button>
+              <details className="studio-more">
+                <summary>{tr.condition ? t("Only when… (set)") : t("Only when…")}</summary>
+                <ConditionEditor
+                  fields={fields}
+                  value={tr.condition as Domain | null}
+                  onChange={(d) => setTransition(tr.id, { condition: d })}
+                  label={t("Condition of {name}", { name: tr.name || "…" })}
+                />
+              </details>
+            </div>
           </li>
         ))}
       </ul>
