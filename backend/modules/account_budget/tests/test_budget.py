@@ -278,3 +278,28 @@ def test_demo(env):
     assert budget.state == "confirmed"
     marketing = budget.line_ids.filtered(lambda line: (line.name or "").startswith("Marketing"))
     assert len(marketing) == 12 and sum(float(line.planned_amount) for line in marketing) == pytest.approx(12000.0)
+
+
+def test_user_interface(env):
+    from modules.account_analytic.tests.common import check_ui
+
+    assert check_ui(env, "account_budget") > 3
+
+
+def test_manual_analytic_items_refresh_budgets(env, ctx):
+    budget = _budget(env, [{"analytic_account_id": ctx["mkt"].ids[0], "planned_amount": 100.0}])
+    line = budget.line_ids
+    item = env["account.analytic_line"].create(
+        {"name": "Internal cost", "amount": -30.0, "account_id": ctx["mkt"].ids[0], "date": D(2026, 5, 1)}
+    )
+    assert float(line.practical_amount) == 30.0
+    item.write({"amount": -45.0})
+    assert float(line.practical_amount) == 45.0
+    item.write({"account_id": ctx["sal"].ids[0]})
+    assert float(line.practical_amount) == 0.0
+    item.write({"account_id": ctx["mkt"].ids[0], "date": D(2027, 5, 1)})
+    assert float(line.practical_amount) == 0.0
+    item.write({"date": D(2026, 5, 2)})
+    assert float(line.practical_amount) == 45.0
+    item.unlink()
+    assert float(line.practical_amount) == 0.0

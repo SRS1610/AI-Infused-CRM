@@ -3,7 +3,7 @@
 * ``asset_profile(asset)`` — method, period, values and the whole board of an asset (for "depreciation
   anomaly checks" and explanations).
 * ``board_checks(asset)`` — deterministic consistency checks of a board (the baseline the anomaly feature
-  builds on): amounts that do not add up, negative or out-of-order entries, overdue drafts.
+  builds on): amounts that do not add up, negative entries, drafts left behind posted ones, overdue drafts.
 * ``asset_model_candidates(env, company)`` — the asset models a bill line may be classified into ("asset
   classification suggestions" must pick one of these).
 """
@@ -89,9 +89,10 @@ def board_checks(asset: Model, today: dt.date | None = None) -> list[dict[str, A
             issues.append({"code": "negative_amount", "move_id": e["move_id"], "amount": e["amount"]})
         if e["state"] == "draft" and dt.date.fromisoformat(e["date"]) < today and profile["state"] == "open":
             issues.append({"code": "overdue_draft", "move_id": e["move_id"], "date": e["date"]})
-    dates = [e["date"] for e in entries]
-    if dates != sorted(dates):
-        issues.append({"code": "unordered", "dates": dates})
+    posted_dates = [e["date"] for e in entries if e["state"] == "posted"]
+    for e in entries:
+        if e["state"] == "draft" and posted_dates and e["date"] < max(posted_dates):
+            issues.append({"code": "draft_before_posted", "move_id": e["move_id"], "date": e["date"]})
     if profile["book_value"] < profile["salvage_value"] - 0.005 and profile["state"] != "close":
         issues.append({"code": "below_salvage", "book_value": profile["book_value"]})
     return issues

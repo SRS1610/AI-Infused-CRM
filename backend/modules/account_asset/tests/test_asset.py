@@ -326,3 +326,48 @@ def test_full_board_reaches_salvage_with_job(env, system_env):
     assert float(asset.book_value) == 99.99 and float(asset.value_residual) == 0.0
     assert not asset.depreciation_move_ids.filtered(lambda m: m.state == "draft")
     assert asset.action_post_due(FAR) == 0
+
+
+def test_user_interface(env):
+    from modules.account_analytic.tests.common import check_ui
+
+    assert check_ui(env, "account_asset") > 3
+
+
+def test_board_checks_flags_and_job_isolation(env, system_env):
+    from modules.account_asset.services import board_checks, post_due_depreciation
+
+    asset = make_asset(
+        env, original_value=1000.0, acquisition_date=D(2026, 1, 1), method_number=2, prorata_computation_type="none"
+    )
+    first, second = asset.depreciation_move_ids.sorted(lambda m: m.date)
+    first.with_context(_account_internal=True).write({"asset_depreciation_value": -5.0})
+    second.action_post()  # posted while the earlier entry is still a draft
+    codes = {i["code"] for i in board_checks(asset, today=D(2026, 1, 2))}
+    assert {"negative_amount", "draft_before_posted", "board_total"} <= codes
+    # a failing asset (deprecated expense account) does not stop the job for the others
+    expense = env["account.account"].create(
+        {"code": "6399", "name": "Old depreciation", "account_type": "expense_depreciation"}
+    )
+    broken = make_asset(
+        env,
+        name="Broken",
+        original_value=100.0,
+        acquisition_date=D(2026, 1, 1),
+        method_number=1,
+        prorata_computation_type="none",
+        account_depreciation_expense_id=expense.ids[0],
+    )
+    good = make_asset(
+        env,
+        name="Good",
+        original_value=100.0,
+        acquisition_date=D(2026, 1, 1),
+        method_number=1,
+        prorata_computation_type="none",
+    )
+    expense.write({"deprecated": True})
+    post_due_depreciation(system_env, D(2027, 1, 1))
+    env.invalidate_all()
+    assert set(good.depreciation_move_ids.mapped("state")) == {"posted"}
+    assert set(broken.depreciation_move_ids.mapped("state")) == {"draft"}

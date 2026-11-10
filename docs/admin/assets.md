@@ -82,7 +82,7 @@ years from 1 April with constant periods = 2 250, 3 000, 3 000, 3 000, 750.
 
 `modules.account_asset.services`: `asset_profile(asset)` (method, period, values, accounts and the whole
 board), `board_checks(asset)` (deterministic consistency checks: total, negative amounts, overdue drafts,
-order, book value below salvage) and `asset_model_candidates(env, company)` (the models a bill line can be
+drafts left behind posted entries, book value below salvage) and `asset_model_candidates(env, company)` (the models a bill line can be
 classified into) — the inputs of the sub-phase 2.6 asset classification and depreciation anomaly features.
 
 ## Access

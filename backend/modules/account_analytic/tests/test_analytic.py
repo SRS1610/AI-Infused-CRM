@@ -374,3 +374,9 @@ def test_views_and_demo(env):
     assert items and {i.plan_id.name for i in items} == {"Departments", "Projects"}
     rent = items.filtered(lambda i: i.general_account_id.code == "6100")
     assert rent and sorted({i.account_id.code for i in rent}) == ["ADM", "SAL"]
+
+
+def test_user_interface(env):
+    from modules.account_analytic.tests.common import check_ui
+
+    assert check_ui(env, "account_analytic") > 3
