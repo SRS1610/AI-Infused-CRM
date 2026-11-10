@@ -131,6 +131,13 @@ A case in `ai/evals/<feature>.jsonl`:
 - `tessera ai eval run <feature> --mode record` records cassettes against the configured providers;
   CI uses `--mode replay` (deterministic, no keys). `--mode live` runs without recording.
 - `tessera ai eval report --strict` lists what any declared feature still lacks.
+- **Corpus isolation.** Each feature's cases run in an evaluation sandbox (`tessera.orm.sandbox`): the
+  business records already in the target database — leads, contacts, messages, activities, meetings,
+  channels, quotations, every `_ai_index` model and any model listed in the feature's `eval.isolate` — are
+  invisible to searches, retrieval and the features' queries, except the records the cases name with
+  `$xml:`. The run is rolled back, so `tessera ai eval run` gives the same scores on a production, demo
+  or test database and writes nothing (only `--save` stores the report). Hand-written SQL over a
+  sandboxed table appends `sandbox.sql_filter(env.cr, model, column)`.
 
 ## 7. Client
 

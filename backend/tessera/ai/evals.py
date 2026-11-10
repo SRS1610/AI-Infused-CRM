@@ -9,6 +9,13 @@ thresholds per metric and a minimum case count. A case::
 Setup records are created in a transaction that is rolled back after the case. ``"$id:lead"`` in
 inputs/expected/cassettes is replaced by the created record's id and ``{{src:lead}}`` by its source id.
 
+Corpus isolation: a feature's cases run inside an evaluation sandbox (:mod:`tessera.orm.sandbox`) in which
+the business records already in the target database (leads, contacts, messages, meetings, quotations,
+every model in the retrieval index, plus the feature's ``eval.isolate`` models) are invisible, except the
+module or demo records the cases name by external id (``$xml:contacts.partner_acme``). Retrieval, searches
+and the features' own queries therefore see only the evaluation corpus, whether the target is a production,
+demo or test database. Everything the run does is rolled back; only ``--save`` stores the report.
+
 Modes (D-017): ``replay`` answers every gateway call from the feature's cassette
 (``ai/cassettes/<name>.jsonl``, keyed by prompt version, case and call index), so CI is deterministic and
 needs no secrets; ``record`` calls the configured providers and rewrites the cassette; ``live`` calls the
@@ -31,6 +38,7 @@ from tessera.ai import client as C
 from tessera.ai.errors import AIError, AIUnavailable
 from tessera.ai.manifest import module_ai_dir, read_features
 from tessera.exceptions import UserError
+from tessera.orm.sandbox import sandbox
 
 if TYPE_CHECKING:
     from tessera.orm.environment import Environment
@@ -448,8 +456,56 @@ def run_case(env: Environment, spec: FeatureSpec, case: dict[str, Any], client: 
     return out
 
 
+# business data the features read: hidden in the evaluation sandbox unless it has an external id
+SANDBOX_MODELS = (
+    "contacts.partner",
+    "crm.lead",
+    "crm.lead_intake",
+    "crm.ai_score_model",
+    "crm.ai_forecast",
+    "chatter.message",
+    "chatter.activity",
+    "calendar.event",
+    "discuss.channel",
+    "sale.quotation",
+)
+
+
+def sandbox_models(env: Environment, spec: FeatureSpec) -> list[str]:
+    """Models whose pre-existing records an evaluation of ``spec`` must not see."""
+    from tessera.ai.retrieval import indexed_fields
+
+    indexed = [name for name, cls in env.registry.models.items() if indexed_fields(cls)]
+    extra = [str(m) for m in spec.eval.get("isolate") or []]
+    return [m for m in dict.fromkeys([*SANDBOX_MODELS, *indexed, *extra]) if m in env.registry.models]
+
+
+XMLID_REF = re.compile(r"\$xml:([a-z0-9_]+)\.([A-Za-z0-9_]+)")
+
+
+def referenced_records(env: Environment, cases: list[dict[str, Any]]) -> dict[str, set[int]]:
+    """Records the cases name by external id (``$xml:contacts.partner_acme``), by model: they belong to the
+    evaluation corpus and stay visible in the sandbox."""
+    refs = sorted(set(XMLID_REF.findall(json.dumps(cases))))
+    out: dict[str, set[int]] = {}
+    if not refs:
+        return out
+    rows = env.cr.fetchall(
+        "SELECT model, res_id FROM core_module_record WHERE (module || '.' || name) = ANY(:refs)",
+        {"refs": [f"{m}.{n}" for m, n in refs]},
+    )
+    for model, res_id in rows:
+        out.setdefault(model, set()).add(int(res_id))
+    return out
+
+
+class _Undo(Exception):
+    """Raised to roll a savepoint back."""
+
+
 def evaluate(env: Environment, spec: FeatureSpec, *, mode: str = "replay") -> EvalReport:
-    """Run every case of a feature inside savepoints that are rolled back."""
+    """Run every case of a feature in the evaluation sandbox, each inside a savepoint that is rolled back;
+    the whole run is rolled back as well, so nothing is written to the target database."""
     from tessera.ai.runtime import get_feature
 
     feature = get_feature(env, spec.name)
@@ -461,20 +517,21 @@ def evaluate(env: Environment, spec: FeatureSpec, *, mode: str = "replay") -> Ev
     previous = C._override
     C.set_client_factory(lambda _env: client)
     results: list[dict[str, Any]] = []
+    cases = spec.cases()
     try:
-        for case in spec.cases():
-
-            class _Undo(Exception):
-                pass
-
-            try:
-                with env.cr.savepoint():
-                    case_env = env.with_context()
-                    res = run_case(case_env, spec, case, client)
-                    results.append({**res, "_case": {**case, "expected": res["expected"]}})
-                    raise _Undo
-            except _Undo:
-                pass
+        with env.cr.savepoint(), sandbox(env, sandbox_models(env, spec), referenced_records(env, cases)):
+            for case in cases:
+                try:
+                    with env.cr.savepoint():
+                        case_env = env.with_context()
+                        res = run_case(case_env, spec, case, client)
+                        results.append({**res, "_case": {**case, "expected": res["expected"]}})
+                        raise _Undo
+                except _Undo:
+                    pass
+            raise _Undo
+    except _Undo:
+        pass
     finally:
         C.set_client_factory(previous)
         if mode == "record" and cassette.dirty:

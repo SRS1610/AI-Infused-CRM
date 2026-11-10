@@ -331,6 +331,8 @@ class Model:
             rule = self._rule_domain(operation)
             if rule is not None:
                 extra.append(rule)
+        if self.env.cr.sandbox and self._name in self.env.cr.sandbox:  # evaluation sandbox (tessera.orm.sandbox)
+            extra.append(self.env.cr.sandbox[self._name].node())
         return combine_and(node, *extra) if extra else node
 
     # ------------------------------------------------------------------ search

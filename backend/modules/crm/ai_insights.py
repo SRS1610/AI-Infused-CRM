@@ -24,6 +24,7 @@ from tessera.exceptions import AccessError, UserError
 from tessera.jobs import enqueue, job
 from tessera.logging import get_logger
 from tessera.orm.hooks import hook
+from tessera.orm.sandbox import sql_filter
 
 if TYPE_CHECKING:
     from tessera.orm.environment import Environment
@@ -484,8 +485,8 @@ def _open_load(env: Environment, user_ids: list[int], company_id: int | None) ->
         return {}
     env.flush()
     rows = env.cr.fetchall(
-        "SELECT user_id, count(*) FROM crm_lead WHERE user_id = ANY(:u) AND active AND NOT coalesce(is_won, false)"
-        " AND (CAST(:c AS integer) IS NULL OR company_id = :c) GROUP BY user_id",
+        "SELECT user_id, count(*) FROM crm_lead WHERE user_id = ANY(:u) AND active AND NOT coalesce(is_won, false)"  # noqa: S608
+        f" AND (CAST(:c AS integer) IS NULL OR company_id = :c){sql_filter(env.cr, 'crm.lead')} GROUP BY user_id",
         {"u": list(user_ids), "c": company_id},
     )
     return {**dict.fromkeys(user_ids, 0), **{r[0]: int(r[1]) for r in rows}}

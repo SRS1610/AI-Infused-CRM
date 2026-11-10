@@ -33,6 +33,7 @@ from tessera.ai import proposals as P
 from tessera.ai.errors import AIError
 from tessera.ai.tools import PendingProposal
 from tessera.exceptions import UserError
+from tessera.orm.sandbox import sql_filter
 
 if TYPE_CHECKING:
     from tessera.orm.environment import Environment
@@ -283,8 +284,9 @@ def candidate_records(me: Model, limit: int = MAX_CANDIDATES) -> Model:
     if name:
         # pg_trgm on the indexed name column; the ORM search below re-applies the user's record rules
         rows = env.cr.fetchall(
-            "SELECT id FROM contacts_partner WHERE active AND id != :id AND name IS NOT NULL "
-            "AND similarity(name, :n) > 0.3 ORDER BY similarity(name, :n) DESC LIMIT :lim",
+            "SELECT id FROM contacts_partner WHERE active AND id != :id AND name IS NOT NULL "  # noqa: S608
+            f"AND similarity(name, :n) > 0.3{sql_filter(env.cr, 'contacts.partner')} "
+            "ORDER BY similarity(name, :n) DESC LIMIT :lim",
             {"id": me.ids[0], "n": name, "lim": limit},
         )
         ids.update({r[0]: None for r in rows})

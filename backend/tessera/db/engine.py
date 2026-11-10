@@ -94,6 +94,8 @@ class Cursor:
         self._savepoint_depth = 0
         self._rollback_listeners: list[weakref.WeakMethod[Callable[[], None]]] = []
         self.closed = False
+        # visibility sandbox of this transaction: model -> scope (``tessera.orm.sandbox``), None outside one
+        self.sandbox: dict[str, Any] | None = None
 
     # -- execution -------------------------------------------------------------------
     def execute(
