@@ -37,7 +37,7 @@ def seed_company(env: Any, company: Any) -> int:
     sale_tax = company.default_sale_tax_id
     purchase_tax = company.default_purchase_tax_id
     for product in products:
-        if sale_tax and sale_tax.ids[0] not in product.taxes_id.ids:
+        if sale_tax and not product._taxes_for(company, "sale"):  # keep taxes given by other modules (sale)
             product.write({"taxes_id": [("add", sale_tax.ids[0])]})
     customers = _customers(env)
     if not customers or not products:

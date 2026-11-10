@@ -1,0 +1,24 @@
+[
+  {"id": "template_robot_cell", "model": "sale.order_template", "values": {
+    "name": "Robot cell starter kit", "sequence": 1, "number_of_days": 45, "payment_term_id": "account.term_30_now_balance_60",
+    "note": "<p>Delivery within 6 weeks of the order. Installation on site is included in the onboarding package.</p>",
+    "line_ids": [
+      {"display_type": "section", "name": "Hardware", "sequence": 1},
+      {"product_id": "product.product_robot_arm", "quantity": 1, "sequence": 2},
+      {"product_id": "product.product_gripper", "quantity": 1, "sequence": 3},
+      {"display_type": "section", "name": "Services", "sequence": 4},
+      {"product_id": "product.product_onboarding", "quantity": 1, "sequence": 5}
+    ],
+    "option_ids": [
+      {"product_id": "product.product_support", "quantity": 1, "sequence": 1},
+      {"product_id": "product.product_sensor", "quantity": 1, "sequence": 2}
+    ]}},
+  {"id": "template_consulting", "model": "sale.order_template", "values": {
+    "name": "Consulting engagement", "sequence": 2, "number_of_days": 30, "payment_term_id": "account.term_30",
+    "note": "<p>Consulting days are invoiced monthly as they are delivered.</p>",
+    "line_ids": [
+      {"product_id": "product.product_consulting", "quantity": 5, "sequence": 1},
+      {"display_type": "note", "name": "Travel expenses are invoiced at cost.", "sequence": 2}
+    ],
+    "option_ids": [{"product_id": "product.product_support", "quantity": 1, "sequence": 1}]}}
+]

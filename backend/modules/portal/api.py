@@ -71,7 +71,10 @@ def update_profile(data: ProfileIn, ctx: RequestContext = Depends(authenticated_
 
 @router.get("/documents")
 def documents(ctx: RequestContext = Depends(authenticated_any)) -> dict[str, Any]:
-    """Everything the signed-in customer may see: quotations of their company (via record rules)."""
+    """Everything the signed-in customer may see: quotations of their company (via record rules) when the
+    ``sale`` module is installed."""
+    if "sale.quotation" not in ctx.env:
+        return {"quotations": []}
     quotes = ctx.env["sale.quotation"].search([], order="date_order desc", limit=200)
     return {
         "quotations": [

@@ -48,8 +48,18 @@ msgid "Quotation date"
 msgstr ""
 
 #. field label
-#: field:sale.quotation.validity_date
+#: field:sale.promotion.date_to field:sale.quotation.validity_date
 msgid "Valid until"
+msgstr ""
+
+#. field label
+#: field:sale.quotation.confirmation_date
+msgid "Confirmed on"
+msgstr ""
+
+#. field help
+#: field:sale.quotation.confirmation_date
+msgid "When the quotation became a sales order"
 msgstr ""
 
 #. field label
@@ -58,41 +68,100 @@ msgid "Salesperson"
 msgstr ""
 
 #. field label
-#: field:sale.quotation.company_id
+#: field:sale.order_template.company_id field:sale.order_template_line.company_id
+#: field:sale.order_template_option.company_id field:sale.promotion.company_id
+#: field:sale.promotion_reward.company_id field:sale.promotion_rule.company_id
+#: field:sale.quotation.company_id field:sale.quotation_line.company_id
 msgid "Company"
 msgstr ""
 
 #. field label
-#: field:sale.quotation.currency_id field:sale.quotation_line.currency_id
+#: field:sale.promotion.currency_id field:sale.quotation.currency_id
+#: field:sale.quotation_line.currency_id
 msgid "Currency"
+msgstr ""
+
+#. field help
+#: field:sale.quotation.currency_id
+msgid "The pricelist's currency"
+msgstr ""
+
+#. field label
+#: field:contacts.partner.pricelist_id field:sale.quotation.pricelist_id
+msgid "Pricelist"
+msgstr ""
+
+#. field help
+#: field:sale.quotation.pricelist_id
+msgid "Gives the unit prices of the lines (default: the customer's pricelist)"
+msgstr ""
+
+#. field label
+#: field:sale.quotation.fiscal_position_id
+msgid "Fiscal position"
+msgstr ""
+
+#. field help
+#: field:sale.quotation.fiscal_position_id
+msgid "Maps the products' taxes (default: the customer's, or the one detected from their country)"
+msgstr ""
+
+#. field label
+#: field:sale.order_template.payment_term_id field:sale.quotation.payment_term_id
+msgid "Payment terms"
+msgstr ""
+
+#. field label
+#. model description
+#: field:sale.quotation.template_id model:sale.order_template
+msgid "Quotation template"
+msgstr ""
+
+#. field help
+#: field:sale.quotation.template_id
+msgid "Lines, options and terms to start from"
+msgstr ""
+
+#. field label
+#: field:sale.quotation.origin_order_id
+msgid "Original order"
+msgstr ""
+
+#. field help
+#: field:sale.quotation.origin_order_id
+msgid "The order this one renews or returns"
 msgstr ""
 
 #. field label
 #. view title
-#: field:sale.quotation.line_ids views.json:view_quotation_form
+#: field:sale.order_template.line_ids field:sale.quotation.line_ids views.json:view_order_template_form
+#: views.json:view_quotation_form
 msgid "Lines"
 msgstr ""
 
 #. field label
 #. template text
-#: data/reports.json:report_quotation_v1 field:sale.quotation.amount_untaxed
+#: data/reports.json:report_quotation_v1 data/reports.json:report_quotation_v2
+#: field:sale.quotation.amount_untaxed
 msgid "Untaxed"
 msgstr ""
 
 #. field label
 #. template text
-#: data/reports.json:report_quotation_v1 field:sale.quotation.amount_tax
+#: data/reports.json:report_quotation_v1 data/reports.json:report_quotation_v2
+#: field:sale.quotation.amount_tax field:sale.quotation_line.tax_ids
 msgid "Taxes"
 msgstr ""
 
 #. field label
 #. template text
-#: data/reports.json:report_quotation_v1 field:sale.quotation.amount_total
+#: data/reports.json:report_quotation_v1 data/reports.json:report_quotation_v2
+#: field:sale.quotation.amount_total
 msgid "Total"
 msgstr ""
 
 #. field label
-#: field:sale.quotation.note
+#: field:sale.order_template.note field:sale.quotation.note
 msgid "Terms and conditions"
 msgstr ""
 
@@ -103,39 +172,114 @@ msgstr ""
 
 #. selection value draft
 #. workflow.state.name
-#: data/workflow.json:st_draft selection:sale.quotation.state
+#: data/workflow.json:st_draft selection:sale.quotation.state selection:sale.quotation_line.order_state
 msgid "Draft"
 msgstr ""
 
 #. selection value sent
 #. workflow.state.name
-#: data/workflow.json:st_sent selection:sale.quotation.state
+#: data/workflow.json:st_sent selection:sale.quotation.state selection:sale.quotation_line.order_state
 msgid "Sent"
 msgstr ""
 
 #. selection value accepted
 #. workflow.state.name
-#. view label
-#: data/workflow.json:st_accepted selection:sale.quotation.state views.json:view_quotation_search
-msgid "Accepted"
+#: data/workflow.json:st_accepted selection:sale.quotation.state
+#: selection:sale.quotation_line.order_state
+msgid "Sales order"
 msgstr ""
 
 #. selection value rejected
 #. workflow.state.name
 #: data/workflow.json:st_rejected selection:sale.quotation.state
+#: selection:sale.quotation_line.order_state
 msgid "Rejected"
 msgstr ""
 
 #. selection value expired
 #. workflow.state.name
 #: data/workflow.json:st_expired selection:sale.quotation.state
+#: selection:sale.quotation_line.order_state
 msgid "Expired"
 msgstr ""
 
 #. selection value cancelled
 #. workflow.state.name
 #: data/workflow.json:st_cancelled selection:sale.quotation.state
+#: selection:sale.quotation_line.order_state
 msgid "Cancelled"
+msgstr ""
+
+#. field label
+#. view label
+#: field:sale.quotation.locked views.json:view_quotation_search
+msgid "Locked"
+msgstr ""
+
+#. field help
+#: field:sale.quotation.locked
+msgid "A locked order cannot be changed (it is fully invoiced)"
+msgstr ""
+
+#. field label
+#: field:sale.quotation.invoice_status field:sale.quotation_line.invoice_status
+msgid "Invoicing"
+msgstr ""
+
+#. selection value no
+#: selection:sale.quotation.invoice_status selection:sale.quotation_line.invoice_status
+msgid "Nothing to invoice"
+msgstr ""
+
+#. selection value to_invoice
+#. field label
+#. view label
+#. menu name
+#: field:sale.quotation_line.qty_to_invoice menus.json:menu_invoicing_root
+#: selection:sale.quotation.invoice_status selection:sale.quotation_line.invoice_status
+#: views.json:view_quotation_search
+msgid "To invoice"
+msgstr ""
+
+#. selection value invoiced
+#: selection:sale.quotation.invoice_status selection:sale.quotation_line.invoice_status
+msgid "Fully invoiced"
+msgstr ""
+
+#. selection value upselling
+#: selection:sale.quotation.invoice_status selection:sale.quotation_line.invoice_status
+msgid "Upselling opportunity"
+msgstr ""
+
+#. field label
+#: field:sale.quotation.amount_to_invoice field:sale.quotation_line.untaxed_amount_to_invoice
+msgid "Untaxed to invoice"
+msgstr ""
+
+#. field label
+#. view title
+#: field:sale.quotation.invoice_count field:sale.quotation.invoice_ids views.json:view_quotation_form
+msgid "Invoices"
+msgstr ""
+
+#. field label
+#: field:sale.quotation.promotion_code_ids
+msgid "Promotion codes"
+msgstr ""
+
+#. field help
+#: field:sale.quotation.promotion_code_ids
+msgid "Code promotions entered for this order; they apply whenever the order is eligible"
+msgstr ""
+
+#. field label
+#: field:sale.quotation.promotion_ids
+msgid "Applied promotions"
+msgstr ""
+
+#. field help
+#: field:sale.quotation.promotion_ids
+msgid "Promotions with reward lines"
 msgstr ""
 
 #. field label
@@ -179,60 +323,79 @@ msgid "Quotation line"
 msgstr ""
 
 #. field label
+#: field:sale.quotation_line.order_state
+msgid "Order state"
+msgstr ""
+
+#. field label
+#: field:sale.order_template.sequence field:sale.order_template_line.sequence
+#: field:sale.order_template_option.sequence field:sale.promotion.sequence
 #: field:sale.quotation_line.sequence
 msgid "Sequence"
 msgstr ""
 
 #. field label
-#: field:sale.quotation_line.display_type
+#: field:sale.order_template_line.display_type field:sale.quotation_line.display_type
 msgid "Display Type"
 msgstr ""
 
 #. selection value section
-#: selection:sale.quotation_line.display_type
+#: selection:sale.order_template_line.display_type selection:sale.quotation_line.display_type
 msgid "Section"
 msgstr ""
 
 #. selection value note
-#: selection:sale.quotation_line.display_type
+#: selection:sale.order_template_line.display_type selection:sale.quotation_line.display_type
 msgid "Note"
 msgstr ""
 
 #. field label
+#: field:sale.order_template_line.product_id field:sale.order_template_option.product_id
 #: field:sale.quotation_line.product_id
 msgid "Product"
 msgstr ""
 
 #. field label
 #. template text
-#: data/reports.json:report_quotation_v1 field:sale.quotation_line.name
+#: data/reports.json:report_quotation_v1 data/reports.json:report_quotation_v2
+#: field:sale.order_template_line.name field:sale.order_template_option.name
+#: field:sale.promotion_reward.description field:sale.quotation_line.name
 msgid "Description"
 msgstr ""
 
 #. field label
+#: field:sale.order_template_line.quantity field:sale.order_template_option.quantity
 #: field:sale.quotation_line.quantity
 msgid "Quantity"
 msgstr ""
 
 #. field label
+#: field:sale.order_template_line.uom_id field:sale.order_template_option.uom_id
 #: field:sale.quotation_line.uom_id
 msgid "Unit"
 msgstr ""
 
 #. field label
 #. template text
-#: data/reports.json:report_quotation_v1 field:sale.quotation_line.price_unit
+#: data/reports.json:report_quotation_v1 data/reports.json:report_quotation_v2
+#: field:sale.quotation_line.price_unit
 msgid "Unit price"
 msgstr ""
 
 #. field label
-#: field:sale.quotation_line.discount
-msgid "Discount %"
+#: field:sale.quotation_line.price_manual
+msgid "Price typed"
+msgstr ""
+
+#. field help
+#: field:sale.quotation_line.price_manual
+msgid "The unit price was typed: the pricelist no longer changes it"
 msgstr ""
 
 #. field label
-#: field:sale.quotation_line.tax_percent
-msgid "Tax %"
+#: field:sale.order_template_line.discount field:sale.order_template_option.discount
+#: field:sale.promotion_reward.discount_percent field:sale.quotation_line.discount
+msgid "Discount %"
 msgstr ""
 
 #. field label
@@ -243,6 +406,30 @@ msgstr ""
 #. field help
 #: field:sale.quotation_line.is_optional
 msgid "Offered as an option; not in the totals until accepted"
+msgstr ""
+
+#. field label
+#. product.product.name
+#: data/products.json:product_downpayment field:sale.quotation_line.is_downpayment
+msgid "Down payment"
+msgstr ""
+
+#. field label
+#. model description
+#: field:sale.quotation_line.is_reward_line model:sale.promotion_reward
+msgid "Promotion reward"
+msgstr ""
+
+#. field label
+#. model description
+#: field:sale.promotion_reward.promotion_id field:sale.promotion_rule.promotion_id
+#: field:sale.quotation_line.promotion_id model:sale.promotion
+msgid "Promotion"
+msgstr ""
+
+#. field label
+#: field:sale.promotion_reward.reward_type field:sale.quotation_line.promotion_reward_id
+msgid "Reward"
 msgstr ""
 
 #. field label
@@ -258,6 +445,372 @@ msgstr ""
 #. field label
 #: field:sale.quotation_line.price_total
 msgid "Price Total"
+msgstr ""
+
+#. field label
+#: field:product.product.invoice_policy field:sale.quotation_line.invoice_policy
+msgid "Invoicing policy"
+msgstr ""
+
+#. selection value order
+#: selection:product.product.invoice_policy selection:sale.quotation_line.invoice_policy
+msgid "Ordered quantities"
+msgstr ""
+
+#. selection value delivery
+#: selection:product.product.invoice_policy selection:sale.quotation_line.invoice_policy
+msgid "Delivered quantities"
+msgstr ""
+
+#. field label
+#: field:sale.quotation_line.qty_delivered_method
+msgid "Delivery tracking"
+msgstr ""
+
+#. field help
+#: field:sale.quotation_line.qty_delivered_method
+msgid "How the delivered quantity is known (entered by hand until stock arrives in Phase 3)"
+msgstr ""
+
+#. selection value manual
+#: selection:sale.quotation_line.qty_delivered_method
+msgid "Manual"
+msgstr ""
+
+#. selection value milestones
+#: selection:sale.quotation_line.qty_delivered_method
+msgid "Milestones"
+msgstr ""
+
+#. field label
+#: field:sale.quotation_line.qty_delivered
+msgid "Delivered"
+msgstr ""
+
+#. field label
+#: field:sale.quotation_line.qty_returned
+msgid "Returned"
+msgstr ""
+
+#. field help
+#: field:sale.quotation_line.qty_returned
+msgid "Quantity the customer sent back"
+msgstr ""
+
+#. field label
+#: field:sale.quotation_line.invoice_line_ids
+msgid "Invoice lines"
+msgstr ""
+
+#. field label
+#: field:sale.quotation_line.qty_invoiced
+msgid "Invoiced"
+msgstr ""
+
+#. field label
+#: field:sale.quotation_line.qty_refunded
+msgid "Credited"
+msgstr ""
+
+#. field label
+#: field:account.move_line.sale_line_ids
+msgid "Sales order lines"
+msgstr ""
+
+#. field label
+#. view label
+#. action name
+#: actions.json:action_orders field:account.move.sale_order_count
+#: field:contacts.partner.sale_order_count views.json:view_quotation_search
+msgid "Sales orders"
+msgstr ""
+
+#. field help
+#: field:product.product.invoice_policy
+msgid "Invoice what the customer ordered, or only what was delivered"
+msgstr ""
+
+#. field label
+#: field:product.product.service_policy
+msgid "Service delivery"
+msgstr ""
+
+#. field help
+#: field:product.product.service_policy
+msgid "How delivered quantities of a service are tracked (entered on the order line in both cases)"
+msgstr ""
+
+#. selection value manual
+#: selection:product.product.service_policy
+msgid "Manually"
+msgstr ""
+
+#. selection value milestones
+#: selection:product.product.service_policy
+msgid "By milestones"
+msgstr ""
+
+#. field label
+#. view title
+#: field:product.product.optional_product_ids field:sale.order_template.option_ids
+#: views.json:view_order_template_form
+msgid "Optional products"
+msgstr ""
+
+#. field help
+#: field:product.product.optional_product_ids
+msgid "Offered as optional lines when this product is added to a quotation"
+msgstr ""
+
+#. field label
+#: field:product.product.accessory_product_ids
+msgid "Accessories"
+msgstr ""
+
+#. field help
+#: field:product.product.accessory_product_ids
+msgid "Suggested with this product (upsell)"
+msgstr ""
+
+#. field help
+#: field:contacts.partner.pricelist_id
+msgid "Prices for this customer (default: the pricelist of their country, else the company's)"
+msgstr ""
+
+#. constraint message
+#: model:sale.promotion
+msgid "A promotion code must be unique"
+msgstr ""
+
+#. field label
+#: field:sale.order_template.name field:sale.promotion.name
+msgid "Name"
+msgstr ""
+
+#. field help
+#: field:sale.promotion.name
+msgid "Shown on the reward lines"
+msgstr ""
+
+#. field help
+#: field:sale.promotion.sequence
+msgid "Promotions apply in this order"
+msgstr ""
+
+#. field label
+#: field:sale.order_template.active field:sale.promotion.active
+msgid "Active"
+msgstr ""
+
+#. field help
+#: field:sale.promotion.company_id
+msgid "Empty = every company"
+msgstr ""
+
+#. field help
+#: field:sale.promotion.currency_id
+msgid "Currency of the minimum amounts and fixed rewards (converted to the order's currency)"
+msgstr ""
+
+#. field label
+#: field:sale.promotion.program_type
+msgid "Applies"
+msgstr ""
+
+#. field help
+#: field:sale.promotion.program_type
+msgid "Automatic promotions apply to every eligible order; code promotions once the code is entered"
+msgstr ""
+
+#. selection value automatic
+#. view label
+#: selection:sale.promotion.program_type views.json:view_promotion_search
+msgid "Automatic"
+msgstr ""
+
+#. selection value code
+#. view label
+#: selection:sale.promotion.program_type views.json:view_promotion_search
+msgid "With a code"
+msgstr ""
+
+#. field label
+#: field:sale.promotion.code
+msgid "Code"
+msgstr ""
+
+#. field help
+#: field:sale.promotion.code
+msgid "The code customers give (case-insensitive)"
+msgstr ""
+
+#. field label
+#: field:sale.promotion.date_from
+msgid "Valid from"
+msgstr ""
+
+#. field label
+#: field:sale.promotion.max_usage
+msgid "Maximum uses"
+msgstr ""
+
+#. field help
+#: field:sale.promotion.max_usage
+msgid "Number of sales orders that can use the promotion (0 = unlimited)"
+msgstr ""
+
+#. field label
+#: field:sale.promotion.usage_count
+msgid "Uses"
+msgstr ""
+
+#. field help
+#: field:sale.promotion.usage_count
+msgid "Sales orders that used it"
+msgstr ""
+
+#. field label
+#. view title
+#: field:sale.promotion.rule_ids views.json:view_promotion_form
+msgid "Conditions"
+msgstr ""
+
+#. field help
+#: field:sale.promotion.rule_ids
+msgid "The order is eligible when one condition is met (no condition: every order)"
+msgstr ""
+
+#. field label
+#. view title
+#: field:sale.promotion.reward_ids views.json:view_promotion_form
+msgid "Rewards"
+msgstr ""
+
+#. field label
+#: field:sale.promotion.note
+msgid "Internal notes"
+msgstr ""
+
+#. model description
+#: model:sale.promotion_rule
+msgid "Promotion condition"
+msgstr ""
+
+#. field label
+#: field:sale.promotion_rule.minimum_amount
+msgid "Minimum untaxed amount"
+msgstr ""
+
+#. field help
+#: field:sale.promotion_rule.minimum_amount
+msgid "Untaxed amount of the order (before rewards)"
+msgstr ""
+
+#. field label
+#: field:sale.promotion_rule.minimum_qty
+msgid "Minimum quantity"
+msgstr ""
+
+#. field help
+#: field:sale.promotion_rule.minimum_qty
+msgid "Quantity of the products below (all products if none)"
+msgstr ""
+
+#. field label
+#. menu name
+#. action name
+#: actions.json:action_products field:sale.promotion_rule.product_ids menus.json:menu_products
+#: menus.json:menu_products_root
+msgid "Products"
+msgstr ""
+
+#. field label
+#. menu name
+#: field:sale.promotion_rule.category_ids menus.json:menu_categories
+msgid "Product categories"
+msgstr ""
+
+#. field help
+#: field:sale.promotion_rule.category_ids
+msgid "Products of these categories (and their sub-categories) count"
+msgstr ""
+
+#. selection value discount_order
+#: selection:sale.promotion_reward.reward_type
+msgid "Percentage on the order"
+msgstr ""
+
+#. selection value discount_cheapest
+#: selection:sale.promotion_reward.reward_type
+msgid "Percentage on the cheapest line"
+msgstr ""
+
+#. selection value fixed_amount
+#: selection:sale.promotion_reward.reward_type
+msgid "Fixed amount"
+msgstr ""
+
+#. selection value free_product
+#. field label
+#: field:sale.promotion_reward.free_product_id selection:sale.promotion_reward.reward_type
+msgid "Free product"
+msgstr ""
+
+#. field label
+#. template text
+#: data/reports.json:report_quotation_v1 data/reports.json:report_quotation_v2
+#: field:sale.promotion_reward.fixed_amount
+msgid "Amount"
+msgstr ""
+
+#. field help
+#: field:sale.promotion_reward.fixed_amount
+msgid "In the promotion's currency"
+msgstr ""
+
+#. field label
+#: field:sale.promotion_reward.free_quantity
+msgid "Free quantity"
+msgstr ""
+
+#. field help
+#: field:sale.promotion_reward.description
+msgid "Label of the reward line (default: the promotion's name)"
+msgstr ""
+
+#. field help
+#: field:sale.order_template.company_id
+msgid "Empty = shared by every company"
+msgstr ""
+
+#. field label
+#: field:sale.order_template.number_of_days
+msgid "Validity (days)"
+msgstr ""
+
+#. field help
+#: field:sale.order_template.number_of_days
+msgid "The quotation is valid this many days after the template is applied"
+msgstr ""
+
+#. model description
+#: model:sale.order_template_line
+msgid "Quotation template line"
+msgstr ""
+
+#. field label
+#: field:sale.order_template_line.template_id field:sale.order_template_option.template_id
+msgid "Template"
+msgstr ""
+
+#. field help
+#: field:sale.order_template_line.name field:sale.order_template_option.name
+msgid "Empty = the product's sales description"
+msgstr ""
+
+#. model description
+#: model:sale.order_template_option
+msgid "Quotation template optional product"
 msgstr ""
 
 #: api.py:26 api.py:39
@@ -276,44 +829,238 @@ msgstr ""
 msgid "Invalid or expired link"
 msgstr ""
 
-#: models/quotation.py:123
-msgid "Add at least one line before sending"
+#: invoicing.py:33
+msgid "The down payment product is missing: upgrade the sale module"
 msgstr ""
 
-#: models/quotation.py:125
-msgid "Only draft or sent quotations can be sent"
+#: invoicing.py:158
+msgid "There is nothing to invoice: check the delivered quantities and the invoicing policies"
 msgstr ""
 
-#: models/quotation.py:131
-msgid "The customer has no email address"
+#: invoicing.py:167
+#, python-format
+msgid "A down payment is a positive amount, and at most 100 % of the order"
 msgstr ""
 
-#: models/quotation.py:190
-msgid "Type your full name to accept"
+#: invoicing.py:179
+#, python-brace-format
+msgid "Down payment of {date}: {percent} %"
 msgstr ""
 
-#: models/quotation.py:192
-msgid "This quotation can no longer be accepted"
+#: invoicing.py:181
+#, python-brace-format
+msgid "Down payment of {date}"
 msgstr ""
 
-#: models/quotation.py:194
-msgid "This quotation has expired"
+#: invoicing.py:243
+msgid "No returned quantity is waiting for a credit note"
 msgstr ""
 
-#: models/quotation.py:203
-msgid "This quotation can no longer be rejected"
+#: invoicing.py:56
+#, python-brace-format
+msgid "Only sales orders can be invoiced ({name}): confirm the quotation first"
 msgstr ""
 
-#: models/quotation.py:101
-msgid "The validity date is before the quotation date"
+#: invoicing.py:152
+#, python-brace-format
+msgid "Down payment deduction: {name}"
 msgstr ""
 
-#: models/quotation.py:271
+#: invoicing.py:174 invoicing.py:210
+#, python-brace-format
+msgid "Order {name} has no amount to pay in advance"
+msgstr ""
+
+#: invoicing.py:176
+#, python-brace-format
+msgid "The down payment is larger than the order total ({total})"
+msgstr ""
+
+#: models/product.py:59
+msgid "A product cannot be its own optional product or accessory"
+msgstr ""
+
+#: models/promotion.py:99
+msgid "A code promotion needs a code"
+msgstr ""
+
+#: models/promotion.py:101
+msgid "The promotion ends before it starts"
+msgstr ""
+
+#: models/promotion.py:103
+msgid "The maximum number of uses cannot be negative"
+msgstr ""
+
+#: models/promotion.py:139
+msgid "Minimums cannot be negative"
+msgstr ""
+
+#: models/promotion.py:175 models/quotation.py:824
 msgid "A discount is between 0 and 100 %"
 msgstr ""
 
-#: models/quotation.py:273
+#: models/promotion.py:177
+msgid "A fixed reward needs a positive amount"
+msgstr ""
+
+#: models/promotion.py:179
+msgid "Choose the free product and its quantity"
+msgstr ""
+
+#: models/quotation.py:277 models/quotation.py:325 models/quotation.py:857 models/quotation.py:887
+#: models/quotation.py:929 promotions.py:236
+#, python-brace-format
+msgid "Sales order {name} is locked: unlock it to change it"
+msgstr ""
+
+#: models/quotation.py:329
+#, python-brace-format
+msgid "Sales order {name} has invoices: cancel or credit them before cancelling the order"
+msgstr ""
+
+#: models/quotation.py:383
+msgid "Add at least one line before sending"
+msgstr ""
+
+#: models/quotation.py:385
+msgid "Only draft or sent quotations can be sent"
+msgstr ""
+
+#: models/quotation.py:391
+msgid "The customer has no email address"
+msgstr ""
+
+#: models/quotation.py:450
+msgid "Type your full name to accept"
+msgstr ""
+
+#: models/quotation.py:452
+msgid "This quotation can no longer be accepted"
+msgstr ""
+
+#: models/quotation.py:454 models/quotation.py:479
+msgid "This quotation has expired"
+msgstr ""
+
+#: models/quotation.py:469
+msgid "This quotation can no longer be rejected"
+msgstr ""
+
+#: models/quotation.py:477
+msgid "Options can only be added to a quotation waiting for your answer"
+msgstr ""
+
+#: models/quotation.py:482
+msgid "This option is not available"
+msgstr ""
+
+#: models/quotation.py:842
+#, python-brace-format
+msgid "'{product}' cannot be sold: choose a product that can be sold (not a template)"
+msgstr ""
+
+#: models/quotation.py:361
+msgid "The validity date is before the quotation date"
+msgstr ""
+
+#: models/quotation.py:501
+#, python-brace-format
+msgid "Only draft or sent quotations can be confirmed ({name})"
+msgstr ""
+
+#: models/quotation.py:503
+msgid "Add at least one line before confirming"
+msgstr ""
+
+#: models/quotation.py:539
+#, python-brace-format
+msgid "Only sales orders can be locked ({name})"
+msgstr ""
+
+#: models/quotation.py:558
+msgid "Choose a quotation template first"
+msgstr ""
+
+#: models/quotation.py:560
+msgid "Templates can only be applied to draft or sent quotations"
+msgstr ""
+
+#: models/quotation.py:604
+#, python-brace-format
+msgid "Unknown invoicing method '{method}'"
+msgstr ""
+
+#: models/quotation.py:826 models/template.py:103
 msgid "Quantities cannot be negative"
+msgstr ""
+
+#: models/quotation.py:828
+msgid "Delivered and returned quantities cannot be negative"
+msgstr ""
+
+#: models/quotation.py:831
+#, python-brace-format
+msgid "More is returned than was ordered or delivered ({name})"
+msgstr ""
+
+#: models/quotation.py:601
+msgid "Give the down payment amount"
+msgstr ""
+
+#: models/quotation.py:931
+#, python-brace-format
+msgid "Invoiced line '{name}' cannot be deleted"
+msgstr ""
+
+#: models/template.py:38
+msgid "The validity cannot be negative"
+msgstr ""
+
+#: models/template.py:99
+msgid "A section or note needs a text"
+msgstr ""
+
+#: models/template.py:101
+msgid "Choose a product or write a description"
+msgstr ""
+
+#: promotions.py:79
+msgid "This promotion is no longer active"
+msgstr ""
+
+#: promotions.py:81
+msgid "This promotion is not available for this company"
+msgstr ""
+
+#: promotions.py:83
+msgid "This promotion has not started yet"
+msgstr ""
+
+#: promotions.py:85
+msgid "This promotion has ended"
+msgstr ""
+
+#: promotions.py:87
+msgid "This promotion has been used the maximum number of times"
+msgstr ""
+
+#: promotions.py:89
+msgid "The order does not meet the promotion's conditions"
+msgstr ""
+
+#: promotions.py:214
+#, python-brace-format
+msgid "Unknown promotion code '{code}'"
+msgstr ""
+
+#: promotions.py:238
+msgid "Promotions apply to quotations and sales orders only"
+msgstr ""
+
+#: promotions.py:242
+#, python-brace-format
+msgid "The promotions of {name} are already invoiced"
 msgstr ""
 
 #. core.group.name
@@ -342,6 +1089,11 @@ msgid "Mark accepted"
 msgstr ""
 
 #. workflow.transition.name
+#: data/workflow.json:tr_confirm
+msgid "Confirm as sales order"
+msgstr ""
+
+#. workflow.transition.name
 #: data/workflow.json:tr_reject
 msgid "Mark rejected"
 msgstr ""
@@ -367,70 +1119,82 @@ msgid "Back to draft"
 msgstr ""
 
 #. template text
-#: data/reports.json:report_quotation_v1
+#: data/reports.json:report_quotation_v1 data/reports.json:report_quotation_v2
 #, python-brace-format
 msgid "Quotation {name}"
 msgstr ""
 
 #. template text
-#: data/reports.json:report_quotation_v1
+#: data/reports.json:report_quotation_v1 data/reports.json:report_quotation_v2
 #, python-brace-format
 msgid "Date: {date}"
 msgstr ""
 
 #. template text
-#: data/reports.json:report_quotation_v1
+#: data/reports.json:report_quotation_v1 data/reports.json:report_quotation_v2
 #, python-brace-format
 msgid "Valid until: {date}"
 msgstr ""
 
 #. template text
-#: data/reports.json:report_quotation_v1
+#: data/reports.json:report_quotation_v1 data/reports.json:report_quotation_v2
 #, python-brace-format
 msgid "Your reference: {reference}"
 msgstr ""
 
 #. template text
-#: data/reports.json:report_quotation_v1
+#: data/reports.json:report_quotation_v1 data/reports.json:report_quotation_v2
 #, python-brace-format
 msgid "Attn: {name}"
 msgstr ""
 
 #. template text
-#: data/reports.json:report_quotation_v1
+#: data/reports.json:report_quotation_v1 data/reports.json:report_quotation_v2
 msgid "Qty"
 msgstr ""
 
 #. template text
-#: data/reports.json:report_quotation_v1
+#: data/reports.json:report_quotation_v1 data/reports.json:report_quotation_v2
 msgid "Disc."
 msgstr ""
 
 #. template text
-#: data/reports.json:report_quotation_v1
+#: data/reports.json:report_quotation_v1 data/reports.json:report_quotation_v2
 msgid "Tax"
 msgstr ""
 
 #. template text
-#: data/reports.json:report_quotation_v1
-msgid "Amount"
-msgstr ""
-
-#. template text
-#: data/reports.json:report_quotation_v1
+#: data/reports.json:report_quotation_v1 data/reports.json:report_quotation_v2
 msgid "(optional)"
 msgstr ""
 
 #. template text
-#: data/reports.json:report_quotation_v1
+#: data/reports.json:report_quotation_v1 data/reports.json:report_quotation_v2
 #, python-brace-format
 msgid "Accepted by {name} on {date}."
 msgstr ""
 
 #. template text
-#: data/reports.json:report_quotation_v1
+#: data/reports.json:report_quotation_v1 data/reports.json:report_quotation_v2
 #, python-brace-format
 msgid "Your salesperson: {name}"
+msgstr ""
+
+#. template text
+#: data/reports.json:report_quotation_v2
+#, python-brace-format
+msgid "Sales order {name}"
+msgstr ""
+
+#. template text
+#: data/reports.json:report_quotation_v2
+#, python-brace-format
+msgid "Payment terms: {name}"
+msgstr ""
+
+#. product.product.description_sale
+#: data/products.json:product_downpayment
+msgid "Advance payment on a sales order, deducted from the final invoice"
 msgstr ""
 
 #. view label
@@ -438,8 +1202,80 @@ msgstr ""
 msgid "Send by email"
 msgstr ""
 
-#. view title
+#. view label
 #: views.json:view_quotation_form
+msgid "Confirm"
+msgstr ""
+
+#. view label
+#: views.json:view_quotation_form
+msgid "Create invoice"
+msgstr ""
+
+#. view label
+#: views.json:view_quotation_form
+msgid "What to invoice"
+msgstr ""
+
+#. view label
+#: views.json:view_quotation_form
+msgid "Down payment (percentage or amount)"
+msgstr ""
+
+#. view help
+#: views.json:view_quotation_form
+msgid "Only for a down payment"
+msgstr ""
+
+#. view label
+#: views.json:view_quotation_form
+msgid "Credit note for returns"
+msgstr ""
+
+#. view confirm
+#: views.json:view_quotation_form
+msgid "Create a credit note for the returned quantities that were already invoiced?"
+msgstr ""
+
+#. view label
+#: views.json:view_quotation_form
+msgid "Apply promotions"
+msgstr ""
+
+#. view label
+#: views.json:view_quotation_form
+msgid "Promotion code (optional)"
+msgstr ""
+
+#. view label
+#: views.json:view_quotation_form
+msgid "Apply template"
+msgstr ""
+
+#. view confirm
+#: views.json:view_quotation_form
+msgid "Replace the lines with those of the template?"
+msgstr ""
+
+#. view label
+#: views.json:view_quotation_form
+msgid "Lock"
+msgstr ""
+
+#. view label
+#: views.json:view_quotation_form
+msgid "Unlock"
+msgstr ""
+
+#. view title
+#. menu name
+#. action name
+#: actions.json:action_promotions menus.json:menu_promotions views.json:view_quotation_form
+msgid "Promotions"
+msgstr ""
+
+#. view title
+#: views.json:view_order_template_form views.json:view_quotation_form
 msgid "Terms"
 msgstr ""
 
@@ -458,9 +1294,34 @@ msgstr ""
 msgid "Waiting for the customer"
 msgstr ""
 
+#. view label
+#: views.json:view_quotation_search
+msgid "Upselling opportunities"
+msgstr ""
+
+#. view title
+#: views.json:view_quotation_line_form
+msgid "Delivery and invoicing"
+msgstr ""
+
+#. view title
+#: views.json:view_promotion_form
+msgid "Notes"
+msgstr ""
+
+#. view label
+#: views.json:view_promotion_search
+msgid "Archived"
+msgstr ""
+
 #. menu name
 #: menus.json:menu_root
 msgid "Sales"
+msgstr ""
+
+#. menu name
+#: menus.json:menu_orders menus.json:menu_orders_root
+msgid "Orders"
 msgstr ""
 
 #. menu name
@@ -471,8 +1332,35 @@ msgstr ""
 
 #. menu name
 #. action name
-#: actions.json:action_products menus.json:menu_products
-msgid "Products"
+#: actions.json:action_customers menus.json:menu_customers
+msgid "Customers"
+msgstr ""
+
+#. menu name
+#. action name
+#: actions.json:action_orders_to_invoice menus.json:menu_to_invoice
+msgid "Orders to invoice"
+msgstr ""
+
+#. menu name
+#: menus.json:menu_variants
+msgid "Product variants"
+msgstr ""
+
+#. menu name
+#: menus.json:menu_pricelists
+msgid "Pricelists"
+msgstr ""
+
+#. menu name
+#: menus.json:menu_reporting
+msgid "Reporting"
+msgstr ""
+
+#. menu name
+#. action name
+#: actions.json:action_sales_analysis menus.json:menu_sales_analysis
+msgid "Sales analysis"
 msgstr ""
 
 #. menu name
@@ -481,12 +1369,28 @@ msgid "Configuration"
 msgstr ""
 
 #. menu name
-#: menus.json:menu_categories
-msgid "Product categories"
+#. action name
+#: actions.json:action_templates menus.json:menu_templates
+msgid "Quotation templates"
+msgstr ""
+
+#. menu name
+#: menus.json:menu_attributes
+msgid "Product attributes"
 msgstr ""
 
 #. menu name
 #: menus.json:menu_uoms
 msgid "Units of measure"
+msgstr ""
+
+#. action help
+#: actions.json:action_orders
+msgid "A quotation becomes a sales order when the customer accepts it online or when you confirm it."
+msgstr ""
+
+#. action help
+#: actions.json:action_orders_to_invoice
+msgid "Sales orders with ordered or delivered quantities not invoiced yet (or returns to credit)."
 msgstr ""
 

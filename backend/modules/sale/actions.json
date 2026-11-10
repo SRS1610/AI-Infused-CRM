@@ -1,4 +1,10 @@
 [
   {"id": "action_quotations", "name": "Quotations", "model": "sale.quotation", "views": ["list", "kanban", "form", "pivot", "graph"], "search_view": "sale.view_quotation_search"},
-  {"id": "action_products", "name": "Products", "model": "product.product", "views": ["kanban", "list", "form"], "search_view": "product.view_product_search"}
+  {"id": "action_orders", "name": "Sales orders", "model": "sale.quotation", "views": ["list", "form", "kanban", "pivot", "graph"], "view_refs": {"list": "sale.view_order_list", "pivot": "sale.view_order_pivot", "graph": "sale.view_order_graph"}, "search_view": "sale.view_quotation_search", "domain": [["state", "=", "accepted"]], "help": "A quotation becomes a sales order when the customer accepts it online or when you confirm it."},
+  {"id": "action_orders_to_invoice", "name": "Orders to invoice", "model": "sale.quotation", "views": ["list", "form"], "view_refs": {"list": "sale.view_order_list"}, "search_view": "sale.view_quotation_search", "domain": [["invoice_status", "=", "to_invoice"]], "help": "Sales orders with ordered or delivered quantities not invoiced yet (or returns to credit)."},
+  {"id": "action_sales_analysis", "name": "Sales analysis", "model": "sale.quotation", "views": ["pivot", "graph", "list", "form"], "view_refs": {"list": "sale.view_order_list", "pivot": "sale.view_order_pivot", "graph": "sale.view_order_graph"}, "search_view": "sale.view_quotation_search", "domain": [["state", "=", "accepted"]]},
+  {"id": "action_customers", "name": "Customers", "model": "contacts.partner", "views": ["kanban", "list", "form"], "search_view": "contacts.view_partner_search", "context": {"default_is_company": true}},
+  {"id": "action_products", "name": "Products", "model": "product.product", "views": ["kanban", "list", "form"], "search_view": "product.view_product_search"},
+  {"id": "action_templates", "name": "Quotation templates", "model": "sale.order_template", "views": ["list", "form"]},
+  {"id": "action_promotions", "name": "Promotions", "model": "sale.promotion", "views": ["list", "form"], "search_view": "sale.view_promotion_search"}
 ]

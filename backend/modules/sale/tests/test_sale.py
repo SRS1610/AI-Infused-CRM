@@ -22,7 +22,7 @@ def quote(env: Any) -> Any:
             "line_ids": [
                 ("create", {"display_type": "section", "name": "Hardware"}),
                 ("create", {"product_id": arm.ids[0], "quantity": 2, "discount": 10}),
-                ("create", {"name": "Install", "quantity": 3, "price_unit": 100, "tax_percent": 0}),
+                ("create", {"name": "Install", "quantity": 3, "price_unit": 100}),  # no tax
                 ("create", {"name": "Extended warranty", "quantity": 1, "price_unit": 999, "is_optional": True}),
             ],
         }
@@ -33,7 +33,9 @@ def quote(env: Any) -> Any:
 def test_totals_numbering_and_product_defaults(quote: Any, env: Any) -> None:
     assert quote.name.startswith(f"QT/{dt.date.today().year}/")
     arm_line = quote.line_ids.filtered(lambda line: line.product_id)
-    assert arm_line.price_unit == 18900 and arm_line.tax_percent == 20 and arm_line.uom_id.name == "Unit(s)"
+    arm_line = arm_line.filtered(lambda line: not line.is_optional)
+    assert arm_line.price_unit == 18900 and arm_line.uom_id.name == "Unit(s)"
+    assert arm_line.tax_ids.mapped("amount") == [20.0]  # the product's 20 % (Phase 1 placeholder mapped to a tax)
     assert arm_line.price_subtotal == pytest.approx(34020.0)  # 2 x 18900 - 10 %
     assert quote.amount_untaxed == pytest.approx(34320.0)  # + 300 install; optional line excluded
     assert quote.amount_tax == pytest.approx(6804.0)

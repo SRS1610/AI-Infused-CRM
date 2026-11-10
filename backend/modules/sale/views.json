@@ -2,21 +2,48 @@
   {"id": "view_quotation_form", "model": "sale.quotation", "type": "form", "name": "sale.quotation.form", "chatter": true,
    "root": {"kind": "sheet", "children": [
      {"kind": "buttons", "children": [
-       {"kind": "button", "method": "action_send", "label": "Send by email", "invisible": ["state", "not_in", ["draft", "sent"]]}
+       {"kind": "button", "method": "action_send", "label": "Send by email", "invisible": ["state", "not_in", ["draft", "sent"]]},
+       {"kind": "button", "method": "action_confirm", "label": "Confirm", "invisible": ["state", "not_in", ["draft", "sent"]]},
+       {"kind": "button", "method": "action_create_invoice", "label": "Create invoice", "dialog_title": "Create an invoice", "submit_label": "Create",
+        "params": [
+          {"name": "method", "label": "What to invoice", "type": "select", "options": [["delivered", "Regular invoice (what can be invoiced now)"], ["percentage", "Down payment: percentage of the total"], ["fixed", "Down payment: fixed amount, tax included"]]},
+          {"name": "amount", "label": "Down payment (percentage or amount)", "type": "number", "help": "Only for a down payment"}
+        ],
+        "invisible": {"any": [["state", "!=", "accepted"], ["locked", "=", true]]}},
+       {"kind": "button", "method": "action_create_credit_note", "label": "Credit note for returns", "confirm": "Create a credit note for the returned quantities that were already invoiced?", "invisible": ["state", "!=", "accepted"]},
+       {"kind": "button", "method": "action_apply_promotions", "label": "Apply promotions", "dialog_title": "Apply promotions", "submit_label": "Apply",
+        "params": [{"name": "code", "label": "Promotion code (optional)", "type": "text"}],
+        "invisible": {"any": [["state", "not_in", ["draft", "sent", "accepted"]], ["locked", "=", true]]}},
+       {"kind": "button", "method": "action_apply_template", "label": "Apply template", "confirm": "Replace the lines with those of the template?", "invisible": {"any": [["state", "not_in", ["draft", "sent"]], ["template_id", "=", null]]}},
+       {"kind": "button", "method": "action_lock", "label": "Lock", "invisible": {"any": [["state", "!=", "accepted"], ["locked", "=", true]]}},
+       {"kind": "button", "method": "action_unlock", "label": "Unlock", "invisible": ["locked", "=", false]}
      ]},
      {"kind": "field", "name": "name", "widget": "title", "readonly": true},
      {"kind": "group", "name": "main", "columns": 2, "children": [
        {"kind": "field", "name": "partner_id"}, {"kind": "field", "name": "validity_date"},
        {"kind": "field", "name": "client_reference"}, {"kind": "field", "name": "date_order"},
-       {"kind": "field", "name": "user_id"}, {"kind": "field", "name": "currency_id"},
-       {"kind": "field", "name": "state", "readonly": true}
+       {"kind": "field", "name": "user_id"}, {"kind": "field", "name": "confirmation_date", "readonly": true, "invisible": ["state", "!=", "accepted"]},
+       {"kind": "field", "name": "pricelist_id"}, {"kind": "field", "name": "currency_id"},
+       {"kind": "field", "name": "fiscal_position_id"}, {"kind": "field", "name": "payment_term_id"},
+       {"kind": "field", "name": "template_id"}, {"kind": "field", "name": "state", "readonly": true},
+       {"kind": "field", "name": "invoice_status", "readonly": true, "widget": "badge", "invisible": ["state", "!=", "accepted"]},
+       {"kind": "field", "name": "locked", "readonly": true, "invisible": ["locked", "=", false]}
      ]},
      {"kind": "notebook", "pages": [
        {"kind": "page", "name": "page_lines", "title": "Lines", "children": [
-         {"kind": "field", "name": "line_ids", "columns": [{"field": "product_id"}, {"field": "name"}, {"field": "quantity"}, {"field": "price_unit"}, {"field": "discount"}, {"field": "tax_percent"}, {"field": "price_subtotal"}]},
+         {"kind": "field", "name": "line_ids", "columns": [{"field": "product_id"}, {"field": "name"}, {"field": "quantity"}, {"field": "qty_delivered"}, {"field": "qty_invoiced"}, {"field": "qty_returned"}, {"field": "price_unit"}, {"field": "discount"}, {"field": "tax_ids"}, {"field": "price_subtotal"}, {"field": "is_optional"}]},
          {"kind": "group", "name": "totals", "columns": 1, "children": [
-           {"kind": "field", "name": "amount_untaxed"}, {"kind": "field", "name": "amount_tax"}, {"kind": "field", "name": "amount_total"}
+           {"kind": "field", "name": "amount_untaxed"}, {"kind": "field", "name": "amount_tax"}, {"kind": "field", "name": "amount_total"},
+           {"kind": "field", "name": "amount_to_invoice", "invisible": ["state", "!=", "accepted"]}
          ]}
+       ]},
+       {"kind": "page", "name": "page_invoices", "title": "Invoices", "invisible": ["invoice_count", "=", 0], "children": [
+         {"kind": "field", "name": "invoice_count", "readonly": true},
+         {"kind": "field", "name": "invoice_ids", "readonly": true, "columns": [{"field": "name"}, {"field": "move_type"}, {"field": "invoice_date"}, {"field": "invoice_date_due"}, {"field": "amount_total"}, {"field": "state"}, {"field": "payment_state"}]}
+       ]},
+       {"kind": "page", "name": "page_promotions", "title": "Promotions", "children": [
+         {"kind": "field", "name": "promotion_code_ids", "widget": "many2many_tags"},
+         {"kind": "field", "name": "promotion_ids", "widget": "many2many_tags", "readonly": true}
        ]},
        {"kind": "page", "name": "page_terms", "title": "Terms", "children": [{"kind": "field", "name": "note"}]},
        {"kind": "page", "name": "page_signature", "title": "Acceptance", "children": [
@@ -25,7 +52,9 @@
      ]}
    ]}},
   {"id": "view_quotation_list", "model": "sale.quotation", "type": "list", "name": "sale.quotation.list",
-   "columns": [{"field": "name"}, {"field": "date_order"}, {"field": "partner_id"}, {"field": "user_id"}, {"field": "validity_date"}, {"field": "amount_total", "sum": true}, {"field": "state", "widget": "badge"}]},
+   "columns": [{"field": "name"}, {"field": "date_order"}, {"field": "partner_id"}, {"field": "user_id"}, {"field": "validity_date"}, {"field": "amount_total", "sum": true}, {"field": "state", "widget": "badge"}, {"field": "invoice_status", "widget": "badge", "optional": "show"}]},
+  {"id": "view_order_list", "model": "sale.quotation", "type": "list", "name": "sale.quotation.order.list",
+   "columns": [{"field": "name"}, {"field": "confirmation_date"}, {"field": "partner_id"}, {"field": "user_id"}, {"field": "amount_untaxed", "sum": true}, {"field": "amount_total", "sum": true}, {"field": "amount_to_invoice", "sum": true}, {"field": "invoice_status", "widget": "badge"}, {"field": "locked", "optional": "hide"}]},
   {"id": "view_quotation_kanban", "model": "sale.quotation", "type": "kanban", "name": "sale.quotation.kanban", "default_group_by": "state",
    "root": {"kind": "card", "children": [{"kind": "field", "name": "name", "widget": "title"}, {"kind": "field", "name": "partner_id"}, {"kind": "field", "name": "amount_total"}]}},
   {"id": "view_quotation_search", "model": "sale.quotation", "type": "search", "name": "sale.quotation.search",
@@ -33,9 +62,104 @@
    "filters": [
      {"name": "mine", "label": "My quotations", "domain": [["user_id", "=", "$uid"]]},
      {"name": "sent", "label": "Waiting for the customer", "domain": [["state", "=", "sent"]]},
-     {"name": "accepted", "label": "Accepted", "domain": [["state", "=", "accepted"]]}
+     {"name": "accepted", "label": "Sales orders", "domain": [["state", "=", "accepted"]]},
+     {"name": "to_invoice", "label": "To invoice", "domain": [["invoice_status", "=", "to_invoice"]]},
+     {"name": "upselling", "label": "Upselling opportunities", "domain": [["invoice_status", "=", "upselling"]]},
+     {"name": "locked", "label": "Locked", "domain": [["locked", "=", true]]}
    ],
-   "group_bys": [{"field": "state"}, {"field": "user_id"}, {"field": "partner_id"}]},
+   "group_bys": [{"field": "state"}, {"field": "invoice_status"}, {"field": "user_id"}, {"field": "partner_id"}, {"field": "pricelist_id"}, {"field": "confirmation_date:month"}]},
   {"id": "view_quotation_pivot", "model": "sale.quotation", "type": "pivot", "name": "sale.quotation.pivot", "row": "user_id", "col": "state", "measures": ["amount_total"]},
-  {"id": "view_quotation_graph", "model": "sale.quotation", "type": "graph", "name": "sale.quotation.graph", "row": "state", "measures": ["amount_total"]}
+  {"id": "view_quotation_graph", "model": "sale.quotation", "type": "graph", "name": "sale.quotation.graph", "row": "state", "measures": ["amount_total"]},
+  {"id": "view_order_pivot", "model": "sale.quotation", "type": "pivot", "name": "sale.quotation.order.pivot", "row": "partner_id", "col": "confirmation_date:month", "measures": ["amount_untaxed", "amount_to_invoice"]},
+  {"id": "view_order_graph", "model": "sale.quotation", "type": "graph", "name": "sale.quotation.order.graph", "row": "confirmation_date:month", "measures": ["amount_untaxed"]},
+
+  {"id": "view_quotation_line_form", "model": "sale.quotation_line", "type": "form", "name": "sale.quotation_line.form",
+   "root": {"kind": "sheet", "children": [
+     {"kind": "group", "name": "main", "columns": 2, "children": [
+       {"kind": "field", "name": "quotation_id", "readonly": true}, {"kind": "field", "name": "display_type"},
+       {"kind": "field", "name": "product_id"}, {"kind": "field", "name": "name"},
+       {"kind": "field", "name": "quantity"}, {"kind": "field", "name": "uom_id"},
+       {"kind": "field", "name": "price_unit"}, {"kind": "field", "name": "discount"},
+       {"kind": "field", "name": "tax_ids", "widget": "many2many_tags"}, {"kind": "field", "name": "is_optional"},
+       {"kind": "field", "name": "price_subtotal", "readonly": true}, {"kind": "field", "name": "price_total", "readonly": true}
+     ]},
+     {"kind": "group", "name": "delivery", "title": "Delivery and invoicing", "columns": 2, "children": [
+       {"kind": "field", "name": "qty_delivered"}, {"kind": "field", "name": "qty_returned"},
+       {"kind": "field", "name": "qty_invoiced", "readonly": true}, {"kind": "field", "name": "qty_to_invoice", "readonly": true},
+       {"kind": "field", "name": "invoice_policy", "readonly": true}, {"kind": "field", "name": "qty_delivered_method", "readonly": true},
+       {"kind": "field", "name": "invoice_status", "readonly": true, "widget": "badge"}, {"kind": "field", "name": "untaxed_amount_to_invoice", "readonly": true}
+     ]},
+     {"kind": "group", "name": "origin", "columns": 2, "children": [
+       {"kind": "field", "name": "is_downpayment", "readonly": true, "invisible": ["is_downpayment", "=", false]},
+       {"kind": "field", "name": "is_reward_line", "readonly": true, "invisible": ["is_reward_line", "=", false]},
+       {"kind": "field", "name": "promotion_id", "readonly": true, "invisible": ["promotion_id", "=", null]},
+       {"kind": "field", "name": "price_manual"}
+     ]}
+   ]}},
+  {"id": "view_quotation_line_list", "model": "sale.quotation_line", "type": "list", "name": "sale.quotation_line.list",
+   "columns": [{"field": "quotation_id"}, {"field": "product_id"}, {"field": "name"}, {"field": "quantity"}, {"field": "qty_delivered"}, {"field": "qty_invoiced"}, {"field": "qty_to_invoice"}, {"field": "price_subtotal", "sum": true}]},
+
+  {"id": "view_order_template_form", "model": "sale.order_template", "type": "form", "name": "sale.order_template.form",
+   "root": {"kind": "sheet", "children": [
+     {"kind": "field", "name": "name", "widget": "title"},
+     {"kind": "group", "name": "main", "columns": 2, "children": [
+       {"kind": "field", "name": "number_of_days"}, {"kind": "field", "name": "payment_term_id"},
+       {"kind": "field", "name": "company_id"}, {"kind": "field", "name": "active"}
+     ]},
+     {"kind": "notebook", "pages": [
+       {"kind": "page", "name": "page_lines", "title": "Lines", "children": [
+         {"kind": "field", "name": "line_ids", "columns": [{"field": "sequence", "widget": "handle"}, {"field": "display_type"}, {"field": "product_id"}, {"field": "name"}, {"field": "quantity"}, {"field": "discount"}]}
+       ]},
+       {"kind": "page", "name": "page_options", "title": "Optional products", "children": [
+         {"kind": "field", "name": "option_ids", "columns": [{"field": "product_id"}, {"field": "name"}, {"field": "quantity"}, {"field": "discount"}]}
+       ]},
+       {"kind": "page", "name": "page_terms", "title": "Terms", "children": [{"kind": "field", "name": "note"}]}
+     ]}
+   ]}},
+  {"id": "view_order_template_list", "model": "sale.order_template", "type": "list", "name": "sale.order_template.list",
+   "columns": [{"field": "sequence", "widget": "handle"}, {"field": "name"}, {"field": "number_of_days"}, {"field": "payment_term_id"}, {"field": "company_id", "optional": "hide"}]},
+
+  {"id": "view_promotion_form", "model": "sale.promotion", "type": "form", "name": "sale.promotion.form",
+   "root": {"kind": "sheet", "children": [
+     {"kind": "field", "name": "name", "widget": "title"},
+     {"kind": "group", "name": "main", "columns": 2, "children": [
+       {"kind": "field", "name": "program_type"}, {"kind": "field", "name": "code", "invisible": ["program_type", "!=", "code"]},
+       {"kind": "field", "name": "date_from"}, {"kind": "field", "name": "date_to"},
+       {"kind": "field", "name": "max_usage"}, {"kind": "field", "name": "usage_count", "readonly": true},
+       {"kind": "field", "name": "company_id"}, {"kind": "field", "name": "currency_id"},
+       {"kind": "field", "name": "sequence"}, {"kind": "field", "name": "active"}
+     ]},
+     {"kind": "notebook", "pages": [
+       {"kind": "page", "name": "page_rules", "title": "Conditions", "children": [
+         {"kind": "field", "name": "rule_ids", "columns": [{"field": "minimum_amount"}, {"field": "minimum_qty"}, {"field": "product_ids"}, {"field": "category_ids"}]}
+       ]},
+       {"kind": "page", "name": "page_rewards", "title": "Rewards", "children": [
+         {"kind": "field", "name": "reward_ids", "columns": [{"field": "reward_type"}, {"field": "discount_percent"}, {"field": "fixed_amount"}, {"field": "free_product_id"}, {"field": "free_quantity"}, {"field": "description"}]}
+       ]},
+       {"kind": "page", "name": "page_notes", "title": "Notes", "children": [{"kind": "field", "name": "note"}]}
+     ]}
+   ]}},
+  {"id": "view_promotion_list", "model": "sale.promotion", "type": "list", "name": "sale.promotion.list",
+   "columns": [{"field": "sequence", "widget": "handle"}, {"field": "name"}, {"field": "program_type"}, {"field": "code"}, {"field": "date_from"}, {"field": "date_to"}, {"field": "usage_count"}, {"field": "max_usage"}]},
+  {"id": "view_promotion_search", "model": "sale.promotion", "type": "search", "name": "sale.promotion.search",
+   "fields": ["name", "code"],
+   "filters": [
+     {"name": "automatic", "label": "Automatic", "domain": [["program_type", "=", "automatic"]]},
+     {"name": "code", "label": "With a code", "domain": [["program_type", "=", "code"]]},
+     {"name": "archived", "label": "Archived", "domain": [["active", "=", false]]}
+   ],
+   "group_bys": [{"field": "program_type"}, {"field": "company_id"}]},
+
+  {"id": "view_product_form_sale", "inherit": "product.view_product_form", "name": "product.product.form.sale",
+   "operations": [
+     {"op": "replace", "anchor": {"field": "tax_percent"}, "node": {"kind": "field", "name": "taxes_id", "widget": "many2many_tags", "readonly_if": ["template_id", "!=", null]}},
+     {"op": "insert_after", "anchor": {"field": "taxes_id"}, "node": {"kind": "field", "name": "invoice_policy", "readonly_if": ["template_id", "!=", null]}},
+     {"op": "insert_after", "anchor": {"field": "invoice_policy"}, "node": {"kind": "field", "name": "service_policy", "invisible": ["type", "!=", "service"], "readonly_if": ["template_id", "!=", null]}},
+     {"op": "append", "anchor": {"name": "page_sales"}, "node": {"kind": "field", "name": "optional_product_ids", "widget": "many2many_tags", "readonly_if": ["template_id", "!=", null]}},
+     {"op": "append", "anchor": {"name": "page_sales"}, "node": {"kind": "field", "name": "accessory_product_ids", "widget": "many2many_tags", "readonly_if": ["template_id", "!=", null]}}
+   ]},
+  {"id": "view_partner_form_sale", "inherit": "contacts.view_partner_form", "name": "contacts.partner.form.sale",
+   "operations": [
+     {"op": "append", "anchor": {"name": "page_sales"}, "node": {"kind": "field", "name": "pricelist_id"}}
+   ]}
 ]

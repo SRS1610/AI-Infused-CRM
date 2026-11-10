@@ -1,0 +1,13 @@
+[
+  {"id": "promotion_big_order", "model": "sale.promotion", "values": {
+    "name": "Large order discount", "sequence": 1, "program_type": "automatic", "company_id": "core.main_company", "currency_id": "core.USD",
+    "rule_ids": [{"minimum_amount": 20000}],
+    "reward_ids": [{"reward_type": "discount_order", "discount_percent": 5}]}},
+  {"id": "promotion_free_gripper", "model": "sale.promotion", "values": {
+    "name": "Free gripper with three robot arms", "sequence": 2, "program_type": "automatic", "currency_id": "core.USD",
+    "rule_ids": [{"minimum_qty": 3, "product_ids": ["product.product_robot_arm"]}],
+    "reward_ids": [{"reward_type": "free_product", "free_product_id": "product.product_gripper", "free_quantity": 1}]}},
+  {"id": "promotion_welcome", "model": "sale.promotion", "values": {
+    "name": "Welcome offer", "sequence": 3, "program_type": "code", "code": "WELCOME100", "max_usage": 50, "currency_id": "core.USD",
+    "reward_ids": [{"reward_type": "fixed_amount", "fixed_amount": 100}]}}
+]

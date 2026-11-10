@@ -20,7 +20,7 @@ from tessera.i18n.apply import apply_module_translations
 from tessera.i18n.catalog import reset_catalogs
 from tessera.logging import get_logger
 from tessera.modules.data import DataLoader
-from tessera.modules.graph import auto_install_candidates, dependants_of, resolve_order
+from tessera.modules.graph import auto_install_candidates, closure, dependants_of, resolve_order
 from tessera.modules.loader import discover, load_module_code
 from tessera.modules.manifest import Manifest
 from tessera.orm.environment import SYSTEM_UID, Environment
@@ -339,7 +339,15 @@ def upgrade_pending(*, database_url: str | None = None) -> InstallResult:
     pending = [n for n, v in installed.items() if n in manifests and Version(manifests[n].version) > Version(v)]
     if not pending:
         return InstallResult()
-    return upgrade_modules(pending, database_url=url)
+    # a new version may depend on a module the database does not have yet (sale 2.0 needs account): install
+    # those first, then upgrade
+    known = [n for n in installed if n in manifests]
+    missing = sorted(closure(manifests, known) - set(known))
+    before = install_modules(missing, database_url=url) if missing else InstallResult()
+    result = upgrade_modules(pending, database_url=url)
+    result.installed = before.installed + result.installed
+    result.seconds += before.seconds
+    return result
 
 
 # -- uninstall ---------------------------------------------------------------------------------

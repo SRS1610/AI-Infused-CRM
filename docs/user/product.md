@@ -1,13 +1,14 @@
 # Products — quick guide
 
 Products and services you quote: name, internal reference, barcode, category, unit (unit, hour,
-day, kg …), sales price, cost (visible to product managers only) and a tax rate placeholder that
-accounting replaces in Phase 2. Archive products you no longer sell instead of deleting them.
+day, kg …), sales price, cost (visible to product managers only) and customer taxes (with sales and
+accounting installed; the Phase 1 *Tax %* placeholder is converted to taxes on upgrade). The *Sales* tab
+also holds the invoicing policy and the optional products and accessories offered with the product. Archive products you no longer sell instead of deleting them.
 
 ## Products, variants and pricelists
 
-Product managers find everything under **Catalogue** (products, variants, pricelists; attributes,
-categories and units under *Configuration*).
+Salespeople find products, variants and pricelists under **Sales → Products** (attributes, categories and
+units under *Sales → Configuration*); product managers also have the **Catalogue** menu.
 
 **Units of measure.** Each category (unit, working time, weight, length, volume) has one *reference*
 unit; the others are *bigger* (a dozen = 12 units, a day = 8 hours) or *smaller* (a gram = 0.001 kg).

@@ -19,10 +19,20 @@
   }
  },
  {
+  "id": "report_quotation_v2",
+  "model": "reports.template_version",
+  "values": {
+   "template_id": "sale.report_quotation",
+   "number": 2,
+   "body": "<table style=\"width:100%\"><tr>\n<td><h1>{% if doc.state == 'accepted' %}{{ _(\"Sales order {name}\", name=doc.name) }}{% else %}{{ _(\"Quotation {name}\", name=doc.name) }}{% endif %}</h1>\n<p>{{ _(\"Date: {date}\", date=doc.date_order | date('%d %b %Y')) }}<br/>{{ _(\"Valid until: {date}\", date=doc.validity_date | date('%d %b %Y')) }}{% if doc.client_reference %}<br/>{{ _(\"Your reference: {reference}\", reference=doc.client_reference) }}{% endif %}</p></td>\n<td style=\"text-align:right\"><strong>{{ doc.partner_id.commercial_partner_id.name or doc.partner_id.name }}</strong><br/>\n{% if doc.partner_id.commercial_partner_id and doc.partner_id.commercial_partner_id.id != doc.partner_id.id %}{{ _(\"Attn: {name}\", name=doc.partner_id.name) }}<br/>{% endif %}\n{{ doc.partner_id.street or '' }}<br/>{{ doc.partner_id.zip or '' }} {{ doc.partner_id.city or '' }}<br/>{{ doc.partner_id.country_id.name if doc.partner_id.country_id else '' }}</td>\n</tr></table>\n<table class=\"data\"><thead><tr><th>{{ _(\"Description\") }}</th><th style=\"text-align:right\">{{ _(\"Qty\") }}</th><th style=\"text-align:right\">{{ _(\"Unit price\") }}</th><th style=\"text-align:right\">{{ _(\"Disc.\") }}</th><th style=\"text-align:right\">{{ _(\"Tax\") }}</th><th style=\"text-align:right\">{{ _(\"Amount\") }}</th></tr></thead>\n<tbody>{% for line in doc.line_ids %}{% if line.is_downpayment %}{% elif line.display_type == 'section' %}<tr><td colspan=\"6\"><strong>{{ line.name }}</strong></td></tr>\n{% elif line.display_type == 'note' %}<tr><td colspan=\"6\"><em>{{ line.name }}</em></td></tr>\n{% else %}<tr><td>{{ line.name }}{% if line.is_optional %} <em>{{ _(\"(optional)\") }}</em>{% endif %}</td><td style=\"text-align:right\">{{ line.quantity }} {{ line.uom_id.name if line.uom_id else '' }}</td><td style=\"text-align:right\">{{ line.price_unit | money(doc.currency_id) }}</td><td style=\"text-align:right\">{{ line.discount ~ ' %' if line.discount else '' }}</td><td style=\"text-align:right\">{% for tax in line.tax_ids %}{{ tax.description or tax.name }}{% if not loop.last %}, {% endif %}{% endfor %}</td><td style=\"text-align:right\">{{ line.price_subtotal | money(doc.currency_id) }}</td></tr>{% endif %}{% endfor %}</tbody></table>\n<table style=\"width:45%;margin-left:55%;margin-top:8mm\"><tr><td>{{ _(\"Untaxed\") }}</td><td style=\"text-align:right\">{{ doc.amount_untaxed | money(doc.currency_id) }}</td></tr>\n<tr><td>{{ _(\"Taxes\") }}</td><td style=\"text-align:right\">{{ doc.amount_tax | money(doc.currency_id) }}</td></tr>\n<tr><td><strong>{{ _(\"Total\") }}</strong></td><td style=\"text-align:right\"><strong>{{ doc.amount_total | money(doc.currency_id) }}</strong></td></tr></table>\n{% if doc.payment_term_id %}<p style=\"margin-top:6mm\">{{ _(\"Payment terms: {name}\", name=doc.payment_term_id.name) }}</p>{% endif %}\n{% if doc.note %}<div style=\"margin-top:8mm\">{{ doc.note }}</div>{% endif %}\n{% if doc.state == 'accepted' %}<p style=\"margin-top:8mm\">{{ _(\"Accepted by {name} on {date}.\", name=doc.signed_by, date=doc.signed_at | date('%d %b %Y')) }}</p>{% endif %}\n<p style=\"margin-top:8mm\">{{ _(\"Your salesperson: {name}\", name=doc.user_id.name if doc.user_id else '') }}</p>",
+   "note": "Sales orders: tax labels, payment terms"
+  }
+ },
+ {
   "id": "report_quotation",
   "model": "reports.template",
   "values": {
-   "current_version_id": "sale.report_quotation_v1"
+   "current_version_id": "sale.report_quotation_v2"
   }
  }
 ]

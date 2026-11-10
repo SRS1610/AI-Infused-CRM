@@ -233,3 +233,52 @@ def test_uninstall_keeping_data_then_reinstall_leaves_no_drift(registry, databas
         Registry.forget(database_url)
         Registry.get(database_url)
         forget_module_fragments(name)
+
+
+def _bare_module(name: str, path: Path, depends: list[str]) -> Path:
+    module_dir = scaffold_module(name, path=path, summary=name, depends=depends)
+    item_py = module_dir / "models" / "item.py"
+    item_py.write_text(
+        item_py.read_text().replace(
+            '_inherit = ["chatter.thread", "core.multi_company"]', '_inherit = ["core.multi_company"]'
+        )
+    )
+    manifest = module_dir / "manifest.toml"
+    manifest.write_text(
+        manifest.read_text()
+        .replace(f'views = ["views/{name}.json"]\n', "")
+        .replace('menus = "menus.json"\n', "")
+        .replace('actions = "actions.json"\n', "")
+        .replace('ai = "ai/features.yaml"\n', "")
+    )
+    return module_dir
+
+
+def test_upgrade_installs_new_dependencies(registry, database_url: str, temp_module_path: Path):  # type: ignore[no-untyped-def]
+    """A new version depending on a module the database lacks (sale 2.0 → account) installs it first."""
+    app, dep = "ktest_upg_app", "ktest_upg_dep"
+    app_dir = _bare_module(app, temp_module_path, ["core"])
+    _bare_module(dep, temp_module_path, ["core"])
+    clear_discovery_cache()
+    try:
+        install_modules([app], database_url=database_url)
+        manifest = app_dir / "manifest.toml"
+        manifest.write_text(
+            manifest.read_text()
+            .replace('version = "0.1.0"', 'version = "0.2.0"')
+            .replace('depends = ["core"]', f'depends = ["core", "{dep}"]')
+        )
+        clear_discovery_cache()
+        Registry.forget(database_url)
+        result = upgrade_pending(database_url=database_url)
+        assert result.installed == [dep] and result.upgraded == [app]
+        states = {s.name: s for s in module_states(database_url=database_url)}
+        assert states[dep].state == "installed" and states[app].installed_version == "0.2.0"
+        assert [d for d in check_schema(database_url=database_url) if "ktest_upg" in d.object] == []
+    finally:
+        uninstall_modules([app], database_url=database_url, drop_data=True)
+        uninstall_modules([dep], database_url=database_url, drop_data=True)
+        Registry.forget(database_url)
+        Registry.get(database_url)
+        forget_module_fragments(app)
+        forget_module_fragments(dep)
