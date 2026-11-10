@@ -491,6 +491,12 @@ def test_lost_opportunities_stay_in_the_retrieval_index(env: Any, env_for: Any) 
     assert {(r, k) for r, k, _ in rows} == {(d.ids[0], k) for d in (lost, other) for k in ("record", "message")}
 
     marie = env_for("marie").with_company(eu)
+    index_records_job(marie.elevated(), "crm.lead", [lost.ids[0]])  # saved by a French user: same index text
+    content = env.cr.scalar(
+        "SELECT content FROM ai_core_embedding WHERE res_model = 'crm.lead' AND res_id = :i AND source_kind = 'record'",
+        {"i": lost.ids[0]},
+    )
+    assert "Outcome: LOST (reason: Too expensive)" in content
     query = "the quotation is above our budget"
     assert not [h for h in R.search(marie, query, models=["crm.lead"]) if h.res_id == lost.ids[0]]  # open deals only
     found = {h.res_id for h in R.search(marie.with_context(active_test=False), query, models=["crm.lead"])}
@@ -498,7 +504,9 @@ def test_lost_opportunities_stay_in_the_retrieval_index(env: Any, env_for: Any) 
     # objection handling finds it through retrieval: the objection's words appear only in its discussion
     kwargs = HANDLERS["crm.objections"](marie, None, {"objection": "Honestly the quotation is above our budget"})
     source = next(s for s in kwargs["sources"] if s.id == f"crm.lead:{lost.ids[0]}")
-    assert source.text.startswith("Outcome: LOST (reason: Too expensive)") and "far above the budget" in source.text
+    # sources shown to the user are rendered in the user's language (the index itself stays in one language)
+    reason = marie["crm.lost_reason"].browse(env.ref("crm.lost_price").ids).name
+    assert source.text.startswith(f"Outcome: LOST (reason: {reason})") and "far above the budget" in source.text
     assert f"crm.lead:{other.ids[0]}" not in [s.id for s in kwargs["sources"]]
     # restored, it is an open deal again: indexed, and visible to ordinary searches
     lost.action_restore()

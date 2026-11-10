@@ -153,23 +153,28 @@ def _store_chunks(env: Environment, items: list[dict[str, Any]]) -> int:
 def index_records(records: Model) -> int:
     if not indexed_fields(records) or not records._ids:
         return 0
+    from tessera.i18n import language_scope
+
     items = []
-    for rec in records.elevated("ai index").with_context(active_test=False):
-        if "active" in rec._fields and not rec.active and not keeps_archived(rec):
-            remove(rec.env, rec._name, rec.ids)
-            continue
-        company = rec.company_id.ids[0] if "company_id" in rec._fields and rec.company_id else None
-        items.append(
-            {
-                "company_id": company,
-                "res_model": rec._name,
-                "res_id": rec.ids[0],
-                "source_kind": "record",
-                "source_id": 0,
-                "title": rec.display_name or "",
-                "text": record_text(rec),
-            }
-        )
+    # one language for the index, whoever saved the record (D-061): the database's default language
+    lang = records.env.registry.default_lang
+    with language_scope(lang):
+        for rec in records.elevated("ai index").with_context(active_test=False, lang=lang):
+            if "active" in rec._fields and not rec.active and not keeps_archived(rec):
+                remove(rec.env, rec._name, rec.ids)
+                continue
+            company = rec.company_id.ids[0] if "company_id" in rec._fields and rec.company_id else None
+            items.append(
+                {
+                    "company_id": company,
+                    "res_model": rec._name,
+                    "res_id": rec.ids[0],
+                    "source_kind": "record",
+                    "source_id": 0,
+                    "title": rec.display_name or "",
+                    "text": record_text(rec),
+                }
+            )
     return _store_chunks(records.env, items)
 
 
