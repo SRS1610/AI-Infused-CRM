@@ -6,7 +6,8 @@ import datetime as dt
 from typing import Any
 
 from modules.account.chart import chart_ref
-from modules.account.tests.common import eu_env, invoice, partner
+from modules.account.tests.common import invoice, partner
+from modules.account_reports.tests.common import isolated
 
 D = dt.date
 Q2 = (D(2031, 4, 1), D(2031, 6, 30))
@@ -36,7 +37,7 @@ def line(env: Any, price: float, tid: str, **vals: Any) -> dict[str, Any]:
 
 
 def eu_golden(env: Any) -> dict[str, Any]:
-    e = eu_env(env)
+    e = isolated(env, "Golden SARL", country="fr", currency="EUR")
     fr, de, us = (e.ref(f"core.country_{c}").ids[0] for c in ("fr", "de", "us"))
     domestic = partner(e, "Client Paris", country_id=fr)
     eu_customer = partner(e, "Kunde Berlin", country_id=de, vat="DE123456789")

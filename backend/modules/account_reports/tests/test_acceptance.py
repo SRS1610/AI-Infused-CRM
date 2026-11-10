@@ -23,13 +23,15 @@ def _check_tb(data):
 
 def test_2a_demo_ledgers_balance_and_statements_reconcile(env):
     env = eu_env(env)  # the admin works in both demo companies
-    companies = env["core.company"].elevated().search([("chart_template", "!=", None)])
-    assert len(companies) >= 2
-    for company in companies:
-        seed_accounting(env, company)
-        seed_reports(env, company)
+    companies = env.ref("core.main_company") | env.ref("core.demo_company_eu")
     today = env.today()
     fy_start = today.replace(month=1, day=1)
+    retained_before = {}
+    for company in companies:
+        seed_accounting(env, company)
+        bs = by_code(run(env, "balance_sheet", company_ids=company.ids, date_to=today))
+        retained_before[company.ids[0]] = bs["RETAINED_EARNINGS"]
+        seed_reports(env, company)
     for company in companies:
         ids = company.ids
         movement = _check_tb(run(env, "trial_balance", company_ids=ids, date_from=fy_start, date_to=today))
@@ -39,7 +41,8 @@ def test_2a_demo_ledgers_balance_and_statements_reconcile(env):
         assert bs["ASSETS"] == pytest.approx(bs["LIABILITIES"] + bs["EQUITY"], abs=0.005)
         assert bs["CURRENT_EARNINGS"] == pytest.approx(pl["NET_INCOME"], abs=0.005)
         # last year's demo summary (72,000 revenue - 50,500 expenses) is in retained earnings with the capital
-        assert bs["RETAINED_EARNINGS"] == pytest.approx(50_000 + 21_500, abs=0.005)
+        added = bs["RETAINED_EARNINGS"] - retained_before[company.ids[0]]
+        assert added == pytest.approx(50_000 + 21_500, abs=0.005)
         cf = by_code(run(env, "cash_flow", company_ids=ids, date_from=fy_start, date_to=today))
         assert cf["OPENING_CASH"] + cf["NET_CHANGE"] == pytest.approx(cf["CLOSING_CASH"], abs=0.005)
     consolidated = companies.ids

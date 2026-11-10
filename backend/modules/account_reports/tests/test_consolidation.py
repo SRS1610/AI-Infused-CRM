@@ -4,26 +4,26 @@ from __future__ import annotations
 
 import pytest
 
-from modules.account.tests.common import eu_env
 from modules.account_reports.engine import Rates
-from modules.account_reports.tests.common import D, by_code, entry, row, run
+from modules.account_reports.tests.common import D, by_code, entry, isolated, row, run
 
 pytestmark = pytest.mark.db
 
 
 @pytest.fixture
 def group(env):
-    e = eu_env(env)
+    main_env = isolated(env, "Group US")
+    e = isolated(main_env, "Group France", country="fr", currency="EUR")
     eu = e.company
-    main = env.ref("core.main_company")
+    main = main_env.company
     eur = eu.elevated().currency_id
     rates = env["core.currency_rate"].elevated()
     for day, rate in ((D(2031, 1, 1), 0.90), (D(2031, 2, 1), 0.80), (D(2031, 3, 1), 0.75)):
         rates.create({"currency_id": eur.ids[0], "date": day, "rate": rate})
     entry(e, D(2031, 1, 5), [("1000", 1000.0), ("3000", -1000.0)], company=eu, ref="eu capital")
     entry(e, D(2031, 2, 15), [("1000", 500.0), ("4100", -500.0)], company=eu, ref="eu sale")
-    entry(env, D(2031, 1, 10), [("1000", 2000.0), ("3000", -2000.0)], company=main, ref="us capital")
-    entry(env, D(2031, 3, 10), [("1000", 300.0), ("4100", -300.0)], company=main, ref="us sale")
+    entry(main_env, D(2031, 1, 10), [("1000", 2000.0), ("3000", -2000.0)], company=main, ref="us capital")
+    entry(main_env, D(2031, 3, 10), [("1000", 300.0), ("4100", -300.0)], company=main, ref="us sale")
     return {"env": e, "eu": eu, "main": main, "ids": [main.ids[0], eu.ids[0]]}
 
 

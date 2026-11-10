@@ -8,6 +8,7 @@ import pytest
 from modules.account.chart import chart_ref
 from modules.account.tests.common import invoice, partner
 from modules.account_reports.engine import run_report
+from modules.account_reports.tests.common import isolated
 from modules.account_tax.closing import ledger_check, period_of
 from modules.account_tax.tests.common import EXPECTED_EU, Q2, D, eu_golden, line
 from tessera.exceptions import AccessError, UserError, ValidationError
@@ -122,6 +123,7 @@ def test_closing_needs_an_adviser_and_valid_dates(env, env_for):
 
 
 def test_us_template(env):
+    env = isolated(env, "Sales Tax Inc")
     customer = partner(env, "US Customer", country_id=env.ref("core.country_us").ids[0])
     invoice(env, customer, [line(env, 1000.0, "sale_combined_8_5")], invoice_date=D(2031, 4, 10))
     invoice(env, customer, [line(env, 100.0, "sale_combined_8_5")], move_type="out_refund", invoice_date=D(2031, 4, 11))

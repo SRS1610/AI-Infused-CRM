@@ -6,7 +6,7 @@ import pytest
 
 from modules.account_reports.expressions import parse
 from modules.account_reports.params import ReportParams
-from modules.account_reports.tests.common import D, by_code, entry, run
+from modules.account_reports.tests.common import D, by_code, entry, isolated, run
 from tessera.exceptions import AccessError, UserError, ValidationError
 
 pytestmark = pytest.mark.db
@@ -42,6 +42,7 @@ def _report(env, **vals):
 
 
 def test_custom_report_lines_and_validation(env):
+    env = isolated(env)
     report = _report(env)
     lines = env["account.report_line"]
     a = lines.create(

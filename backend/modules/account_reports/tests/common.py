@@ -11,6 +11,20 @@ from tessera.orm import Model
 D = dt.date
 
 
+def isolated(env: Any, name: str = "Reports Test Co", country: str = "us", currency: str = "USD") -> Any:
+    """The admin working in a new company of its own (with its chart), so the shared test database's committed
+    data stays out of the figures."""
+    company = env["core.company"].create(
+        {
+            "name": name,
+            "country_id": env.ref(f"core.country_{country}").ids[0],
+            "currency_id": env.ref(f"core.{currency}").ids[0],
+        }
+    )
+    env.user.elevated().write({"company_ids": [("add", company.ids[0])]})
+    return env.with_company(company)
+
+
 def acc(env: Any, code: str, company: Model | None = None) -> Model:
     company = company or env.company
     found = env["account.account"].search([("code", "=", code), ("company_id", "=", company.ids[0])], limit=1)

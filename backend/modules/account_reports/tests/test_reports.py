@@ -7,9 +7,15 @@ from __future__ import annotations
 import pytest
 
 from modules.account.tests.common import invoice, partner
-from modules.account_reports.tests.common import D, acc, by_code, domain_balance, entry, row, run
+from modules.account_reports.tests.common import D, acc, by_code, domain_balance, entry, isolated, row, run
 
 pytestmark = pytest.mark.db
+
+
+@pytest.fixture
+def env(env):
+    """Every test of this file works in a company of its own."""
+    return isolated(env)
 
 
 @pytest.fixture
