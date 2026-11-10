@@ -1,0 +1,15 @@
+name = "account_reports"
+version = "1.0.0"
+summary = "Financial reports: general ledger, trial balance, profit and loss, balance sheet, cash flow, aged balances, partner ledger, consolidation"
+category = "Accounting"
+phase = 2
+depends = ["account"]
+license = "Apache-2.0"
+installable = true
+
+[load]
+security = ["security/access.json"]
+data = ["data/reports.json"]
+views = ["views.json"]
+actions = "actions.json"
+menus = "menus.json"

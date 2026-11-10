@@ -1,0 +1,6 @@
+[
+  {"id": "access_account_report_readonly", "model": "core.model_access", "values": {"name": "account.report: account.group_account_readonly", "model_name": "account.report", "group_id": "account.group_account_readonly", "perm_read": true, "perm_write": false, "perm_create": false, "perm_unlink": false}},
+  {"id": "access_account_report_manager", "model": "core.model_access", "values": {"name": "account.report: account.group_account_manager", "model_name": "account.report", "group_id": "account.group_account_manager", "perm_read": true, "perm_write": true, "perm_create": true, "perm_unlink": true}},
+  {"id": "access_account_report_line_readonly", "model": "core.model_access", "values": {"name": "account.report_line: account.group_account_readonly", "model_name": "account.report_line", "group_id": "account.group_account_readonly", "perm_read": true, "perm_write": false, "perm_create": false, "perm_unlink": false}},
+  {"id": "access_account_report_line_manager", "model": "core.model_access", "values": {"name": "account.report_line: account.group_account_manager", "model_name": "account.report_line", "group_id": "account.group_account_manager", "perm_read": true, "perm_write": true, "perm_create": true, "perm_unlink": true}}
+]

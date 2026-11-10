@@ -1,0 +1,9 @@
+[
+ {"id": "view_report_list", "model": "account.report", "type": "list", "name": "account.report.list", "columns": [{"field": "sequence"}, {"field": "name"}, {"field": "code"}, {"field": "engine"}, {"field": "date_mode"}, {"field": "chart_template", "optional": "show"}, {"field": "active", "optional": "hide"}]},
+ {"id": "view_report_form", "model": "account.report", "type": "form", "name": "account.report.form", "root": {"kind": "sheet", "children": [
+   {"kind": "buttons", "children": [{"kind": "button", "method": "check_definition", "label": "Check the definition"}]},
+   {"kind": "group", "name": "main", "columns": 2, "children": [{"kind": "field", "name": "name"}, {"kind": "field", "name": "code"}, {"kind": "field", "name": "engine"}, {"kind": "field", "name": "date_mode"}, {"kind": "field", "name": "allow_comparison"}, {"kind": "field", "name": "variant_of"}, {"kind": "field", "name": "chart_template"}, {"kind": "field", "name": "sequence"}, {"kind": "field", "name": "active"}]},
+   {"kind": "field", "name": "description"},
+   {"kind": "field", "name": "line_ids", "columns": [{"field": "sequence"}, {"field": "name"}, {"field": "code"}, {"field": "parent_id"}, {"field": "expression"}, {"field": "date_scope"}, {"field": "sign"}, {"field": "groupby_account"}, {"field": "hide_if_zero"}, {"field": "consolidation_only"}, {"field": "style"}]}
+ ]}}
+]

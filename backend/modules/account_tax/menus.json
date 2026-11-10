@@ -1,0 +1,4 @@
+[
+ {"id": "menu_tax_report", "name": "Tax report", "parent": "account_reports.menu_reporting", "sequence": 90, "action": "account_tax.action_tax_report"},
+ {"id": "menu_tax_returns", "name": "Tax returns", "parent": "account.menu_accounting", "sequence": 40, "action": "account_tax.action_tax_returns"}
+]

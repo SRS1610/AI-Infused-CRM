@@ -1,0 +1,15 @@
+name = "account_tax"
+version = "1.0.0"
+summary = "Tax returns: grid report per chart of accounts, tax closing entry and lock, pre-filing checks"
+category = "Accounting"
+phase = 2
+depends = ["account_reports"]
+license = "Apache-2.0"
+installable = true
+
+[load]
+security = ["security/access.json"]
+data = ["data/tax_reports.json"]
+views = ["views.json"]
+actions = "actions.json"
+menus = "menus.json"

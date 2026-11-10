@@ -1,0 +1,480 @@
+[
+ {
+  "id": "tax_report_eu",
+  "model": "account.report",
+  "values": {
+   "name": "VAT return",
+   "code": "tax_eu",
+   "sequence": 90,
+   "engine": "lines",
+   "date_mode": "range",
+   "allow_comparison": true,
+   "description": "Grids of the EU-style chart. Credit notes reduce the grids; TAX_DUE - TAX_DEDUCTIBLE = NET ties to the tax accounts.",
+   "variant_of": "tax",
+   "chart_template": "eu"
+  }
+ },
+ {
+  "id": "tax_eu_sales",
+  "model": "account.report_line",
+  "values": {
+   "report_id": "tax_report_eu",
+   "sequence": 10,
+   "name": "Sales",
+   "code": "SALES",
+   "expression": "children",
+   "style": "header"
+  }
+ },
+ {
+  "id": "tax_eu_g01",
+  "model": "account.report_line",
+  "values": {
+   "report_id": "tax_report_eu",
+   "sequence": 20,
+   "name": "[01] Taxable sales (base)",
+   "code": "G01",
+   "expression": "grid(01)",
+   "parent_id": "tax_eu_sales"
+  }
+ },
+ {
+  "id": "tax_eu_g02",
+  "model": "account.report_line",
+  "values": {
+   "report_id": "tax_report_eu",
+   "sequence": 30,
+   "name": "[02] Output VAT",
+   "code": "G02",
+   "expression": "grid(02)",
+   "parent_id": "tax_eu_sales"
+  }
+ },
+ {
+  "id": "tax_eu_g03",
+  "model": "account.report_line",
+  "values": {
+   "report_id": "tax_report_eu",
+   "sequence": 40,
+   "name": "[03] Intra-EU supplies, exempt (base)",
+   "code": "G03",
+   "expression": "grid(03)",
+   "parent_id": "tax_eu_sales"
+  }
+ },
+ {
+  "id": "tax_eu_g04",
+  "model": "account.report_line",
+  "values": {
+   "report_id": "tax_report_eu",
+   "sequence": 50,
+   "name": "[04] Exports outside the EU, exempt (base)",
+   "code": "G04",
+   "expression": "grid(04)",
+   "parent_id": "tax_eu_sales"
+  }
+ },
+ {
+  "id": "tax_eu_purchases",
+  "model": "account.report_line",
+  "values": {
+   "report_id": "tax_report_eu",
+   "sequence": 60,
+   "name": "Purchases",
+   "code": "PURCHASES",
+   "expression": "children",
+   "style": "header"
+  }
+ },
+ {
+  "id": "tax_eu_g05",
+  "model": "account.report_line",
+  "values": {
+   "report_id": "tax_report_eu",
+   "sequence": 70,
+   "name": "[05] Taxable purchases (base)",
+   "code": "G05",
+   "expression": "grid(05)",
+   "parent_id": "tax_eu_purchases"
+  }
+ },
+ {
+  "id": "tax_eu_g06",
+  "model": "account.report_line",
+  "values": {
+   "report_id": "tax_report_eu",
+   "sequence": 80,
+   "name": "[06] Deductible VAT on purchases",
+   "code": "G06",
+   "expression": "grid(06)",
+   "parent_id": "tax_eu_purchases"
+  }
+ },
+ {
+  "id": "tax_eu_g07",
+  "model": "account.report_line",
+  "values": {
+   "report_id": "tax_report_eu",
+   "sequence": 90,
+   "name": "[07] Intra-EU acquisitions, reverse charge (base)",
+   "code": "G07",
+   "expression": "grid(07)",
+   "parent_id": "tax_eu_purchases"
+  }
+ },
+ {
+  "id": "tax_eu_g08",
+  "model": "account.report_line",
+  "values": {
+   "report_id": "tax_report_eu",
+   "sequence": 100,
+   "name": "[08] VAT due on reverse-charge acquisitions",
+   "code": "G08",
+   "expression": "grid(08)",
+   "parent_id": "tax_eu_purchases",
+   "sign": "-1"
+  }
+ },
+ {
+  "id": "tax_eu_g09",
+  "model": "account.report_line",
+  "values": {
+   "report_id": "tax_report_eu",
+   "sequence": 110,
+   "name": "[09] Deductible VAT on reverse-charge acquisitions",
+   "code": "G09",
+   "expression": "grid(09)",
+   "parent_id": "tax_eu_purchases"
+  }
+ },
+ {
+  "id": "tax_eu_g10",
+  "model": "account.report_line",
+  "values": {
+   "report_id": "tax_report_eu",
+   "sequence": 120,
+   "name": "[10] Imports, exempt (base)",
+   "code": "G10",
+   "expression": "grid(10)",
+   "parent_id": "tax_eu_purchases"
+  }
+ },
+ {
+  "id": "tax_eu_tax_due",
+  "model": "account.report_line",
+  "values": {
+   "report_id": "tax_report_eu",
+   "sequence": 130,
+   "name": "Total VAT due",
+   "code": "TAX_DUE",
+   "expression": "line(G02) + line(G08)",
+   "style": "total"
+  }
+ },
+ {
+  "id": "tax_eu_tax_deductible",
+  "model": "account.report_line",
+  "values": {
+   "report_id": "tax_report_eu",
+   "sequence": 140,
+   "name": "Total deductible VAT",
+   "code": "TAX_DEDUCTIBLE",
+   "expression": "line(G06) + line(G09)",
+   "style": "total"
+  }
+ },
+ {
+  "id": "tax_eu_net",
+  "model": "account.report_line",
+  "values": {
+   "report_id": "tax_report_eu",
+   "sequence": 150,
+   "name": "VAT payable (negative: VAT credit)",
+   "code": "NET",
+   "expression": "line(TAX_DUE) - line(TAX_DEDUCTIBLE)",
+   "style": "total"
+  }
+ },
+ {
+  "id": "tax_report_us",
+  "model": "account.report",
+  "values": {
+   "name": "Sales tax return",
+   "code": "tax_us",
+   "sequence": 91,
+   "engine": "lines",
+   "date_mode": "range",
+   "allow_comparison": true,
+   "description": "Grids of the US chart (TX_*). TAX_DUE - TAX_DEDUCTIBLE = NET ties to the tax accounts.",
+   "variant_of": "tax",
+   "chart_template": "us"
+  }
+ },
+ {
+  "id": "tax_us_sales",
+  "model": "account.report_line",
+  "values": {
+   "report_id": "tax_report_us",
+   "sequence": 10,
+   "name": "Sales",
+   "code": "SALES",
+   "expression": "children",
+   "style": "header"
+  }
+ },
+ {
+  "id": "tax_us_tx_sales",
+  "model": "account.report_line",
+  "values": {
+   "report_id": "tax_report_us",
+   "sequence": 20,
+   "name": "Taxable sales",
+   "code": "TX_SALES",
+   "expression": "grid(TX_SALES)",
+   "parent_id": "tax_us_sales"
+  }
+ },
+ {
+  "id": "tax_us_tx_exempt",
+  "model": "account.report_line",
+  "values": {
+   "report_id": "tax_report_us",
+   "sequence": 30,
+   "name": "Exempt sales (resale, export)",
+   "code": "TX_EXEMPT",
+   "expression": "grid(TX_EXEMPT)",
+   "parent_id": "tax_us_sales"
+  }
+ },
+ {
+  "id": "tax_us_tx_state",
+  "model": "account.report_line",
+  "values": {
+   "report_id": "tax_report_us",
+   "sequence": 40,
+   "name": "State sales tax collected",
+   "code": "TX_STATE",
+   "expression": "grid(TX_STATE)",
+   "parent_id": "tax_us_sales"
+  }
+ },
+ {
+  "id": "tax_us_tx_local",
+  "model": "account.report_line",
+  "values": {
+   "report_id": "tax_report_us",
+   "sequence": 50,
+   "name": "Local sales tax collected",
+   "code": "TX_LOCAL",
+   "expression": "grid(TX_LOCAL)",
+   "parent_id": "tax_us_sales"
+  }
+ },
+ {
+  "id": "tax_us_purchases",
+  "model": "account.report_line",
+  "values": {
+   "report_id": "tax_report_us",
+   "sequence": 60,
+   "name": "Purchases",
+   "code": "PURCHASES",
+   "expression": "children",
+   "style": "header"
+  }
+ },
+ {
+  "id": "tax_us_tx_purchases",
+  "model": "account.report_line",
+  "values": {
+   "report_id": "tax_report_us",
+   "sequence": 70,
+   "name": "Purchases (no sales tax)",
+   "code": "TX_PURCHASES",
+   "expression": "grid(TX_PURCHASES)",
+   "parent_id": "tax_us_purchases"
+  }
+ },
+ {
+  "id": "tax_us_tax_due",
+  "model": "account.report_line",
+  "values": {
+   "report_id": "tax_report_us",
+   "sequence": 80,
+   "name": "Total sales tax due",
+   "code": "TAX_DUE",
+   "expression": "line(TX_STATE) + line(TX_LOCAL)",
+   "style": "total"
+  }
+ },
+ {
+  "id": "tax_us_tax_deductible",
+  "model": "account.report_line",
+  "values": {
+   "report_id": "tax_report_us",
+   "sequence": 90,
+   "name": "Total deductible tax",
+   "code": "TAX_DEDUCTIBLE",
+   "expression": "",
+   "style": "total"
+  }
+ },
+ {
+  "id": "tax_us_net",
+  "model": "account.report_line",
+  "values": {
+   "report_id": "tax_report_us",
+   "sequence": 100,
+   "name": "Sales tax payable",
+   "code": "NET",
+   "expression": "line(TAX_DUE) - line(TAX_DEDUCTIBLE)",
+   "style": "total"
+  }
+ },
+ {
+  "id": "tax_report_generic",
+  "model": "account.report",
+  "values": {
+   "name": "Tax return",
+   "code": "tax_generic",
+   "sequence": 92,
+   "engine": "lines",
+   "date_mode": "range",
+   "allow_comparison": true,
+   "description": "Grids of the generic chart. TAX_DUE - TAX_DEDUCTIBLE = NET ties to the tax accounts.",
+   "variant_of": "tax",
+   "chart_template": "generic"
+  }
+ },
+ {
+  "id": "tax_generic_sales",
+  "model": "account.report_line",
+  "values": {
+   "report_id": "tax_report_generic",
+   "sequence": 10,
+   "name": "Sales",
+   "code": "SALES",
+   "expression": "children",
+   "style": "header"
+  }
+ },
+ {
+  "id": "tax_generic_g01",
+  "model": "account.report_line",
+  "values": {
+   "report_id": "tax_report_generic",
+   "sequence": 20,
+   "name": "[01] Taxable sales (base)",
+   "code": "G01",
+   "expression": "grid(01)",
+   "parent_id": "tax_generic_sales"
+  }
+ },
+ {
+  "id": "tax_generic_g02",
+  "model": "account.report_line",
+  "values": {
+   "report_id": "tax_report_generic",
+   "sequence": 30,
+   "name": "[02] Tax collected",
+   "code": "G02",
+   "expression": "grid(02)",
+   "parent_id": "tax_generic_sales"
+  }
+ },
+ {
+  "id": "tax_generic_g03",
+  "model": "account.report_line",
+  "values": {
+   "report_id": "tax_report_generic",
+   "sequence": 40,
+   "name": "[03] Exempt sales (base)",
+   "code": "G03",
+   "expression": "grid(03)",
+   "parent_id": "tax_generic_sales"
+  }
+ },
+ {
+  "id": "tax_generic_purchases",
+  "model": "account.report_line",
+  "values": {
+   "report_id": "tax_report_generic",
+   "sequence": 50,
+   "name": "Purchases",
+   "code": "PURCHASES",
+   "expression": "children",
+   "style": "header"
+  }
+ },
+ {
+  "id": "tax_generic_g04",
+  "model": "account.report_line",
+  "values": {
+   "report_id": "tax_report_generic",
+   "sequence": 60,
+   "name": "[04] Taxable purchases (base)",
+   "code": "G04",
+   "expression": "grid(04)",
+   "parent_id": "tax_generic_purchases"
+  }
+ },
+ {
+  "id": "tax_generic_g05",
+  "model": "account.report_line",
+  "values": {
+   "report_id": "tax_report_generic",
+   "sequence": 70,
+   "name": "[05] Deductible tax",
+   "code": "G05",
+   "expression": "grid(05)",
+   "parent_id": "tax_generic_purchases"
+  }
+ },
+ {
+  "id": "tax_generic_g06",
+  "model": "account.report_line",
+  "values": {
+   "report_id": "tax_report_generic",
+   "sequence": 80,
+   "name": "[06] Exempt purchases (base)",
+   "code": "G06",
+   "expression": "grid(06)",
+   "parent_id": "tax_generic_purchases"
+  }
+ },
+ {
+  "id": "tax_generic_tax_due",
+  "model": "account.report_line",
+  "values": {
+   "report_id": "tax_report_generic",
+   "sequence": 90,
+   "name": "Total tax due",
+   "code": "TAX_DUE",
+   "expression": "line(G02)",
+   "style": "total"
+  }
+ },
+ {
+  "id": "tax_generic_tax_deductible",
+  "model": "account.report_line",
+  "values": {
+   "report_id": "tax_report_generic",
+   "sequence": 100,
+   "name": "Total deductible tax",
+   "code": "TAX_DEDUCTIBLE",
+   "expression": "line(G05)",
+   "style": "total"
+  }
+ },
+ {
+  "id": "tax_generic_net",
+  "model": "account.report_line",
+  "values": {
+   "report_id": "tax_report_generic",
+   "sequence": 110,
+   "name": "Tax payable (negative: tax credit)",
+   "code": "NET",
+   "expression": "line(TAX_DUE) - line(TAX_DEDUCTIBLE)",
+   "style": "total"
+  }
+ }
+]
