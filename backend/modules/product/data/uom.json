@@ -1,9 +1,11 @@
 [
-  {"id": "uom_unit", "model": "product.uom", "noupdate": true, "values": {"name": "Unit(s)", "category": "unit", "factor": 1}},
-  {"id": "uom_dozen", "model": "product.uom", "noupdate": true, "values": {"name": "Dozen", "category": "unit", "factor": 12}},
-  {"id": "uom_hour", "model": "product.uom", "noupdate": true, "values": {"name": "Hour(s)", "category": "time", "factor": 1}},
-  {"id": "uom_day", "model": "product.uom", "noupdate": true, "values": {"name": "Day(s)", "category": "time", "factor": 8}},
-  {"id": "uom_kg", "model": "product.uom", "noupdate": true, "values": {"name": "kg", "category": "weight", "factor": 1}},
-  {"id": "uom_meter", "model": "product.uom", "noupdate": true, "values": {"name": "m", "category": "length", "factor": 1}},
-  {"id": "uom_liter", "model": "product.uom", "noupdate": true, "values": {"name": "L", "category": "volume", "factor": 1}}
+  {"id": "uom_unit", "model": "product.uom", "noupdate": true, "values": {"name": "Unit(s)", "category": "unit", "uom_type": "reference", "factor": 1, "rounding": 0.01}},
+  {"id": "uom_dozen", "model": "product.uom", "noupdate": true, "values": {"name": "Dozen", "category": "unit", "uom_type": "bigger", "factor": 12, "rounding": 0.01}},
+  {"id": "uom_hour", "model": "product.uom", "noupdate": true, "values": {"name": "Hour(s)", "category": "time", "uom_type": "reference", "factor": 1, "rounding": 0.01}},
+  {"id": "uom_day", "model": "product.uom", "noupdate": true, "values": {"name": "Day(s)", "category": "time", "uom_type": "bigger", "factor": 8, "rounding": 0.01}},
+  {"id": "uom_kg", "model": "product.uom", "noupdate": true, "values": {"name": "kg", "category": "weight", "uom_type": "reference", "factor": 1, "rounding": 0.001}},
+  {"id": "uom_gram", "model": "product.uom", "noupdate": true, "values": {"name": "g", "category": "weight", "uom_type": "smaller", "factor": 0.001, "rounding": 1}},
+  {"id": "uom_meter", "model": "product.uom", "noupdate": true, "values": {"name": "m", "category": "length", "uom_type": "reference", "factor": 1, "rounding": 0.001}},
+  {"id": "uom_cm", "model": "product.uom", "noupdate": true, "values": {"name": "cm", "category": "length", "uom_type": "smaller", "factor": 0.01, "rounding": 0.1}},
+  {"id": "uom_liter", "model": "product.uom", "noupdate": true, "values": {"name": "L", "category": "volume", "uom_type": "reference", "factor": 1, "rounding": 0.001}}
 ]

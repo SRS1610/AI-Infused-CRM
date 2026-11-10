@@ -1,3 +1,4 @@
 [
-  {"id": "group_product_manager", "model": "core.group", "noupdate": true, "values": {"name": "Products / Manager", "category": "Sales", "comment": "Create and price products; see costs", "implied_ids": ["core.group_user"]}}
+  {"id": "group_product_manager", "model": "core.group", "noupdate": true, "values": {"name": "Products / Manager", "category": "Sales", "comment": "Create and price products; see costs", "implied_ids": ["core.group_user"]}},
+  {"id": "core.group_system", "model": "core.group", "values": {"implied_ids": {"$add": ["product.group_product_manager"]}}}
 ]

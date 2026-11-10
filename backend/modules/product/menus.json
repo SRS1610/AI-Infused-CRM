@@ -1,1 +1,10 @@
-[]
+[
+  {"id": "menu_root", "name": "Catalogue", "sequence": 35, "icon": "package", "groups": ["product.group_product_manager"]},
+  {"id": "menu_products", "name": "Products", "parent": "product.menu_root", "sequence": 10, "action": "product.action_products"},
+  {"id": "menu_variants", "name": "Product variants", "parent": "product.menu_root", "sequence": 20, "action": "product.action_variants"},
+  {"id": "menu_pricelists", "name": "Pricelists", "parent": "product.menu_root", "sequence": 30, "action": "product.action_pricelists"},
+  {"id": "menu_config", "name": "Configuration", "parent": "product.menu_root", "sequence": 90},
+  {"id": "menu_attributes", "name": "Product attributes", "parent": "product.menu_config", "sequence": 10, "action": "product.action_attributes"},
+  {"id": "menu_categories", "name": "Product categories", "parent": "product.menu_config", "sequence": 20, "action": "product.action_categories"},
+  {"id": "menu_uoms", "name": "Units of measure", "parent": "product.menu_config", "sequence": 30, "action": "product.action_uoms"}
+]

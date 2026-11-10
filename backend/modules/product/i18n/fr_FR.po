@@ -16,17 +16,126 @@ msgstr ""
 "Generated-By: Babel 2.18.0\n"
 
 #. model description
+#: model:product.attribute
+msgid "Product attribute"
+msgstr "Attribut de produit"
+
+#. field label
+#: field:product.attribute.name field:product.category.name field:product.pricelist.name
+#: field:product.product.name field:product.uom.name
+msgid "Name"
+msgstr "Nom"
+
+#. field label
+#: field:product.attribute.sequence field:product.attribute_line.sequence
+#: field:product.attribute_value.sequence field:product.pricelist.sequence
+#: field:product.pricelist_item.sequence
+msgid "Sequence"
+msgstr "Séquence"
+
+#. field label
+#: field:product.attribute.display_type
+msgid "Display"
+msgstr "Affichage"
+
+#. field help
+#: field:product.attribute.display_type
+msgid "How customers choose a value"
+msgstr "Comment les clients choisissent une valeur"
+
+#. selection value radio
+#: selection:product.attribute.display_type
+msgid "Radio buttons"
+msgstr "Boutons radio"
+
+#. selection value select
+#: selection:product.attribute.display_type
+msgid "Drop-down list"
+msgstr "Liste déroulante"
+
+#. selection value color
+#: selection:product.attribute.display_type
+msgid "Colour swatches"
+msgstr "Pastilles de couleur"
+
+#. field label
+#: field:product.attribute.value_ids field:product.attribute_line.value_ids
+msgid "Values"
+msgstr "Valeurs"
+
+#. model description
+#: model:product.attribute_value
+msgid "Product attribute value"
+msgstr "Valeur d'attribut de produit"
+
+#. constraint message
+#: model:product.attribute_value
+msgid "Two values of an attribute cannot share a code"
+msgstr "Deux valeurs d'un attribut ne peuvent pas avoir le même code"
+
+#. field label
+#: field:product.attribute_line.attribute_id field:product.attribute_value.attribute_id
+msgid "Attribute"
+msgstr "Attribut"
+
+#. field label
+#: field:product.attribute_value.name
+msgid "Value"
+msgstr "Valeur"
+
+#. field label
+#: field:product.attribute_value.code
+msgid "Code"
+msgstr "Code"
+
+#. field help
+#: field:product.attribute_value.code
+msgid "Short code added to the variants' internal reference (e.g. RED, XL)"
+msgstr "Code court ajouté à la référence interne des variantes (par ex. ROU, XL)"
+
+#. field label
+#: field:product.attribute_value.html_color
+msgid "Colour"
+msgstr "Couleur"
+
+#. field help
+#: field:product.attribute_value.html_color
+msgid "HTML colour shown for colour attributes, e.g. #c0392b"
+msgstr "Couleur HTML affichée pour les attributs de couleur, par ex. #c0392b"
+
+#. field label
+#: field:product.attribute_value.price_extra field:product.product.price_extra
+msgid "Extra price"
+msgstr "Supplément de prix"
+
+#. field help
+#: field:product.attribute_value.price_extra
+msgid "Added to the template's sales price for this value"
+msgstr "Ajouté au prix de vente du modèle pour cette valeur"
+
+#. model description
+#: model:product.attribute_line
+msgid "Product attribute line"
+msgstr "Ligne d'attribut de produit"
+
+#. constraint message
+#: model:product.attribute_line
+msgid "An attribute is listed once per product"
+msgstr "Un attribut n'apparaît qu'une fois par produit"
+
+#. field label
+#: field:product.attribute_line.product_id field:product.product.template_id
+msgid "Template"
+msgstr "Modèle"
+
+#. model description
 #: model:product.uom
 msgid "Unit of measure"
 msgstr "Unité de mesure"
 
 #. field label
-#: field:product.category.name field:product.product.name field:product.uom.name
-msgid "Name"
-msgstr "Nom"
-
-#. field label
-#: field:product.product.category_id field:product.uom.category
+#: field:product.pricelist_item.category_id field:product.product.category_id
+#: field:product.uom.category
 msgid "Category"
 msgstr "Catégorie"
 
@@ -57,6 +166,33 @@ msgid "Volume"
 msgstr "Volume"
 
 #. field label
+#: field:product.product.type field:product.uom.uom_type
+msgid "Type"
+msgstr "Type"
+
+#. field help
+#: field:product.uom.uom_type
+msgid "Each category has one reference unit (ratio 1); the others are bigger or smaller than it"
+msgstr ""
+"Chaque catégorie a une unité de référence (rapport 1) ; les autres sont plus grandes ou plus "
+"petites"
+
+#. selection value reference
+#: selection:product.uom.uom_type
+msgid "Reference unit of its category"
+msgstr "Unité de référence de sa catégorie"
+
+#. selection value bigger
+#: selection:product.uom.uom_type
+msgid "Bigger than the reference unit"
+msgstr "Plus grande que l'unité de référence"
+
+#. selection value smaller
+#: selection:product.uom.uom_type
+msgid "Smaller than the reference unit"
+msgstr "Plus petite que l'unité de référence"
+
+#. field label
 #: field:product.uom.factor
 msgid "Factor"
 msgstr "Facteur"
@@ -67,12 +203,23 @@ msgid "How many of this unit make the category's reference unit"
 msgstr "Combien de cette unité font l'unité de référence de la catégorie"
 
 #. field label
-#: field:product.product.active field:product.uom.active
+#: field:product.uom.rounding
+msgid "Rounding precision"
+msgstr "Précision d'arrondi"
+
+#. field help
+#: field:product.uom.rounding
+msgid "Quantities converted into this unit are rounded to a multiple of this value"
+msgstr "Les quantités converties dans cette unité sont arrondies à un multiple de cette valeur"
+
+#. field label
+#: field:product.pricelist.active field:product.product.active field:product.uom.active
 msgid "Active"
 msgstr "Actif"
 
 #. model description
-#: model:product.category
+#. selection value category
+#: model:product.category selection:product.pricelist_item.applied_on
 msgid "Product category"
 msgstr "Catégorie de produits"
 
@@ -87,7 +234,10 @@ msgid "Complete Name"
 msgstr "Nom complet"
 
 #. model description
-#: model:product.product
+#. selection value product
+#. field label
+#: field:product.pricelist_item.product_id model:product.product
+#: selection:product.pricelist_item.applied_on
 msgid "Product"
 msgstr "Produit"
 
@@ -105,11 +255,6 @@ msgstr "Référence interne"
 #: field:product.product.barcode
 msgid "Barcode"
 msgstr "Code-barres"
-
-#. field label
-#: field:product.product.type
-msgid "Type"
-msgstr "Type"
 
 #. selection value service
 #: selection:product.product.type
@@ -134,17 +279,20 @@ msgid "Sales description"
 msgstr "Description commerciale"
 
 #. field label
+#: field:product.pricelist.currency_id field:product.pricelist_item.currency_id
 #: field:product.product.currency_id
 msgid "Currency"
 msgstr "Devise"
 
 #. field label
-#: field:product.product.list_price
+#. selection value list_price
+#: field:product.product.list_price selection:product.pricelist_item.base
 msgid "Sales price"
 msgstr "Prix de vente"
 
 #. field label
-#: field:product.product.standard_price
+#. selection value standard_price
+#: field:product.product.standard_price selection:product.pricelist_item.base
 msgid "Cost"
 msgstr "Coût"
 
@@ -169,22 +317,401 @@ msgid "Can be sold"
 msgstr "Peut être vendu"
 
 #. field label
+#: field:product.pricelist.company_id field:product.pricelist_item.company_id
 #: field:product.product.company_id
 msgid "Company"
 msgstr "Société"
 
 #. field help
-#: field:product.product.company_id
+#: field:product.pricelist.company_id field:product.product.company_id
 msgid "Empty = shared by every company"
 msgstr "Vide = partagé par toutes les sociétés"
 
-#: models/product.py:82
+#. field label
+#: field:product.product.attribute_line_ids
+msgid "Attributes"
+msgstr "Attributs"
+
+#. field help
+#: field:product.product.attribute_line_ids
+msgid "Attributes and values this product comes in; a product with attributes is a template"
+msgstr "Attributs et valeurs dans lesquels ce produit existe ; un produit avec des attributs est un modèle"
+
+#. field label
+#: field:product.product.is_template
+msgid "Has variants"
+msgstr "A des variantes"
+
+#. field help
+#: field:product.product.is_template
+msgid "Set when the product has attributes: it is not sold itself, its variants are"
+msgstr "Coché quand le produit a des attributs : il n'est pas vendu lui-même, ses variantes le sont"
+
+#. field help
+#: field:product.product.template_id
+msgid "The product this variant was generated from"
+msgstr "Le produit à partir duquel cette variante a été générée"
+
+#. field label
+#. view label
+#: field:product.product.variant_ids views.json:view_product_search
+msgid "Variants"
+msgstr "Variantes"
+
+#. field label
+#: field:product.product.attribute_value_ids
+msgid "Attribute values"
+msgstr "Valeurs d'attributs"
+
+#. field help
+#: field:product.product.attribute_value_ids
+msgid "The combination this variant stands for"
+msgstr "La combinaison que représente cette variante"
+
+#. field help
+#: field:product.product.price_extra
+msgid "Sum of the extra prices of the variant's attribute values, added to the template's sales price"
+msgstr "Somme des suppléments des valeurs d'attributs de la variante, ajoutée au prix de vente du modèle"
+
+#. field label
+#: field:product.product.variant_count
+msgid "Number of variants"
+msgstr "Nombre de variantes"
+
+#. field label
+#. view label
+#: field:product.product.is_sellable views.json:view_product_search
+msgid "Sellable on a line"
+msgstr "Vendable sur une ligne"
+
+#. field help
+#: field:product.product.is_sellable
+msgid "Can be sold and is not a template: use [('is_sellable', '=', True)] to choose products for lines"
+msgstr ""
+"Peut être vendu et n'est pas un modèle : utilisez [('is_sellable', '=', True)] pour choisir les "
+"produits des lignes"
+
+#. model description
+#. field label
+#: field:product.pricelist_item.pricelist_id model:product.pricelist
+msgid "Pricelist"
+msgstr "Liste de prix"
+
+#. field label
+#: field:product.pricelist.country_ids
+msgid "Countries"
+msgstr "Pays"
+
+#. field help
+#: field:product.pricelist.country_ids
+msgid "Customers in these countries get this pricelist unless they have one of their own"
+msgstr "Les clients de ces pays reçoivent cette liste de prix, sauf s'ils ont la leur"
+
+#. field label
+#: field:product.pricelist.item_ids
+msgid "Rules"
+msgstr "Règles"
+
+#. model description
+#: model:product.pricelist_item
+msgid "Pricelist rule"
+msgstr "Règle de liste de prix"
+
+#. field label
+#. view title
+#: field:product.pricelist_item.applied_on views.json:view_pricelist_item_form
+msgid "Applies to"
+msgstr "S'applique à"
+
+#. selection value all
+#: models/pricelist.py:281 selection:product.pricelist_item.applied_on
+msgid "All products"
+msgstr "Tous les produits"
+
+#. selection value variant
+#: selection:product.pricelist_item.applied_on
+msgid "Product variant"
+msgstr "Variante de produit"
+
+#. field help
+#: field:product.pricelist_item.category_id
+msgid "Also applies to its sub-categories"
+msgstr "S'applique aussi à ses sous-catégories"
+
+#. field help
+#: field:product.pricelist_item.product_id
+msgid "A single product, or a template: the rule then applies to every variant"
+msgstr "Un produit simple, ou un modèle : la règle s'applique alors à chaque variante"
+
+#. field label
+#: field:product.pricelist_item.variant_id
+msgid "Variant"
+msgstr "Variante"
+
+#. field label
+#: field:product.pricelist_item.min_quantity
+msgid "Minimum quantity"
+msgstr "Quantité minimale"
+
+#. field help
+#: field:product.pricelist_item.min_quantity
+msgid "In the product's unit; the rule applies from it"
+msgstr "Dans l'unité du produit ; la règle s'applique à partir de celle-ci"
+
+#. field label
+#: field:product.pricelist_item.date_start
+msgid "Start date"
+msgstr "Date de début"
+
+#. field help
+#: field:product.pricelist_item.date_start
+msgid "First day the rule applies"
+msgstr "Premier jour d'application de la règle"
+
+#. field label
+#: field:product.pricelist_item.date_end
+msgid "End date"
+msgstr "Date de fin"
+
+#. field help
+#: field:product.pricelist_item.date_end
+msgid "Last day the rule applies"
+msgstr "Dernier jour d'application de la règle"
+
+#. field label
+#. view title
+#: field:product.pricelist_item.compute_price views.json:view_pricelist_item_form
+msgid "Price"
+msgstr "Prix"
+
+#. selection value fixed
+#. field label
+#: field:product.pricelist_item.fixed_price selection:product.pricelist_item.compute_price
+msgid "Fixed price"
+msgstr "Prix fixe"
+
+#. selection value percentage
+#: selection:product.pricelist_item.compute_price
+msgid "Discount"
+msgstr "Remise"
+
+#. selection value formula
+#: selection:product.pricelist_item.compute_price
+msgid "Formula"
+msgstr "Formule"
+
+#. field label
+#: field:product.pricelist_item.percent_price
+msgid "Discount %"
+msgstr "Remise %"
+
+#. field help
+#: field:product.pricelist_item.percent_price
+msgid "Discount on the base price"
+msgstr "Remise sur le prix de base"
+
+#. field label
+#: field:product.pricelist_item.base
+msgid "Based on"
+msgstr "Basé sur"
+
+#. field help
+#: field:product.pricelist_item.base
+msgid "Price the discount or formula starts from"
+msgstr "Prix auquel s'applique la remise ou la formule"
+
+#. selection value pricelist
+#. field label
+#: field:product.pricelist_item.base_pricelist_id selection:product.pricelist_item.base
+msgid "Other pricelist"
+msgstr "Autre liste de prix"
+
+#. field label
+#: field:product.pricelist_item.price_discount
+msgid "Formula discount %"
+msgstr "Remise de la formule %"
+
+#. field help
+#: field:product.pricelist_item.price_discount
+msgid "Percentage taken off the base price"
+msgstr "Pourcentage retiré du prix de base"
+
+#. field label
+#: field:product.pricelist_item.price_round
+msgid "Round to"
+msgstr "Arrondir à"
+
+#. field help
+#: field:product.pricelist_item.price_round
+msgid "The discounted price is rounded to a multiple of this amount (e.g. 0.05, 1)"
+msgstr "Le prix remisé est arrondi à un multiple de ce montant (par ex. 0,05, 1)"
+
+#. field label
+#: field:product.pricelist_item.price_surcharge
+msgid "Surcharge"
+msgstr "Majoration"
+
+#. field help
+#: field:product.pricelist_item.price_surcharge
+msgid "Added after rounding (e.g. -0.01 for prices ending in .99)"
+msgstr "Ajoutée après l'arrondi (par ex. -0,01 pour des prix se terminant par ,99)"
+
+#. field label
+#: field:product.pricelist_item.price_min_margin
+msgid "Minimum margin"
+msgstr "Marge minimale"
+
+#. field help
+#: field:product.pricelist_item.price_min_margin
+msgid "The price is at least the cost plus this amount"
+msgstr "Le prix vaut au moins le coût plus ce montant"
+
+#. field label
+#: field:product.pricelist_item.price_max_margin
+msgid "Maximum margin"
+msgstr "Marge maximale"
+
+#. field help
+#: field:product.pricelist_item.price_max_margin
+msgid "The price is at most the cost plus this amount"
+msgstr "Le prix vaut au plus le coût plus ce montant"
+
+#: models/attribute.py:53
+msgid "A colour is written #rgb or #rrggbb"
+msgstr "Une couleur s'écrit #rgb ou #rrggbb"
+
+#: models/attribute.py:88 models/product.py:303
+msgid "A variant cannot have attributes of its own: add them to its template"
+msgstr "Une variante ne peut pas avoir ses propres attributs : ajoutez-les à son modèle"
+
+#: models/attribute.py:91
+msgid "Choose at least one value for each attribute"
+msgstr "Choisissez au moins une valeur pour chaque attribut"
+
+#: models/attribute.py:94
+msgid "The values of an attribute line must belong to its attribute"
+msgstr "Les valeurs d'une ligne d'attribut doivent appartenir à son attribut"
+
+#: models/pricelist.py:121
+#, python-brace-format
+msgid "The pricelist '{name}' is based on itself through other pricelists"
+msgstr "La liste de prix « {name} » est basée sur elle-même via d'autres listes de prix"
+
+#: models/pricelist.py:275
+#, python-brace-format
+msgid "Category: {category}"
+msgstr "Catégorie : {category}"
+
+#: models/pricelist.py:283
+#, python-brace-format
+msgid "{target} (from {quantity})"
+msgstr "{target} (à partir de {quantity})"
+
+#: models/pricelist.py:305
+msgid "Choose the category the rule applies to"
+msgstr "Choisissez la catégorie à laquelle s'applique la règle"
+
+#: models/pricelist.py:307
+msgid "Choose the product the rule applies to"
+msgstr "Choisissez le produit auquel s'applique la règle"
+
+#: models/pricelist.py:309
+msgid "Choose the variant the rule applies to"
+msgstr "Choisissez la variante à laquelle s'applique la règle"
+
+#: models/pricelist.py:311
+msgid "The rule ends before it starts"
+msgstr "La règle se termine avant de commencer"
+
+#: models/pricelist.py:313
+msgid "The minimum quantity cannot be negative"
+msgstr "La quantité minimale ne peut pas être négative"
+
+#: models/pricelist.py:315
+msgid "A discount cannot exceed 100 %"
+msgstr "Une remise ne peut pas dépasser 100 %"
+
+#: models/pricelist.py:317
+msgid "The rounding cannot be negative"
+msgstr "L'arrondi ne peut pas être négatif"
+
+#: models/pricelist.py:323
+msgid "The minimum margin is above the maximum margin"
+msgstr "La marge minimale dépasse la marge maximale"
+
+#: models/pricelist.py:340
+msgid "A pricelist cannot be based on itself, even through other pricelists"
+msgstr "Une liste de prix ne peut pas être basée sur elle-même, même via d'autres listes de prix"
+
+#: models/pricelist.py:326
+msgid "Choose the pricelist the rule is based on"
+msgstr "Choisissez la liste de prix sur laquelle la règle est basée"
+
+#: models/product.py:123
+#, python-brace-format
+msgid "Cannot convert '{from_unit}' into '{to_unit}': they measure different things"
+msgstr "Impossible de convertir « {from_unit} » en « {to_unit} » : elles ne mesurent pas la même chose"
+
+#: models/product.py:468
+#, python-brace-format
+msgid "These attributes make {count} variants; the limit is {limit}"
+msgstr "Ces attributs donnent {count} variantes ; la limite est de {limit}"
+
+#: models/product.py:98
+msgid "The ratio of a unit must be positive"
+msgstr "Le rapport d'une unité doit être positif"
+
+#: models/product.py:100
+msgid "The rounding precision of a unit must be positive"
+msgstr "La précision d'arrondi d'une unité doit être positive"
+
+#: models/product.py:102
+msgid "A reference unit has a ratio of 1"
+msgstr "Une unité de référence a un rapport de 1"
+
+#: models/product.py:104
+msgid "A unit bigger than the reference has a ratio above 1"
+msgstr "Une unité plus grande que la référence a un rapport supérieur à 1"
+
+#: models/product.py:106
+msgid "A unit smaller than the reference has a ratio below 1"
+msgstr "Une unité plus petite que la référence a un rapport inférieur à 1"
+
+#: models/product.py:290
 msgid "The sales price cannot be negative"
 msgstr "Le prix de vente ne peut pas être négatif"
 
-#: models/product.py:84
+#: models/product.py:292
 msgid "Tax must be between 0 and 100 %"
 msgstr "La taxe doit être comprise entre 0 et 100 %"
+
+#: models/product.py:300
+msgid "A variant cannot be the template of other variants"
+msgstr "Une variante ne peut pas être le modèle d'autres variantes"
+
+#: models/product.py:485
+#, python-brace-format
+msgid "'{name}' is a variant: generate variants from its template"
+msgstr "« {name} » est une variante : générez les variantes depuis son modèle"
+
+#: models/product.py:487
+#, python-brace-format
+msgid "Add attributes to '{name}' before generating variants"
+msgstr "Ajoutez des attributs à « {name} » avant de générer les variantes"
+
+#: models/product.py:113
+#, python-brace-format
+msgid "The category '{category}' already has a reference unit"
+msgstr "La catégorie « {category} » a déjà une unité de référence"
+
+#: models/product.py:172
+msgid "A category cannot be its own parent"
+msgstr "Une catégorie ne peut pas être son propre parent"
+
+#: models/product.py:397
+#, python-brace-format
+msgid "'{field}' is shared by every variant of '{template}': change it on the template"
+msgstr "« {field} » est commun à toutes les variantes de « {template} » : modifiez-le sur le modèle"
 
 #. core.group.name
 #: security/groups.json:group_product_manager
@@ -217,9 +744,19 @@ msgid "kg"
 msgstr "kg"
 
 #. product.uom.name
+#: data/uom.json:uom_gram
+msgid "g"
+msgstr "g"
+
+#. product.uom.name
 #: data/uom.json:uom_meter
 msgid "m"
 msgstr "m"
+
+#. product.uom.name
+#: data/uom.json:uom_cm
+msgid "cm"
+msgstr "cm"
 
 #. product.uom.name
 #: data/uom.json:uom_liter
@@ -238,22 +775,90 @@ msgid "Services"
 msgstr "Services"
 
 #. view label
+#: views.json:view_product_form
+msgid "Generate variants"
+msgstr "Générer les variantes"
+
+#. view title
+#: views.json:view_product_form
+msgid "Sales"
+msgstr "Ventes"
+
+#. view title
+#: views.json:view_product_form
+msgid "Attributes & variants"
+msgstr "Attributs et variantes"
+
+#. view label
 #: views.json:view_product_search
+msgid "With variants"
+msgstr "Avec variantes"
+
+#. view label
+#: views.json:view_pricelist_search views.json:view_product_search
 msgid "Archived"
 msgstr "Archivés"
 
+#. view title
+#: views.json:view_pricelist_form
+msgid "Price rules"
+msgstr "Règles de prix"
+
+#. view label
+#: views.json:view_pricelist_search
+msgid "Regional"
+msgstr "Régionales"
+
+#. menu name
+#: menus.json:menu_root
+msgid "Catalogue"
+msgstr "Catalogue"
+
+#. menu name
 #. action name
-#: actions.json:action_products
+#: actions.json:action_products menus.json:menu_products
 msgid "Products"
 msgstr "Produits"
 
+#. menu name
 #. action name
-#: actions.json:action_categories
+#: actions.json:action_variants menus.json:menu_variants
+msgid "Product variants"
+msgstr "Variantes de produits"
+
+#. menu name
+#. action name
+#: actions.json:action_pricelists menus.json:menu_pricelists
+msgid "Pricelists"
+msgstr "Listes de prix"
+
+#. menu name
+#: menus.json:menu_config
+msgid "Configuration"
+msgstr "Configuration"
+
+#. menu name
+#. action name
+#: actions.json:action_attributes menus.json:menu_attributes
+msgid "Product attributes"
+msgstr "Attributs de produits"
+
+#. menu name
+#. action name
+#: actions.json:action_categories menus.json:menu_categories
 msgid "Product categories"
 msgstr "Catégories de produits"
 
+#. menu name
 #. action name
-#: actions.json:action_uoms
+#: actions.json:action_uoms menus.json:menu_uoms
 msgid "Units of measure"
 msgstr "Unités de mesure"
+
+#. action help
+#: actions.json:action_variants
+msgid "Variants are generated from a product with attributes (button \"Generate variants\")."
+msgstr ""
+"Les variantes sont générées à partir d'un produit avec des attributs (bouton « Générer les "
+"variantes »)."
 

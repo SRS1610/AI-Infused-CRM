@@ -1,0 +1,28 @@
+[
+  {"id": "category_apparel", "model": "product.category", "values": {"name": "Apparel", "parent_id": "product.category_goods"}},
+  {"id": "attribute_colour", "model": "product.attribute", "values": {"name": "Colour", "sequence": 1, "display_type": "color"}},
+  {"id": "attribute_colour_red", "model": "product.attribute_value", "values": {"attribute_id": "product.attribute_colour", "name": "Red", "code": "RED", "sequence": 1, "html_color": "#c0392b"}},
+  {"id": "attribute_colour_blue", "model": "product.attribute_value", "values": {"attribute_id": "product.attribute_colour", "name": "Blue", "code": "BLU", "sequence": 2, "html_color": "#2e86c1"}},
+  {"id": "attribute_colour_green", "model": "product.attribute_value", "values": {"attribute_id": "product.attribute_colour", "name": "Green", "code": "GRN", "sequence": 3, "html_color": "#27ae60"}},
+  {"id": "attribute_size", "model": "product.attribute", "values": {"name": "Size", "sequence": 2, "display_type": "radio"}},
+  {"id": "attribute_size_s", "model": "product.attribute_value", "values": {"attribute_id": "product.attribute_size", "name": "S", "code": "S", "sequence": 1}},
+  {"id": "attribute_size_m", "model": "product.attribute_value", "values": {"attribute_id": "product.attribute_size", "name": "M", "code": "M", "sequence": 2}},
+  {"id": "attribute_size_l", "model": "product.attribute_value", "values": {"attribute_id": "product.attribute_size", "name": "L", "code": "L", "sequence": 3, "price_extra": 2.0}},
+  {"id": "product_tshirt", "model": "product.product", "values": {
+    "name": "Organic cotton T-shirt", "default_code": "TSHIRT", "type": "goods", "category_id": "product.category_apparel",
+    "list_price": 25, "standard_price": 8, "tax_percent": 20,
+    "description_sale": "Crew-neck T-shirt in certified organic cotton, printed with the company logo.",
+    "attribute_line_ids": [
+      {"attribute_id": "product.attribute_colour", "sequence": 1, "value_ids": ["product.attribute_colour_red", "product.attribute_colour_blue", "product.attribute_colour_green"]},
+      {"attribute_id": "product.attribute_size", "sequence": 2, "value_ids": ["product.attribute_size_s", "product.attribute_size_m", "product.attribute_size_l"]}
+    ]}},
+  {"id": "product_tshirt_red_s", "model": "product.product", "values": {"template_id": "product.product_tshirt", "default_code": "TSHIRT-RED-S", "attribute_value_ids": ["product.attribute_colour_red", "product.attribute_size_s"]}},
+  {"id": "product_tshirt_red_m", "model": "product.product", "values": {"template_id": "product.product_tshirt", "default_code": "TSHIRT-RED-M", "attribute_value_ids": ["product.attribute_colour_red", "product.attribute_size_m"]}},
+  {"id": "product_tshirt_red_l", "model": "product.product", "values": {"template_id": "product.product_tshirt", "default_code": "TSHIRT-RED-L", "attribute_value_ids": ["product.attribute_colour_red", "product.attribute_size_l"]}},
+  {"id": "product_tshirt_blue_s", "model": "product.product", "values": {"template_id": "product.product_tshirt", "default_code": "TSHIRT-BLU-S", "attribute_value_ids": ["product.attribute_colour_blue", "product.attribute_size_s"]}},
+  {"id": "product_tshirt_blue_m", "model": "product.product", "values": {"template_id": "product.product_tshirt", "default_code": "TSHIRT-BLU-M", "attribute_value_ids": ["product.attribute_colour_blue", "product.attribute_size_m"]}},
+  {"id": "product_tshirt_blue_l", "model": "product.product", "values": {"template_id": "product.product_tshirt", "default_code": "TSHIRT-BLU-L", "attribute_value_ids": ["product.attribute_colour_blue", "product.attribute_size_l"]}},
+  {"id": "product_tshirt_green_s", "model": "product.product", "values": {"template_id": "product.product_tshirt", "default_code": "TSHIRT-GRN-S", "attribute_value_ids": ["product.attribute_colour_green", "product.attribute_size_s"]}},
+  {"id": "product_tshirt_green_m", "model": "product.product", "values": {"template_id": "product.product_tshirt", "default_code": "TSHIRT-GRN-M", "attribute_value_ids": ["product.attribute_colour_green", "product.attribute_size_m"]}},
+  {"id": "product_tshirt_green_l", "model": "product.product", "values": {"template_id": "product.product_tshirt", "default_code": "TSHIRT-GRN-L", "attribute_value_ids": ["product.attribute_colour_green", "product.attribute_size_l"]}}
+]
