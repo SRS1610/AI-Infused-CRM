@@ -33,6 +33,7 @@ from tessera.ai import proposals as P
 from tessera.ai.errors import AIError
 from tessera.ai.tools import PendingProposal
 from tessera.exceptions import UserError
+from tessera.i18n import _
 
 if TYPE_CHECKING:
     from tessera.orm.environment import Environment
@@ -206,28 +207,28 @@ def score_pair(me: Model, other: Model, embed_cos: float | None) -> Candidate:
     s["name_similarity"] = nsim
     z += W_NAME * min(1.0, max(0.0, (nsim - NAME_FLOOR) / (1 - NAME_FLOOR)))
     if nsim >= 0.999:
-        reasons.append("Same name")
+        reasons.append(_("Same name"))
     elif nsim >= 0.8:
-        reasons.append(f"Very similar name ({round(nsim * 100)}%)")
+        reasons.append(_("Very similar name ({percent}%)", percent=round(nsim * 100)))
     elif nsim >= 0.65:
-        reasons.append(f"Similar name ({round(nsim * 100)}%)")
+        reasons.append(_("Similar name ({percent}%)", percent=round(nsim * 100)))
     if me.email_normalized and me.email_normalized == other.email_normalized:
         s["email"] = True
         z += W_EMAIL + (W_EMAIL_OTHER_NAME if nsim < 0.4 else 0.0)
-        reasons.append("Same e-mail address")
+        reasons.append(_("Same e-mail address"))
     if not me.is_company and not other.is_company and given_name_conflict(me.name, other.name):
         s["given_name_conflict"] = True
         z += W_GIVEN_NAME_CONFLICT
     if me.phone_normalized and me.phone_normalized == other.phone_normalized:
         s["phone"] = True
         z += W_PHONE + (W_PHONE_OTHER_NAME if nsim < 0.5 else 0.0)
-        reasons.append("Same phone number")
+        reasons.append(_("Same phone number"))
     vat_a, vat_b = (re.sub(r"\W", "", (x or "").upper()) for x in (me.vat, other.vat))
     if vat_a and vat_b:
         if vat_a == vat_b:
             s["vat"] = True
             z += W_VAT
-            reasons.append("Same tax ID")
+            reasons.append(_("Same tax ID"))
         else:
             s["vat_conflict"] = True
             z += W_VAT_CONFLICT
@@ -238,7 +239,7 @@ def score_pair(me: Model, other: Model, embed_cos: float | None) -> Candidate:
             s["domain"] = shared[0]
             z += W_DOMAIN
             if not s.get("email"):
-                reasons.append(f"Same domain ({shared[0]})")
+                reasons.append(_("Same domain ({domain})", domain=shared[0]))
         else:
             s["domain_conflict"] = True
             z += W_DOMAIN_CONFLICT
@@ -263,11 +264,11 @@ def score_pair(me: Model, other: Model, embed_cos: float | None) -> Candidate:
         s["semantic_similarity"] = round(embed_cos, 4)
         z += W_EMBED * min(1.0, max(0.0, (embed_cos - 0.5) / 0.5))
         if embed_cos >= 0.75 and nsim < 0.8:
-            reasons.append(f"Similar profile (semantic match {round(embed_cos * 100)}%)")
+            reasons.append(_("Similar profile (semantic match {percent}%)", percent=round(embed_cos * 100)))
     if s.get("same_company") and nsim >= 0.65:
-        reasons.append("Same company")
+        reasons.append(_("Same company"))
     if s.get("city") and reasons:
-        reasons.append("Same city")
+        reasons.append(_("Same city"))
     c.score = 1 / (1 + math.exp(-z))
     return c
 
@@ -351,7 +352,7 @@ def propose_merge(env: Environment, partner: Model, other_ids: list[int], run: M
     """A proposal of kind ``action`` that merges ``other_ids`` and ``partner`` into the oldest of them."""
     others = env["contacts.partner"].browse([i for i in dict.fromkeys(other_ids) if i != partner.ids[0]])
     if not others:
-        raise UserError("Choose at least one other contact to merge")
+        raise UserError(_("Choose at least one other contact to merge"))
     group = partner | others
     group.check_access("write")  # proposing a merge the user could not make is pointless
     survivor = group.sorted(lambda r: r.ids[0])[:1]
@@ -377,11 +378,11 @@ def merge_action(env: Environment, model: str, res_id: int | None, args: dict[st
     from modules.contacts.merge import merge_partners
 
     if model != "contacts.partner" or not res_id:
-        raise UserError("A merge needs the contact to keep")
+        raise UserError(_("A merge needs the contact to keep"))
     survivor = env["contacts.partner"].browse([res_id])
     others = env["contacts.partner"].browse([int(i) for i in args.get("merge_ids") or []])
     if not survivor.exists() or len(others.exists()) != len(others):
-        raise UserError("One of the contacts to merge no longer exists")
+        raise UserError(_("One of the contacts to merge no longer exists"))
     log = merge_partners(env, survivor, others, dict(args.get("field_choices") or {}))
     log.elevated().write({"method": "ai_suggested"})
     return log

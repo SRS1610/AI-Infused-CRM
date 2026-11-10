@@ -13,6 +13,7 @@ from zoneinfo import ZoneInfo
 from dateutil import parser as dateparser
 
 from tessera.exceptions import TesseraError, UserError, ValidationError
+from tessera.i18n import _
 from tessera.orm import fields as F
 
 if TYPE_CHECKING:
@@ -173,10 +174,10 @@ def run_import(
     columns: list[tuple[int, str, str]] = [(i, h, str(mapping[h])) for i, h in enumerate(headers) if mapping.get(h)]
     unknown = [p for _, _, p in columns if p != "id" and p.split("/")[0] not in model._fields]
     if unknown:
-        raise UserError(f"Unknown fields in the mapping: {', '.join(unknown)}")
-    for _, _, path in columns:
+        raise UserError(_("Unknown fields in the mapping: {unknown}", unknown=", ".join(unknown)))
+    for _index, _header, path in columns:
         if path != "id" and not model._check_field_access(model._fields[path.split("/")[0]], "write"):
-            raise UserError(f"You cannot import into '{path}'")
+            raise UserError(_("You cannot import into '{path}'", path=path))
     field_to_column = {p.split("/")[0]: h for _, h, p in columns if p != "id"}
     required = [
         n

@@ -10,6 +10,7 @@ from pydantic import BaseModel, Field
 from tessera.api.deps import RequestContext, authenticated
 from tessera.api.registry import register_router
 from tessera.exceptions import UserError
+from tessera.i18n import _
 
 router = register_router(APIRouter(prefix="/contacts", tags=["contacts"]))
 COMPARED = [
@@ -44,7 +45,7 @@ def duplicates(partner_id: int, ctx: RequestContext = Depends(authenticated)) ->
 def merge_preview(ids: list[int] = Body(...), ctx: RequestContext = Depends(authenticated)) -> dict[str, Any]:
     """Side-by-side values of the contacts to merge, for the wizard."""
     if len(set(ids)) < 2:
-        raise UserError("Select at least two contacts")
+        raise UserError(_("Select at least two contacts"))
     partners = ctx.env["contacts.partner"].browse(ids)
     partners.check_access("write")
     fields = [f for f in COMPARED if f in partners._fields]
@@ -56,7 +57,7 @@ def merge_preview(ids: list[int] = Body(...), ctx: RequestContext = Depends(auth
 @router.post("/merge")
 def merge(data: MergeIn, ctx: RequestContext = Depends(authenticated)) -> dict[str, Any]:
     if data.survivor_id not in data.ids:
-        raise UserError("The contact to keep must be one of the selected contacts")
+        raise UserError(_("The contact to keep must be one of the selected contacts"))
     partners = ctx.env["contacts.partner"].browse(data.ids)
     return partners.action_merge(data.survivor_id, data.field_choices)
 
@@ -76,7 +77,7 @@ def _ai_partner(ctx: RequestContext, partner_id: int, feature: str) -> Any:
     check_enabled(ctx.env, get_feature(ctx.env, feature))  # 404 feature_disabled when switched off
     partner = ctx.env["contacts.partner"].browse([partner_id])
     if not partner.exists():
-        raise MissingError("No such contact")
+        raise MissingError(_("No such contact"))
     partner.check_access("read")
     return partner
 

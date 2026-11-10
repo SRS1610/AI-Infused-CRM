@@ -17,9 +17,11 @@ node at a JSON-pointer-like ``path``.
 from __future__ import annotations
 
 import copy
+from collections.abc import Sequence
 from typing import TYPE_CHECKING, Any, cast
 
 from tessera.exceptions import ValidationError
+from tessera.i18n import SOURCE_LANG, _, translate
 from tessera.orm import fields as F
 
 if TYPE_CHECKING:
@@ -35,19 +37,19 @@ CHILD_KEYS = ("children", "columns", "pages", "fields", "filters", "group_bys", 
 
 def validate_definition(view_type: str, definition: Any) -> None:
     if not isinstance(definition, dict):
-        raise ValidationError("View definition must be an object")
+        raise ValidationError(_("View definition must be an object"))
     if view_type in ("form", "kanban") and "root" not in definition:
-        raise ValidationError(f"A {view_type} view needs a 'root' node")
+        raise ValidationError(_("A {view_type} view needs a 'root' node", view_type=view_type))
     if view_type == "list" and not isinstance(definition.get("columns"), list):
-        raise ValidationError("A list view needs a 'columns' list")
+        raise ValidationError(_("A list view needs a 'columns' list"))
     if view_type == "search":
         for key in ("fields", "filters", "group_bys"):
             if key in definition and not isinstance(definition[key], list):
-                raise ValidationError(f"search view '{key}' must be a list")
+                raise ValidationError(_("search view '{key}' must be a list", key=key))
     if view_type == "calendar" and not definition.get("date_start"):
-        raise ValidationError("A calendar view needs 'date_start'")
+        raise ValidationError(_("A calendar view needs 'date_start'"))
     if view_type in ("pivot", "graph") and not isinstance(definition.get("measures", []), list):
-        raise ValidationError(f"A {view_type} view needs a 'measures' list")
+        raise ValidationError(_("A {view_type} view needs a 'measures' list", view_type=view_type))
     _validate_nodes(definition)
 
 
@@ -87,11 +89,18 @@ def _validate_nodes(node: Any, pointer: str = "") -> None:
         if "kind" in node:
             kind = node["kind"]
             if not isinstance(kind, str):
-                raise ValidationError(f"node 'kind' must be a string at {pointer or '/'}", pointer=pointer or "/")
+                raise ValidationError(
+                    _("node 'kind' must be a string at {pointer}", pointer=pointer or "/"), pointer=pointer or "/"
+                )
             if kind not in NODE_KINDS:
-                raise ValidationError(f"Unknown view node kind '{kind}' at {pointer or '/'}", pointer=pointer or "/")
+                raise ValidationError(
+                    _("Unknown view node kind '{kind}' at {pointer}", kind=kind, pointer=pointer or "/"),
+                    pointer=pointer or "/",
+                )
             if kind == "component" and not node.get("component"):
-                raise ValidationError(f"component node needs 'component' at {pointer or '/'}", pointer=pointer or "/")
+                raise ValidationError(
+                    _("component node needs 'component' at {pointer}", pointer=pointer or "/"), pointer=pointer or "/"
+                )
         for key, value in node.items():
             _validate_nodes(value, f"{pointer}/{key}")
     elif isinstance(node, list):
@@ -101,19 +110,19 @@ def _validate_nodes(node: Any, pointer: str = "") -> None:
 
 def validate_operations(operations: Any) -> None:
     if not isinstance(operations, list):
-        raise ValidationError("operations must be a list")
+        raise ValidationError(_("operations must be a list"))
     for op in operations:
         if not isinstance(op, dict) or op.get("op") not in OPS:
-            raise ValidationError(f"Invalid view operation {op!r}")
+            raise ValidationError(_("Invalid view operation {op}", op=repr(op)))
         anchor = op.get("anchor")
         if not isinstance(anchor, dict) or not ({"field", "name", "path"} & set(anchor)):
-            raise ValidationError(f"Operation {op.get('op')} needs an anchor with field/name/path")
+            raise ValidationError(_("Operation {op} needs an anchor with field/name/path", op=op.get("op")))
         if op["op"] in ("insert_after", "insert_before", "append", "prepend", "replace") and not isinstance(
             op.get("node"), dict
         ):
-            raise ValidationError(f"Operation {op['op']} needs a node")
+            raise ValidationError(_("Operation {op} needs a node", op=op["op"]))
         if op["op"] == "set_attr" and not isinstance(op.get("attrs"), dict):
-            raise ValidationError("set_attr needs attrs")
+            raise ValidationError(_("set_attr needs attrs"))
         if "node" in op:
             _validate_nodes(op["node"], f"/operations/{operations.index(op)}/node")
 
@@ -149,7 +158,7 @@ def _find(container: Any, anchor: dict[str, Any]) -> tuple[list[Any] | None, int
                 index = part
                 current = current[part]
             else:
-                raise ValidationError(f"Invalid path '{anchor['path']}'")
+                raise ValidationError(_("Invalid path '{path}'", path=anchor["path"]))
         if isinstance(parent, list):
             return parent, int(index), current
         return None, None, current
@@ -168,7 +177,7 @@ def _find(container: Any, anchor: dict[str, Any]) -> tuple[list[Any] | None, int
         elif isinstance(node, list):
             for i, child in enumerate(node):
                 stack.append((node, i, child))
-    raise ValidationError(f"View anchor {anchor} not found")
+    raise ValidationError(_("View anchor {anchor} not found", anchor=anchor))
 
 
 def _children_list(node: dict[str, Any]) -> list[Any]:
@@ -186,7 +195,7 @@ def apply_operations(definition: dict[str, Any], operations: list[dict[str, Any]
         parent, idx, node = _find(result, op["anchor"])
         if kind in ("insert_after", "insert_before", "remove", "replace"):
             if parent is None or idx is None:
-                raise ValidationError(f"Operation {kind} needs an anchor inside a list")
+                raise ValidationError(_("Operation {kind} needs an anchor inside a list", kind=kind))
             if kind == "insert_after":
                 parent.insert(idx + 1, copy.deepcopy(op["node"]))
             elif kind == "insert_before":
@@ -262,6 +271,36 @@ def strip_inaccessible_fields(env: Environment, model_name: str, definition: Any
     return visit(definition)
 
 
+# -- translation --------------------------------------------------------------------------------------
+
+# node attributes holding text shown to users; the top level of a definition only has these few
+# (a calendar's top-level ``title`` names a field)
+TRANSLATABLE_ATTRS = frozenset({"label", "title", "string", "help", "placeholder", "confirm", "text", "tooltip"})
+TOP_LEVEL_TRANSLATABLE_ATTRS = frozenset({"label", "string", "help"})
+
+
+def translate_view(definition: Any, lang: str | None, modules: Sequence[str] | None = None) -> Any:
+    """A copy of ``definition`` whose user-facing string attributes are in ``lang`` (the en_US source text
+    when no catalogue translates them)."""
+    if not lang or lang == SOURCE_LANG:
+        return definition
+
+    def visit(node: Any, top: bool = False) -> Any:
+        if isinstance(node, list):
+            return [visit(item) for item in node]
+        if isinstance(node, dict):
+            attrs = TOP_LEVEL_TRANSLATABLE_ATTRS if top else TRANSLATABLE_ATTRS
+            return {
+                key: translate(value, lang, modules=modules)
+                if key in attrs and isinstance(value, str)
+                else visit(value)
+                for key, value in node.items()
+            }
+        return node
+
+    return visit(definition, top=True)
+
+
 # -- defaults -----------------------------------------------------------------------------------------
 
 SYSTEM_FIELDS = {
@@ -319,7 +358,7 @@ def default_view(env: Environment, model_name: str, view_type: str) -> dict[str,
         }
     if view_type == "search":
         filters = (
-            [{"name": "archived", "label": "Archived", "domain": [["active", "=", False]]}]
+            [{"name": "archived", "label": _("Archived"), "domain": [["active", "=", False]]}]
             if "active" in model._fields
             else []
         )
@@ -356,4 +395,4 @@ def default_view(env: Environment, model_name: str, view_type: str) -> dict[str,
         return {"type": "activity", "model": model_name, "generated": True}
     if view_type in ("gantt", "map"):
         return {"type": view_type, "model": model_name, "generated": True, "unsupported_until": "Phase 4"}
-    raise ValidationError(f"Unknown view type '{view_type}'")
+    raise ValidationError(_("Unknown view type '{view_type}'", view_type=view_type))

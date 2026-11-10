@@ -12,6 +12,7 @@ from pydantic import BaseModel, Field
 from tessera.api.deps import RequestContext, admin_only, authenticated, authenticated_any, request_context
 from tessera.config import get_settings
 from tessera.exceptions import AccessDenied, MissingError, UserError
+from tessera.i18n import _
 from tessera.runtime import current_remote_ip, user_agent_var
 from tessera.security import auth as auth_lib
 from tessera.security.crypto import new_token
@@ -120,7 +121,7 @@ def login_totp(body: TotpRequest, response: Response, ctx: RequestContext = Depe
     user = auth_lib.consume_pre_auth(sys_env, body.pre_auth_token)
     code = body.code.strip()
     if not auth_lib.totp_verify(user.elevated().totp_secret, code) and not user.consume_recovery_code(code):
-        raise AccessDenied("Invalid authentication code")
+        raise AccessDenied(_("Invalid authentication code"))
     return _finish_login(ctx, response, user, totp_verified=True)
 
 
@@ -141,7 +142,7 @@ def session_info(ctx: RequestContext = Depends(authenticated_any)) -> dict[str, 
 def change_password(body: PasswordChangeRequest, ctx: RequestContext = Depends(authenticated_any)) -> dict[str, Any]:
     user = ctx.env.user
     if not user.check_password(body.current_password):
-        raise AccessDenied("Current password is incorrect")
+        raise AccessDenied(_("Current password is incorrect"))
     user.set_password(body.new_password)
     # other sessions of this user are revoked
     sys_env = ctx.system_env()
@@ -167,7 +168,7 @@ def totp_setup(ctx: RequestContext = Depends(authenticated_any)) -> dict[str, An
 def totp_enable(body: TotpEnableRequest, ctx: RequestContext = Depends(authenticated_any)) -> dict[str, Any]:
     user = ctx.env.user.elevated()
     if not auth_lib.totp_verify(user.totp_secret, body.code):
-        raise UserError("The code does not match; scan the QR code again and retry")
+        raise UserError(_("The code does not match; scan the QR code again and retry"))
     user.write({"totp_enabled": True})
     return {"ok": True, "recovery_codes": user.generate_recovery_codes()}
 
@@ -176,7 +177,7 @@ def totp_enable(body: TotpEnableRequest, ctx: RequestContext = Depends(authentic
 def totp_disable(body: TotpEnableRequest, ctx: RequestContext = Depends(authenticated_any)) -> dict[str, Any]:
     user = ctx.env.user.elevated()
     if not auth_lib.totp_verify(user.totp_secret, body.code):
-        raise AccessDenied("Invalid authentication code")
+        raise AccessDenied(_("Invalid authentication code"))
     user.with_context(_recompute_write=True)._write_columns({"totp_secret": None, "totp_enabled": False})
     return {"ok": True}
 
@@ -205,7 +206,7 @@ def create_api_key(body: ApiKeyCreate, ctx: RequestContext = Depends(authenticat
 def revoke_api_key(key_id: int, ctx: RequestContext = Depends(authenticated)) -> dict[str, Any]:
     key = ctx.env["core.api_key"].browse([key_id]).exists()
     if not key:
-        raise MissingError("API key not found")
+        raise MissingError(_("API key not found"))
     key.write({"active": False})
     return {"ok": True}
 
@@ -216,7 +217,7 @@ def revoke_api_key(key_id: int, ctx: RequestContext = Depends(authenticated)) ->
 def _provider(ctx: RequestContext, code: str) -> Any:
     provider = ctx.system_env()["core.sso_provider"].search([("code", "=", code), ("enabled", "=", True)], limit=1)
     if not provider:
-        raise MissingError(f"Unknown identity provider '{code}'")
+        raise MissingError(_("Unknown identity provider '{code}'", code=code))
     return provider
 
 
@@ -255,9 +256,9 @@ def oidc_callback(code: str, request: Request, ctx: RequestContext = Depends(req
     try:
         state, nonce, verifier = cookie.split(".", 2)
     except ValueError as exc:
-        raise AccessDenied("Login session expired; start again") from exc
+        raise AccessDenied(_("Login session expired; start again")) from exc
     if not secrets.compare_digest(state, request.query_params.get("state", "")):
-        raise AccessDenied("State mismatch")
+        raise AccessDenied(_("State mismatch"))
     auth_code = request.query_params.get("code")
     if not auth_code:
         raise AccessDenied(request.query_params.get("error_description") or "Identity provider returned no code")

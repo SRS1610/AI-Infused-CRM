@@ -39,6 +39,7 @@ from decimal import ROUND_HALF_UP, Decimal
 from typing import TYPE_CHECKING, Any, ClassVar
 
 from tessera.exceptions import ValidationError
+from tessera.i18n import _, translatable
 
 if TYPE_CHECKING:
     from tessera.orm.model import Model
@@ -227,7 +228,7 @@ class Field:
 
     def validate(self, value: Any, record: Model) -> None:
         if self.required and value in (None, "", False) and not isinstance(value, bool | int | float):
-            raise ValidationError(f"Field '{self.string or self.name}' is required", field=self.name)
+            raise ValidationError(_("Field '{field}' is required", field=translatable(self.label)), field=self.name)
 
     def default_value(self, model: Model) -> Any:
         if not self.has_default:
@@ -279,7 +280,9 @@ class Integer(Field):
         try:
             return int(value)
         except (TypeError, ValueError) as exc:
-            raise ValidationError(f"'{value}' is not an integer for field '{self.name}'", field=self.name) from exc
+            raise ValidationError(
+                _("'{value}' is not an integer for field '{name}'", value=value, name=self.name), field=self.name
+            ) from exc
 
 
 class Float(Field):
@@ -305,7 +308,9 @@ class Float(Field):
         try:
             value = float(value)
         except (TypeError, ValueError) as exc:
-            raise ValidationError(f"'{value}' is not a number for field '{self.name}'", field=self.name) from exc
+            raise ValidationError(
+                _("'{value}' is not a number for field '{name}'", value=value, name=self.name), field=self.name
+            ) from exc
         if self.digits is not None:
             scale = self.digits[1] if isinstance(self.digits, tuple) else self.digits
             value = float(Decimal(str(value)).quantize(Decimal(1).scaleb(-scale), rounding=ROUND_HALF_UP))
@@ -328,7 +333,9 @@ class Monetary(Field):
         try:
             return float(Decimal(str(value)).quantize(Decimal("0.0001"), rounding=ROUND_HALF_UP))
         except Exception as exc:
-            raise ValidationError(f"'{value}' is not an amount for field '{self.name}'", field=self.name) from exc
+            raise ValidationError(
+                _("'{value}' is not an amount for field '{name}'", value=value, name=self.name), field=self.name
+            ) from exc
 
     def describe(self) -> dict[str, Any]:
         return {**super().describe(), "currency_field": self.currency_field}
@@ -352,7 +359,9 @@ class Char(Field):
         if self.trim:
             value = value.strip()
         if self.size and len(value) > self.size:
-            raise ValidationError(f"Value too long for field '{self.name}' (max {self.size})", field=self.name)
+            raise ValidationError(
+                _("Value too long for field '{name}' (max {size})", name=self.name, size=self.size), field=self.name
+            )
         return value
 
 
@@ -399,13 +408,15 @@ class Date(Field):
             return value
         if isinstance(value, str):
             return dt.date.fromisoformat(value[:10])
-        raise ValidationError(f"'{value}' is not a date")
+        raise ValidationError(_("'{value}' is not a date", value=value))
 
     def convert_to_cache(self, value: Any, record: Model | None = None) -> Any:
         try:
             return self.to_date(value)
         except ValueError as exc:
-            raise ValidationError(f"'{value}' is not a date for field '{self.name}'", field=self.name) from exc
+            raise ValidationError(
+                _("'{value}' is not a date for field '{name}'", value=value, name=self.name), field=self.name
+            ) from exc
 
     def convert_to_read(self, value: Any, record: Model) -> Any:
         return value.isoformat() if value else None
@@ -432,13 +443,15 @@ class Datetime(Field):
         if isinstance(value, str):
             parsed = dt.datetime.fromisoformat(value.replace("Z", "+00:00"))
             return parsed if parsed.tzinfo else parsed.replace(tzinfo=dt.UTC)
-        raise ValidationError(f"'{value}' is not a datetime")
+        raise ValidationError(_("'{value}' is not a datetime", value=value))
 
     def convert_to_cache(self, value: Any, record: Model | None = None) -> Any:
         try:
             value = self.to_datetime(value)
         except ValueError as exc:
-            raise ValidationError(f"'{value}' is not a datetime for field '{self.name}'", field=self.name) from exc
+            raise ValidationError(
+                _("'{value}' is not a datetime for field '{name}'", value=value, name=self.name), field=self.name
+            ) from exc
         return value.astimezone(dt.UTC) if value else None
 
     def convert_to_read(self, value: Any, record: Model) -> Any:
@@ -481,7 +494,7 @@ class Selection(Field):
         allowed = {k for k, _ in self.get_selection(record)}
         if allowed and value not in allowed:
             raise ValidationError(
-                f"'{value}' is not a valid choice for field '{self.string or self.name}'",
+                _("'{value}' is not a valid choice for field '{field}'", value=value, field=translatable(self.label)),
                 field=self.name,
                 allowed=sorted(allowed),
             )
@@ -503,7 +516,7 @@ class Json(Field):
             try:
                 return json.loads(value)
             except json.JSONDecodeError as exc:
-                raise ValidationError(f"Invalid JSON for field '{self.name}'", field=self.name) from exc
+                raise ValidationError(_("Invalid JSON for field '{name}'", name=self.name), field=self.name) from exc
         return value
 
 
@@ -528,7 +541,12 @@ class Vector(Field):
         values = [float(x) for x in value]
         if len(values) != self.dimensions:
             raise ValidationError(
-                f"Vector for field '{self.name}' must have {self.dimensions} dimensions, got {len(values)}",
+                _(
+                    "Vector for field '{name}' must have {dimensions} dimensions, got {count}",
+                    name=self.name,
+                    dimensions=self.dimensions,
+                    count=len(values),
+                ),
                 field=self.name,
             )
         return values
@@ -561,7 +579,7 @@ class Binary(Field):
             return bytes(value)
         if isinstance(value, str):
             return base64.b64decode(value)
-        raise ValidationError(f"Binary field '{self.name}' expects bytes or base64", field=self.name)
+        raise ValidationError(_("Binary field '{name}' expects bytes or base64", name=self.name), field=self.name)
 
     def convert_to_read(self, value: Any, record: Model) -> Any:
         return base64.b64encode(value).decode("ascii") if value else None
@@ -617,13 +635,16 @@ class Many2one(Field):
         if hasattr(value, "_ids"):
             ids = value._ids
             if len(ids) > 1:
-                raise ValidationError(f"Many2one '{self.name}' expects a single record", field=self.name)
+                raise ValidationError(_("Many2one '{name}' expects a single record", name=self.name), field=self.name)
             return ids[0] if ids else None
         if isinstance(value, dict) and "id" in value:
             return int(value["id"])
         if isinstance(value, str) and value.isdigit():
             return int(value)
-        raise ValidationError(f"'{value!r}' is not a valid reference for field '{self.name}'", field=self.name)
+        raise ValidationError(
+            _("'{value}' is not a valid reference for field '{name}'", value=repr(value), name=self.name),
+            field=self.name,
+        )
 
     def convert_to_record(self, value: Any, record: Model) -> Any:
         comodel = record.env[self.comodel_name or ""]
@@ -671,7 +692,7 @@ class _X2many(Field):
 
     def validate(self, value: Any, record: Model) -> None:
         if self.required and not value:
-            raise ValidationError(f"Field '{self.string or self.name}' is required", field=self.name)
+            raise ValidationError(_("Field '{field}' is required", field=translatable(self.label)), field=self.name)
 
     @staticmethod
     def normalize_commands(value: Any) -> list[tuple[Any, ...]]:
@@ -694,9 +715,9 @@ class _X2many(Field):
                 elif isinstance(item, dict):
                     commands.append(("create", item))
                 else:
-                    raise ValidationError(f"Invalid x2many command {item!r}")
+                    raise ValidationError(_("Invalid x2many command {item}", item=repr(item)))
             return commands
-        raise ValidationError(f"Invalid x2many value {value!r}")
+        raise ValidationError(_("Invalid x2many value {value}", value=repr(value)))
 
 
 class One2many(_X2many):
@@ -766,7 +787,7 @@ class Id(Field):
         return record._single_id()
 
     def __set__(self, record: Model, value: Any) -> None:
-        raise ValidationError("The id field cannot be written")
+        raise ValidationError(_("The id field cannot be written"))
 
 
 class Related(Field):
@@ -777,7 +798,7 @@ class Related(Field):
     def __init__(self, path: str | None = None, string: str | None = None, **kw: Any) -> None:
         related = kw.pop("related", None) or path
         if not related:
-            raise ValidationError("Related() needs a field path")
+            raise ValidationError(_("Related() needs a field path"))
         super().__init__(string, related=related, **kw)
 
 
@@ -799,7 +820,10 @@ class Reference(Field):
             return f"{value._name},{value._single_id()}"
         if isinstance(value, str) and re.match(r"^[a-z_][a-z0-9_.]*,\d+$", value):
             return value
-        raise ValidationError(f"'{value!r}' is not a valid reference for field '{self.name}'", field=self.name)
+        raise ValidationError(
+            _("'{value}' is not a valid reference for field '{name}'", value=repr(value), name=self.name),
+            field=self.name,
+        )
 
     def convert_to_record(self, value: Any, record: Model) -> Any:
         if not value:

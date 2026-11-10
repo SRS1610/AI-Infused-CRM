@@ -16,11 +16,12 @@ import io
 from collections.abc import Mapping
 from typing import Any
 
-from jinja2 import StrictUndefined, select_autoescape
+from jinja2 import StrictUndefined, pass_context, select_autoescape
 from jinja2.sandbox import SandboxedEnvironment
 from markupsafe import Markup
 
 from tessera.exceptions import UserError
+from tessera.i18n import _
 
 PAPER = {"A4": ("210mm", "297mm"), "Letter": ("8.5in", "11in"), "Legal": ("8.5in", "14in"), "A5": ("148mm", "210mm")}
 
@@ -110,6 +111,24 @@ def _date(value: Any, fmt: str = "%Y-%m-%d") -> str:
     return str(value.strftime(fmt))
 
 
+@pass_context
+def _translate(context: Any, msgid: str, **params: Any) -> str:
+    """``{{ _("Valid until: {date}", date=...) }}``: the text in the document's language (``lang``)."""
+    from tessera.i18n import render
+
+    lang = context.get("lang")
+    return render(str(msgid), params, str(lang) if lang else None)
+
+
+def document_language(doc: Any, default: str | None) -> str | None:
+    """A document is printed in its partner's language when it has one, else in ``default``."""
+    if doc is None or "partner_id" not in getattr(doc, "_fields", {}):
+        return default
+    partner = doc.partner_id
+    lang = getattr(partner.elevated(), "lang", None) if len(partner) == 1 else None
+    return str(lang) if lang else default
+
+
 def make_environment() -> ReportSandbox:
     env = ReportSandbox(autoescape=select_autoescape(default=True, default_for_string=True), undefined=StrictUndefined)
     env.filters.update(
@@ -120,7 +139,7 @@ def make_environment() -> ReportSandbox:
             "nl2br": _nl2br,
         }
     )
-    env.globals.update({"qr": qr_data_uri, "now": lambda: dt.datetime.now(dt.UTC)})
+    env.globals.update({"qr": qr_data_uri, "now": lambda: dt.datetime.now(dt.UTC), "_": _translate})
     return env
 
 
@@ -134,18 +153,19 @@ def render_html(
     try:
         template = _ENV.from_string(body)
     except Exception as exc:
-        raise UserError(f"Template error: {exc}") from exc
+        raise UserError(_("Template error: {exc}", exc=exc)) from exc
     docs = context.get("docs")
     pages = []
     try:
         for doc in docs if docs is not None else [None]:
             ctx = dict(context)
             ctx["doc"] = wrap(doc) if doc is not None else None
+            ctx["lang"] = document_language(doc, context.get("lang"))
             pages.append(template.render(**ctx))
     except UserError:
         raise
     except Exception as exc:
-        raise UserError(f"Template error: {exc}") from exc
+        raise UserError(_("Template error: {exc}", exc=exc)) from exc
     return _frame(pages, layout or {}, title, context)
 
 
@@ -197,7 +217,7 @@ BLOCK_TYPES = {"heading", "text", "field", "fields", "table", "qr", "spacer", "p
 def _expr(path: str, root: str = "doc") -> str:
     parts = [p for p in str(path).split(".") if p]
     if not parts or any(not p.isidentifier() or p.startswith("_") for p in parts):
-        raise UserError(f"Invalid field path '{path}'")
+        raise UserError(_("Invalid field path '{path}'", path=path))
     return root + "." + ".".join(parts)
 
 
@@ -208,7 +228,7 @@ def blocks_to_template(blocks: list[dict[str, Any]]) -> str:
     for block in blocks:
         kind = block.get("type")
         if kind not in BLOCK_TYPES:
-            raise UserError(f"Unknown block type '{kind}'")
+            raise UserError(_("Unknown block type '{kind}'", kind=kind))
         if kind == "heading":
             level = min(max(int(block.get("level", 2)), 1), 3)
             out.append(f"<h{level}>{html.escape(str(block.get('text', '')))}</h{level}>")

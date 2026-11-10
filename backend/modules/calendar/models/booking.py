@@ -8,6 +8,7 @@ from typing import Any
 from zoneinfo import ZoneInfo
 
 from tessera.exceptions import ValidationError
+from tessera.i18n import _
 from tessera.orm import Model, api, fields
 from tessera.security import crypto
 
@@ -40,11 +41,13 @@ class BookingLink(Model):
     def _check(self) -> None:
         for link in self:
             if (link.duration_minutes or 0) < 5:
-                raise ValidationError("Meetings last at least 5 minutes", field="duration_minutes")
+                raise ValidationError(_("Meetings last at least 5 minutes"), field="duration_minutes")
             try:
                 ZoneInfo(link.timezone or "UTC")
             except Exception as exc:
-                raise ValidationError(f"Unknown time zone '{link.timezone}'", field="timezone") from exc
+                raise ValidationError(
+                    _("Unknown time zone '{timezone}'", timezone=link.timezone), field="timezone"
+                ) from exc
             for window in link.availability or []:
                 try:
                     if not 0 <= int(window["weekday"]) <= 6:
@@ -53,7 +56,9 @@ class BookingLink(Model):
                     if e <= s:
                         raise ValueError
                 except (KeyError, ValueError, TypeError) as exc:
-                    raise ValidationError(f"Invalid availability window {window}", field="availability") from exc
+                    raise ValidationError(
+                        _("Invalid availability window {window}", window=window), field="availability"
+                    ) from exc
 
     def free_slots(self, start: dt.datetime, end: dt.datetime) -> list[dt.datetime]:
         """Slot starts in [start, end) inside the availability windows that don't clash with the host's busy

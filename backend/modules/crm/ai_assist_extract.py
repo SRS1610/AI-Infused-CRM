@@ -22,6 +22,7 @@ from tessera.ai.prompts import html_to_text
 from tessera.ai.runtime import handler, run_feature
 from tessera.ai.tools import PendingProposal, ToolContext
 from tessera.exceptions import AccessError
+from tessera.i18n import _
 from tessera.jobs import enqueue, job
 from tessera.orm.hooks import hook
 
@@ -193,8 +194,8 @@ def lead_extract_job(env: Any, intake_id: int) -> dict[str, Any]:
     notify(
         user_env,
         user_lead,
-        f"AI read the {intake.channel} for {lead.name}",
-        f"{fields} field suggestions to review" if fields else "Nothing new to fill in",
+        _("AI read the {channel} for {lead}", channel=intake.channel, lead=lead.name),
+        _("{count} field suggestions to review", count=fields) if fields else _("Nothing new to fill in"),
     )
     return {"status": "ok", "run_id": result.run.ids[0], "proposals": len(result.proposals)}
 

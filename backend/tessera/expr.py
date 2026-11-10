@@ -25,6 +25,7 @@ from functools import lru_cache
 from typing import Any
 
 from tessera.exceptions import ValidationError
+from tessera.i18n import _
 
 MAX_LENGTH = 2000
 MAX_STEPS = 10_000
@@ -90,7 +91,7 @@ def _contains(haystack: Any, needle: Any) -> bool:
 
 def _matches(value: Any, pattern: str) -> bool:
     if len(pattern) > 200:
-        raise ValidationError("Pattern too long")
+        raise ValidationError(_("Pattern too long"))
     return re.search(pattern, str(value or "")) is not None
 
 
@@ -126,23 +127,25 @@ class ExpressionError(ValidationError):
 def compile_expression(source: str) -> ast.Expression:
     """Parse and validate. Raises ``ExpressionError`` with a user-readable message."""
     if len(source) > MAX_LENGTH:
-        raise ExpressionError(f"Expression longer than {MAX_LENGTH} characters")
+        raise ExpressionError(_("Expression longer than {limit} characters", limit=MAX_LENGTH))
     try:
         tree = ast.parse(source.strip(), mode="eval")
     except SyntaxError as exc:
-        raise ExpressionError(f"Syntax error: {exc.msg} (column {exc.offset})") from exc
+        raise ExpressionError(_("Syntax error: {msg} (column {offset})", msg=exc.msg, offset=exc.offset)) from exc
     for node in ast.walk(tree):
         if isinstance(node, ast.Name | ast.Attribute):
             name = node.id if isinstance(node, ast.Name) else node.attr
             if name.startswith("_"):
-                raise ExpressionError(f"Names starting with '_' are not allowed: {name}")
+                raise ExpressionError(_("Names starting with '_' are not allowed: {name}", name=name))
         elif isinstance(node, ast.Call):
             if not isinstance(node.func, ast.Name) or node.func.id not in FUNCTIONS:
-                raise ExpressionError("Only these functions can be called: " + ", ".join(sorted(FUNCTIONS)))
+                raise ExpressionError(
+                    _("Only these functions can be called: {functions}", functions=", ".join(sorted(FUNCTIONS)))
+                )
             if node.keywords:
-                raise ExpressionError("Keyword arguments are not supported")
+                raise ExpressionError(_("Keyword arguments are not supported"))
         elif not isinstance(node, _ALLOWED_NODES):
-            raise ExpressionError(f"'{type(node).__name__}' is not allowed in expressions")
+            raise ExpressionError(_("'{name}' is not allowed in expressions", name=type(node).__name__))
     return tree
 
 
@@ -177,10 +180,10 @@ class _Evaluator:
     def eval(self, node: ast.AST) -> Any:
         self.steps += 1
         if self.steps > MAX_STEPS:
-            raise ExpressionError("Expression too complex")
+            raise ExpressionError(_("Expression too complex"))
         method = getattr(self, f"_{type(node).__name__}", None)
         if method is None:  # pragma: no cover - compile_expression rejects these
-            raise ExpressionError(f"'{type(node).__name__}' is not allowed")
+            raise ExpressionError(_("'{name}' is not allowed", name=type(node).__name__))
         return method(node)
 
     def _Expression(self, node: ast.Expression) -> Any:  # noqa: N802
@@ -200,14 +203,14 @@ class _Evaluator:
 
     def _Dict(self, node: ast.Dict) -> Any:  # noqa: N802
         if any(k is None for k in node.keys):
-            raise ExpressionError("Dict unpacking is not allowed")
+            raise ExpressionError(_("Dict unpacking is not allowed"))
         return {self.eval(k): self.eval(v) for k, v in zip(node.keys, node.values, strict=True)}  # type: ignore[arg-type]
 
     def _Name(self, node: ast.Name) -> Any:  # noqa: N802
         if node.id in ("True", "False", "None"):
             return {"True": True, "False": False, "None": None}[node.id]
         if node.id not in self.names:
-            raise ExpressionError(f"Unknown name '{node.id}'")
+            raise ExpressionError(_("Unknown name '{name}'", name=node.id))
         return self.names[node.id]
 
     def _Attribute(self, node: ast.Attribute) -> Any:  # noqa: N802
@@ -218,13 +221,13 @@ class _Evaluator:
                 if attr == "id":
                     return base.ids[0] if len(base.ids) == 1 else None
                 return getattr(base, attr)
-            raise ExpressionError(f"'{base._name}' has no field '{attr}'")
+            raise ExpressionError(_("'{name}' has no field '{attr}'", name=base._name, attr=attr))
         if isinstance(base, dt.date) and attr in _DATE_ATTRS:
             value = getattr(base, attr)
             return value() if attr in ("weekday", "isoformat") else value
         if isinstance(base, Mapping) and attr in base:
             return base[attr]
-        raise ExpressionError(f"Attribute '{attr}' is not available here")
+        raise ExpressionError(_("Attribute '{attr}' is not available here", attr=attr))
 
     def _BoolOp(self, node: ast.BoolOp) -> Any:  # noqa: N802
         if isinstance(node.op, ast.And):
@@ -247,19 +250,19 @@ class _Evaluator:
     def _BinOp(self, node: ast.BinOp) -> Any:  # noqa: N802
         left, right = self.eval(node.left), self.eval(node.right)
         if isinstance(node.op, ast.Pow) and isinstance(right, int | float) and abs(right) > MAX_POWER:
-            raise ExpressionError("Exponent too large")
+            raise ExpressionError(_("Exponent too large"))
         if isinstance(node.op, ast.Mult):
             for a, b in ((left, right), (right, left)):
                 if isinstance(a, str | list | tuple) and isinstance(b, int) and len(a) * b > MAX_SEQUENCE:
-                    raise ExpressionError("Result too large")
+                    raise ExpressionError(_("Result too large"))
         try:
             result = _BINOPS[type(node.op)](left, right)
         except ZeroDivisionError as exc:
-            raise ExpressionError("Division by zero") from exc
+            raise ExpressionError(_("Division by zero")) from exc
         except TypeError as exc:
-            raise ExpressionError(f"Incompatible values: {exc}") from exc
+            raise ExpressionError(_("Incompatible values: {exc}", exc=exc)) from exc
         if isinstance(result, str | list | tuple) and len(result) > MAX_SEQUENCE:
-            raise ExpressionError("Result too large")
+            raise ExpressionError(_("Result too large"))
         return result
 
     def _Compare(self, node: ast.Compare) -> Any:  # noqa: N802
@@ -269,7 +272,7 @@ class _Evaluator:
             try:
                 ok = _COMPARE[type(op)](left, right)
             except TypeError as exc:
-                raise ExpressionError(f"Cannot compare: {exc}") from exc
+                raise ExpressionError(_("Cannot compare: {exc}", exc=exc)) from exc
             if not ok:
                 return False
             left = right
@@ -281,7 +284,7 @@ class _Evaluator:
     def _Subscript(self, node: ast.Subscript) -> Any:  # noqa: N802
         base = self.eval(node.value)
         if not isinstance(base, list | tuple | str | Mapping):
-            raise ExpressionError("Only lists, strings and dicts can be indexed")
+            raise ExpressionError(_("Only lists, strings and dicts can be indexed"))
         if isinstance(node.slice, ast.Slice):
             parts = [
                 self.eval(p) if p is not None else None for p in (node.slice.lower, node.slice.upper, node.slice.step)
@@ -301,7 +304,7 @@ class _Evaluator:
         except ExpressionError:
             raise
         except (TypeError, ValueError) as exc:
-            raise ExpressionError(f"{node.func.id}(): {exc}") from exc  # type: ignore[attr-defined]
+            raise ExpressionError(_("{function}(): {exc}", function=node.func.id, exc=exc)) from exc  # type: ignore[attr-defined]
 
 
 def evaluate(source: str, names: Mapping[str, Any] | None = None) -> Any:

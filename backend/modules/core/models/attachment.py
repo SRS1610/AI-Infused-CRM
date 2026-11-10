@@ -6,6 +6,7 @@ import mimetypes
 import secrets
 
 from tessera.exceptions import AccessError
+from tessera.i18n import _
 from tessera.orm import Model, api, fields
 from tessera.storage import content_key, get_storage
 
@@ -78,7 +79,9 @@ class Attachment(Model):
                 try:
                     self.env[model_name].browse([res_id]).check_access(operation)
                 except AccessError as exc:
-                    raise AccessError("You are not allowed to access this attachment", attachment=att.ids[0]) from exc
+                    raise AccessError(
+                        _("You are not allowed to access this attachment"), attachment=att.ids[0]
+                    ) from exc
 
     @api.expose
     def action_download(self) -> dict[str, object]:

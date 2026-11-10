@@ -14,6 +14,7 @@ from pydantic import BaseModel, ConfigDict, Field
 from tessera.api.deps import RequestContext, authenticated
 from tessera.api.serializers import clean_input_values, default_read_fields, etag_for, parse_fields_param
 from tessera.exceptions import AccessError, ConcurrencyError, MissingError, ValidationError
+from tessera.i18n import _
 from tessera.orm import fields as F
 from tessera.orm.model import Model
 
@@ -51,7 +52,7 @@ class ReadGroupBody(BaseModel):
 
 def get_model(ctx: RequestContext, model_name: str, context: dict[str, Any] | None = None) -> Model:
     if model_name not in ctx.registry.models:
-        raise MissingError(f"Unknown model '{model_name}'", model=model_name)
+        raise MissingError(_("Unknown model '{model_name}'", model_name=model_name), model=model_name)
     model = ctx.env[model_name]
     if context:
         safe = {k: v for k, v in context.items() if not k.startswith("_")}
@@ -65,7 +66,7 @@ def _parse_domain(raw: str | None) -> Any:
     try:
         return json.loads(raw)
     except json.JSONDecodeError as exc:
-        raise ValidationError(f"Invalid domain JSON: {exc.msg}") from exc
+        raise ValidationError(_("Invalid domain JSON: {msg}", msg=exc.msg)) from exc
 
 
 def _parse_context(raw: str | None) -> dict[str, Any] | None:
@@ -74,9 +75,9 @@ def _parse_context(raw: str | None) -> dict[str, Any] | None:
     try:
         ctx = json.loads(raw)
     except json.JSONDecodeError as exc:
-        raise ValidationError("Invalid context JSON") from exc
+        raise ValidationError(_("Invalid context JSON")) from exc
     if not isinstance(ctx, dict):
-        raise ValidationError("context must be an object")
+        raise ValidationError(_("context must be an object"))
     return ctx
 
 
@@ -103,7 +104,7 @@ def list_records(
     search_node = node
     if after is not None:
         if order not in (None, "", "id", "id asc"):
-            raise ValidationError("Keyset pagination ('after') requires order=id")
+            raise ValidationError(_("Keyset pagination ('after') requires order=id"))
         order, offset = "id", 0
         search_node = {"all": [node, ["id", ">", after]]} if node else [["id", ">", after]]
     records = model.search(search_node, offset=offset, limit=limit, order=order)
@@ -125,7 +126,7 @@ def _expand(model: Model, items: list[dict[str, Any]], names: list[str]) -> None
     for name in names:
         field = model._fields.get(name)
         if not isinstance(field, F.Many2one):
-            raise ValidationError(f"Only many2one fields can be expanded ('{name}')")
+            raise ValidationError(_("Only many2one fields can be expanded ('{name}')", name=name))
         ids = sorted({item[name]["id"] for item in items if isinstance(item.get(name), dict)})
         if not ids:
             continue
@@ -161,7 +162,7 @@ def fields_get(model_name: str, ctx: RequestContext = Depends(authenticated)) ->
     model.check_access_rights("read")
     return {
         "model": model._name,
-        "description": model._description,
+        "description": type(model)._description_in(ctx.env.lang),
         "rec_name": model._rec_name,
         "order": model._order,
         "fields": model.fields_get(),
@@ -202,7 +203,7 @@ def get_record(
     record = model.browse([record_id])
     data = _serialize(record, parse_fields_param(fields, model))
     if not data:
-        raise MissingError(f"{model_name}({record_id}) not found")
+        raise MissingError(_("{model_name}({record_id}) not found", model_name=model_name, record_id=record_id))
     etag = etag_for(record)
     if etag:
         response.headers["ETag"] = etag
@@ -221,11 +222,11 @@ def update_record(
     model = get_model(ctx, model_name)
     record = model.browse([record_id]).exists()
     if not record:
-        raise MissingError(f"{model_name}({record_id}) not found")
+        raise MissingError(_("{model_name}({record_id}) not found", model_name=model_name, record_id=record_id))
     if if_match:
         current = etag_for(record)
         if current and current != if_match:
-            raise ConcurrencyError("The record was modified by someone else; reload and retry")
+            raise ConcurrencyError(_("The record was modified by someone else; reload and retry"))
     record.write(clean_input_values(model, body.values))
     etag = etag_for(record)
     if etag:
@@ -238,7 +239,7 @@ def delete_record(model_name: str, record_id: int, ctx: RequestContext = Depends
     model = get_model(ctx, model_name)
     record = model.browse([record_id]).exists()
     if not record:
-        raise MissingError(f"{model_name}({record_id}) not found")
+        raise MissingError(_("{model_name}({record_id}) not found", model_name=model_name, record_id=record_id))
     record.unlink()
     return Response(status_code=204)
 
@@ -250,13 +251,15 @@ def call_record_method(
     model = get_model(ctx, model_name, body.context)
     record = model.browse([record_id]).exists()
     if not record:
-        raise MissingError(f"{model_name}({record_id}) not found")
+        raise MissingError(_("{model_name}({record_id}) not found", model_name=model_name, record_id=record_id))
     return {"result": _call(record, method, body.args, body.keyword_args)}
 
 
 def _call(records: Model, method: str, args: list[Any], kwargs: dict[str, Any]) -> Any:
     if method.startswith("_") or method not in type(records)._exposed_methods:
-        raise AccessError(f"Method '{method}' is not exposed on {records._name}", method=method)
+        raise AccessError(
+            _("Method '{method}' is not exposed on {name}", method=method, name=records._name), method=method
+        )
     result = getattr(records, method)(*args, **kwargs)
     if isinstance(result, Model):
         return {"model": result._name, "ids": result.ids}

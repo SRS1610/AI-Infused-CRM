@@ -27,6 +27,7 @@ import httpx
 
 from tessera.ai.errors import AIError, AIUnavailable, from_code
 from tessera.config import get_settings
+from tessera.i18n import _
 
 if TYPE_CHECKING:
     from tessera.orm.environment import Environment
@@ -91,7 +92,7 @@ class HttpGatewayClient:
         try:
             resp = self.client.post(path, json=body, headers=ctx.headers() if ctx else None)
         except httpx.HTTPError as exc:
-            raise AIUnavailable(f"AI gateway unreachable: {exc}") from exc
+            raise AIUnavailable(_("AI gateway unreachable: {exc}", exc=exc)) from exc
         self._raise(resp)
         return resp.json()
 
@@ -114,7 +115,7 @@ class HttpGatewayClient:
                         data["event"] = data.get("event", event)
                         yield data
         except httpx.HTTPError as exc:
-            raise AIUnavailable(f"AI gateway unreachable: {exc}") from exc
+            raise AIUnavailable(_("AI gateway unreachable: {exc}", exc=exc)) from exc
 
     def embed(self, ctx: CallContext, texts: list[str], input_type: str = "document") -> dict[str, Any]:
         result: dict[str, Any] = self._post("/v1/embed", ctx, {"texts": texts, "input_type": input_type})
@@ -128,7 +129,7 @@ class HttpGatewayClient:
         try:
             resp = self.client.get("/v1/usage", params=params)
         except httpx.HTTPError as exc:
-            raise AIUnavailable(f"AI gateway unreachable: {exc}") from exc
+            raise AIUnavailable(_("AI gateway unreachable: {exc}", exc=exc)) from exc
         self._raise(resp)
         rows: list[dict[str, Any]] = resp.json()
         return rows
@@ -137,7 +138,7 @@ class HttpGatewayClient:
         try:
             resp = self.client.get("/v1/health", timeout=3.0)
         except httpx.HTTPError as exc:
-            raise AIUnavailable(f"AI gateway unreachable: {exc}") from exc
+            raise AIUnavailable(_("AI gateway unreachable: {exc}", exc=exc)) from exc
         self._raise(resp)
         data: dict[str, Any] = resp.json()
         return data

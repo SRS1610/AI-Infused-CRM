@@ -21,6 +21,7 @@ from typing import Any
 
 from modules.studio.hooks import build_fragments, rows_from_cursor
 from tessera.exceptions import AccessError, ValidationError
+from tessera.i18n import _
 from tessera.orm import fields as F
 from tessera.orm.registry import bump_registry_stamp
 
@@ -31,7 +32,7 @@ VIEW_TYPES = ("form", "list", "kanban", "search", "calendar", "pivot", "graph")
 
 def check_designer(env: Any) -> None:
     if not env.is_system and not env.registry.security.has_groups(env, [DESIGNER]):
-        raise AccessError("Studio is reserved to designers")
+        raise AccessError(_("Studio is reserved to designers"))
 
 
 def _sys(env: Any) -> Any:
@@ -50,7 +51,7 @@ def editable_models(env: Any) -> list[dict[str, Any]]:
 def _model_cls(env: Any, model_name: str) -> Any:
     cls = env.registry.models.get(model_name)
     if cls is None or cls._studio is False or not cls._auto:
-        raise ValidationError(f"'{model_name}' cannot be customised in Studio")
+        raise ValidationError(_("'{model_name}' cannot be customised in Studio", model_name=model_name))
     return cls
 
 
@@ -93,20 +94,23 @@ def add_field(
     name = name if name.startswith("x_") else f"x_{name}"
     name = re.sub(r"[^a-z0-9_]", "_", name.lower())
     if not NAME.match(name):
-        raise ValidationError("Field names start with x_ and use lowercase letters, digits and underscores")
+        raise ValidationError(_("Field names start with x_ and use lowercase letters, digits and underscores"))
     if name in cls._fields:
-        raise ValidationError(f"'{model_name}' already has a field '{name}'")
+        raise ValidationError(_("'{model_name}' already has a field '{name}'", model_name=model_name, name=name))
     if ttype in ("many2one", "many2many"):
         comodel = options.get("comodel")
         if comodel not in env.registry.models:
-            raise ValidationError("Link fields need an existing target model", field="comodel")
+            raise ValidationError(_("Link fields need an existing target model"), field="comodel")
     if ttype == "monetary":
         currency = options.get("currency_field") or "currency_id"
         if currency not in cls._fields:
-            raise ValidationError(f"Amount fields need a currency field on '{model_name}'", field="currency_field")
+            raise ValidationError(
+                _("Amount fields need a currency field on '{model_name}'", model_name=model_name),
+                field="currency_field",
+            )
         options["currency_field"] = currency
     if ttype == "selection" and not options.get("selection"):
-        raise ValidationError("Choice fields need their options", field="selection")
+        raise ValidationError(_("Choice fields need their options"), field="selection")
     allowed = {
         "help",
         "required",
@@ -123,7 +127,7 @@ def add_field(
     }
     unknown = set(options) - allowed
     if unknown:
-        raise ValidationError(f"Unknown field options: {', '.join(sorted(unknown))}")
+        raise ValidationError(_("Unknown field options: {unknown}", unknown=", ".join(sorted(unknown))))
     field_rec = (
         _sys(env)["studio.field"]
         .with_context(studio_internal=True)
@@ -215,7 +219,7 @@ def change_view(env: Any, model_name: str, view_type: str, operations: list[dict
     check_designer(env)
     _model_cls(env, model_name)
     if view_type not in VIEW_TYPES:
-        raise ValidationError(f"Unknown view type '{view_type}'")
+        raise ValidationError(_("Unknown view type '{view_type}'", view_type=view_type))
     base = _base_view(env, model_name, view_type)
     operations = _list_ops(base, operations)
     validate_operations(operations)
@@ -305,7 +309,10 @@ def create_workflow(
     check_designer(env)
     cls = _model_cls(env, model_name)
     if state_field not in cls._fields:
-        raise ValidationError(f"'{model_name}' has no field '{state_field}'", field="state_field")
+        raise ValidationError(
+            _("'{model_name}' has no field '{state_field}'", model_name=model_name, state_field=state_field),
+            field="state_field",
+        )
     sys_env = _sys(env)
     wf = sys_env["workflow.definition"].create({"name": name, "model_name": model_name, "state_field": state_field})
     by_key = {}

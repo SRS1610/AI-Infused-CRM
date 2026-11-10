@@ -7,6 +7,7 @@ from typing import Any
 
 from tessera.exceptions import ValidationError
 from tessera.expr import ExpressionError, compile_expression
+from tessera.i18n import _
 from tessera.orm import Model, api, fields
 from tessera.orm.domain import Domain
 
@@ -74,20 +75,20 @@ class Automation(Model):
     def _check_definition(self) -> None:
         for auto in self:
             if auto.model_name not in self.env.registry.models:
-                raise ValidationError(f"Unknown model '{auto.model_name}'", field="model_name")
+                raise ValidationError(_("Unknown model '{model_name}'", model_name=auto.model_name), field="model_name")
             model = self.env[auto.model_name]
             if auto.trigger == "on_time":
                 field = model._fields.get(auto.date_field or "")
                 if field is None or field.type_name not in ("date", "datetime") or not field.store:
                     raise ValidationError(
-                        "On time automations need a stored date or datetime field", field="date_field"
+                        _("On time automations need a stored date or datetime field"), field="date_field"
                     )
             for name in ("filter_domain", "pre_filter_domain"):
                 if auto[name]:
                     try:
                         Domain(auto[name])
                     except Exception as exc:
-                        raise ValidationError(f"Invalid domain: {exc}", field=name) from exc
+                        raise ValidationError(_("Invalid domain: {exc}", exc=exc), field=name) from exc
             try:
                 if auto.condition:
                     compile_expression(auto.condition)
@@ -116,23 +117,38 @@ class Automation(Model):
 
 def _check_action(model: Model, index: int, action: Any) -> None:
     if not isinstance(action, dict) or action.get("type") not in ACTION_TYPES:
-        raise ValidationError(f"Action {index + 1}: unknown type (one of {', '.join(ACTION_TYPES)})", field="actions")
+        raise ValidationError(
+            _(
+                "Action {number}: unknown type (one of {types})",
+                number=index + 1,
+                types=", ".join(ACTION_TYPES),
+            ),
+            field="actions",
+        )
     missing = ACTION_TYPES[action["type"]] - set(action)
     if missing:
-        raise ValidationError(f"Action {index + 1}: missing {', '.join(sorted(missing))}", field="actions")
+        raise ValidationError(
+            _("Action {number}: missing {missing}", number=index + 1, missing=", ".join(sorted(missing))),
+            field="actions",
+        )
     if action["type"] in ("update", "create_record"):
         target = model.env[action.get("model") or model._name] if action["type"] == "create_record" else model
         for fname, expr in (action.get("values") or {}).items():
             if fname not in target._fields:
-                raise ValidationError(f"Action {index + 1}: unknown field '{fname}'", field="actions")
+                raise ValidationError(
+                    _("Action {number}: unknown field '{fname}'", number=index + 1, fname=fname), field="actions"
+                )
             compile_expression(str(expr))
     for key in ("body", "summary", "title", "user", "users"):
         if key in action and action[key] is not None:
             compile_expression(str(action[key]))
     if action["type"] == "call_method" and action["method"] not in type(model)._exposed_methods:
-        raise ValidationError(f"Action {index + 1}: '{action['method']}' is not a callable method", field="actions")
+        raise ValidationError(
+            _("Action {number}: '{method}' is not a callable method", number=index + 1, method=action["method"]),
+            field="actions",
+        )
     if action["type"] == "call_webhook" and not str(action["url"]).startswith(("https://", "http://")):
-        raise ValidationError(f"Action {index + 1}: webhook URL must be http(s)", field="actions")
+        raise ValidationError(_("Action {number}: webhook URL must be http(s)", number=index + 1), field="actions")
 
 
 class AutomationRun(Model):

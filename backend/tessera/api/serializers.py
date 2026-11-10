@@ -7,6 +7,7 @@ from collections.abc import Sequence
 from typing import Any
 
 from tessera.exceptions import ValidationError
+from tessera.i18n import _
 from tessera.orm import fields as F
 from tessera.orm.model import Model
 
@@ -30,7 +31,7 @@ def clean_input_values(model: Model, values: dict[str, Any]) -> dict[str, Any]:
             continue
         field = model._fields.get(name)
         if field is None:
-            raise ValidationError(f"Unknown field '{name}' on {model._name}", field=name)
+            raise ValidationError(_("Unknown field '{field}' on {model}", field=name, model=model._name), field=name)
         if isinstance(field, F._X2many) and isinstance(value, list):
             out[name] = [
                 tuple(cmd) if isinstance(cmd, list) and cmd and isinstance(cmd[0], str) else cmd for cmd in value
@@ -67,7 +68,7 @@ def parse_fields_param(raw: str | None, model: Model) -> list[str] | None:
     names = [n.strip() for n in raw.split(",") if n.strip()]
     unknown = [n for n in names if n not in model._fields]
     if unknown:
-        raise ValidationError(f"Unknown field(s) {unknown} on {model._name}")
+        raise ValidationError(_("Unknown field(s) {unknown} on {name}", unknown=unknown, name=model._name))
     return names
 
 

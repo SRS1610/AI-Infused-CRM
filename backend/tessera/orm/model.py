@@ -20,6 +20,8 @@ from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.exc import IntegrityError
 
 from tessera.exceptions import AccessError, MissingError, UserError, ValidationError
+from tessera.i18n import _, translatable
+from tessera.i18n.catalog import SOURCE_LANG, lookup
 from tessera.orm import fields as F
 from tessera.orm.domain import And, Domain, Leaf, Node, RawDomain, combine_and, parse, substitute
 from tessera.orm.registry import current_loading_module, register_fragment
@@ -42,6 +44,12 @@ def _module_of(cls: type) -> str:
         if idx + 1 < len(parts):
             return parts[idx + 1]
     return "kernel"
+
+
+def _operation_verb(operation: str) -> str:
+    """The verb of an access operation, for messages ("You are not allowed to {operation} …")."""
+    verbs = {"read": _("read"), "write": _("modify"), "create": _("create"), "unlink": _("delete")}
+    return verbs.get(operation, operation)
 
 
 class Model:
@@ -128,7 +136,9 @@ class Model:
 
     def ensure_one(self) -> Model:
         if len(self._ids) != 1:
-            raise ValidationError(f"Expected a single {self._name} record, got {len(self._ids)}")
+            raise ValidationError(
+                _("Expected a single {name} record, got {count}", name=self._name, count=len(self._ids))
+            )
         return self
 
     def exists(self) -> Model:
@@ -251,7 +261,12 @@ class Model:
         allowed = self.env.registry.security.check_model_access(self.env, self._name, operation)
         if not allowed and raise_exception:
             raise AccessError(
-                f"You are not allowed to {operation} '{self._description}' ({self._name}) records",
+                _(
+                    "You are not allowed to {operation} '{description}' ({name}) records",
+                    operation=_operation_verb(operation),
+                    description=translatable(self._description),
+                    name=self._name,
+                ),
                 model=self._name,
                 operation=operation,
             )
@@ -275,7 +290,11 @@ class Model:
         count = self.env.cr.scalar(Query(self).count(node))
         if count != len(set(self._ids)):
             raise AccessError(
-                f"You are not allowed to {operation} some of these '{self._description}' records",
+                _(
+                    "You are not allowed to {operation} some of these '{description}' records",
+                    operation=_operation_verb(operation),
+                    description=translatable(self._description),
+                ),
                 model=self._name,
                 operation=operation,
             )
@@ -314,7 +333,7 @@ class Model:
                 if isinstance(value, Model):
                     return value.ids if len(value.ids) != 1 else value.ids[0]
                 return value
-            raise ValidationError(f"Unknown domain variable '${name}'")
+            raise ValidationError(_("Unknown domain variable '${name}'", name=name))
 
         return resolve
 
@@ -448,7 +467,7 @@ class Model:
         self.ensure_one()
         if not self._check_field_access(field, "read"):
             raise AccessError(
-                f"You are not allowed to read field '{field.name}' of {self._name}",
+                _("You are not allowed to read field '{field}' of {model}", field=field.name, model=self._name),
                 model=self._name,
                 field=field.name,
             )
@@ -541,12 +560,15 @@ class Model:
             existing = {r[0] for r in self.env.cr.fetchall(exists_stmt)}
             if self._ids[0] in existing:
                 raise AccessError(
-                    f"You are not allowed to read this '{self._description}' record",
+                    _(
+                        "You are not allowed to read this '{description}' record",
+                        description=translatable(self._description),
+                    ),
                     model=self._name,
                     id=self._ids[0],
                 )
             raise MissingError(
-                f"Record {self._name}({self._ids[0]}) does not exist or has been deleted",
+                _("Record {name}({ids}) does not exist or has been deleted", name=self._name, ids=self._ids[0]),
                 model=self._name,
                 id=self._ids[0],
             )
@@ -604,10 +626,14 @@ class Model:
         )
         unknown = [n for n in names if n not in self._fields]
         if unknown:
-            raise ValidationError(f"Unknown field(s) {unknown} on {self._name}")
+            raise ValidationError(_("Unknown field(s) {unknown} on {name}", unknown=unknown, name=self._name))
         for n in names:
             if not self._check_field_access(self._fields[n], "read"):
-                raise AccessError(f"You are not allowed to read field '{n}' of {self._name}", model=self._name, field=n)
+                raise AccessError(
+                    _("You are not allowed to read field '{n}' of {model}", field=n, model=self._name),
+                    model=self._name,
+                    field=n,
+                )
         stored = [n for n in names if n != "id" and self._fields[n].store and not isinstance(self._fields[n], F.Binary)]
         if stored:
             self._fetch(stored)
@@ -635,6 +661,10 @@ class Model:
         return out
 
     def fields_get(self, allfields: Sequence[str] | None = None) -> dict[str, dict[str, Any]]:
+        """Field metadata; labels, help texts and selection labels in the environment's language."""
+        lang = self.env.lang
+        localize = lang != SOURCE_LANG
+        modules = self.env.registry.module_order
         out: dict[str, dict[str, Any]] = {}
         for name, field in self._fields.items():
             if allfields and name not in allfields:
@@ -644,8 +674,24 @@ class Model:
             desc = field.describe()
             if isinstance(field, F.Selection):
                 desc["selection"] = field.get_selection(self)
+            if localize:
+                own = field.module or None
+                desc["string"] = lookup(desc["string"], lang, modules=modules, module=own)
+                if desc.get("help"):
+                    desc["help"] = lookup(desc["help"], lang, modules=modules, module=own)
+                if desc.get("selection"):
+                    desc["selection"] = [
+                        (key, lookup(str(label), lang, modules=modules, module=own)) for key, label in desc["selection"]
+                    ]
             out[name] = desc
         return out
+
+    @classmethod
+    def _description_in(cls, lang: str | None) -> str:
+        """The model's ``_description`` in ``lang``."""
+        registry = cls._registry
+        modules = registry.module_order if registry is not None else None
+        return lookup(cls._description, lang, modules=modules, module=cls._module or None)
 
     # ------------------------------------------------------------------ defaults
     def default_get(self, field_names: Sequence[str]) -> Vals:
@@ -699,12 +745,12 @@ class Model:
         for name, value in vals.items():
             field = self._fields.get(name)
             if field is None:
-                raise ValidationError(f"Unknown field '{name}' on {self._name}", field=name)
+                raise ValidationError(_("Unknown field '{field}' on {model}", field=name, model=self._name), field=name)
             if name == "id":
                 continue
             if name not in defaulted and not self._check_field_access(field, "write"):
                 raise AccessError(
-                    f"You are not allowed to write field '{name}' of {self._name}",
+                    _("You are not allowed to write field '{field}' of {model}", field=name, model=self._name),
                     model=self._name,
                     field=name,
                 )
@@ -713,7 +759,10 @@ class Model:
             elif field.compute and field.inverse and not field.store:
                 inverse[name] = value
             elif field.compute and not field.inverse and not self.env.context.get("_recompute_write"):
-                raise ValidationError(f"Field '{name}' on {self._name} is computed and cannot be written", field=name)
+                raise ValidationError(
+                    _("Field '{field}' on {model} is computed and cannot be written", field=name, model=self._name),
+                    field=name,
+                )
             else:
                 if field.inverse and field.compute:
                     inverse[name] = value
@@ -882,24 +931,29 @@ class Model:
             if constraint == f"{self._table}_{name}"[:63]:
                 # UNIQUE (column) / CHECK on one column: report it as that field's error
                 cols = [c for c in re.findall(r"[a-z_][a-z0-9_]*", definition.split("(", 1)[-1]) if c in self._fields]
-                return ValidationError(message, constraint=name, **({"field": cols[0]} if len(set(cols)) == 1 else {}))
+                return ValidationError(
+                    translatable(message), constraint=name, **({"field": cols[0]} if len(set(cols)) == 1 else {})
+                )
         if sqlstate == "23503":
             detail = getattr(diag, "message_detail", "") or ""
             if "is not present in table" in detail:
                 return ValidationError(
-                    f"A referenced record does not exist ({self._name}): {detail}",
+                    _("A referenced record does not exist ({name}): {detail}", name=self._name, detail=detail),
                     detail=detail,
                     constraint=constraint,
                 )
             return UserError(
-                f"This '{self._description}' record is still referenced by other records "
-                "and cannot be deleted or modified.",
+                _(
+                    "This '{description}' record is still referenced by other records "
+                    "and cannot be deleted or modified.",
+                    description=translatable(self._description),
+                ),
                 detail=detail,
                 constraint=constraint,
             )
         if sqlstate == "23505":
-            return ValidationError("A record with the same unique value already exists.", constraint=constraint)
-        return UserError(f"Database constraint violated: {constraint or sqlstate}")
+            return ValidationError(_("A record with the same unique value already exists."), constraint=constraint)
+        return UserError(_("Database constraint violated: {constraint}", constraint=constraint or sqlstate))
 
     def _run_inverses(self, inverse: Vals) -> None:
         by_method: dict[str, list[str]] = defaultdict(list)
@@ -977,7 +1031,7 @@ class Model:
                         rec._m2m_replace(field, [])
                     current = []
                 else:
-                    raise ValidationError(f"Unknown x2many command '{kind}'")
+                    raise ValidationError(_("Unknown x2many command '{kind}'", kind=kind))
             self.env.cache.invalidate_field(field, [rid])
             self.env.cache.set(field, rid, tuple(current), self._cache_qualifier(field))
 
@@ -1069,7 +1123,7 @@ class Model:
     def restore(self) -> bool:
         """Undo a soft delete."""
         if not self._soft_delete:
-            raise UserError(f"{self._description} records cannot be restored")
+            raise UserError(_("{description} records cannot be restored", description=translatable(self._description)))
         self.check_access_rights("unlink")
         self.with_context(include_deleted=True).check_access_rule("unlink")
         self.elevated("restore").with_context(_recompute_write=True)._write_columns(
@@ -1192,7 +1246,7 @@ class Model:
         for rid in existing._ids:
             value = existing.env.cache.get(field, rid, qualifier, default=None)
             by_value[_hashable(value)].append(rid)
-        for _, rids in by_value.items():
+        for _value, rids in by_value.items():
             value = existing.env.cache.get(field, rids[0], qualifier, default=None)
             existing.browse(rids).with_context(_recompute_write=True)._write_columns({field_name: value}, touch=False)
         existing.modified([field_name])
@@ -1294,7 +1348,7 @@ class Model:
 
     def toggle_active(self) -> None:
         if "active" not in self._fields:
-            raise UserError(f"{self._description} records cannot be archived")
+            raise UserError(_("{description} records cannot be archived", description=translatable(self._description)))
         for rec in self:
             rec.write({"active": not rec["active"]})
 

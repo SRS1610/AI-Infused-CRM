@@ -22,6 +22,7 @@ from tessera.ai.errors import InvalidOutput
 from tessera.ai.runtime import HANDLERS, RunResult, handler, run_feature
 from tessera.ai.tools import ToolContext
 from tessera.exceptions import AccessError, UserError
+from tessera.i18n import _
 from tessera.orm import fields as F
 from tessera.orm.domain import And, Leaf, Not, Or, parse
 
@@ -293,11 +294,11 @@ def prepare(env: Environment, record: Any, inputs: dict[str, Any]) -> dict[str, 
 
     def on_output(ctx: ToolContext, _text: str, data: Any) -> None:
         if not isinstance(data, dict):
-            raise InvalidOutput("The AI answer was not a list of conditions")
+            raise InvalidOutput(_("The AI answer was not a list of conditions"))
         domain = to_domain(data)
         errors = validate_domain(env, domain)
         if errors:
-            raise InvalidOutput("The suggested filter cannot be used: " + "; ".join(errors[:3]))
+            raise InvalidOutput(_("The suggested filter cannot be used: {errors}", errors="; ".join(errors[:3])))
         options = field_options(env)
         leaves = domain["any"] if isinstance(domain, dict) else domain
         data["domain"] = domain

@@ -11,13 +11,14 @@ from modules.workflow.models.workflow import workflow_for
 from tessera.api.deps import RequestContext, authenticated, request_context
 from tessera.api.registry import register_router
 from tessera.exceptions import AccessDenied, MissingError, UserError
+from tessera.i18n import _
 
 router = register_router(APIRouter(prefix="/workflow", tags=["workflow"]))
 
 
 def statusbar_payload(ctx: RequestContext, model: str, res_id: int) -> dict[str, Any]:
     if model not in ctx.registry.models:
-        raise UserError(f"Unknown model '{model}'")
+        raise UserError(_("Unknown model '{model}'", model=model))
     record = ctx.env[model].browse([res_id])
     record.check_access("read")
     wf = workflow_for(ctx.env, model)
@@ -28,7 +29,7 @@ def statusbar_payload(ctx: RequestContext, model: str, res_id: int) -> dict[str,
     transitions = []
     for tr in wf.transition_ids:
         tr_user = tr.with_env(ctx.env) if can_write else None
-        reason = tr_user.blocked_reason(record) if tr_user is not None else "No write access"
+        reason = tr_user.blocked_reason(record) if tr_user is not None else _("No write access")
         if reason is None:
             transitions.append(
                 {
@@ -64,10 +65,10 @@ def take_transition(
     wf = workflow_for(ctx.env, model)
     tr = ctx.env["workflow.transition"].elevated().browse([transition_id]).exists()
     if not wf or not tr or tr.definition_id.ids[0] != wf.ids[0]:
-        raise MissingError("Transition not found")
+        raise MissingError(_("Transition not found"))
     record = ctx.env[model].browse([res_id]).exists()
     if not record:
-        raise MissingError("Record not found")
+        raise MissingError(_("Record not found"))
     tr.with_env(ctx.env).apply(record)
     return statusbar_payload(ctx, model, res_id)
 
@@ -86,13 +87,13 @@ def incoming_webhook(
     autos = ctx.env["workflow.automation"].elevated().search([("trigger", "=", "on_webhook"), ("active", "=", True)])
     auto = next((a for a in autos if a.webhook_token and hmac.compare_digest(a.webhook_token, token)), None)
     if auto is None:
-        raise AccessDenied("Unknown webhook")
+        raise AccessDenied(_("Unknown webhook"))
     env = ctx.env.elevated(f"automation webhook {auto.ids[0]}")
     rid = payload.get("record_id")
     if rid is None:
-        raise UserError("record_id is required")
+        raise UserError(_("record_id is required"))
     record = env[auto.model_name].browse([int(rid)]).exists()
     if not record:
-        raise MissingError("Record not found")
+        raise MissingError(_("Record not found"))
     ran = run_automation(auto, record, "webhook", extra={"payload": payload})
     return {"ran": ran}

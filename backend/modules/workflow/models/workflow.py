@@ -5,6 +5,7 @@ from __future__ import annotations
 from typing import Any
 
 from tessera.exceptions import AccessError, ConflictError, ValidationError
+from tessera.i18n import _
 from tessera.orm import Model, api, fields
 from tessera.orm.domain import Domain
 
@@ -30,18 +31,20 @@ class Definition(Model):
     def _check_target(self) -> None:
         for wf in self:
             if wf.model_name not in self.env.registry.models:
-                raise ValidationError(f"Unknown model '{wf.model_name}'", field="model_name")
+                raise ValidationError(_("Unknown model '{model_name}'", model_name=wf.model_name), field="model_name")
             field = self.env[wf.model_name]._fields.get(wf.state_field)
             if field is None or field.type_name not in ("selection", "char", "many2one"):
                 raise ValidationError(
-                    "The state field must be a selection, char or many2one field", field="state_field"
+                    _("The state field must be a selection, char or many2one field"), field="state_field"
                 )
             if wf.active:
                 others = self.search(
                     [("model_name", "=", wf.model_name), ("active", "=", True), ("id", "!=", wf.ids[0])]
                 )
                 if others:
-                    raise ValidationError(f"'{wf.model_name}' already has an active workflow", field="model_name")
+                    raise ValidationError(
+                        _("'{model_name}' already has an active workflow", model_name=wf.model_name), field="model_name"
+                    )
 
     def state_key(self, record: Model) -> str | None:
         value = record[self.state_field]
@@ -103,7 +106,7 @@ class Transition(Model):
                 try:
                     Domain(tr.guard_domain)
                 except Exception as exc:
-                    raise ValidationError(f"Invalid guard domain: {exc}", field="guard_domain") from exc
+                    raise ValidationError(_("Invalid guard domain: {exc}", exc=exc), field="guard_domain") from exc
 
     # -- evaluation ---------------------------------------------------------------------------------
 
@@ -113,19 +116,19 @@ class Transition(Model):
         wf = self.definition_id
         current = wf.state_key(record)
         if self.from_state_ids and current not in self.from_state_ids.mapped("key"):
-            return "Not available from the current state"
+            return _("Not available from the current state")
         if current == self.to_state_id.key:
-            return "Already in that state"
+            return _("Already in that state")
         if self.group_ids:
             xmlids = [x for x in self.group_ids.get_external_id().values() if x]
             if not self.env.registry.security.has_groups(record.env, xmlids):
-                return "You are not allowed to do this"
+                return _("You are not allowed to do this")
         if self.guard_domain:
             matches = record.with_context(active_test=False).search(
                 [("id", "=", record.ids[0]), Domain(self.guard_domain).node]
             )
             if not matches:
-                return self.guard_message or "Conditions for this step are not met"
+                return self.guard_message or _("Conditions for this step are not met")
         return None
 
     def apply(self, record: Model) -> Model:
@@ -135,7 +138,7 @@ class Transition(Model):
         record.check_access("write")
         reason = self.blocked_reason(record)
         if reason is not None:
-            if reason == "You are not allowed to do this":
+            if getattr(reason, "msgid", reason) == "You are not allowed to do this":
                 raise AccessError(reason)
             raise ConflictError(reason, transition=self.ids[0])
         wf = self.definition_id

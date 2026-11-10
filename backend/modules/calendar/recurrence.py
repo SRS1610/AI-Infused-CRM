@@ -8,6 +8,7 @@ from collections.abc import Iterable
 from dateutil.rrule import rrulestr
 
 from tessera.exceptions import ValidationError
+from tessera.i18n import _
 
 MAX_OCCURRENCES = 5000
 SUPPORTED_FREQ = {"DAILY", "WEEKLY", "MONTHLY", "YEARLY"}
@@ -22,13 +23,13 @@ def normalize_rule(rule: str | None) -> str | None:
     parts = dict(p.split("=", 1) for p in text.split(";") if "=" in p)
     freq = parts.get("FREQ", "").upper()
     if freq not in SUPPORTED_FREQ:
-        raise ValidationError(f"Unsupported recurrence frequency '{freq or '?'}'", field="rrule")
+        raise ValidationError(_("Unsupported recurrence frequency '{freq}'", freq=freq or "?"), field="rrule")
     if "COUNT" in parts and "UNTIL" in parts:
-        raise ValidationError("A recurrence has COUNT or UNTIL, not both", field="rrule")
+        raise ValidationError(_("A recurrence has COUNT or UNTIL, not both"), field="rrule")
     try:
         rrulestr(f"RRULE:{text}", dtstart=dt.datetime(2026, 1, 1, tzinfo=dt.UTC))
     except (ValueError, TypeError) as exc:
-        raise ValidationError(f"Invalid recurrence rule: {exc}", field="rrule") from exc
+        raise ValidationError(_("Invalid recurrence rule: {exc}", exc=exc), field="rrule") from exc
     return text.upper()
 
 

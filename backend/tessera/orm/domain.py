@@ -25,6 +25,7 @@ from dataclasses import dataclass, field
 from typing import Any
 
 from tessera.exceptions import ValidationError
+from tessera.i18n import _
 
 OPERATORS = frozenset(
     {
@@ -153,11 +154,11 @@ def parse(raw: RawDomain) -> Node:
         try:
             raw = json.loads(raw)
         except json.JSONDecodeError as exc:
-            raise ValidationError(f"Invalid domain JSON: {exc.msg}") from exc
+            raise ValidationError(_("Invalid domain JSON: {msg}", msg=exc.msg)) from exc
         return parse(raw)
     if isinstance(raw, dict):
         if len(raw) != 1:
-            raise ValidationError(f"A domain node must have exactly one key, got {sorted(raw)}")
+            raise ValidationError(_("A domain node must have exactly one key, got {raw}", raw=sorted(raw)))
         key, body = next(iter(raw.items()))
         if key == "all":
             return And(tuple(parse(x) for x in _as_list(body)))
@@ -165,19 +166,19 @@ def parse(raw: RawDomain) -> Node:
             return Or(tuple(parse(x) for x in _as_list(body)))
         if key == "not":
             return Not(parse(body))
-        raise ValidationError(f"Unknown domain operator '{key}' (expected all/any/not)")
+        raise ValidationError(_("Unknown domain operator '{key}' (expected all/any/not)", key=key))
     if _is_leaf(raw):
         path, op, *rest = raw
         if not re.match(r"^[a-zA-Z_][a-zA-Z0-9_]*(\.[a-zA-Z_][a-zA-Z0-9_]*)*$", path):
-            raise ValidationError(f"Invalid field path '{path}' in domain")
+            raise ValidationError(_("Invalid field path '{path}' in domain", path=path))
         value = rest[0] if rest else None
         if op in ("is_set", "is_not_set") and rest and value not in (None, True):
-            raise ValidationError(f"Operator '{op}' takes no value")
+            raise ValidationError(_("Operator '{op}' takes no value", op=op))
         return Leaf(path, op, value)
     if isinstance(raw, list | tuple):
         children = tuple(parse(x) for x in raw)
         return children[0] if len(children) == 1 else And(children)
-    raise ValidationError(f"Cannot parse domain element {raw!r}")
+    raise ValidationError(_("Cannot parse domain element {raw}", raw=repr(raw)))
 
 
 def _as_list(body: Any) -> list[Any]:
@@ -187,7 +188,7 @@ def _as_list(body: Any) -> list[Any]:
         return [body]
     if isinstance(body, list | tuple):
         return list(body)
-    raise ValidationError(f"Expected a list of domain nodes, got {body!r}")
+    raise ValidationError(_("Expected a list of domain nodes, got {body}", body=repr(body)))
 
 
 def combine_and(*domains: RawDomain) -> Node:
@@ -252,7 +253,7 @@ def substitute(node: Node, variables: Variables | Callable[[str], Any]) -> Node:
                 ids = list(value._ids)
                 return ids[0] if len(ids) == 1 else ids
             return value
-        raise ValidationError(f"Unknown domain variable '${name}'")
+        raise ValidationError(_("Unknown domain variable '${name}'", name=name))
 
     def visit(n: Node) -> Node:
         if isinstance(n, Leaf):
@@ -349,7 +350,7 @@ def _compare_leaf(op: str, actual: Any, expected: Any) -> bool:
         return actual not in (None, False, "", ()) and not (hasattr(actual, "_ids") and not actual._ids)
     if op == "is_not_set":
         return not _compare_leaf("is_set", actual, expected)
-    raise ValidationError(f"Operator '{op}' cannot be evaluated in memory")
+    raise ValidationError(_("Operator '{op}' cannot be evaluated in memory", op=op))
 
 
 def evaluate(node: Node, record: Any, getter: ValueGetter | None = None) -> bool:
@@ -391,7 +392,7 @@ def _eval_path(segments: Sequence[str], op: str, expected: Any, record: Any, get
         matched = any(evaluate(sub, rec, get) for rec in _iter_records(value))
         return matched if op == "any" else not matched
     if op in ("child_of", "parent_of"):
-        raise ValidationError(f"Operator '{op}' requires SQL evaluation")
+        raise ValidationError(_("Operator '{op}' requires SQL evaluation", op=op))
     if hasattr(value, "_ids") and op in ("=", "!=", "in", "not_in", "is_set", "is_not_set"):
         ids = list(value._ids)
         if op in ("is_set", "is_not_set"):

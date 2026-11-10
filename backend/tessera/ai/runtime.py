@@ -25,6 +25,7 @@ from tessera.ai.client import CallContext, get_client
 from tessera.ai.errors import AIError, FeatureDisabled, ModelRefused
 from tessera.ai.tools import REGISTRY, PendingProposal, Source, ToolContext, ToolRejected, validate_arguments
 from tessera.exceptions import AccessError, MissingError, UserError
+from tessera.i18n import _
 
 if TYPE_CHECKING:
     from tessera.orm.environment import Environment
@@ -91,16 +92,16 @@ def proposal_dict(p: Model) -> dict[str, Any]:
 def get_feature(env: Environment, name: str) -> Model:
     feature = env["ai_core.feature"].elevated().search([("name", "=", name)], limit=1)
     if not feature:
-        raise MissingError(f"Unknown AI feature '{name}'")
+        raise MissingError(_("Unknown AI feature '{name}'", name=name))
     return feature
 
 
 def check_enabled(env: Environment, feature: Model) -> None:
     company = env.company.ids[0] if env.company else None
     if not feature.enabled_for(company):
-        raise FeatureDisabled(f"The AI feature '{feature.title}' is turned off")
+        raise FeatureDisabled(_("The AI feature '{title}' is turned off", title=feature.title))
     if env.user.elevated().share:
-        raise AccessError("AI features are available to internal users only")
+        raise AccessError(_("AI features are available to internal users only"))
 
 
 def _names_for(env: Environment, record: Model | None, sources: list[Source]) -> list[str]:
@@ -130,7 +131,7 @@ def _prepare(
 ) -> tuple[Model, str, str]:
     prompt = env["ai_core.prompt"].elevated().search([("name", "=", feature.prompt or feature.name)], limit=1)
     if not prompt:
-        raise UserError(f"AI feature '{feature.name}' has no prompt")
+        raise UserError(_("AI feature '{name}' has no prompt", name=feature.name))
     version = prompt.version_for(env.company.ids[0] if env.company else None, env.uid)
     T.validate_inputs(version.input_schema, inputs)
     variables = {
@@ -368,7 +369,9 @@ def run_feature(
             meta = resp
             run.elevated().write({"steps": step + 1})
             if resp.get("stop") == "refusal":
-                raise ModelRefused(f"The model declined this request ({resp.get('refusal_category') or 'policy'})")
+                raise ModelRefused(
+                    _("The model declined this request ({category})", category=resp.get("refusal_category") or "policy")
+                )
             calls = [b for b in resp.get("content", []) if b.get("type") == "tool_use"]
             if resp.get("stop") != "tool_use" or not calls:
                 break
@@ -451,7 +454,7 @@ def stream_feature(
                 usage: dict[str, Any] = {}
                 _usage_add(usage, resp)
                 if resp.get("stop") == "refusal":
-                    raise ModelRefused("The model declined this request")
+                    raise ModelRefused(_("The model declined this request"))
                 text = "".join(b.get("text") or "" for b in resp.get("content", []) if b.get("type") == "text")
                 result = _finish(ctx, run, feature, text, resp.get("parsed"), usage, resp, on_output)
                 yield {"event": "done", "result": result.to_dict()}

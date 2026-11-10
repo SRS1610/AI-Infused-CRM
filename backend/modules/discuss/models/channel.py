@@ -6,6 +6,7 @@ from __future__ import annotations
 from typing import Any
 
 from tessera.exceptions import UserError, ValidationError
+from tessera.i18n import _
 from tessera.orm import Model, api, fields
 
 
@@ -53,7 +54,7 @@ class Channel(Model):
     def _check_type(self) -> None:
         for ch in self:
             if ch.channel_type in ("dm", "group") and ch.privacy != "invite":
-                raise ValidationError("Direct messages and group chats are invite-only", field="privacy")
+                raise ValidationError(_("Direct messages and group chats are invite-only"), field="privacy")
 
     def create(self, vals_list):  # type: ignore[no-untyped-def]
         channels = super().create(vals_list)
@@ -76,7 +77,7 @@ class Channel(Model):
         for ch in self:
             ch.check_access("read")
             if ch.privacy == "invite" and not ch._is_member():
-                raise UserError("This channel is invite-only")
+                raise UserError(_("This channel is invite-only"))
             if not ch._is_member():
                 self.env["discuss.member"].elevated("join").create({"channel_id": ch.ids[0], "user_id": self.env.uid})
         return True
@@ -91,9 +92,9 @@ class Channel(Model):
     def action_invite(self, user_ids: list[int]) -> bool:
         self.ensure_one()
         if not self._is_member() and not self.env.registry.security.has_groups(self.env, ["core.group_system"]):
-            raise UserError("Only members can invite people")
+            raise UserError(_("Only members can invite people"))
         if self.channel_type == "dm":
-            raise UserError("Start a group chat to talk with more people")
+            raise UserError(_("Start a group chat to talk with more people"))
         members = self.env["discuss.member"].elevated("invite")
         existing = set(members.search([("channel_id", "=", self.ids[0])]).mapped("user_id").ids)
         for uid in user_ids:
@@ -104,7 +105,7 @@ class Channel(Model):
     @api.model
     def get_or_create_dm(self, user_id: int) -> Model:
         if user_id == self.env.uid:
-            raise UserError("Pick someone else")
+            raise UserError(_("Pick someone else"))
         pair = sorted([self.env.uid, int(user_id)])
         key = f"dm:{pair[0]}:{pair[1]}"
         channels = self.elevated("direct message").with_context(active_test=False)

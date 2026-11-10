@@ -5,6 +5,7 @@ from __future__ import annotations
 from typing import Any
 
 from tessera.exceptions import UserError
+from tessera.i18n import _
 from tessera.jobs import enqueue, job
 from tessera.orm import Model, api, fields
 
@@ -51,7 +52,7 @@ class ImportJob(Model):
         self.ensure_one()
         att = self.attachment_id.elevated()
         if not att:
-            raise UserError("The import file is missing")
+            raise UserError(_("The import file is missing"))
         opts = self.options or {}
         return read_table(
             att.raw or b"",
@@ -79,7 +80,7 @@ class ImportJob(Model):
         """Run the import in the background; progress is published on ``job:<id>``."""
         self.ensure_one()
         if self.state in ("queued", "running"):
-            raise UserError("This import is already running")
+            raise UserError(_("This import is already running"))
         job_rec = enqueue(
             self.env,
             "core.import_run",
@@ -118,8 +119,13 @@ def import_run_job(env: Any, import_id: int) -> dict[str, Any]:
     )
     env["core.notification"].notify(
         [env.uid],
-        f"Import finished: {imp.filename}",
-        f"{result.created} created, {result.updated} updated, {len(result.errors)} errors",
+        _("Import finished: {filename}", filename=imp.filename),
+        _(
+            "{created} created, {updated} updated, {errors} errors",
+            created=result.created,
+            updated=result.updated,
+            errors=len(result.errors),
+        ),
         kind="job",
     )
     return {"created": result.created, "updated": result.updated, "errors": len(result.errors)}

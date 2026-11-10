@@ -28,6 +28,7 @@ from tessera.ai.prompts import html_to_text
 from tessera.ai.runtime import HANDLERS, check_enabled, get_feature, handler, run_feature
 from tessera.ai.tools import PendingProposal, ToolContext
 from tessera.exceptions import AccessError, MissingError, UserError
+from tessera.i18n import _
 from tessera.jobs import job
 from tessera.logging import get_logger
 
@@ -213,7 +214,7 @@ def brief_sources(env: Environment, event: Model) -> list[Source]:
 @handler(BRIEF)
 def meeting_brief_context(env: Environment, record: Model, inputs: dict[str, Any]) -> dict[str, Any]:
     if record is None or record._name != "calendar.event":
-        raise UserError("A meeting brief is prepared for a meeting")
+        raise UserError(_("A meeting brief is prepared for a meeting"))
     return {"sources": brief_sources(env, record)}
 
 
@@ -315,7 +316,7 @@ def prepare_meeting_briefs(env: Environment, lead_minutes: int = 60, window_minu
             summary = re.sub(r"\s*\[source:[^\]]+\]", "", result.text).strip()
             env["core.notification"].notify(
                 [user.ids[0]],
-                f"Meeting brief ready: {event.name}",
+                _("Meeting brief ready: {event}", event=event.name),
                 summary[:240],
                 kind="system",
                 model="calendar.event",

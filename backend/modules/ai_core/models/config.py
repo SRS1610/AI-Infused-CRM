@@ -7,6 +7,7 @@ from __future__ import annotations
 from typing import Any
 
 from tessera.exceptions import ValidationError
+from tessera.i18n import _
 from tessera.orm import Model, api, fields
 from tessera.security.crypto import encrypt, is_encrypted
 
@@ -92,7 +93,7 @@ class Route(Model):
     def _check_fallback(self) -> None:
         for r in self:
             if r.fallback_provider_id and not r.fallback_model:
-                raise ValidationError("A fallback provider needs a model", field="fallback_model")
+                raise ValidationError(_("A fallback provider needs a model"), field="fallback_model")
 
 
 class Budget(Model):

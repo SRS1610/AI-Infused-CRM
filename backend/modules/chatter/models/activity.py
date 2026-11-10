@@ -5,6 +5,7 @@ from __future__ import annotations
 import datetime as dt
 
 from tessera.exceptions import UserError
+from tessera.i18n import _
 from tessera.orm import Model, api, fields
 
 
@@ -122,7 +123,7 @@ class Activity(Model):
 
         for act in self:
             if act.done:
-                raise UserError("This activity is already done")
+                raise UserError(_("This activity is already done"))
             body = f"<p><b>{act.activity_type_id.name}</b> done: {act.summary or ''}</p>"
             if feedback:
                 body += f"<p>{feedback}</p>"

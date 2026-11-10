@@ -14,6 +14,8 @@ from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.responses import JSONResponse
 
 from tessera.config import get_settings
+from tessera.i18n import _, translate
+from tessera.i18n.message import begin_request, end_request
 from tessera.logging import bind_context, clear_context, get_logger
 from tessera.runtime import client_id_var, new_request_id, remote_ip_var, user_agent_var
 
@@ -34,9 +36,11 @@ class RequestContextMiddleware(BaseHTTPMiddleware):
         client_id_var.set((request.headers.get("x-tessera-client") or "")[:64] or None)
         bind_context(request_id=rid, path=request.url.path, method=request.method)
         started = time.perf_counter()
+        lang_token = begin_request()  # filled with the caller's language once authenticated
         try:
             response = await call_next(request)
         finally:
+            end_request(lang_token)
             clear_context()
         response.headers["X-Request-Id"] = rid
         response.headers["Server-Timing"] = f"app;dur={(time.perf_counter() - started) * 1000:.1f}"
@@ -87,10 +91,12 @@ class SlidingWindowLimiter:
 limiter = SlidingWindowLimiter()
 
 
-def _limited(key: str, message: str) -> JSONResponse:
+def _limited(key: str, message: str, request: Request) -> JSONResponse:
+    from tessera.api.deps import header_language
+
     return JSONResponse(
         status_code=429,
-        content={"error": "RateLimited", "message": message},
+        content={"error": "RateLimited", "message": str(translate(message, header_language(request)))},
         headers={"Retry-After": str(limiter.retry_after(key))},
     )
 
@@ -108,7 +114,7 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
         path = request.url.path
         if path.startswith(_LOGIN_PATHS) and request.method == "POST":
             if not limiter.allow(f"login:{ip}", settings.login_rate_limit_per_minute):
-                return _limited(f"login:{ip}", "Too many attempts")
+                return _limited(f"login:{ip}", _("Too many attempts"), request)
         elif path.startswith("/api/"):
             # per credential (API key or browser session), so people sharing an address (an office behind
             # one NAT) do not share a budget; plus a higher per-address ceiling against credential rotation
@@ -123,5 +129,5 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
                 checks = [(f"api-anon:{ip}", settings.api_rate_limit_per_minute)]
             for key, limit in checks:
                 if not limiter.allow(key, limit):
-                    return _limited(key, "Rate limit exceeded")
+                    return _limited(key, _("Rate limit exceeded"), request)
         return await call_next(request)

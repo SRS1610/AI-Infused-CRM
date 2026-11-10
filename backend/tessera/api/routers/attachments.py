@@ -9,6 +9,7 @@ from fastapi.responses import Response
 
 from tessera.api.deps import RequestContext, authenticated_any, request_context
 from tessera.exceptions import AccessError, MissingError
+from tessera.i18n import _
 
 router = APIRouter(prefix="/attachments", tags=["attachments"])
 
@@ -26,10 +27,10 @@ async def upload(
 ) -> dict[str, Any]:
     data = await file.read()
     if len(data) > MAX_UPLOAD:
-        raise AccessError("File too large (max 50 MB)")
+        raise AccessError(_("File too large (max 50 MB)"))
     if model and res_id:
         if model not in ctx.registry.models:
-            raise MissingError(f"Unknown model '{model}'")
+            raise MissingError(_("Unknown model '{model}'", model=model))
         ctx.env[model].browse([res_id]).check_access("write")
     attachment = ctx.env["core.attachment"].create(
         {
@@ -50,15 +51,15 @@ def download(attachment_id: int, token: str | None = None, ctx: RequestContext =
     sys_env = ctx.system_env()
     attachment = sys_env["core.attachment"].browse([attachment_id]).exists()
     if not attachment:
-        raise MissingError("Attachment not found")
+        raise MissingError(_("Attachment not found"))
     if token:
         if attachment.access_token != token:
-            raise AccessError("Invalid attachment token")
+            raise AccessError(_("Invalid attachment token"))
     elif attachment.public:
         pass
     else:
         if not ctx.authenticated:
-            raise AccessError("Authentication required")
+            raise AccessError(_("Authentication required"))
         user_att = ctx.env["core.attachment"].browse([attachment_id])
         user_att.check_record_access("read")
     data = attachment.raw or b""

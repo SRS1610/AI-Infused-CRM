@@ -22,6 +22,7 @@ from tessera.ai.prompts import CITATION, html_to_text
 from tessera.ai.runtime import handler, run_feature
 from tessera.ai.tools import PendingProposal, ToolContext
 from tessera.exceptions import AccessError, MissingError, ValidationError
+from tessera.i18n import _
 from tessera.jobs import enqueue, job
 
 MESSAGE_TYPES = ["comment", "email"]
@@ -66,7 +67,7 @@ def readable_channel(env: Any, channel_id: int) -> Any:
     """The channel as the user sees it; AccessError / MissingError when record rules hide it."""
     channel = env["discuss.channel"].browse([int(channel_id)])
     if not channel.exists():
-        raise MissingError("This channel does not exist")
+        raise MissingError(_("This channel does not exist"))
     channel.check_access("read")
     return channel
 
@@ -85,7 +86,7 @@ def _parse_when(value: Any, name: str) -> dt.datetime | None:
     try:
         when = dt.datetime.fromisoformat(str(value).replace("Z", "+00:00"))
     except ValueError as exc:
-        raise ValidationError(f"'{name}' must be an ISO date or date-time", field=name) from exc
+        raise ValidationError(_("'{name}' must be an ISO date or date-time", name=name), field=name) from exc
     return when if when.tzinfo else when.replace(tzinfo=dt.UTC)
 
 
@@ -125,7 +126,7 @@ def count_in_range(env: Any, channel: Any, inputs: dict[str, Any]) -> int:
 @handler("discuss.summary")
 def summary_handler(env: Any, record: Any, inputs: dict[str, Any]) -> dict[str, Any]:
     if record is None or record._name != "discuss.channel":
-        raise ValidationError("Pick the channel to summarise")
+        raise ValidationError(_("Pick the channel to summarise"))
     channel = readable_channel(env, record.ids[0])
     msgs = summary_messages(env, channel, inputs)
     label = _label(channel, env.uid)
@@ -172,8 +173,10 @@ def summarize_job(env: Any, channel_id: int, inputs: dict[str, Any]) -> dict[str
     env["core.notification"].elevated("ai summary ready").create(
         {
             "user_id": env.uid,
-            "title": f"Summary of {label} is ready" if ok else f"The summary of {label} could not be made",
-            "body": (result.text[:240] if ok else "AI is unavailable right now; try again later."),
+            "title": _("Summary of {channel} is ready", channel=label)
+            if ok
+            else _("The summary of {channel} could not be made", channel=label),
+            "body": (result.text[:240] if ok else _("AI is unavailable right now; try again later.")),
             "kind": "job",
             "model": "discuss.channel",
             "res_id": channel.ids[0],
@@ -293,7 +296,7 @@ def _reply_proposal(channel_id: int, title: str) -> Any:
 @handler("discuss.reply_draft")
 def reply_draft_handler(env: Any, record: Any, inputs: dict[str, Any]) -> dict[str, Any]:
     if record is None or record._name != "discuss.channel":
-        raise ValidationError("Pick the conversation to reply in")
+        raise ValidationError(_("Pick the conversation to reply in"))
     channel = readable_channel(env, record.ids[0])
     domain: list[Any] = [
         ("model", "=", "discuss.channel"),
@@ -332,10 +335,10 @@ def translate_handler(env: Any, record: Any, inputs: dict[str, Any]) -> dict[str
 
     msg = env["chatter.message"].elevated().browse([int(inputs.get("message_id") or 0)]).exists()
     if not msg or msg.message_type not in (*MESSAGE_TYPES, "note"):
-        raise MissingError("This message does not exist")
+        raise MissingError(_("This message does not exist"))
     check_thread_access(env, msg.model, msg.res_id, "read")  # the thread's record rules decide
     if msg.is_internal and not is_internal_user(env):
-        raise AccessError("Not allowed")
+        raise AccessError(_("Not allowed"))
     return {"sources": [Source(f"chatter.message:{msg.ids[0]}", f"Message from {_author(msg)}", _text(msg.body))]}
 
 

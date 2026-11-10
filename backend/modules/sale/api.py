@@ -13,6 +13,7 @@ from tessera.api.deps import RequestContext, request_context
 from tessera.api.middleware import limiter
 from tessera.api.registry import register_router
 from tessera.exceptions import AccessDenied, AccessError, MissingError, UserError
+from tessera.i18n import _
 from tessera.runtime import current_remote_ip
 
 router = register_router(APIRouter(prefix="/sale/quotes", tags=["sale"]))
@@ -22,20 +23,20 @@ def _quote(ctx: RequestContext, quote_id: int, token: str | None) -> Any:
     """The quotation, elevated, after checking the token or the caller's read access."""
     sys_quote = ctx.env["sale.quotation"].elevated("customer access").browse([quote_id]).exists()
     if not sys_quote or sys_quote.state in ("draft", "cancelled"):
-        raise MissingError("Quotation not found")
+        raise MissingError(_("Quotation not found"))
     if token:
         if not limiter.allow(f"quote-token:{current_remote_ip() or '?'}", 60):
-            raise UserError("Too many attempts; try again in a minute")
+            raise UserError(_("Too many attempts; try again in a minute"))
         expected = sys_quote.access_token or ""
         if not expected or not hmac.compare_digest(expected, token):
-            raise AccessDenied("Invalid or expired link")
+            raise AccessDenied(_("Invalid or expired link"))
         return sys_quote
     if not ctx.authenticated:
-        raise AccessDenied("Sign in or use the link from your email")
+        raise AccessDenied(_("Sign in or use the link from your email"))
     try:
         ctx.env["sale.quotation"].browse([quote_id]).check_access("read")
     except AccessError as exc:
-        raise MissingError("Quotation not found") from exc
+        raise MissingError(_("Quotation not found")) from exc
     return sys_quote
 
 

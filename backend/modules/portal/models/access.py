@@ -8,6 +8,7 @@ import secrets
 from typing import Any
 
 from tessera.exceptions import UserError
+from tessera.i18n import _
 from tessera.orm import Model, api, fields
 
 INVITATION_VALIDITY = dt.timedelta(days=7)
@@ -56,15 +57,17 @@ class Partner(Model):
         self.check_access("write")
         me = self.elevated("portal invitation")
         if not me.email_normalized:
-            raise UserError("The contact needs an email address to receive the invitation")
+            raise UserError(_("The contact needs an email address to receive the invitation"))
         users = self.env["core.user"].elevated("portal invitation").with_context(active_test=False)
         user = users.search([("partner_id", "=", self.ids[0])], limit=1)
         if user and not user.share:
-            raise UserError("This contact is already an internal user")
+            raise UserError(_("This contact is already an internal user"))
         portal_group = self.env.ref("core.group_portal")
         if not user:
             if users.search_count([("login", "=", me.email_normalized)]):
-                raise UserError(f"A user with the login {me.email_normalized} already exists")
+                raise UserError(
+                    _("A user with the login {email_normalized} already exists", email_normalized=me.email_normalized)
+                )
             user = users.create(
                 {
                     "login": me.email_normalized,
@@ -125,13 +128,13 @@ class Partner(Model):
 def accept_invitation(env: Any, token: str, password: str) -> Model:
     """Activate the portal user behind a valid, unused, unexpired invitation token."""
     if len(password or "") < 8:
-        raise UserError("Choose a password of at least 8 characters")
+        raise UserError(_("Choose a password of at least 8 characters"))
     accesses = env["portal.access"].elevated("portal invitation")
     access = accesses.search([("invitation_token_hash", "=", token_hash(token)), ("state", "=", "invited")], limit=1)
     if not access:
-        raise UserError("This invitation link is invalid or was already used")
+        raise UserError(_("This invitation link is invalid or was already used"))
     if access.invitation_expires_at and access.invitation_expires_at < env.now():
-        raise UserError("This invitation has expired; ask for a new one")
+        raise UserError(_("This invitation has expired; ask for a new one"))
     user = access.user_id.with_context(active_test=False)
     user.write({"active": True})
     user.set_password(password)

@@ -7,6 +7,7 @@ from typing import Any
 from modules.workflow.engine import automations_for, run_automation
 from modules.workflow.models.workflow import workflow_for
 from tessera.exceptions import ConflictError
+from tessera.i18n import _, translatable
 from tessera.orm import Model
 from tessera.orm.hooks import hook
 
@@ -33,7 +34,11 @@ def guard_and_snapshot(records: Model, vals: dict[str, Any], old_values: dict[An
         changing = [r for r in records if wf.state_key(r) != _as_key(vals[wf.state_field])]
         if changing:
             raise ConflictError(
-                f"'{records._fields[wf.state_field].label}' follows the {wf.name} workflow: use its buttons",
+                _(
+                    "'{label}' follows the {name} workflow: use its buttons",
+                    label=translatable(records._fields[wf.state_field].label),
+                    name=wf.name,
+                ),
                 field=wf.state_field,
             )
     autos = automations_for(records, ("on_write", "on_create_or_write"))

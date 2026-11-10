@@ -6,6 +6,7 @@ import base64
 from typing import Any
 
 from tessera.exceptions import AccessError, UserError, ValidationError
+from tessera.i18n import _
 from tessera.jobs import job
 from tessera.orm import Model, api, fields
 from tessera.reports import blocks_to_template, render_html, render_pdf
@@ -75,7 +76,7 @@ class Template(Model):
     def _check_model(self) -> None:
         for tpl in self:
             if tpl.model_name not in self.env.registry.models:
-                raise ValidationError(f"Unknown model '{tpl.model_name}'", field="model_name")
+                raise ValidationError(_("Unknown model '{model_name}'", model_name=tpl.model_name), field="model_name")
 
     @api.expose
     def publish_version(
@@ -84,14 +85,14 @@ class Template(Model):
         """Save a new version (from a template body or editor blocks) and make it current."""
         self.ensure_one()
         if not body and not blocks:
-            raise UserError("Give a template body or blocks")
+            raise UserError(_("Give a template body or blocks"))
         source = body or blocks_to_template(blocks or [])
         from tessera.reports.engine import _ENV
 
         try:
             _ENV.parse(source)
         except Exception as exc:
-            raise ValidationError(f"Template error: {exc}", field="body") from exc
+            raise ValidationError(_("Template error: {exc}", exc=exc), field="body") from exc
         number = (max(self.version_ids.mapped("number")) if self.version_ids else 0) + 1
         version = self.env["reports.template_version"].create(
             {"template_id": self.ids[0], "number": number, "body": source, "blocks": blocks, "note": note}
@@ -104,7 +105,7 @@ class Template(Model):
         self.ensure_one()
         version = self.version_ids.filtered(lambda v: v.number == int(number))
         if not version:
-            raise UserError(f"No version {number}")
+            raise UserError(_("No version {number}", number=number))
         self.write({"current_version_id": version.ids[0]})
         return {"version": int(number)}
 
@@ -124,10 +125,10 @@ class Template(Model):
         if self.group_ids:
             xmlids = [x for x in self.group_ids.get_external_id().values() if x]
             if not self.env.registry.security.has_groups(self.env, xmlids):
-                raise AccessError("You are not allowed to print this report")
+                raise AccessError(_("You are not allowed to print this report"))
         version = self.elevated().current_version_id
         if not version:
-            raise UserError(f"Report '{self.name}' has no published version")
+            raise UserError(_("Report '{name}' has no published version", name=self.name))
         records = self.env[self.model_name].browse(res_ids)
         records.check_access("read")
         layout = self._layout_for(records)
@@ -138,7 +139,12 @@ class Template(Model):
         )
         from tessera.reports.engine import wrap
 
-        context = {"docs": list(records), "company": wrap(company.elevated()), "user": wrap(self.env.user.elevated())}
+        context = {
+            "docs": list(records),
+            "company": wrap(company.elevated()),
+            "user": wrap(self.env.user.elevated()),
+            "lang": self.env.lang,
+        }
         html_doc = render_html(version.body, context, layout=layout.as_dict() if layout else None, title=self.name)
         from tessera.reports.engine import _ENV
 

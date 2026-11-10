@@ -6,6 +6,7 @@ import secrets
 from typing import Any
 
 from tessera.exceptions import ValidationError
+from tessera.i18n import _
 from tessera.orm import Model, api, fields
 from tessera.orm.domain import Domain
 
@@ -181,7 +182,7 @@ class AssignmentRule(Model):
         for rule in self:
             Domain(rule.domain or [])
             if not rule.assign_team_id and not rule.assign_user_id:
-                raise ValidationError("A rule routes to a team or a salesperson", field="assign_team_id")
+                raise ValidationError(_("A rule routes to a team or a salesperson"), field="assign_team_id")
 
 
 class ScoringRule(Model):
@@ -202,7 +203,7 @@ class ScoringRule(Model):
             try:
                 Domain(rule.domain or [])
             except Exception as exc:
-                raise ValidationError(f"Invalid domain: {exc}", field="domain") from exc
+                raise ValidationError(_("Invalid domain: {exc}", exc=exc), field="domain") from exc
 
     def create(self, vals_list):  # type: ignore[no-untyped-def]
         rules = super().create(vals_list)
