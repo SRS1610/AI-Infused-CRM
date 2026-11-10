@@ -1,0 +1,107 @@
+name: Nightly
+
+# U-6 performance at volume, and the live AI evaluation run (1.6-b) when a provider key is configured.
+on:
+  schedule:
+    - cron: "17 3 * * *"
+  workflow_dispatch:
+
+env:
+  UV_LINK_MODE: copy
+
+jobs:
+  perf:
+    name: List views at 100k rows (U-6)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    services:
+      postgres:
+        image: pgvector/pgvector:pg16
+        env:
+          POSTGRES_USER: tessera
+          POSTGRES_PASSWORD: tessera
+          POSTGRES_DB: tessera_perf
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U tessera -d tessera_perf"
+          --health-interval 5s --health-timeout 3s --health-retries 20
+    env:
+      TESSERA_ENV: test
+      TESSERA_DATABASE_URL: postgresql://tessera:tessera@localhost:5432/tessera_perf
+      TESSERA_SECRET_KEY: ci-only-secret-key-not-for-production-32b
+      TESSERA_MASTER_KEY: Y2ktb25seS1tYXN0ZXIta2V5LW5vdC1mb3ItcHJvZHVjdGlvbi0zMmI=
+      TESSERA_JOBS_BACKEND: inline
+      TESSERA_AI_GATEWAY_URL: inprocess
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+          cache-dependency-glob: backend/uv.lock
+      - run: uv python install 3.12
+      - run: uv sync --frozen
+      - name: Database extensions
+        run: PGPASSWORD=tessera psql -h localhost -U tessera -d tessera_perf -c "CREATE EXTENSION IF NOT EXISTS vector; CREATE EXTENSION IF NOT EXISTS pg_trgm;"
+      - run: uv run tessera seed demo --phase 1
+      - run: uv run tessera perf lists --rows 100000 --json perf.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: perf-report
+          path: backend/perf.json
+
+  ai-live:
+    name: Live AI evaluation (1.6-b)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    services:
+      postgres:
+        image: pgvector/pgvector:pg16
+        env:
+          POSTGRES_USER: tessera
+          POSTGRES_PASSWORD: tessera
+          POSTGRES_DB: tessera_eval
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U tessera -d tessera_eval"
+          --health-interval 5s --health-timeout 3s --health-retries 20
+    env:
+      TESSERA_ENV: test
+      TESSERA_DATABASE_URL: postgresql://tessera:tessera@localhost:5432/tessera_eval
+      TESSERA_SECRET_KEY: ci-only-secret-key-not-for-production-32b
+      TESSERA_MASTER_KEY: Y2ktb25seS1tYXN0ZXIta2V5LW5vdC1mb3ItcHJvZHVjdGlvbi0zMmI=
+      TESSERA_JOBS_BACKEND: inline
+      TESSERA_AI_GATEWAY_URL: inprocess
+      GATEWAY_ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+    steps:
+      - name: Provider key configured?
+        if: env.GATEWAY_ANTHROPIC_API_KEY == ''
+        run: echo "::notice::ANTHROPIC_API_KEY secret not set; the live evaluation is skipped"
+      - uses: actions/checkout@v4
+        if: env.GATEWAY_ANTHROPIC_API_KEY != ''
+      - uses: astral-sh/setup-uv@v5
+        if: env.GATEWAY_ANTHROPIC_API_KEY != ''
+        with:
+          enable-cache: true
+          cache-dependency-glob: backend/uv.lock
+      - if: env.GATEWAY_ANTHROPIC_API_KEY != ''
+        run: uv python install 3.12 && uv sync --frozen
+      - if: env.GATEWAY_ANTHROPIC_API_KEY != ''
+        run: PGPASSWORD=tessera psql -h localhost -U tessera -d tessera_eval -c "CREATE EXTENSION IF NOT EXISTS vector; CREATE EXTENSION IF NOT EXISTS pg_trgm;"
+      - if: env.GATEWAY_ANTHROPIC_API_KEY != ''
+        run: uv run tessera seed demo --phase 1
+      - name: Route the default task classes to the provider (D-016 tiers)
+        if: env.GATEWAY_ANTHROPIC_API_KEY != ''
+        run: uv run tessera ai provider --kind anthropic
+      - name: Live evaluation (accuracy, latency p95, cost per feature)
+        if: env.GATEWAY_ANTHROPIC_API_KEY != ''
+        run: uv run tessera ai eval run --mode live --save --json eval-live.json
+      - uses: actions/upload-artifact@v4
+        if: always() && env.GATEWAY_ANTHROPIC_API_KEY != ''
+        with:
+          name: ai-live-eval
+          path: backend/eval-live.json

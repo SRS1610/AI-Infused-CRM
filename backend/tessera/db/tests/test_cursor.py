@@ -35,3 +35,15 @@ def test_nested_savepoint_rollback_runs_only_its_own_callbacks(cr: Any) -> None:
     cr.commit()
     cr.rollback()
     assert calls == ["inner"]  # committed work is not undone
+
+
+def test_session_settings_survive_the_pools_rollback(registry: Any, database_url: str) -> None:
+    from tessera.db.engine import get_engine
+
+    engine = get_engine(database_url)
+    engine.dispose()  # new connections, so the connect hook runs
+    for _ in range(3):  # the pool rolls back each connection when it is returned
+        with engine.connect() as conn:
+            assert conn.exec_driver_sql("SHOW statement_timeout").scalar() != "0"
+            assert conn.exec_driver_sql("SHOW jit").scalar() == "off"
+            assert conn.exec_driver_sql("SHOW timezone").scalar() == "UTC"

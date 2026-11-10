@@ -58,6 +58,13 @@ def get_engine(url: str | None = None) -> Engine:
                 with dbapi_conn.cursor() as cur:
                     cur.execute(f"SET statement_timeout = {settings.db_statement_timeout_ms}")
                     cur.execute("SET timezone = 'UTC'")
+                    if not settings.db_jit:
+                        # JIT compiles plans for 100+ ms once a query's estimated cost passes jit_above_cost,
+                        # which counts over a 100k-row table reach: 180 ms for a 20 ms query (U-6, D-061)
+                        cur.execute("SET jit = off")
+                # the driver opened a transaction for these SETs: commit it, or the pool's rollback on
+                # return undoes them and later checkouts run without a statement timeout
+                dbapi_conn.commit()
                 try:
                     from pgvector.psycopg import register_vector
 

@@ -126,3 +126,55 @@ def reindex(
         counts = retrieval.rebuild(env, models or None)
     for model, n in counts.items():
         console.print(f"{model}: {n} chunks")
+
+
+# D-016: default model tiers per task class for a provider configured from the command line
+TIERS: dict[str, dict[str, str]] = {
+    "anthropic": {
+        "classify": "claude-haiku-5-5",
+        "extract": "claude-haiku-5-5",
+        "translate": "claude-haiku-5-5",
+        "nl_query": "claude-haiku-5-5",
+        "summarize": "claude-sonnet-5-5",
+        "draft": "claude-sonnet-5-5",
+        "reason": "claude-opus-5-5",
+        "vision": "claude-opus-5-5",
+    },
+}
+
+
+@app.command("provider")
+def provider(
+    kind: str = typer.Option("anthropic", help="Provider kind with default tiers: " + ", ".join(TIERS)),
+    name: str | None = typer.Option(None, help="Provider name (default: the kind, capitalised)"),
+    region: str = typer.Option("us", help="Residency label matched against companies' allowed regions"),
+    approved_for_pii: bool = typer.Option(False, help="May receive personal data"),
+    database_url: str | None = typer.Option(None),
+) -> None:
+    """Configure a provider and route the default task classes to it (D-016 tiers).
+
+    The API key is not stored: the gateway reads GATEWAY_<KIND>_API_KEY from its environment. Routes for
+    task classes the provider does not serve (embeddings, transcription) are left as they are; company
+    specific routes are untouched."""
+    from tessera.orm.environment import environment_for
+
+    if kind not in TIERS:
+        raise typer.BadParameter(f"no default tiers for '{kind}'; configure it under Settings → AI")
+    label = name or kind.capitalize()
+    with environment_for(_url(database_url), su=True) as env:
+        Provider = env["ai_core.provider"]  # noqa: N806
+        rec = Provider.search([("name", "=", label), ("kind", "=", kind)], limit=1)
+        values = {"name": label, "kind": kind, "region": region, "approved_for_pii": approved_for_pii, "active": True}
+        if rec:
+            rec.write(values)
+        else:
+            rec = Provider.create(values)
+        Route = env["ai_core.route"]  # noqa: N806
+        for task_class, model in TIERS[kind].items():
+            values = {"provider_id": rec.ids[0], "model": model, "params": {}, "active": True}
+            routes = Route.search([("company_id", "=", None), ("task_class", "=", task_class)])
+            if routes:
+                routes.write(values)
+            else:
+                Route.create({**values, "task_class": task_class})
+            console.print(f"{task_class:<10} → {label} / {model}")

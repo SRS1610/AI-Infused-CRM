@@ -38,6 +38,7 @@ from tessera.cli import db as _db  # noqa: E402
 from tessera.cli import i18n as _i18n  # noqa: E402
 from tessera.cli import jobs as _jobs  # noqa: E402
 from tessera.cli import module as _module  # noqa: E402
+from tessera.cli import perf as _perf  # noqa: E402
 from tessera.cli import run as _run  # noqa: E402
 from tessera.cli import seed as _seed  # noqa: E402
 
@@ -47,6 +48,7 @@ app.add_typer(_module.app, name="module", help="Modules: scaffold, install, upgr
 app.add_typer(_jobs.app, name="jobs", help="Background jobs: run, list, requeue, tick")
 app.add_typer(_seed.app, name="seed", help="Demo data: install a phase's scenario")
 app.add_typer(_ai.app, name="ai", help="AI: evaluations, completeness report, classification, re-index")
+app.add_typer(_perf.app, name="perf", help="Performance checks: list views at volume (U-6)")
 app.command("serve")(_run.serve)
 app.command("worker")(_run.worker)
 app.command("scheduler")(_run.scheduler)

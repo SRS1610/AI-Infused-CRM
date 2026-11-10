@@ -209,12 +209,15 @@ class OrmConfigStore:
         cfg = GatewayConfig()
         if "ai_core.provider" not in env.registry.models:
             return cfg
+        from gateway.settings import Settings as GatewaySettings
+
+        env_keys = GatewaySettings().env_keys()  # GATEWAY_<KIND>_API_KEY, as in the gateway service
         for p in env["ai_core.provider"].search([("active", "=", True)]):
             cfg.providers[p.ids[0]] = ProviderConfig(
                 id=p.ids[0],
                 name=p.name,
                 kind=p.kind,
-                api_key=decrypt(p.api_key) if p.api_key else None,
+                api_key=(decrypt(p.api_key) if p.api_key else None) or env_keys.get(p.kind) or None,
                 base_url=p.base_url or None,
                 region=p.region or None,
                 approved_for_pii=bool(p.approved_for_pii),

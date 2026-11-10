@@ -32,6 +32,7 @@ class Settings(BaseSettings):
     db_pool_size: int = 10
     db_max_overflow: int = 20
     db_statement_timeout_ms: int = 60_000
+    db_jit: bool = False  # PostgreSQL JIT for this application's sessions (off: interactive queries)
 
     # redis
     redis_url: str = "redis://localhost:6379/0"
