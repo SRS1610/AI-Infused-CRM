@@ -128,5 +128,6 @@ def invite(
 
 @router.get("/presence")
 def presence(ctx: RequestContext = Depends(authenticated)) -> dict[str, Any]:
-    """Users with an open connection (this process; the Redis backend shares connections later)."""
+    """Users with an open connection: in every API process with the Redis realtime backend (presence kept
+    in Redis with a heartbeat), in this process with the in-process backend."""
     return {"online": sorted(hub.online_uids(ctx.registry.dbname))}

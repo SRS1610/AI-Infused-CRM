@@ -2,7 +2,8 @@
 
 - **Channels** are team rooms: *Everyone* channels are open to all colleagues, *Invited members only*
   channels are private. Browse and join from the sidebar; create one with *New channel*.
-- **Direct messages**: *Message someone* starts a private conversation (a green dot means online).
+- **Direct messages**: *Message someone* starts a private conversation (a green dot means online —
+  connected in any browser tab or device).
 - **Mentions**: type `@` and a name — they get a notification even if they don't follow the channel.
 - **Unread counts** appear next to each conversation; opening it marks it read.
 - **Notifications**: per channel, choose *every message*, *when mentioned* or *never*.

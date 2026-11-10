@@ -20,6 +20,15 @@ its state, arguments, progress, result, last error and one `core.job_attempt` ro
 
 Jobs are dispatched **after commit only**: work enqueued by a request that rolls back never runs.
 
+## Several API processes: realtime and presence
+
+With `TESSERA_REALTIME_BACKEND=redis` (several API processes or containers), presence — who is online in
+Discuss — is kept in Redis: every process records its WebSocket connections in the sorted set
+`tessera:presence:<database>` and refreshes them every 20 seconds, so whichever process answers
+`GET /api/v1/discuss/presence` sees every connected user. Connections of a process that stops without
+closing them disappear after 60 seconds. If Redis is unreachable, a process answers for its own
+connections only. With the in-process backend (`memory`, single process) nothing changes.
+
 ## Lifecycle, retries and the dead letter
 
 ```
