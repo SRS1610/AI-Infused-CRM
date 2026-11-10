@@ -29,7 +29,11 @@ def seed_company(env: Any, company: Any) -> int:
     if moves.search_count([("company_id", "=", company.ids[0]), ("ref", "like", f"{DEMO_REF}-")]):
         return 0
     today = env.today()
-    products = [p for x in ("product_consulting", "product_robot_arm", "product_support", "product_sensor") if (p := _ref(env, f"product.{x}"))]
+    products = [
+        p
+        for x in ("product_consulting", "product_robot_arm", "product_support", "product_sensor")
+        if (p := _ref(env, f"product.{x}"))
+    ]
     sale_tax = company.default_sale_tax_id
     purchase_tax = company.default_purchase_tax_id
     for product in products:

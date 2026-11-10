@@ -6,9 +6,8 @@ from typing import Any
 
 import pytest
 
-from tessera.exceptions import AccessError, UserError
-
 from modules.account.tests.common import D, eu_env, invoice, partner
+from tessera.exceptions import AccessError, UserError
 
 pytestmark = pytest.mark.db
 
@@ -73,7 +72,9 @@ def test_portal_user_sees_only_own_posted_invoices(env):
     mine = invoice(env, customer, [{"price_unit": 10.0}])
     draft = invoice(env, customer, [{"price_unit": 20.0}], post=False)
     theirs = invoice(env, other, [{"price_unit": 30.0}])
-    contact = env["contacts.partner"].create({"name": "Pat Portal", "parent_id": customer.ids[0], "email": "pat@portal.test"})
+    contact = env["contacts.partner"].create(
+        {"name": "Pat Portal", "parent_id": customer.ids[0], "email": "pat@portal.test"}
+    )
     portal = env["core.user"].create(
         {
             "name": "Pat Portal",
@@ -105,12 +106,16 @@ def test_new_company_gets_a_chart(env):
 
 def test_bank_account_iban_check(env):
     holder = partner(env, "IBAN Holder")
-    good = env["account.bank_account"].create({"partner_id": holder.ids[0], "acc_number": "FR76 3000 6000 0112 3456 7890 189"})
+    good = env["account.bank_account"].create(
+        {"partner_id": holder.ids[0], "acc_number": "FR76 3000 6000 0112 3456 7890 189"}
+    )
     assert good.sanitized_acc_number == "FR7630006000011234567890189"
     from tessera.exceptions import ValidationError
 
     with pytest.raises(ValidationError):
-        env["account.bank_account"].create({"partner_id": holder.ids[0], "acc_number": "FR76 3000 6000 0112 3456 7890 188"})
+        env["account.bank_account"].create(
+            {"partner_id": holder.ids[0], "acc_number": "FR76 3000 6000 0112 3456 7890 188"}
+        )
 
 
 def test_variants_share_accounting_fields(env):
@@ -126,7 +131,9 @@ def test_variants_share_accounting_fields(env):
 
 
 def test_invoice_token_link(client, admin):  # type: ignore[no-untyped-def]
-    p = admin.post("/api/v1/models/contacts.partner", json={"values": {"name": "Link Buyer", "email": "lb@example.test"}}).json()
+    p = admin.post(
+        "/api/v1/models/contacts.partner", json={"values": {"name": "Link Buyer", "email": "lb@example.test"}}
+    ).json()
     move = admin.post(
         "/api/v1/models/account.move",
         json={
@@ -156,7 +163,13 @@ def test_register_payment_through_the_api(admin):  # type: ignore[no-untyped-def
     p = admin.post("/api/v1/models/contacts.partner", json={"values": {"name": "API Payer"}}).json()
     move = admin.post(
         "/api/v1/models/account.move",
-        json={"values": {"move_type": "out_invoice", "partner_id": p["id"], "invoice_line_ids": [["create", {"name": "X", "price_unit": 100}]]}},
+        json={
+            "values": {
+                "move_type": "out_invoice",
+                "partner_id": p["id"],
+                "invoice_line_ids": [["create", {"name": "X", "price_unit": 100}]],
+            }
+        },
     ).json()
     admin.post(f"/api/v1/models/account.move/{move['id']}/call/action_post", json={})
     res = admin.post(
@@ -164,7 +177,9 @@ def test_register_payment_through_the_api(admin):  # type: ignore[no-untyped-def
         json={"kwargs": {"amount": 30, "date": "2026-11-01"}},
     ).json()["result"]
     assert len(res["payment_ids"]) == 1
-    state = admin.get(f"/api/v1/models/account.move/{move['id']}", params={"fields": "payment_state,amount_residual"}).json()
+    state = admin.get(
+        f"/api/v1/models/account.move/{move['id']}", params={"fields": "payment_state,amount_residual"}
+    ).json()
     assert state["payment_state"] == "partial" and state["amount_residual"] == 70
 
 

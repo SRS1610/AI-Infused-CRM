@@ -323,6 +323,23 @@ Format: `D-nnn · date · status (Proposed | Accepted | Superseded)`
 - **Alternatives:** Closing entries; refusing cancellation of hashed entries; always using outstanding accounts.
 - **Rationale:** Simplest model that meets 2-a to 2-c and keeps invoices *Paid* when bank statements are not used.
 
+### D-078 · 2026-11-10 · Accepted — Analytic sign and distribution format
+- **Decision:** `analytic_distribution` is JSON `{"<analytic account id>": percent}`, at most 100 % per plan. Analytic item amount = −balance × % in company currency (revenue positive, costs negative). The distribution is the only analytic data writable on posted items; changing it regenerates the items. Distribution models apply only to lines created without a distribution, most specific first, filling plan by plan.
+- **Alternatives:** One analytic account per line; analytic sign = balance.
+- **Rationale:** Several plans (cost centre, project, department) at once; positive revenue reads naturally in analytic reports.
+
+### D-079 · 2026-11-10 · Accepted — Budget amounts
+- **Decision:** Planned and actual amounts are positive for the line's nature (expense lines count costs, revenue lines income); variance = actual − planned. Actuals are stored, refreshed when items are posted or changed and nightly. `variance_report()` holds the only numbers the 2.6 explanations may use.
+- **Rationale:** Groupable in list / pivot views; one source of numbers for AI explanations.
+
+### D-080 · 2026-11-10 · Accepted — Depreciation engine
+- **Decision:** Life is measured in periods (`none` / `constant_periods`, 30/360 day count) or days (`daily_computation`); a pause does not use up life (the end moves). Straight line uses cumulative rounding; declining = residual × factor × months / 12, the last entry taking what is left; declining-then-linear takes the larger of the declining amount and residual over remaining life. Rates apply to book value minus salvage.
+- **Rationale:** Matches the 2-g golden table and common statutory practice.
+
+### D-081 · 2026-11-10 · Accepted — Asset changes
+- **Decision:** A value decrease is an impairment entry on the depreciation expense account; an increase creates a gross-increase child asset over the parent's remaining life (counterpart *Other income* unless given). A cash sale debits outstanding receipts; a sale on an invoice line uses that line's account. Posted depreciation entries are changed through *Modify*, never reset. A due entry in a locked period posts on the first open day.
+- **Rationale:** Keeps posted history immutable (D-073) while allowing revaluation and disposal.
+
 ### D-023 · 2026-11-09 · Proposed — Public web surfaces before Phase 7 use `*_website` bridge modules
 - **Decision:** Modules that need a public page before the `website` builder exists (recruitment job postings, event pages, eLearning courses, blog, forum, survey invitations) depend only on `portal` for their minimal public rendering in their own phase; `recruitment_website`, `events_website`, `elearning_website`, `blog_website`, `forum_website` bridge modules (auto-installed when `website` is present) move those pages into the website builder in Phase 7.
 - **Rationale:** Preserves the layering rule (no dependency on a later phase) while still shipping usable public pages when each module lands.
