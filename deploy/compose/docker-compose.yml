@@ -1,0 +1,190 @@
+# Tessera development stack. `make up` from the repository root.
+name: tessera
+
+x-backend-env: &backend-env
+  TESSERA_ENV: ${TESSERA_ENV:-development}
+  TESSERA_DATABASE_URL: postgresql://tessera:tessera@db:5432/tessera
+  TESSERA_TEST_DATABASE_URL: postgresql://tessera:tessera@db:5432/tessera_test
+  TESSERA_REDIS_URL: redis://redis:6379/0
+  TESSERA_SECRET_KEY: ${TESSERA_SECRET_KEY:-dev-only-secret-key-change-me-please-32b}
+  TESSERA_MASTER_KEY: ${TESSERA_MASTER_KEY:-ZGV2LW9ubHktbWFzdGVyLWtleS0zMi1ieXRlcy0hIQ==}
+  TESSERA_BASE_URL: ${TESSERA_BASE_URL:-http://localhost:8000}
+  TESSERA_STORAGE_BACKEND: s3
+  TESSERA_S3_ENDPOINT: http://minio:9000
+  TESSERA_S3_BUCKET: tessera
+  TESSERA_S3_ACCESS_KEY: tessera
+  TESSERA_S3_SECRET_KEY: tessera-secret
+  TESSERA_SMTP_HOST: mailpit
+  TESSERA_SMTP_PORT: "1025"
+  TESSERA_MAIL_FROM: noreply@tessera.local
+  TESSERA_AI_GATEWAY_URL: http://gateway:8100
+  TESSERA_AI_GATEWAY_TOKEN: ${TESSERA_AI_GATEWAY_TOKEN:-dev-only-gateway-token}
+
+services:
+  db:
+    image: pgvector/pgvector:pg16
+    environment:
+      POSTGRES_USER: tessera
+      POSTGRES_PASSWORD: tessera
+      POSTGRES_DB: tessera
+    command: ["postgres", "-c", "shared_preload_libraries=pg_stat_statements", "-c", "max_connections=200"]
+    volumes:
+      - db-data:/var/lib/postgresql/data
+      - ./init-db.sh:/docker-entrypoint-initdb.d/10-init.sh:ro
+    ports:
+      - "${TESSERA_DB_PORT:-5432}:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U tessera -d tessera"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  redis:
+    image: redis:7-alpine
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - redis-data:/data
+    ports:
+      - "${TESSERA_REDIS_PORT:-6379}:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  minio:
+    image: minio/minio:latest
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: tessera
+      MINIO_ROOT_PASSWORD: tessera-secret
+    volumes:
+      - minio-data:/data
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  minio-init:
+    image: minio/mc:latest
+    depends_on:
+      minio:
+        condition: service_healthy
+    entrypoint: >
+      /bin/sh -c "mc alias set local http://minio:9000 tessera tessera-secret &&
+                  mc mb --ignore-existing local/tessera && exit 0"
+
+  mailpit:
+    image: axllent/mailpit:latest
+    ports:
+      - "8025:8025"   # web UI
+      - "1025:1025"   # SMTP
+    environment:
+      MP_SMTP_AUTH_ACCEPT_ANY: "1"
+      MP_SMTP_AUTH_ALLOW_INSECURE: "1"
+
+  server:
+    build:
+      context: ../..
+      dockerfile: deploy/images/backend.Dockerfile
+    command: ["tessera", "serve", "--host", "0.0.0.0", "--port", "8000"]
+    environment: *backend-env
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    ports:
+      - "8000:8000"
+    volumes:
+      - ../../backend:/app/backend
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://localhost:8000/healthz').status==200 else 1)"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+
+  worker:
+    build:
+      context: ../..
+      dockerfile: deploy/images/backend.Dockerfile
+    command: ["tessera", "worker", "--queues", "default,mail,reports,ai,imports"]
+    environment: *backend-env
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ../../backend:/app/backend
+
+  scheduler:
+    build:
+      context: ../..
+      dockerfile: deploy/images/backend.Dockerfile
+    command: ["tessera", "scheduler"]
+    environment: *backend-env
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ../../backend:/app/backend
+
+  gateway:
+    build:
+      context: ../..
+      dockerfile: deploy/images/gateway.Dockerfile
+    command: ["gateway", "serve", "--host", "0.0.0.0", "--port", "8100"]
+    environment:
+      GATEWAY_ENV: ${TESSERA_ENV:-development}
+      GATEWAY_DATABASE_URL: postgresql://tessera:tessera@db:5432/tessera
+      GATEWAY_REDIS_URL: redis://redis:6379/1
+      GATEWAY_SERVICE_TOKEN: ${TESSERA_AI_GATEWAY_TOKEN:-dev-only-gateway-token}
+      GATEWAY_MASTER_KEY: ${TESSERA_MASTER_KEY:-ZGV2LW9ubHktbWFzdGVyLWtleS0zMi1ieXRlcy0hIQ==}
+      GATEWAY_ANTHROPIC_API_KEY: ${GATEWAY_ANTHROPIC_API_KEY:-}
+      GATEWAY_OPENAI_API_KEY: ${GATEWAY_OPENAI_API_KEY:-}
+      GATEWAY_OLLAMA_BASE_URL: ${GATEWAY_OLLAMA_BASE_URL:-http://ollama:11434}
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    ports:
+      - "8100:8100"
+    volumes:
+      - ../../gateway:/app/gateway
+
+  web:
+    build:
+      context: ../..
+      dockerfile: deploy/images/web.Dockerfile
+      target: dev
+    environment:
+      VITE_API_URL: http://localhost:8000
+    ports:
+      - "5173:5173"
+    volumes:
+      - ../../frontend:/app/frontend
+      - web-node-modules:/app/frontend/node_modules
+
+  # Optional self-hosted model server for the vLLM/Ollama adapter: `docker compose --profile ai-local up`
+  ollama:
+    image: ollama/ollama:latest
+    profiles: ["ai-local"]
+    volumes:
+      - ollama-data:/root/.ollama
+    ports:
+      - "11434:11434"
+
+volumes:
+  db-data:
+  redis-data:
+  minio-data:
+  ollama-data:
+  web-node-modules:

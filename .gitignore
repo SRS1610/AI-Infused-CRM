@@ -33,3 +33,7 @@ test-results/
 .DS_Store
 .idea/
 .vscode/
+
+# backend runtime data
+var/
+backend/var/
