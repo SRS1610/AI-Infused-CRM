@@ -25,7 +25,7 @@ Template: [Build plan §2.9](architecture/BUILD_PLAN.md). State on 2026-11-10, b
 
 | Check | Result |
 |---|---|
-| Backend tests (`uv run pytest --cov`, PostgreSQL 16 + pgvector) | 586 passed, coverage 88 % |
+| Backend tests (`uv run pytest --cov`, PostgreSQL 16 + pgvector) | 590 passed, coverage 88 % |
 | AI gateway tests (`gateway/`) | 118 passed, coverage 92 % |
 | Frontend unit tests (`npx vitest run --coverage`) | 140 passed, coverage 91 % |
 | Playwright, desktop and mobile, against `tessera seed demo` | 40 passed, 14 skipped (desktop-only scenarios on mobile) |
