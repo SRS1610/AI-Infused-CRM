@@ -930,7 +930,7 @@ kbd {
 }
 @media (max-width: 1100px) {
   .form-with-chatter {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
 }
 .chatter {
@@ -1665,4 +1665,15 @@ tr.clickable {
 }
 .agenda-day.today h3 {
   color: var(--primary);
+}
+
+.form-with-chatter > * {
+  min-width: 0;
+}
+.form-view .sheet {
+  max-width: 100%;
+  overflow-x: auto;
+}
+.statusbar-widget {
+  max-width: 100%;
 }

@@ -159,6 +159,7 @@ def install_modules(names: Sequence[str], *, database_url: str | None = None, de
     result = InstallResult()
     cr = Cursor(engine)
     try:
+        ensure_extensions(cr)
         installed = _installed_modules(cr)
         wanted = list(dict.fromkeys([*names, *installed]))
         order = resolve_order(manifests, wanted)
@@ -437,15 +438,33 @@ def module_states(*, database_url: str | None = None) -> list[ModuleState]:
     return out
 
 
+EXTENSIONS = ("vector", "pg_trgm", "unaccent", "btree_gin", "pgcrypto")
+
+
+def ensure_extensions(cr: Cursor) -> list[str]:
+    """Create the PostgreSQL extensions modules rely on (trigram search, vectors, …). Returns those that could
+    not be created (missing from the server or insufficient privileges) so callers can warn."""
+    missing = []
+    for ext in EXTENSIONS:
+        if cr.scalar("SELECT 1 FROM pg_extension WHERE extname = :e", {"e": ext}):
+            continue
+        try:
+            with cr.savepoint():
+                cr.execute(f"CREATE EXTENSION IF NOT EXISTS {ext}")
+        except Exception:  # reported below; pg_trgm is the one most indexes need
+            missing.append(ext)
+    if missing:
+        log.warning("database extensions unavailable", extensions=missing)
+    return missing
+
+
 def drop_everything(*, database_url: str | None = None) -> None:
     url = _resolve_url(database_url)
     cr = Cursor(get_engine(url))
     try:
         cr.execute("DROP SCHEMA public CASCADE")
         cr.execute("CREATE SCHEMA public")
-        for ext in ("vector", "pg_trgm", "unaccent", "btree_gin", "pgcrypto"):
-            with cr.savepoint():
-                cr.execute(f"CREATE EXTENSION IF NOT EXISTS {ext}")
+        ensure_extensions(cr)
         cr.commit()
     finally:
         cr.close()

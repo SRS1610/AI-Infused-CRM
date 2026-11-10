@@ -172,6 +172,18 @@ Format: `D-nnn · date · status (Proposed | Accepted | Superseded)`
 ### D-042 · 2026-11-10 · Accepted — Data files can extend another module's many2many links with `$add`
 - **Decision:** `{"implied_ids": {"$add": ["sale.group_sale_manager"]}}` adds links without replacing them (a plain list still means "set"). Used so the administrator group implies the Sales and CRM administrator groups.
 
+### D-043 · 2026-11-10 · Accepted — Calendar sync: one engine, provider adapters, change detection by content hash
+- **Decision:** `calendar.sync` has one engine and thin adapters (CalDAV via WebDAV `sync-collection`, Google Calendar sync tokens, Microsoft Graph delta). Each linked event stores the remote ETag and a hash of the normalised iCalendar content; a remote change whose hash equals the stored one is treated as our own echo and ignored, and a conflict where both sides changed resolves to the most recent `last_modified`. Adapters are tested by one shared contract suite against an in-process Radicale server and fakes of the Google and Graph APIs.
+- **Rationale:** Server timestamps have second granularity on some providers, so timestamp comparison alone misfires; hashes make echo suppression deterministic. A shared contract suite keeps the three adapters behaving identically.
+- **Limits recorded:** modified single occurrences of a recurring series are not synced yet; Google OAuth token refresh and the Graph non-beta delta endpoint are left for the integration hardening in Phase 2.
+
+### D-044 · 2026-11-10 · Accepted — Discuss presence is tracked per API process for now
+- **Decision:** Online presence comes from the WebSocket hub of the process that holds the connection and is announced on the `presence` channel. With several API replicas a user connected to another replica shows as offline until the Redis-backed hub (Phase 2 scaling work) replaces the in-process one.
+- **Rationale:** Single-process deployments are the Phase 1 target; message delivery itself already goes through the database and notification jobs, so only the green dot is affected.
+
+### D-045 · 2026-11-10 · Accepted — Installing modules ensures PostgreSQL extensions first
+- **Decision:** `install_modules` and `drop_everything` create the extensions modules rely on (`vector`, `pg_trgm`, `unaccent`, `btree_gin`, `pgcrypto`) before schema sync, so a brand-new database installs without a manual step; extensions the server lacks are reported, not fatal. The installer test (1.4-a) installs `crm` with its dependencies on an empty database and asserts no schema drift.
+
 ### D-023 · 2026-11-09 · Proposed — Public web surfaces before Phase 7 use `*_website` bridge modules
 - **Decision:** Modules that need a public page before the `website` builder exists (recruitment job postings, event pages, eLearning courses, blog, forum, survey invitations) depend only on `portal` for their minimal public rendering in their own phase; `recruitment_website`, `events_website`, `elearning_website`, `blog_website`, `forum_website` bridge modules (auto-installed when `website` is present) move those pages into the website builder in Phase 7.
 - **Rationale:** Preserves the layering rule (no dependency on a later phase) while still shipping usable public pages when each module lands.

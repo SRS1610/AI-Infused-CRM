@@ -4,6 +4,30 @@ All notable changes are recorded here, grouped by phase. Format follows [Keep a 
 
 ## [Unreleased] — Phase 1 in progress
 
+### Sub-phase 1.4 — Applications
+- `contacts`: companies and people with addresses, tags, hierarchy and commercial entity; duplicate
+  detection (same email, same phone, same name in the same company) and a merge wizard with field-by-field choices,
+  reference re-pointing across all models and a 7-day undo.
+- `product` and `sale` (quotation subset): products, quotations with lines, optional lines and taxes,
+  workflow-driven states, quotation PDF, email with a signed customer link, online accept/reject,
+  automatic expiry.
+- `crm`: leads and opportunities, stages, teams with round-robin and rule-based assignment, rule
+  scoring with nightly re-score, lead conversion and merge, pipeline kanban with stage totals,
+  web-to-lead form with embeddable script, sales analysis and forecast; an accepted quotation marks the
+  opportunity won.
+- `portal`: invitations for customer contacts, customer home with their documents and quotations;
+  customers reach only purpose-built endpoints (D-041).
+- `discuss`: channels, direct messages, unread counts, mentions, invitations and presence (D-044).
+- `calendar`: meetings with attendees, RSVP (in-app and email link), rooms with conflict checks,
+  RFC 5545 recurrence, booking links with free-slot search, `.ics` invitations, two-way sync with
+  CalDAV, Google Calendar and Microsoft 365 (D-043).
+- Installer creates required PostgreSQL extensions on a fresh database (D-045).
+- Client: CRM reports page, merge dialog, customer quotation page, portal app, Discuss app, calendar
+  agenda week/day views; mobile form layout no longer overflows beside the chatter.
+- User guides in `docs/user/` for every application.
+- Tests: 297 backend (coverage 87 %, incl. fresh-database CRM install under 60 s, CalDAV contract tests
+  against Radicale), 57 frontend unit (coverage 88 %), 11 new Playwright scenarios on desktop and mobile.
+
 ### Sub-phase 1.3 — Platform services
 - Background jobs (`tessera.jobs`): PostgreSQL job ledger with per-attempt history, Celery/inline/manual
   dispatch after commit, retries with capped exponential backoff, dead letter and re-queue, idempotency
