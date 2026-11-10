@@ -37,6 +37,27 @@ All notable changes are recorded here, grouped by phase. Format follows [Keep a 
   New *Catalogue* menu; demo T-shirt variants and *Wholesale* / *Europe (EUR)* lists. `tessera db migrate`
   types existing units.
 
+### Sub-phase 2.4 — Analytic, budgets, assets, reports, tax return
+- **Analytic accounting (`account_analytic` 1.0.0).** Analytic plans (shared or per company, optional or
+  mandatory by account type, account prefix or journal) and analytic accounts with revenue, costs and
+  balance. Invoice lines and journal items carry an analytic distribution (percentages per analytic
+  account, at most 100 % per plan), still editable after posting; posting creates analytic items
+  (revenue positive, costs negative), reset and cancel remove them, credit notes keep the distribution.
+  Distribution models prefill new lines by partner, product, category, account prefix and company;
+  mandatory plans block posting. Analytic items list, pivot (account × month) and graph.
+- **Budgets (`account_budget` 1.0.0).** Budgets with expense and revenue lines on analytic accounts or
+  financial accounts / account types; actual, theoretical (elapsed share), achievement and variance kept
+  up to date as items are posted, with a nightly refresh; budget-vs-actual list, pivot and graph; monthly
+  split; `variance_report()` service for the 2.6 explanations.
+- **Fixed assets (`account_asset` 1.0.0, 2-g).** Assets and asset models; straight-line, declining and
+  declining-then-straight-line boards with no prorata, constant (30/360) periods or daily prorata,
+  planned as draft entries posted by a daily job (lock dates respected); value decrease (impairment) and
+  increase (gross-increase child asset), pause / resume, disposal and sale with gain or loss; assets
+  created from vendor bill lines on accounts with an asset model. Golden-table tests for every method.
+- Demo: departments and projects with allocated invoices and bills, a confirmed yearly budget, a laptop,
+  a van and office furniture with partly posted boards. Guides:
+  [analytic](docs/admin/analytic.md), [budgets](docs/admin/budgets.md), [assets](docs/admin/assets.md).
+
 ### Sub-phase 2.7 — SAML single sign-on
 - **SAML 2.0 single sign-on (`auth_saml`, D-013, D-069).** Administrators add SAML identity providers under
   Settings → Users & Companies; the login page offers them next to OIDC. Service-provider initiated login

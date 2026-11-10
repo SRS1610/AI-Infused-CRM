@@ -1,0 +1,107 @@
+[
+  {"id": "view_analytic_plan_list", "model": "account.analytic_plan", "type": "list", "name": "account.analytic_plan.list",
+   "columns": [{"field": "sequence", "widget": "handle"}, {"field": "name"}, {"field": "default_applicability"}, {"field": "account_count"}, {"field": "company_id", "optional": "hide"}]},
+  {"id": "view_analytic_plan_form", "model": "account.analytic_plan", "type": "form", "name": "account.analytic_plan.form",
+   "root": {"kind": "sheet", "children": [
+     {"kind": "field", "name": "name", "widget": "title"},
+     {"kind": "group", "name": "main", "columns": 2, "children": [
+       {"kind": "field", "name": "default_applicability"},
+       {"kind": "field", "name": "color", "widget": "color"},
+       {"kind": "field", "name": "company_id"},
+       {"kind": "field", "name": "active"}
+     ]},
+     {"kind": "notebook", "pages": [
+       {"kind": "page", "name": "page_accounts", "title": "Analytic accounts", "children": [
+         {"kind": "field", "name": "account_ids", "columns": [{"field": "code"}, {"field": "name"}, {"field": "partner_id"}, {"field": "balance"}]}
+       ]},
+       {"kind": "page", "name": "page_applicability", "title": "Applicability", "children": [
+         {"kind": "field", "name": "applicability_ids", "columns": [{"field": "account_type"}, {"field": "account_prefix"}, {"field": "journal_id"}, {"field": "applicability"}, {"field": "company_id"}]}
+       ]}
+     ]},
+     {"kind": "field", "name": "description"}
+   ]}},
+  {"id": "view_analytic_account_list", "model": "account.analytic_account", "type": "list", "name": "account.analytic_account.list",
+   "columns": [{"field": "code"}, {"field": "name"}, {"field": "plan_id"}, {"field": "partner_id"}, {"field": "debit"}, {"field": "credit"}, {"field": "balance"}, {"field": "company_id", "optional": "hide"}]},
+  {"id": "view_analytic_account_form", "model": "account.analytic_account", "type": "form", "name": "account.analytic_account.form",
+   "root": {"kind": "sheet", "children": [
+     {"kind": "field", "name": "name", "widget": "title"},
+     {"kind": "group", "name": "main", "columns": 2, "children": [
+       {"kind": "field", "name": "code"},
+       {"kind": "field", "name": "plan_id"},
+       {"kind": "field", "name": "partner_id"},
+       {"kind": "field", "name": "company_id"},
+       {"kind": "field", "name": "active"}
+     ]},
+     {"kind": "group", "name": "totals", "columns": 3, "children": [
+       {"kind": "field", "name": "credit", "readonly": true},
+       {"kind": "field", "name": "debit", "readonly": true},
+       {"kind": "field", "name": "balance", "readonly": true}
+     ]},
+     {"kind": "notebook", "pages": [
+       {"kind": "page", "name": "page_lines", "title": "Analytic items", "children": [
+         {"kind": "field", "name": "line_ids", "readonly": true, "columns": [{"field": "date"}, {"field": "name"}, {"field": "general_account_id"}, {"field": "partner_id"}, {"field": "amount"}]}
+       ]}
+     ]}
+   ]}},
+  {"id": "view_analytic_account_search", "model": "account.analytic_account", "type": "search", "name": "account.analytic_account.search",
+   "fields": ["name", "code", "plan_id", "partner_id"],
+   "filters": [{"name": "archived", "label": "Archived", "domain": [["active", "=", false]]}],
+   "group_bys": [{"field": "plan_id"}, {"field": "partner_id"}]},
+  {"id": "view_analytic_line_list", "model": "account.analytic_line", "type": "list", "name": "account.analytic_line.list",
+   "columns": [{"field": "date"}, {"field": "name"}, {"field": "account_id"}, {"field": "plan_id"}, {"field": "general_account_id"}, {"field": "partner_id"}, {"field": "product_id", "optional": "hide"}, {"field": "unit_amount", "optional": "hide"}, {"field": "percentage", "optional": "hide"}, {"field": "amount", "sum": true}, {"field": "move_id", "optional": "hide"}, {"field": "company_id", "optional": "hide"}]},
+  {"id": "view_analytic_line_form", "model": "account.analytic_line", "type": "form", "name": "account.analytic_line.form",
+   "root": {"kind": "sheet", "children": [
+     {"kind": "field", "name": "name", "widget": "title"},
+     {"kind": "group", "name": "main", "columns": 2, "children": [
+       {"kind": "field", "name": "date"},
+       {"kind": "field", "name": "amount"},
+       {"kind": "field", "name": "account_id"},
+       {"kind": "field", "name": "plan_id", "readonly": true},
+       {"kind": "field", "name": "general_account_id"},
+       {"kind": "field", "name": "partner_id"},
+       {"kind": "field", "name": "product_id"},
+       {"kind": "field", "name": "unit_amount"},
+       {"kind": "field", "name": "move_line_id", "readonly": true},
+       {"kind": "field", "name": "ref"},
+       {"kind": "field", "name": "company_id"}
+     ]}
+   ]}},
+  {"id": "view_analytic_line_search", "model": "account.analytic_line", "type": "search", "name": "account.analytic_line.search",
+   "fields": ["name", "account_id", "plan_id", "general_account_id", "partner_id", "product_id"],
+   "filters": [
+     {"name": "income", "label": "Revenue", "domain": [["amount", ">", 0]]},
+     {"name": "cost", "label": "Costs", "domain": [["amount", "<", 0]]},
+     {"name": "from_ledger", "label": "From journal items", "domain": [["move_line_id", "!=", null]]}
+   ],
+   "group_bys": [{"field": "account_id"}, {"field": "plan_id"}, {"field": "general_account_id"}, {"field": "partner_id"}, {"field": "date:month"}]},
+  {"id": "view_analytic_line_pivot", "model": "account.analytic_line", "type": "pivot", "name": "account.analytic_line.pivot",
+   "row": "account_id", "col": "date:month", "measures": ["amount"]},
+  {"id": "view_analytic_line_graph", "model": "account.analytic_line", "type": "graph", "name": "account.analytic_line.graph",
+   "row": "account_id", "measures": ["amount"]},
+  {"id": "view_distribution_model_list", "model": "account.analytic_distribution_model", "type": "list", "name": "account.analytic_distribution_model.list",
+   "columns": [{"field": "sequence", "widget": "handle"}, {"field": "partner_id"}, {"field": "product_id"}, {"field": "product_categ_id"}, {"field": "account_prefix"}, {"field": "analytic_distribution"}, {"field": "company_id", "optional": "hide"}]},
+  {"id": "view_distribution_model_form", "model": "account.analytic_distribution_model", "type": "form", "name": "account.analytic_distribution_model.form",
+   "root": {"kind": "sheet", "children": [
+     {"kind": "group", "name": "criteria", "title": "When a new line matches", "columns": 2, "children": [
+       {"kind": "field", "name": "partner_id"},
+       {"kind": "field", "name": "product_id"},
+       {"kind": "field", "name": "product_categ_id"},
+       {"kind": "field", "name": "account_prefix"},
+       {"kind": "field", "name": "company_id"},
+       {"kind": "field", "name": "sequence"}
+     ]},
+     {"kind": "field", "name": "analytic_distribution"}
+   ]}},
+  {"id": "view_invoice_form_analytic", "model": "account.move", "type": "form", "name": "account.move.invoice.form.analytic", "inherit": "account.view_invoice_form",
+   "operations": [
+     {"op": "insert_after", "anchor": {"field": "tax_ids"}, "node": {"field": "analytic_distribution", "optional": "show"}}
+   ]},
+  {"id": "view_move_form_analytic", "model": "account.move", "type": "form", "name": "account.move.entry.form.analytic", "inherit": "account.view_move_form",
+   "operations": [
+     {"op": "insert_after", "anchor": {"field": "tax_ids"}, "node": {"field": "analytic_distribution", "optional": "show"}}
+   ]},
+  {"id": "view_move_line_list_analytic", "model": "account.move_line", "type": "list", "name": "account.move_line.list.analytic", "inherit": "account.view_move_line_list",
+   "operations": [
+     {"op": "insert_after", "anchor": {"field": "name"}, "node": {"field": "analytic_distribution", "optional": "hide"}}
+   ]}
+]

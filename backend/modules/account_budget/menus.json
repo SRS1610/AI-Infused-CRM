@@ -1,0 +1,6 @@
+[
+  {"id": "menu_budgets", "name": "Budgets", "parent": "account_analytic.menu_analytic", "sequence": 60,
+   "action": "account_budget.action_budgets", "groups": ["account.group_account_user", "account.group_account_readonly"]},
+  {"id": "menu_budget_analysis", "name": "Budget vs actual", "parent": "account_analytic.menu_analytic", "sequence": 65,
+   "action": "account_budget.action_budget_analysis", "groups": ["account.group_account_user", "account.group_account_readonly"]}
+]

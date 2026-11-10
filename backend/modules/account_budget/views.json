@@ -1,0 +1,79 @@
+[
+  {"id": "view_budget_list", "model": "account.budget", "type": "list", "name": "account.budget.list",
+   "columns": [{"field": "name"}, {"field": "date_from"}, {"field": "date_to"}, {"field": "user_id"}, {"field": "planned_total"}, {"field": "practical_total"}, {"field": "state", "widget": "badge"}, {"field": "company_id", "optional": "hide"}]},
+  {"id": "view_budget_form", "model": "account.budget", "type": "form", "name": "account.budget.form", "chatter": true,
+   "root": {"kind": "sheet", "children": [
+     {"kind": "buttons", "children": [
+       {"kind": "button", "method": "action_confirm", "label": "Confirm", "invisible": ["state", "!=", "draft"]},
+       {"kind": "button", "method": "action_refresh", "label": "Refresh actuals", "invisible": ["state", "not_in", ["draft", "confirmed"]]},
+       {"kind": "button", "method": "action_split_monthly", "label": "Split per month", "confirm": "Replace every line spanning several months by one line per month?", "invisible": ["state", "not_in", ["draft", "confirmed"]]},
+       {"kind": "button", "method": "action_done", "label": "Close", "invisible": ["state", "!=", "confirmed"]},
+       {"kind": "button", "method": "action_cancel", "label": "Cancel", "invisible": ["state", "not_in", ["draft", "confirmed"]]},
+       {"kind": "button", "method": "action_draft", "label": "Reset to draft", "invisible": ["state", "not_in", ["cancel", "confirmed"]]}
+     ]},
+     {"kind": "field", "name": "name", "widget": "title"},
+     {"kind": "group", "name": "main", "columns": 2, "children": [
+       {"kind": "field", "name": "date_from"},
+       {"kind": "field", "name": "date_to"},
+       {"kind": "field", "name": "user_id"},
+       {"kind": "field", "name": "state", "readonly": true, "widget": "badge"},
+       {"kind": "field", "name": "planned_total", "readonly": true},
+       {"kind": "field", "name": "practical_total", "readonly": true},
+       {"kind": "field", "name": "company_id"}
+     ]},
+     {"kind": "notebook", "pages": [
+       {"kind": "page", "name": "page_lines", "title": "Budget lines", "children": [
+         {"kind": "field", "name": "line_ids", "columns": [
+           {"field": "name"}, {"field": "line_type"}, {"field": "analytic_account_id"}, {"field": "account_ids"}, {"field": "account_type", "optional": "hide"},
+           {"field": "date_from"}, {"field": "date_to"}, {"field": "planned_amount"}, {"field": "practical_amount"},
+           {"field": "theoretical_amount"}, {"field": "achievement"}, {"field": "variance"}
+         ]}
+       ]},
+       {"kind": "page", "name": "page_notes", "title": "Notes", "children": [{"kind": "field", "name": "note"}]}
+     ]}
+   ]}},
+  {"id": "view_budget_search", "model": "account.budget", "type": "search", "name": "account.budget.search",
+   "fields": ["name", "user_id"],
+   "filters": [{"name": "confirmed", "label": "Confirmed", "domain": [["state", "=", "confirmed"]]}],
+   "group_bys": [{"field": "state"}, {"field": "user_id"}]},
+  {"id": "view_budget_line_list", "model": "account.budget_line", "type": "list", "name": "account.budget_line.list",
+   "columns": [{"field": "budget_id"}, {"field": "name"}, {"field": "line_type"}, {"field": "analytic_account_id"}, {"field": "account_ids", "optional": "hide"},
+               {"field": "date_from"}, {"field": "date_to"}, {"field": "planned_amount", "sum": true}, {"field": "practical_amount", "sum": true},
+               {"field": "theoretical_amount", "sum": true}, {"field": "achievement"}, {"field": "variance", "sum": true}, {"field": "budget_state", "optional": "hide"}]},
+  {"id": "view_budget_line_form", "model": "account.budget_line", "type": "form", "name": "account.budget_line.form",
+   "root": {"kind": "sheet", "children": [
+     {"kind": "buttons", "children": [
+       {"kind": "button", "method": "action_split_monthly", "label": "Split per month", "invisible": ["budget_state", "not_in", ["draft", "confirmed"]]}
+     ]},
+     {"kind": "group", "name": "main", "columns": 2, "children": [
+       {"kind": "field", "name": "budget_id"},
+       {"kind": "field", "name": "name"},
+       {"kind": "field", "name": "line_type"},
+       {"kind": "field", "name": "analytic_account_id"},
+       {"kind": "field", "name": "account_ids"},
+       {"kind": "field", "name": "account_type"},
+       {"kind": "field", "name": "date_from"},
+       {"kind": "field", "name": "date_to"},
+       {"kind": "field", "name": "planned_amount"}
+     ]},
+     {"kind": "group", "name": "actuals", "title": "Budget vs actual", "columns": 2, "children": [
+       {"kind": "field", "name": "practical_amount", "readonly": true},
+       {"kind": "field", "name": "theoretical_amount", "readonly": true},
+       {"kind": "field", "name": "achievement", "readonly": true},
+       {"kind": "field", "name": "variance", "readonly": true}
+     ]}
+   ]}},
+  {"id": "view_budget_line_search", "model": "account.budget_line", "type": "search", "name": "account.budget_line.search",
+   "fields": ["budget_id", "analytic_account_id", "name"],
+   "filters": [
+     {"name": "active_budgets", "label": "Open budgets", "domain": [["budget_state", "in", ["draft", "confirmed"]]]},
+     {"name": "expense", "label": "Expenses", "domain": [["line_type", "=", "expense"]]},
+     {"name": "revenue", "label": "Revenue", "domain": [["line_type", "=", "revenue"]]},
+     {"name": "over_budget", "label": "Over budget (expenses)", "domain": [["line_type", "=", "expense"], ["variance", ">", 0]]}
+   ],
+   "group_bys": [{"field": "budget_id"}, {"field": "analytic_account_id"}, {"field": "line_type"}, {"field": "date_from:month"}]},
+  {"id": "view_budget_line_pivot", "model": "account.budget_line", "type": "pivot", "name": "account.budget_line.pivot",
+   "row": "analytic_account_id", "col": "date_from:month", "measures": ["planned_amount", "practical_amount", "variance"]},
+  {"id": "view_budget_line_graph", "model": "account.budget_line", "type": "graph", "name": "account.budget_line.graph",
+   "row": "analytic_account_id", "measures": ["planned_amount", "practical_amount"]}
+]
