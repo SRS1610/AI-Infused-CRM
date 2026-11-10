@@ -1,4 +1,8 @@
 # Tessera AI gateway image.
+# uv, pinned; override UV_IMAGE to use a mirror (any image with /uv)
+ARG UV_IMAGE=ghcr.io/astral-sh/uv:0.11.32
+FROM ${UV_IMAGE} AS uv
+
 FROM python:3.12-slim-bookworm
 
 ENV PYTHONUNBUFFERED=1 \
@@ -11,7 +15,7 @@ ENV PYTHONUNBUFFERED=1 \
 RUN apt-get update && apt-get install -y --no-install-recommends libpq5 curl ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 
-COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/local/bin/uv
+COPY --from=uv /uv /usr/local/bin/uv
 
 WORKDIR /app/gateway
 COPY gateway/pyproject.toml gateway/uv.lock* ./

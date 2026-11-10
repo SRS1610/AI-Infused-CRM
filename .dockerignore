@@ -1,0 +1,19 @@
+# Keep the build context small: images copy backend/, gateway/ and frontend/ sources only.
+.git
+.claude
+**/.venv
+**/node_modules
+**/__pycache__
+**/.pytest_cache
+**/.mypy_cache
+**/.ruff_cache
+**/htmlcov
+**/coverage
+**/.coverage
+**/coverage.xml
+frontend/dist
+frontend/test-results
+frontend/playwright-report
+.env
+.env.*
+!.env.example

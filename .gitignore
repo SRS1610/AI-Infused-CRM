@@ -45,3 +45,6 @@ frontend/coverage/
 
 # a symlinked node_modules (worktrees) is a file, not a directory
 node_modules
+
+# Agent worktrees
+.claude/worktrees/

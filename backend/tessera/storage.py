@@ -73,8 +73,20 @@ class S3Storage:
             aws_secret_access_key=secret_key,
             region_name=region,
         )
+        self._bucket_ready = False
+
+    def _ensure_bucket(self) -> None:
+        """Create the bucket on first write if the object store does not have it yet (a fresh dev stack)."""
+        if self._bucket_ready:
+            return
+        try:
+            self.client.head_bucket(Bucket=self.bucket)
+        except Exception:
+            self.client.create_bucket(Bucket=self.bucket)
+        self._bucket_ready = True
 
     def put(self, key: str, data: bytes) -> None:
+        self._ensure_bucket()
         self.client.put_object(Bucket=self.bucket, Key=key, Body=data)
 
     def get(self, key: str) -> bytes:

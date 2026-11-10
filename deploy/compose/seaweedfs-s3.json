@@ -1,0 +1,9 @@
+{
+  "identities": [
+    {
+      "name": "tessera",
+      "credentials": [{ "accessKey": "tessera", "secretKey": "tessera-secret" }],
+      "actions": ["Admin", "Read", "Write", "List", "Tagging"]
+    }
+  ]
+}

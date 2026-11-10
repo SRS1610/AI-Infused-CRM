@@ -23,7 +23,7 @@ from tessera.modules.loader import discover, load_module_code
 from tessera.modules.manifest import Manifest
 from tessera.orm.environment import SYSTEM_UID, Environment
 from tessera.orm.fields import Many2many
-from tessera.orm.registry import Registry
+from tessera.orm.registry import Registry, bump_registry_stamp, read_registry_stamp
 from tessera.orm.schema import Drift, check_drift, sync_schema
 
 log = get_logger(__name__)
@@ -74,6 +74,9 @@ def load_installed(registry: Registry) -> None:
     cr = Cursor(engine)
     try:
         installed = _installed_modules(cr)
+        # remember which state of the database this registry reflects (0: loaded, no change recorded yet),
+        # so a process notices modules installed, upgraded or removed elsewhere (``current_registry``)
+        registry.stamp = read_registry_stamp(cr) or 0
     finally:
         cr.close()
     if not installed:
@@ -194,6 +197,7 @@ def install_modules(names: Sequence[str], *, database_url: str | None = None, de
             result.installed.append(name)
         _sync_model_metadata(env, registry)
         env.flush()
+        registry.stamp = bump_registry_stamp(cr)  # other processes reload their registry
         cr.commit()
     except BaseException:
         cr.rollback()
@@ -305,6 +309,7 @@ def upgrade_modules(names: Sequence[str], *, database_url: str | None = None) ->
             result.upgraded.append(name)
         _sync_model_metadata(env, registry)
         env.flush()
+        registry.stamp = bump_registry_stamp(cr)  # other processes reload their registry
         cr.commit()
     except BaseException:
         cr.rollback()
@@ -420,6 +425,7 @@ def uninstall_modules(
                 digest = hashlib.sha1(index.encode(), usedforsecurity=False).hexdigest()[:10]
                 cr.execute(f'ALTER INDEX "{index}" RENAME TO "_removed_{stamp}_{digest}"')
             cr.execute(f'ALTER TABLE "{table}" RENAME TO "_removed_{stamp}_{table}"'[:200])
+        bump_registry_stamp(cr)  # other processes reload their registry
         cr.commit()
     except BaseException:
         cr.rollback()

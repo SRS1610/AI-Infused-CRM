@@ -641,14 +641,25 @@ def bump_registry_stamp(cr: Any) -> int | None:
 
 
 def current_registry(db_url: str, cr: Any) -> Registry:
-    """The registry for ``db_url``, rebuilt first when another process changed the model structure."""
+    """The registry for ``db_url``, brought up to date first when another process changed the model
+    structure: a Studio change rebuilds it; installed, upgraded or removed modules load a fresh one."""
     registry = Registry.get(db_url)
     stamp = read_registry_stamp(cr)
-    if stamp is not None and registry.stamp is not None and stamp != registry.stamp:
-        with Registry._lock:
-            if registry.stamp != stamp:
-                registry.build()
-                registry.stamp = stamp
-    elif registry.stamp is None:
+    if stamp is None or stamp == registry.stamp:
+        return registry
+    if registry.stamp is None and registry.ready:
+        # built in this process (an install or a test), not loaded from the database: it is current
         registry.stamp = stamp
-    return registry
+        return registry
+    with Registry._lock:
+        registry = Registry.get(db_url)
+        if registry.stamp == stamp:
+            return registry
+        rows = cr.fetchall("SELECT name, installed_version FROM core_module WHERE state = 'installed'")
+        installed = {name: version or "0" for name, version in rows}
+        if registry.ready and installed == registry.installed_versions:
+            registry.build()  # same modules: only Studio fields changed
+            registry.stamp = stamp
+            return registry
+        Registry.forget(db_url)
+        return Registry.get(db_url)
