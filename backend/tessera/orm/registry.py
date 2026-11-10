@@ -328,6 +328,7 @@ class Registry:
             "_transient",
             "_auto",
             "_audit",
+            "_ai_index_archived",
         ):
             for frag in reversed(cls._fragments):
                 if attr in frag.__dict__:

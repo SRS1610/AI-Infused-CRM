@@ -67,6 +67,8 @@ class Model:
     _sql_constraints: ClassVar[list[tuple[str, str, str]]] = []
     _global_search: ClassVar[list[str]] = []
     _ai_index: ClassVar[list[str]] = []
+    # archived records matching this domain stay in the retrieval index (default: archived ones are dropped)
+    _ai_index_archived: ClassVar[list[Any] | None] = None
     _register: ClassVar[bool] = True
 
     # populated by the registry on composed classes

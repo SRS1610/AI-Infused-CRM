@@ -431,6 +431,50 @@ def test_eval_isolation_and_injection_cases_inspected(env: Any) -> None:
         assert denied in ([], [("records.read", "access_denied")])
 
 
+def test_lost_opportunities_stay_in_the_retrieval_index(env: Any, env_for: Any) -> None:
+    """Lost deals are archived but indexed with their outcome and lost reason, their discussion included;
+    retrieval returns them only to searches over archived records, and only to users who may read them."""
+    from modules.ai_core.hooks import index_messages_job, index_records_job
+
+    main, eu = env.ref("core.main_company").ids[0], env.ref("core.demo_company_eu").ids[0]
+    leads = env["crm.lead"].elevated()
+    story = "They kept repeating that the quotation was far above the budget of the plant."
+    lost = leads.create({"name": "Dunmore: line 4", "type": "opportunity", "company_id": eu})
+    other = leads.create({"name": "Elsewhere Ltd: line 9", "type": "opportunity", "company_id": main})
+    archived = leads.create({"name": "Old duplicate", "type": "opportunity", "company_id": eu,
+                             "description": f"<p>{story}</p>"})  # fmt: skip
+    msgs = env["chatter.message"].elevated()
+    for deal in (lost, other):
+        msgs.create({"model": "crm.lead", "res_id": deal.ids[0], "message_type": "comment", "body": f"<p>{story}</p>"})
+        deal.action_set_lost(env.ref("crm.lost_price").ids[0], "Went with the cheapest offer")
+    archived.write({"active": False})  # archived without being lost: leaves the index
+    ids = [lost.ids[0], other.ids[0], archived.ids[0]]
+    index_records_job(env.elevated(), "crm.lead", ids)  # what the after-write hook queues
+    index_messages_job(env.elevated(), msgs.search([("model", "=", "crm.lead"), ("res_id", "in", ids)]).ids)
+    rows = env.cr.fetchall(
+        "SELECT res_id, source_kind, content FROM ai_core_embedding WHERE res_model = 'crm.lead' AND res_id = ANY(:i)",
+        {"i": ids},
+    )
+    record_chunk = next(c for r, k, c in rows if r == lost.ids[0] and k == "record")
+    assert "Outcome: LOST (reason: Too expensive)" in record_chunk and "cheapest offer" in record_chunk
+    assert {(r, k) for r, k, _ in rows} == {(d.ids[0], k) for d in (lost, other) for k in ("record", "message")}
+
+    marie = env_for("marie").with_company(eu)
+    query = "the quotation is above our budget"
+    assert not [h for h in R.search(marie, query, models=["crm.lead"]) if h.res_id == lost.ids[0]]  # open deals only
+    found = {h.res_id for h in R.search(marie.with_context(active_test=False), query, models=["crm.lead"])}
+    assert lost.ids[0] in found and other.ids[0] not in found  # the other company's lost deal: filtered first
+    # objection handling finds it through retrieval: the objection's words appear only in its discussion
+    kwargs = HANDLERS["crm.objections"](marie, None, {"objection": "Honestly the quotation is above our budget"})
+    source = next(s for s in kwargs["sources"] if s.id == f"crm.lead:{lost.ids[0]}")
+    assert source.text.startswith("Outcome: LOST (reason: Too expensive)") and "far above the budget" in source.text
+    assert f"crm.lead:{other.ids[0]}" not in [s.id for s in kwargs["sources"]]
+    # restored, it is an open deal again: indexed, and visible to ordinary searches
+    lost.action_restore()
+    index_records_job(env.elevated(), "crm.lead", [lost.ids[0]])
+    assert lost.ids[0] in {h.res_id for h in R.search(marie, query, models=["crm.lead"])}
+
+
 # ------------------------------------------------------------------------------------------- NL search
 
 

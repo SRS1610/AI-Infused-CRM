@@ -108,6 +108,13 @@ messages are chunked and embedded by background jobs after each change; `retriev
 returns only chunks of records the user can read, ranked by vector similarity fused with trigram
 similarity.
 
+Archived records leave the index, except those matching the model's `_ai_index_archived` domain:
+`crm.lead` keeps lost opportunities (`[("type", "=", "opportunity"), ("lost", "=", True)]`) so objection
+handling learns from them. They are returned only by searches that include archived records
+(`retrieval.search(env.with_context(active_test=False), …)`), still filtered by the user's record rules
+before ranking. An optional `_ai_index_header()` method adds a first line to a record's indexed text
+(`Outcome: LOST (reason: Too expensive)`).
+
 ## 6. Evaluate
 
 A case in `ai/evals/<feature>.jsonl`:
