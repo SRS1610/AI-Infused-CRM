@@ -5,6 +5,7 @@ import type { Domain, ViewDef, ViewsResponse } from "../api/types";
 import { formatNumber } from "../format";
 import { series } from "./pivotData";
 import { groupableFields, measureFields } from "./PivotView";
+import { t } from "../i18n";
 
 interface Props {
   model: string;
@@ -14,6 +15,17 @@ interface Props {
 }
 
 type ChartType = "bar" | "line" | "pie";
+
+function chartLabel(type: ChartType): string {
+  return type === "bar" ? t("Bar") : type === "line" ? t("Line") : t("Pie");
+}
+
+function chartTitle(type: ChartType, measure: string, group: string): string {
+  const vars = { measure, group };
+  if (type === "bar") return t("{measure} by {group} (bar chart)", vars);
+  if (type === "line") return t("{measure} by {group} (line chart)", vars);
+  return t("{measure} by {group} (pie chart)", vars);
+}
 const W = 640;
 const H = 280;
 const PAD = { top: 16, right: 16, bottom: 56, left: 56 };
@@ -32,8 +44,8 @@ export function GraphView({ model, meta, view, domain }: Props) {
   const [by, setBy] = useState<string>((view.row as string | undefined) ?? groupable[0]?.name ?? "");
   const [measure, setMeasure] = useState<string>(view.measures?.[0] ?? "__count");
   const [type, setType] = useState<ChartType>((view.chart as ChartType | undefined) ?? "bar");
-  const t = meta.fields[by]?.type;
-  const spec = t === "date" || t === "datetime" ? `${by}:month` : by;
+  const byType = meta.fields[by]?.type;
+  const spec = byType === "date" || byType === "datetime" ? `${by}:month` : by;
   const result = useQuery({
     queryKey: ["list", model, "graph", spec, measure, JSON.stringify(domain)],
     queryFn: () =>
@@ -44,7 +56,7 @@ export function GraphView({ model, meta, view, domain }: Props) {
     () => series(result.data?.groups ?? [], spec, measure === "__count" ? "__count" : `${measure}:sum`),
     [result.data, spec, measure],
   );
-  const measureLabel = measure === "__count" ? "Count" : (meta.fields[measure]?.string ?? measure);
+  const measureLabel = measure === "__count" ? t("Count") : (meta.fields[measure]?.string ?? measure);
   const byLabel = meta.fields[by]?.string ?? by;
   const max = Math.max(1, ...data.map((d) => d.value));
   const innerW = W - PAD.left - PAD.right;
@@ -55,7 +67,7 @@ export function GraphView({ model, meta, view, domain }: Props) {
     <div className="graph-view">
       <div className="pivot-controls">
         <label>
-          Group by
+          {t("Group by")}
           <select className="input small" value={by} onChange={(e) => setBy(e.target.value)}>
             {groupable.map((f) => (
               <option key={f.name} value={f.name}>
@@ -65,9 +77,9 @@ export function GraphView({ model, meta, view, domain }: Props) {
           </select>
         </label>
         <label>
-          Measure
+          {t("Measure")}
           <select className="input small" value={measure} onChange={(e) => setMeasure(e.target.value)}>
-            <option value="__count">Count</option>
+            <option value="__count">{t("Count")}</option>
             {measureFields(meta).map((f) => (
               <option key={f.name} value={f.name}>
                 {f.string}
@@ -75,7 +87,7 @@ export function GraphView({ model, meta, view, domain }: Props) {
             ))}
           </select>
         </label>
-        <div role="radiogroup" aria-label="Chart type" className="view-switcher">
+        <div role="radiogroup" aria-label={t("Chart type")} className="view-switcher">
           {(["bar", "line", "pie"] as ChartType[]).map((c) => (
             <button
               key={c}
@@ -85,16 +97,16 @@ export function GraphView({ model, meta, view, domain }: Props) {
               className={`btn small${type === c ? " active" : " ghost"}`}
               onClick={() => setType(c)}
             >
-              {c[0].toUpperCase() + c.slice(1)}
+              {chartLabel(c)}
             </button>
           ))}
         </div>
       </div>
-      {result.isLoading && <div className="loading">Loading…</div>}
-      {!result.isLoading && data.length === 0 && <div className="muted">No data.</div>}
+      {result.isLoading && <div className="loading">{t("Loading…")}</div>}
+      {!result.isLoading && data.length === 0 && <div className="muted">{t("No data.")}</div>}
       {data.length > 0 && (
         <figure className="chart">
-          <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={`${measureLabel} by ${byLabel} (${type} chart)`}>
+          <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={chartTitle(type, measureLabel, byLabel)}>
             {type !== "pie" && (
               <g>
                 {[0, 0.25, 0.5, 0.75, 1].map((f) => {
@@ -151,7 +163,7 @@ export function GraphView({ model, meta, view, domain }: Props) {
             {type === "pie" && <Pie data={data} />}
           </svg>
           <figcaption className="sr-only">
-            {measureLabel} by {byLabel}
+            {t("{measure} by {group}", { measure: measureLabel, group: byLabel })}
           </figcaption>
           <table className="sr-only">
             <thead>

@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { api } from "../api/client";
 import type { Many2oneValue } from "../api/types";
 import { Many2oneInput } from "./Many2oneInput";
+import { t } from "../i18n";
 
 interface Props {
   comodel: string;
@@ -45,7 +46,7 @@ export function Many2manyTags({ comodel, ids, onChange, disabled, label, id }: P
               <button
                 type="button"
                 className="tag-remove"
-                aria-label={`Remove ${names[tid] ?? tid}`}
+                aria-label={t("Remove {name}", { name: names[tid] ?? tid })}
                 onClick={() => onChange(ids.filter((x) => x !== tid))}
               >
                 ×
@@ -60,7 +61,7 @@ export function Many2manyTags({ comodel, ids, onChange, disabled, label, id }: P
           comodel={comodel}
           value={null}
           onChange={add}
-          label={`Add ${label}`}
+          label={t("Add {field}", { field: label })}
           domain={ids.length ? { not: ["id", "in", ids] } : undefined}
         />
       )}

@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { api } from "../api/client";
 import type { ListColumn } from "../api/types";
 import { displayValue } from "../format";
+import { t } from "../i18n";
 
 interface Props {
   comodel: string;
@@ -25,7 +26,7 @@ export function One2manyTable({ comodel, ids, columns, label, onOpen }: Props) {
     queryFn: () => api.list(comodel, { domain: [["id", "in", ids]], fields: fieldNames, limit: 500, count: false }),
     enabled: ids.length > 0 && (!!columns || views.isSuccess),
   });
-  if (!ids.length) return <p className="muted">No {label.toLowerCase()}.</p>;
+  if (!ids.length) return <p className="muted">{t("No {items}.", { items: label.toLowerCase() })}</p>;
   const meta = views.data?.fields ?? {};
   return (
     <table className="table compact" aria-label={label}>

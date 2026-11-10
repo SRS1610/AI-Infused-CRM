@@ -84,13 +84,13 @@ def _job_queue(db_url: str, job_id: int) -> str:
 def process_job(db_url: str, job_id: int) -> str:
     """Run one job in its own transactions. Returns the final state of this attempt."""
     from tessera.orm.environment import SYSTEM_UID, Environment
-    from tessera.orm.registry import Registry
+    from tessera.orm.registry import current_registry
 
-    registry = Registry.get(db_url)
     engine = get_engine(db_url)
 
     # 1. claim: queued → running (row lock prevents two workers running the same job)
     cr = Cursor(engine)
+    registry = current_registry(db_url, cr)
     try:
         row = cr.fetchone(
             "SELECT state, attempts, user_id, company_id FROM core_job WHERE id = :id FOR UPDATE SKIP LOCKED",

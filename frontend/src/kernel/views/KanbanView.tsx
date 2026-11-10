@@ -5,6 +5,7 @@ import type { Domain, GroupRow, RecordData, ViewDef, ViewNode, ViewsResponse } f
 import { and } from "../domain";
 import { displayValue, formatNumber } from "../format";
 import { collectFields } from "./FormView";
+import { t } from "../i18n";
 
 interface Props {
   model: string;
@@ -51,7 +52,7 @@ export function KanbanView({ model, meta, view, domain, groupBy, onOpen }: Props
   if (groups.isLoading)
     return (
       <div className="loading" role="status">
-        Loading…
+        {t("Loading…")}
       </div>
     );
   let columns: GroupRow[] = groupField ? (groups.data?.groups ?? []) : [{ __count: 0, __domain: domain }];
@@ -70,7 +71,7 @@ export function KanbanView({ model, meta, view, domain, groupBy, onOpen }: Props
     ];
   }
   return (
-    <div className="kanban" role="list" aria-label={`${meta.model.description} board`}>
+    <div className="kanban" role="list" aria-label={t("{model} board", { model: meta.model.description })}>
       {columns.map((g, i) => (
         <KanbanColumn
           key={i}
@@ -119,7 +120,7 @@ function KanbanColumn({
   const groupValue = value && typeof value === "object" && "id" in value ? value.id : (value ?? null);
   const title = groupField
     ? value === null || value === undefined || value === false
-      ? "None"
+      ? t("None")
       : typeof value === "object"
         ? value.display_name
         : displayValue(meta.fields[groupField], value)
@@ -168,7 +169,7 @@ function KanbanColumn({
         <h3>{String(title)}</h3>
         <span className="count">{records.data?.total ?? group.__count}</span>
         {sumField && (
-          <span className="kanban-sum" title={`Total ${meta.fields[sumField]?.string ?? sumField}`}>
+          <span className="kanban-sum" title={t("Total {field}", { field: meta.fields[sumField]?.string ?? sumField })}>
             {formatNumber(Number(group[`${sumField}:sum`] ?? 0), 0)}
           </span>
         )}
@@ -183,8 +184,8 @@ function KanbanColumn({
         >
           <input
             className="input small"
-            placeholder="Quick create…"
-            aria-label={`Quick create in ${title}`}
+            placeholder={t("Quick create…")}
+            aria-label={t("Quick create in {column}", { column: String(title) })}
             value={quick}
             onChange={(e) => setQuick(e.target.value)}
           />

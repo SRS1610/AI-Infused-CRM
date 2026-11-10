@@ -281,11 +281,11 @@ def environment_for(
 ) -> Iterator[Environment]:
     """Open a transaction on ``database_url`` and yield an environment; commit on success."""
     from tessera.config import get_settings
-    from tessera.orm.registry import Registry
+    from tessera.orm.registry import current_registry
 
     url = database_url or get_settings().database_url
-    registry = Registry.get(url)
     cr = Cursor(get_engine(url))
+    registry = current_registry(url, cr)
     env = Environment.new(registry, cr, uid, context, su)
     try:
         yield env

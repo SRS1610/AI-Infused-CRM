@@ -6,6 +6,7 @@ import { and } from "../domain";
 import { selectionActionsFor } from "../extensions";
 import { FieldInput } from "../fields/FieldInput";
 import { displayValue } from "../format";
+import { t, tn, tx } from "../i18n";
 
 interface Props {
   model: string;
@@ -138,7 +139,7 @@ export function ListView({ model, meta, view, domain, groupBy, context, pageSize
       await queryClient.invalidateQueries({ queryKey: ["list", model] });
     } catch (e) {
       if (e instanceof ApiError && e.isConflict)
-        setConflict("This record was changed by someone else since you started editing.");
+        setConflict(t("This record was changed by someone else since you started editing."));
       else setNotice(e instanceof Error ? e.message : String(e));
     }
   };
@@ -162,7 +163,8 @@ export function ListView({ model, meta, view, domain, groupBy, context, pageSize
       URL.revokeObjectURL(url);
       return;
     }
-    if (action === "delete" && !window.confirm(`Delete ${ids.length} record(s)?`)) return;
+    if (action === "delete" && !window.confirm(tn("Delete {count} record?", "Delete {count} records?", ids.length)))
+      return;
     try {
       for (const id of ids) {
         if (action === "delete") await api.remove(model, id);
@@ -220,24 +222,24 @@ export function ListView({ model, meta, view, domain, groupBy, context, pageSize
         })}
       <div className="list-toolbar">
         {selected.size > 0 ? (
-          <div className="bulk" role="toolbar" aria-label="Bulk actions">
-            <span>{selected.size} selected</span>
+          <div className="bulk" role="toolbar" aria-label={t("Bulk actions")}>
+            <span>{t("{count} selected", { count: selected.size })}</span>
             <button type="button" className="btn small" onClick={() => void bulk("export")}>
-              Export CSV
+              {t("Export CSV")}
             </button>
             {hasActive && meta.model.access.write && (
               <button type="button" className="btn small" onClick={() => void bulk("archive")}>
-                Archive
+                {t("Archive")}
               </button>
             )}
             {hasActive && meta.model.access.write && (
               <button type="button" className="btn small" onClick={() => void bulk("unarchive")}>
-                Unarchive
+                {t("Unarchive")}
               </button>
             )}
             {meta.model.access.unlink && (
               <button type="button" className="btn small danger" onClick={() => void bulk("delete")}>
-                Delete
+                {t("Delete")}
               </button>
             )}
             {extraActions
@@ -250,7 +252,9 @@ export function ListView({ model, meta, view, domain, groupBy, context, pageSize
           </div>
         ) : (
           <span className="muted">
-            {groupBy.length ? `${groups.data?.groups.length ?? 0} groups` : `${total} record${total === 1 ? "" : "s"}`}
+            {groupBy.length
+              ? tn("{count} group", "{count} groups", groups.data?.groups.length ?? 0)
+              : tn("{count} record", "{count} records", total)}
           </span>
         )}
         <div className="spacer" />
@@ -261,7 +265,7 @@ export function ListView({ model, meta, view, domain, groupBy, context, pageSize
             aria-expanded={showColumns}
             onClick={() => setShowColumns((s) => !s)}
           >
-            Columns
+            {t("Columns")}
           </button>
           {showColumns && (
             <div className="dropdown-menu" role="menu">
@@ -284,13 +288,13 @@ export function ListView({ model, meta, view, domain, groupBy, context, pageSize
           )}
         </div>
         {groupBy.length === 0 && total > pageSize && (
-          <nav className="pager" aria-label="Pagination">
+          <nav className="pager" aria-label={t("Pagination")}>
             <button
               type="button"
               className="btn small ghost"
               disabled={offset === 0}
               onClick={() => setOffset(Math.max(0, offset - pageSize))}
-              aria-label="Previous page"
+              aria-label={t("Previous page")}
             >
               ‹
             </button>
@@ -302,7 +306,7 @@ export function ListView({ model, meta, view, domain, groupBy, context, pageSize
               className="btn small ghost"
               disabled={offset + pageSize >= total}
               onClick={() => setOffset(offset + pageSize)}
-              aria-label="Next page"
+              aria-label={t("Next page")}
             >
               ›
             </button>
@@ -313,15 +317,15 @@ export function ListView({ model, meta, view, domain, groupBy, context, pageSize
         <div className="alert error" role="alert">
           {notice}{" "}
           <button type="button" className="btn small" onClick={() => setNotice(null)}>
-            Dismiss
+            {t("Dismiss")}
           </button>
         </div>
       )}
       {conflict && (
-        <div className="alert conflict" role="alertdialog" aria-label="Edit conflict">
+        <div className="alert conflict" role="alertdialog" aria-label={t("Edit conflict")}>
           {conflict}
           <button type="button" className="btn small" onClick={() => editing && void startEdit({ id: editing.id })}>
-            Reload record
+            {t("Reload record")}
           </button>
           <button
             type="button"
@@ -331,7 +335,7 @@ export function ListView({ model, meta, view, domain, groupBy, context, pageSize
               setConflict(null);
             }}
           >
-            Cancel
+            {t("Cancel")}
           </button>
         </div>
       )}
@@ -343,7 +347,7 @@ export function ListView({ model, meta, view, domain, groupBy, context, pageSize
                 <th className="select-col">
                   <input
                     type="checkbox"
-                    aria-label="Select all"
+                    aria-label={t("Select all")}
                     checked={allSelected}
                     onChange={(e) =>
                       setSelected(e.target.checked ? new Set(items.map((r) => Number(r.id))) : new Set())
@@ -411,7 +415,7 @@ export function ListView({ model, meta, view, domain, groupBy, context, pageSize
                     <td className="select-col" onClick={(e) => e.stopPropagation()}>
                       <input
                         type="checkbox"
-                        aria-label={`Select ${row.display_name ?? row.id}`}
+                        aria-label={t("Select {record}", { record: row.display_name ?? row.id })}
                         checked={selected.has(Number(row.id))}
                         onChange={(e) => {
                           const next = new Set(selected);
@@ -435,7 +439,7 @@ export function ListView({ model, meta, view, domain, groupBy, context, pageSize
             {groupBy.length === 0 && !rows.isLoading && items.length === 0 && (
               <tr>
                 <td colSpan={columns.length + 1} className="empty">
-                  No records match.
+                  {t("No records match.")}
                 </td>
               </tr>
             )}
@@ -464,12 +468,15 @@ export function ListView({ model, meta, view, domain, groupBy, context, pageSize
       </div>
       {editing && (
         <div className="edit-bar" role="status">
-          Editing row — <kbd>Enter</kbd> to save, <kbd>Esc</kbd> to cancel
+          {tx("Editing row — {enter} to save, {escape} to cancel", {
+            enter: <kbd>{t("Enter")}</kbd>,
+            escape: <kbd>{t("Esc")}</kbd>,
+          })}
           <button type="button" className="btn small primary" onClick={() => void saveEdit()}>
-            Save
+            {t("Save")}
           </button>
           <button type="button" className="btn small ghost" onClick={() => setEditing(null)}>
-            Cancel
+            {t("Cancel")}
           </button>
         </div>
       )}
@@ -478,7 +485,7 @@ export function ListView({ model, meta, view, domain, groupBy, context, pageSize
 }
 
 function groupLabel(meta: ViewsResponse, field: string, value: any): string {
-  if (value === null || value === undefined || value === false) return "None";
+  if (value === null || value === undefined || value === false) return t("None");
   const f = meta.fields[field.split(":")[0]];
   if (f?.type === "many2one") return value.display_name ?? `#${value.id}`;
   return displayValue(f, value) || String(value);

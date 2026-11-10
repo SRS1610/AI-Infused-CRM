@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { api, ApiError } from "../api/client";
 import { useSession } from "../session";
+import { t } from "../i18n";
 
 export function LoginPage() {
   const { setSession } = useSession();
@@ -30,7 +31,7 @@ export function LoginPage() {
         setSession(result);
       }
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : "Cannot reach the server");
+      setError(err instanceof ApiError ? err.message : t("Cannot reach the server"));
       if (preAuth && err instanceof ApiError && /expired/i.test(err.message)) setPreAuth(null);
     } finally {
       setBusy(false);
@@ -41,7 +42,7 @@ export function LoginPage() {
     <main className="login">
       <form className="login-card" onSubmit={submit} aria-labelledby="login-title">
         <img src="/icon.svg" alt="" width={48} height={48} />
-        <h1 id="login-title">{preAuth ? "Two-factor authentication" : "Sign in to Tessera"}</h1>
+        <h1 id="login-title">{preAuth ? t("Two-factor authentication") : t("Sign in to Tessera")}</h1>
         {error && (
           <div className="alert error" role="alert">
             {error}
@@ -49,7 +50,7 @@ export function LoginPage() {
         )}
         {!preAuth ? (
           <>
-            <label htmlFor="login">Login</label>
+            <label htmlFor="login">{t("Login")}</label>
             <input
               id="login"
               className="input"
@@ -59,7 +60,7 @@ export function LoginPage() {
               value={login}
               onChange={(e) => setLogin(e.target.value)}
             />
-            <label htmlFor="password">Password</label>
+            <label htmlFor="password">{t("Password")}</label>
             <input
               id="password"
               className="input"
@@ -72,7 +73,7 @@ export function LoginPage() {
           </>
         ) : (
           <>
-            <label htmlFor="code">Authentication code or recovery code</label>
+            <label htmlFor="code">{t("Authentication code or recovery code")}</label>
             <input
               id="code"
               className="input"
@@ -86,11 +87,11 @@ export function LoginPage() {
           </>
         )}
         <button type="submit" className="btn primary block" disabled={busy}>
-          {busy ? "Signing in…" : preAuth ? "Verify" : "Sign in"}
+          {busy ? t("Signing in…") : preAuth ? t("Verify") : t("Sign in")}
         </button>
         {!preAuth && (providers.data ?? []).length > 0 && (
           <div className="sso">
-            <p className="muted">or continue with</p>
+            <p className="muted">{t("or continue with")}</p>
             {providers.data!.map((p) => (
               <a key={p.code} className="btn block" href={`/api/v1/auth/oidc/${encodeURIComponent(p.code)}/start`}>
                 {p.name}

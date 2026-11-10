@@ -149,3 +149,9 @@ def schedule_activity_action(env: Any, model: str, res_id: int | None, args: dic
         summary=args.get("summary"),
         date_deadline=args.get("date_deadline"),
     )
+
+
+@hook("seed_demo")
+def seed_retrieval_index(env: Any) -> None:
+    """Demo: index every opted-in model so retrieval-based features have data."""
+    retrieval.rebuild(env)

@@ -5,6 +5,7 @@ import { api } from "../api/client";
 import type { NotificationItem } from "../api/platform";
 import { useRealtime } from "../realtime";
 import { useSession } from "../session";
+import { t } from "../i18n";
 
 /** Unread notifications, live over the user's realtime channel. */
 export function NotificationBell() {
@@ -26,7 +27,7 @@ export function NotificationBell() {
   });
   useRealtime(session ? `user:${session.user.id}` : null, (event) => {
     if (event.event !== "notification") return;
-    setToast(String(event.data.title ?? "New notification"));
+    setToast(String(event.data.title ?? t("New notification")));
     window.setTimeout(() => setToast(null), 5000);
     void list.refetch();
   });
@@ -41,7 +42,7 @@ export function NotificationBell() {
       <button
         type="button"
         className="btn ghost small bell"
-        aria-label={`Notifications: ${unread} unread`}
+        aria-label={t("Notifications: {count} unread", { count: unread })}
         aria-haspopup="dialog"
         aria-expanded={open}
         onClick={() => setOpen((o) => !o)}
@@ -49,16 +50,16 @@ export function NotificationBell() {
         🔔{unread > 0 && <span className="badge count">{unread > 99 ? "99+" : unread}</span>}
       </button>
       {open && (
-        <div className="dropdown-menu right notification-panel" role="dialog" aria-label="Notifications">
+        <div className="dropdown-menu right notification-panel" role="dialog" aria-label={t("Notifications")}>
           <div className="panel-head">
-            <strong>Notifications</strong>
+            <strong>{t("Notifications")}</strong>
             {items.length > 0 && (
               <button type="button" className="btn small ghost" onClick={() => void markRead(items.map((n) => n.id))}>
-                Mark all read
+                {t("Mark all read")}
               </button>
             )}
           </div>
-          {items.length === 0 && <p className="muted">You're all caught up.</p>}
+          {items.length === 0 && <p className="muted">{t("You're all caught up.")}</p>}
           <ul>
             {items.map((n) => (
               <li key={n.id}>

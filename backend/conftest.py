@@ -49,6 +49,7 @@ KERNEL_TEST_MODULES = [
     "calendar",
     "ai_core",
     "ai_test",
+    "studio",
 ]
 
 

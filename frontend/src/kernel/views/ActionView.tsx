@@ -16,8 +16,24 @@ import { ListView } from "./ListView";
 import { PivotView } from "./PivotView";
 import { emptySearch, SearchBar, type SearchState } from "./SearchBar";
 import { buildDomain } from "./searchDomain";
+import { t } from "../i18n";
 
 const LATER = new Set(["activity", "gantt", "map"]);
+
+/** Display names of the view types (the API values stay in English). */
+function viewTypeLabel(type: string): string {
+  const labels: Record<string, string> = {
+    list: t("List"),
+    kanban: t("Kanban"),
+    calendar: t("Calendar"),
+    pivot: t("Pivot"),
+    graph: t("Graph"),
+    activity: t("Activity"),
+    gantt: t("Gantt"),
+    map: t("Map"),
+  };
+  return labels[type] ?? type[0].toUpperCase() + type.slice(1);
+}
 registerClientAction("activities", () => <ActivityDashboard />);
 
 /** Defaults passed through the action context (`default_<field>`). */
@@ -39,8 +55,8 @@ export function ActionView() {
 
   const action = useQuery({ queryKey: ["action", actionRef], queryFn: () => api.action(actionRef) });
   const types = useMemo(() => {
-    const t = action.data?.view_types ?? ["list", "form"];
-    return [...new Set([...t, "form", "search"])];
+    const declared = action.data?.view_types ?? ["list", "form"];
+    return [...new Set([...declared, "form", "search"])];
   }, [action.data]);
   const refs = useMemo(
     () => ({
@@ -57,7 +73,7 @@ export function ActionView() {
 
   const recordParam = params.get("id");
   const recordId = recordParam === "new" ? null : recordParam ? Number(recordParam) : undefined;
-  const firstMulti = (action.data?.view_types ?? ["list"]).find((t) => t !== "form") ?? "list";
+  const firstMulti = (action.data?.view_types ?? ["list"]).find((vt) => vt !== "form") ?? "list";
   const viewType = recordParam ? "form" : (params.get("view") ?? firstMulti);
 
   const go = useCallback(
@@ -79,7 +95,7 @@ export function ActionView() {
   if (action.isLoading || (action.data?.model && views.isLoading))
     return (
       <div className="loading" role="status">
-        Loading…
+        {t("Loading…")}
       </div>
     );
   if (action.isError)
@@ -96,11 +112,15 @@ export function ActionView() {
   const client = def.kind === "client" ? clientAction(def.client_tag) : undefined;
   if (client) return client();
   if (def.kind !== "window" || !def.model)
-    return <div className="alert info">This action type ({def.kind}) is not available in the browser yet.</div>;
+    return (
+      <div className="alert info">
+        {t("This action type ({kind}) is not available in the browser yet.", { kind: def.kind })}
+      </div>
+    );
   if (views.isError || !views.data)
     return (
       <div className="alert error" role="alert">
-        {(views.error as Error | undefined)?.message ?? "Cannot load views"}
+        {(views.error as Error | undefined)?.message ?? t("Cannot load views")}
       </div>
     );
   const meta = views.data;
@@ -112,17 +132,17 @@ export function ActionView() {
         <div className="control-panel">
           <h1 className="page-title">{def.name}</h1>
           {meta.model.access.create && (
-            <button type="button" className="btn primary" onClick={() => go({ id: "new" })} title="New (Alt+N)">
-              New
+            <button type="button" className="btn primary" onClick={() => go({ id: "new" })} title={t("New (Alt+N)")}>
+              {t("New")}
             </button>
           )}
           {meta.model.access.create && (
             <button type="button" className="btn ghost" onClick={() => navigate(`/import/${def.model}`)}>
-              Import
+              {t("Import")}
             </button>
           )}
           <button type="button" className="btn ghost" onClick={() => setExporting(true)}>
-            Export
+            {t("Export")}
           </button>
           <SearchBar
             model={def.model}
@@ -132,19 +152,19 @@ export function ActionView() {
             onChange={setSearch}
             inputRef={searchInput}
           />
-          <div className="view-switcher" role="tablist" aria-label="View type">
+          <div className="view-switcher" role="tablist" aria-label={t("View type")}>
             {def.view_types
-              .filter((t) => t !== "form")
-              .map((t) => (
+              .filter((vt) => vt !== "form")
+              .map((vt) => (
                 <button
-                  key={t}
+                  key={vt}
                   type="button"
                   role="tab"
-                  aria-selected={viewType === t}
-                  className={viewType === t ? "btn small active" : "btn small ghost"}
-                  onClick={() => go({ view: t, id: null })}
+                  aria-selected={viewType === vt}
+                  className={viewType === vt ? "btn small active" : "btn small ghost"}
+                  onClick={() => go({ view: vt, id: null })}
                 >
-                  {t[0].toUpperCase() + t.slice(1)}
+                  {viewTypeLabel(vt)}
                 </button>
               ))}
           </div>
@@ -199,7 +219,9 @@ export function ActionView() {
         <GraphView model={def.model} meta={meta} view={meta.views.graph} domain={domain} />
       )}
       {LATER.has(viewType) && (
-        <div className="alert info">The {viewType} view arrives with a later phase; pick another view above.</div>
+        <div className="alert info">
+          {t("The {view} view arrives with a later phase; pick another view above.", { view: viewTypeLabel(viewType) })}
+        </div>
       )}
       {exporting && (
         <ExportDialog
@@ -211,7 +233,7 @@ export function ActionView() {
       )}
       {!meta.views[viewType] && !LATER.has(viewType) && viewType !== "form" && (
         <button type="button" className="btn" onClick={() => navigate(-1)}>
-          Back
+          {t("Back")}
         </button>
       )}
     </div>

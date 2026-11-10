@@ -1,6 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import { api, ApiError, configureClient } from "./api/client";
 import type { SessionInfo } from "./api/types";
+import { setLanguage } from "./i18n";
 import { realtime } from "./realtime";
 
 interface SessionContextValue {
@@ -38,6 +39,8 @@ export function SessionProvider({ children }: { children: ReactNode }) {
         companies: ids.length ? ids : null,
         company: stored?.current && allowed.has(stored.current) ? stored.current : null,
       });
+      // before the state update, so the re-render it triggers already uses the user's language
+      setLanguage(s.lang || s.user.lang);
       realtime.connect();
     } else {
       configureClient({ csrf: null, companies: null, company: null });

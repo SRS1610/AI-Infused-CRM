@@ -1,10 +1,11 @@
 // Pure helpers turning read_group rows into pivot tables and chart series (unit-tested separately).
 import type { GroupRow } from "../api/types";
+import { t } from "../i18n";
 
 export function groupLabel(value: unknown): string {
-  if (value === null || value === undefined || value === false) return "None";
+  if (value === null || value === undefined || value === false) return t("None");
   if (typeof value === "object" && value && "display_name" in value)
-    return String((value as { display_name: unknown }).display_name ?? "None");
+    return String((value as { display_name: unknown }).display_name ?? t("None"));
   return String(value);
 }
 
@@ -27,7 +28,7 @@ export function buildPivot(groups: GroupRow[], rowBy: string[], colBy: string | 
   for (const g of groups) {
     const path = rowBy.map((r) => groupLabel(g[r]));
     const rowKey = path.join(" / ");
-    const col = colBy ? groupLabel(g[colBy]) : "Total";
+    const col = colBy ? groupLabel(g[colBy]) : t("Total");
     const value = Number(measure === "__count" ? g.__count : (g[measure] ?? 0)) || 0;
     rows.set(rowKey, path);
     cols.add(col);
@@ -36,8 +37,9 @@ export function buildPivot(groups: GroupRow[], rowBy: string[], colBy: string | 
     colTotals.set(col, (colTotals.get(col) ?? 0) + value);
     total += value;
   }
+  const none = t("None");
   const sortedCols = [...cols].sort((a, b) =>
-    a === "None" ? 1 : b === "None" ? -1 : a.localeCompare(b, undefined, { numeric: true }),
+    a === none ? 1 : b === none ? -1 : a.localeCompare(b, undefined, { numeric: true }),
   );
   const sortedRows = [...rows.values()].sort((a, b) =>
     a.join("/").localeCompare(b.join("/"), undefined, { numeric: true }),
@@ -50,7 +52,7 @@ export function toCsv(table: PivotTable, rowHeaders: string[]): string {
     const s = String(v);
     return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
   };
-  const lines = [[...rowHeaders, ...table.cols, "Total"].map(esc).join(",")];
+  const lines = [[...rowHeaders, ...table.cols, t("Total")].map(esc).join(",")];
   for (const path of table.rows) {
     const key = path.join(" / ");
     lines.push(
@@ -61,7 +63,7 @@ export function toCsv(table: PivotTable, rowHeaders: string[]): string {
   }
   lines.push(
     [
-      ...rowHeaders.map((_, i) => (i === 0 ? "Total" : "")),
+      ...rowHeaders.map((_, i) => (i === 0 ? t("Total") : "")),
       ...table.cols.map((c) => table.colTotals.get(c) ?? 0),
       table.total,
     ]

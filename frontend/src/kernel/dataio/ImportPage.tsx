@@ -4,6 +4,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { api, ApiError } from "../api/client";
 import { dataio, type ImportJob } from "../api/platform";
 import { useRealtime } from "../realtime";
+import { t, tn } from "../i18n";
 
 /** /import/:model — upload, map columns, dry run, then import in the background with live progress. */
 export function ImportPage() {
@@ -52,12 +53,12 @@ export function ImportPage() {
 
   const blocking = (job?.errors ?? []).filter((e) => e.row === null);
   const options = (header: string) => {
-    const opts: { value: string; label: string }[] = [{ value: "id", label: "External ID" }];
+    const opts: { value: string; label: string }[] = [{ value: "id", label: t("External ID") }];
     for (const f of fields) {
       opts.push({ value: f.name, label: `${f.label}${f.required ? " *" : ""}` });
       if (f.paths) {
-        opts.push({ value: `${f.name}/id`, label: `${f.label} (external ID)` });
-        opts.push({ value: `${f.name}/.id`, label: `${f.label} (database ID)` });
+        opts.push({ value: `${f.name}/id`, label: t("{field} (external ID)", { field: f.label }) });
+        opts.push({ value: `${f.name}/.id`, label: t("{field} (database ID)", { field: f.label }) });
       }
     }
     return opts.filter((o) => o.value === job?.mapping[header] || !Object.values(job?.mapping ?? {}).includes(o.value));
@@ -67,16 +68,16 @@ export function ImportPage() {
     <div className="import-page">
       <div className="form-toolbar">
         <button type="button" className="btn ghost" onClick={() => navigate(-1)}>
-          ← Back
+          ← {t("Back")}
         </button>
-        <h1 className="page-title">Import {label}</h1>
+        <h1 className="page-title">{t("Import {model}", { model: label })}</h1>
         <a className="btn ghost small" href={`/api/v1/import/${model}/template`}>
-          Download template
+          {t("Download template")}
         </a>
       </div>
       {!job && (
         <label className="dropzone">
-          <span>Choose a CSV or Excel file</span>
+          <span>{t("Choose a CSV or Excel file")}</span>
           <input
             type="file"
             accept=".csv,.xlsx,text/csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
@@ -92,16 +93,18 @@ export function ImportPage() {
       {job && (
         <>
           <p>
-            <strong>{job.filename}</strong> — {job.row_count} rows
-            {job.saved_mapping && <span className="badge">Mapping “{job.saved_mapping}” applied</span>}
+            <strong>{job.filename}</strong> — {tn("{count} row", "{count} rows", job.row_count)}
+            {job.saved_mapping && (
+              <span className="badge">{t("Mapping “{name}” applied", { name: job.saved_mapping })}</span>
+            )}
           </p>
           <div className="table-scroll">
             <table className="import-mapping">
               <thead>
                 <tr>
-                  <th scope="col">Column in file</th>
-                  <th scope="col">Imports into</th>
-                  <th scope="col">Sample</th>
+                  <th scope="col">{t("Column in file")}</th>
+                  <th scope="col">{t("Imports into")}</th>
+                  <th scope="col">{t("Sample")}</th>
                 </tr>
               </thead>
               <tbody>
@@ -111,11 +114,11 @@ export function ImportPage() {
                     <td>
                       <select
                         className="input small"
-                        aria-label={`Field for column ${h}`}
+                        aria-label={t("Field for column {column}", { column: h })}
                         value={job.mapping[h] ?? ""}
                         onChange={(e) => setMapping(h, e.target.value)}
                       >
-                        <option value="">Do not import</option>
+                        <option value="">{t("Do not import")}</option>
                         {options(h).map((o) => (
                           <option key={o.value} value={o.value}>
                             {o.label}
@@ -138,8 +141,8 @@ export function ImportPage() {
           <div className="button-row">
             <input
               className="input small"
-              placeholder="Save mapping as…"
-              aria-label="Save mapping as"
+              placeholder={t("Save mapping as…")}
+              aria-label={t("Save mapping as")}
               value={saveAs}
               onChange={(e) => setSaveAs(e.target.value)}
             />
@@ -154,7 +157,7 @@ export function ImportPage() {
                 if (updated) await run(() => dataio.dryRun(job.id));
               }}
             >
-              Test (dry run)
+              {t("Test (dry run)")}
             </button>
             <button
               type="button"
@@ -162,37 +165,45 @@ export function ImportPage() {
               disabled={busy || job.state !== "tested" || blocking.length > 0}
               onClick={() => void run(() => dataio.start(job.id))}
             >
-              Import
+              {t("Import")}
             </button>
           </div>
           {job.state === "tested" && (
             <div className={`alert ${job.error_count ? "error" : "info"}`} role="status">
               {blocking.length
-                ? `Fix the column mapping first: ${blocking.map((e) => e.message).join("; ")}`
+                ? t("Fix the column mapping first: {problems}", { problems: blocking.map((e) => e.message).join("; ") })
                 : job.error_count
-                  ? `${job.error_count} row(s) have errors and will be skipped; the other rows will be imported.`
-                  : "Everything looks fine. Nothing has been written yet."}
+                  ? tn(
+                      "{count} row has errors and will be skipped; the other rows will be imported.",
+                      "{count} rows have errors and will be skipped; the other rows will be imported.",
+                      job.error_count,
+                    )
+                  : t("Everything looks fine. Nothing has been written yet.")}
             </div>
           )}
           {(job.state === "queued" || job.state === "running") && (
             <div className="import-progress" role="status">
-              <progress max={100} value={progress?.value ?? 0} aria-label="Import progress" />{" "}
-              {progress?.message ?? "Queued…"}
+              <progress max={100} value={progress?.value ?? 0} aria-label={t("Import progress")} />{" "}
+              {progress?.message ?? t("Queued…")}
             </div>
           )}
           {job.state === "done" && (
             <div className="alert info" role="status">
-              Import finished: {job.created} created, {job.updated} updated, {job.error_count} skipped.
+              {t("Import finished: {created} created, {updated} updated, {skipped} skipped.", {
+                created: job.created,
+                updated: job.updated,
+                skipped: job.error_count,
+              })}
             </div>
           )}
           {job.errors.length > 0 && (
             <table className="import-errors">
-              <caption>Errors</caption>
+              <caption>{t("Errors")}</caption>
               <thead>
                 <tr>
-                  <th scope="col">Row</th>
-                  <th scope="col">Column</th>
-                  <th scope="col">Problem</th>
+                  <th scope="col">{t("Row")}</th>
+                  <th scope="col">{t("Column")}</th>
+                  <th scope="col">{t("Problem")}</th>
                 </tr>
               </thead>
               <tbody>

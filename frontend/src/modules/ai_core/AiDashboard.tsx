@@ -4,6 +4,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { ai, aiErrorMessage, type AdminFeature, type UsageRow } from "../../kernel/ai/api";
 import { registerClientAction } from "../../kernel/extensions";
+import { t } from "../../kernel/i18n";
 
 const pct = (v: number | null | undefined) => (v === null || v === undefined ? "—" : `${Math.round(v * 100)}%`);
 const usd = (v: string | number) =>
@@ -15,6 +16,17 @@ const usd = (v: string | number) =>
   });
 const int = (v: number) => v.toLocaleString();
 
+/** Risk classes of the EU AI Act as the gateway reports them; unknown classes show as sent. */
+function riskLabel(risk: string): string {
+  const labels: Record<string, string> = {
+    minimal: t("minimal"),
+    limited: t("limited"),
+    high: t("high"),
+    unacceptable: t("unacceptable"),
+  };
+  return labels[risk] ?? risk;
+}
+
 function firstOfMonth(): string {
   const d = new Date();
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-01`;
@@ -25,37 +37,37 @@ function UsageTable({ rows }: { rows: UsageRow[] }) {
   const requests = rows.reduce((s, r) => s + r.requests, 0);
   return (
     <table className="data-table">
-      <caption className="sr-only">AI usage per company and feature</caption>
+      <caption className="sr-only">{t("AI usage per company and feature")}</caption>
       <thead>
         <tr>
-          <th scope="col">Company</th>
-          <th scope="col">Feature</th>
+          <th scope="col">{t("Company")}</th>
+          <th scope="col">{t("Feature")}</th>
           <th scope="col" className="num">
-            Requests
+            {t("Requests")}
           </th>
           <th scope="col" className="num">
-            Input tokens
+            {t("Input tokens")}
           </th>
           <th scope="col" className="num">
-            Output tokens
+            {t("Output tokens")}
           </th>
           <th scope="col" className="num">
-            Spend
+            {t("Spend")}
           </th>
           <th scope="col" className="num">
-            Latency p50
+            {t("Latency p50")}
           </th>
           <th scope="col" className="num">
-            Latency p95
+            {t("Latency p95")}
           </th>
           <th scope="col" className="num">
-            Accepted
+            {t("Accepted")}
           </th>
           <th scope="col" className="num">
-            Fallback
+            {t("Fallback")}
           </th>
           <th scope="col" className="num">
-            Cache hits
+            {t("Cache hits")}
           </th>
         </tr>
       </thead>
@@ -79,7 +91,7 @@ function UsageTable({ rows }: { rows: UsageRow[] }) {
       <tfoot>
         <tr>
           <th scope="row" colSpan={2}>
-            Total
+            {t("Total")}
           </th>
           <td className="num">{int(requests)}</td>
           <td colSpan={2} />
@@ -108,12 +120,12 @@ function Switches({ features }: { features: AdminFeature[] }) {
     <>
       {error && <div className="alert error">{error}</div>}
       <table className="data-table">
-        <caption className="sr-only">AI features and kill switches</caption>
+        <caption className="sr-only">{t("AI features and kill switches")}</caption>
         <thead>
           <tr>
-            <th scope="col">Feature</th>
-            <th scope="col">Risk</th>
-            <th scope="col">Everywhere</th>
+            <th scope="col">{t("Feature")}</th>
+            <th scope="col">{t("Risk")}</th>
+            <th scope="col">{t("Everywhere")}</th>
             {companies.map((c) => (
               <th scope="col" key={c.id}>
                 {c.name}
@@ -126,13 +138,13 @@ function Switches({ features }: { features: AdminFeature[] }) {
             <tr key={f.name}>
               <th scope="row" title={f.name}>
                 {f.title}
-                {(f.writes || f.outbound) && <span className="muted small"> · proposes changes</span>}
+                {(f.writes || f.outbound) && <span className="muted small"> · {t("proposes changes")}</span>}
               </th>
-              <td>{f.risk_class}</td>
+              <td>{riskLabel(f.risk_class)}</td>
               <td>
                 <input
                   type="checkbox"
-                  aria-label={`${f.title} enabled everywhere`}
+                  aria-label={t("{feature} enabled everywhere", { feature: f.title })}
                   checked={f.enabled_global}
                   onChange={(e) => void toggle(f, null, e.target.checked)}
                 />
@@ -141,7 +153,7 @@ function Switches({ features }: { features: AdminFeature[] }) {
                 <td key={c.id}>
                   <input
                     type="checkbox"
-                    aria-label={`${f.title} enabled for ${c.name}`}
+                    aria-label={t("{feature} enabled for {company}", { feature: f.title, company: c.name })}
                     checked={c.enabled}
                     disabled={!f.enabled_global}
                     onChange={(e) => void toggle(f, c.id, e.target.checked)}
@@ -163,33 +175,35 @@ export function AiDashboard() {
   return (
     <div className="page ai-dashboard">
       <header className="page-header">
-        <h1>AI usage and cost</h1>
+        <h1>{t("AI usage and cost")}</h1>
         <label className="field inline">
-          <span>Since</span>
+          <span>{t("Since")}</span>
           <input type="date" value={since} onChange={(e) => setSince(e.target.value)} />
         </label>
       </header>
       <section aria-labelledby="ai-usage-h">
-        <h2 id="ai-usage-h">Usage</h2>
-        {usage.isLoading && <p className="muted">Loading…</p>}
+        <h2 id="ai-usage-h">{t("Usage")}</h2>
+        {usage.isLoading && <p className="muted">{t("Loading…")}</p>}
         {usage.error && <div className="alert error">{aiErrorMessage(usage.error)}</div>}
         {usage.data && !usage.data.available && (
-          <div className="alert info">The AI gateway is unavailable: {usage.data.message}</div>
+          <div className="alert info">
+            {t("The AI gateway is unavailable: {message}", { message: usage.data.message })}
+          </div>
         )}
         {usage.data?.available &&
           (usage.data.rows.length ? (
             <UsageTable rows={usage.data.rows} />
           ) : (
-            <p className="muted">No AI usage in this period.</p>
+            <p className="muted">{t("No AI usage in this period.")}</p>
           ))}
       </section>
       <section aria-labelledby="ai-flags-h">
-        <h2 id="ai-flags-h">Features and kill switches</h2>
+        <h2 id="ai-flags-h">{t("Features and kill switches")}</h2>
         {features.data &&
           (features.data.length ? (
             <Switches features={features.data} />
           ) : (
-            <p className="muted">No AI features are installed yet.</p>
+            <p className="muted">{t("No AI features are installed yet.")}</p>
           ))}
       </section>
     </div>

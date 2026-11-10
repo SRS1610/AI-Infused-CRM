@@ -50,6 +50,7 @@ _loading_module: threading.local = threading.local()
 
 HookName = (
     str  # after_create | before_write | after_write | before_unlink | after_unlink | after_restore | registry_built
+    # | before_build
 )
 
 
@@ -149,6 +150,9 @@ class Registry:
         self.extra: dict[str, Any] = {}  # per-registry caches owned by platform modules
         # loaders for manifest `load` kinds other than security/data/demo (views, menus, ...)
         self.data_loaders: dict[str, Callable[..., Any]] = {}
+        # model fragments defined by data in this database (Studio fields), set by ``before_build`` hooks
+        self.dynamic_fragments: list[type[Model]] = []
+        self.stamp: int | None = None  # ``core.registry_stamp`` version this registry was built for
 
     # -- lifecycle ---------------------------------------------------------------------------
     @classmethod
@@ -183,10 +187,18 @@ class Registry:
         return module in self.module_order
 
     # -- building ----------------------------------------------------------------------------
-    def build(self) -> None:
-        """(Re)compose every model from the fragments of ``module_order``."""
+    def build(self, dynamic: list[type[Model]] | None = None) -> None:
+        """(Re)compose every model from the fragments of ``module_order`` plus this database's dynamic
+        fragments (``dynamic`` when given, else whatever the ``before_build`` hooks provide)."""
         with self.lock:
             from tessera.orm.model import Model
+
+            if dynamic is None:
+                self.dynamic_fragments = []
+                for hook in self.hooks.get("before_build", ()):
+                    hook(self)
+            else:
+                self.dynamic_fragments = list(dynamic)
 
             self.models.clear()
             self.abstract.clear()
@@ -210,6 +222,12 @@ class Registry:
                     if name not in fragments:
                         order.append(name)
                     fragments[name].append(frag)
+            for frag in self.dynamic_fragments:
+                target = frag.__dict__.get("_extend")
+                if target in fragments:
+                    fragments[target].append(frag)
+                else:
+                    log.warning("dynamic fragment for an unknown model ignored", model=target)
             for name, frags in fragments.items():
                 bases = [f for f in frags if "_name" in f.__dict__]
                 if not bases:
@@ -579,3 +597,39 @@ class Registry:
             "mixins": list(cls._mixin_names),
             "fields": {name: fld.describe() for name, fld in cls._fields.items()},
         }
+
+
+REGISTRY_STAMP_TABLE = "core_registry_stamp"
+
+
+def read_registry_stamp(cr: Any) -> int | None:
+    if not cr.scalar(f"SELECT to_regclass('{REGISTRY_STAMP_TABLE}') IS NOT NULL"):
+        return None
+    value = cr.scalar(f"SELECT version FROM {REGISTRY_STAMP_TABLE} WHERE id = 1")  # noqa: S608
+    return int(value) if value is not None else None
+
+
+def bump_registry_stamp(cr: Any) -> int | None:
+    """Mark the model structure as changed (Studio): every process rebuilds its registry on its next
+    transaction. Random, so a rolled-back change cannot collide with a later committed one."""
+    if not cr.scalar(f"SELECT to_regclass('{REGISTRY_STAMP_TABLE}') IS NOT NULL"):
+        return None
+    cr.execute(
+        f"INSERT INTO {REGISTRY_STAMP_TABLE} (id, version) VALUES (1, floor(random() * 1e15)::bigint) "  # noqa: S608
+        "ON CONFLICT (id) DO UPDATE SET version = EXCLUDED.version"
+    )
+    return read_registry_stamp(cr)
+
+
+def current_registry(db_url: str, cr: Any) -> Registry:
+    """The registry for ``db_url``, rebuilt first when another process changed the model structure."""
+    registry = Registry.get(db_url)
+    stamp = read_registry_stamp(cr)
+    if stamp is not None and registry.stamp is not None and stamp != registry.stamp:
+        with Registry._lock:
+            if registry.stamp != stamp:
+                registry.build()
+                registry.stamp = stamp
+    elif registry.stamp is None:
+        registry.stamp = stamp
+    return registry

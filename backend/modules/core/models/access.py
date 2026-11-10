@@ -65,6 +65,18 @@ class RecordRule(Model):
             parse(rule.domain)
 
 
+class RegistryStamp(Model):
+    """One row whose ``version`` changes when the model structure changes at runtime (Studio fields);
+    every process compares it with the version its registry was built for and rebuilds when it differs."""
+
+    _name = "core.registry_stamp"
+    _description = "Registry stamp"
+    _log_access = False
+    _studio = False
+
+    version = fields.Integer()
+
+
 class SecurityStamp(Model):
     """One row whose ``version`` changes (randomly) in the same transaction as any change to groups,
     access rights, record rules or memberships. Every process compares it with the version of its

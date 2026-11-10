@@ -11,6 +11,7 @@ import { formPanelsFor } from "../extensions";
 import { useRealtime, type RealtimeEvent } from "../realtime";
 import { useSession } from "../session";
 import { StatusBar } from "./StatusBar";
+import { t } from "../i18n";
 
 interface Props {
   model: string;
@@ -89,13 +90,13 @@ export function FormView({ model, recordId, meta, view, defaults, onSaved, onBac
     (event: RealtimeEvent) => {
       if (event.data.client === CLIENT_ID) return; // our own save
       if (event.event === "unlink") {
-        setMessage({ kind: "info", text: "This record was deleted by someone else." });
+        setMessage({ kind: "info", text: t("This record was deleted by someone else.") });
         return;
       }
       if (dirty)
         setMessage({
           kind: "conflict",
-          text: "Someone else changed this record. Saving will be refused until you reload.",
+          text: t("Someone else changed this record. Saving will be refused until you reload."),
         });
       else void loaded.refetch();
     },
@@ -120,7 +121,7 @@ export function FormView({ model, recordId, meta, view, defaults, onSaved, onBac
       if (!f?.required || f.type === "boolean" || SYSTEM.has(name)) continue;
       const v = record[name];
       if (v === null || v === undefined || v === "" || (Array.isArray(v) && v.length === 0 && f.type !== "one2many"))
-        missing[name] = `${f.string} is required`;
+        missing[name] = t("{field} is required", { field: f.string });
     }
     setErrors(missing);
     return Object.keys(missing).length === 0;
@@ -129,7 +130,7 @@ export function FormView({ model, recordId, meta, view, defaults, onSaved, onBac
   const save = async (): Promise<number | null> => {
     if (!dirty && recordId !== null) return recordId;
     if (!validate()) {
-      setMessage({ kind: "error", text: "Some required fields are empty." });
+      setMessage({ kind: "error", text: t("Some required fields are empty.") });
       return null;
     }
     setSaving(true);
@@ -172,7 +173,7 @@ export function FormView({ model, recordId, meta, view, defaults, onSaved, onBac
   };
 
   const remove = async () => {
-    if (recordId === null || !window.confirm("Delete this record?")) return;
+    if (recordId === null || !window.confirm(t("Delete this record?"))) return;
     try {
       await api.remove(model, recordId);
       await queryClient.invalidateQueries({ queryKey: ["list", model] });
@@ -187,7 +188,7 @@ export function FormView({ model, recordId, meta, view, defaults, onSaved, onBac
   if (recordId !== null && loaded.isLoading)
     return (
       <div className="loading" role="status">
-        Loading…
+        {t("Loading…")}
       </div>
     );
   if (recordId !== null && loaded.isError)
@@ -305,20 +306,22 @@ export function FormView({ model, recordId, meta, view, defaults, onSaved, onBac
   const form = (
     <form
       className="form-view"
-      aria-label={record.display_name ? String(record.display_name) : `New ${meta.model.description}`}
+      aria-label={
+        record.display_name ? String(record.display_name) : t("New {model}", { model: meta.model.description })
+      }
       onSubmit={(e) => {
         e.preventDefault();
         void save();
       }}
     >
       <div className="form-toolbar">
-        <button type="button" className="btn ghost" onClick={onBack} aria-label="Back to list">
-          ← Back
+        <button type="button" className="btn ghost" onClick={onBack} aria-label={t("Back to list")}>
+          ← {t("Back")}
         </button>
         <div className="breadcrumb" aria-live="polite">
-          {recordId === null ? `New ${meta.model.description}` : String(record.display_name ?? "")}
+          {recordId === null ? t("New {model}", { model: meta.model.description }) : String(record.display_name ?? "")}
           {dirty && (
-            <span className="dirty" title="Unsaved changes">
+            <span className="dirty" title={t("Unsaved changes")}>
               {" "}
               •
             </span>
@@ -330,18 +333,18 @@ export function FormView({ model, recordId, meta, view, defaults, onSaved, onBac
               type="submit"
               className="btn primary"
               disabled={saving || (!dirty && recordId !== null)}
-              title="Save (Ctrl/⌘+S)"
+              title={t("Save (Ctrl/⌘+S)")}
             >
-              {saving ? "Saving…" : "Save"}
+              {saving ? t("Saving…") : t("Save")}
             </button>
-            <button type="button" className="btn" onClick={discard} disabled={!dirty} title="Discard (Esc)">
-              Discard
+            <button type="button" className="btn" onClick={discard} disabled={!dirty} title={t("Discard (Esc)")}>
+              {t("Discard")}
             </button>
           </>
         )}
         {recordId !== null && meta.model.access.unlink && (
           <button type="button" className="btn danger ghost" onClick={remove}>
-            Delete
+            {t("Delete")}
           </button>
         )}
         {recordId !== null && (printable.data?.length ?? 0) > 0 && (
@@ -371,7 +374,7 @@ export function FormView({ model, recordId, meta, view, defaults, onSaved, onBac
                 void loaded.refetch();
               }}
             >
-              Reload
+              {t("Reload")}
             </button>
           )}
         </div>
@@ -409,20 +412,20 @@ function PrintMenu({ templates, recordId }: { templates: { id: number; name: str
         aria-expanded={open}
         onClick={() => setOpen((o) => !o)}
       >
-        Print
+        {t("Print")}
       </button>
       {open && (
         <div className="dropdown-menu right" role="menu">
-          {templates.map((t) => (
+          {templates.map((tpl) => (
             <a
-              key={t.id}
+              key={tpl.id}
               role="menuitem"
               className="btn ghost block"
-              href={reports.url(t.id, [recordId])}
+              href={reports.url(tpl.id, [recordId])}
               target="_blank"
               rel="noreferrer"
             >
-              {t.name}
+              {tpl.name}
             </a>
           ))}
         </div>
@@ -459,7 +462,7 @@ function Notebook({
               if (e.key === "ArrowLeft") setActive((a) => (a - 1 + pages.length) % pages.length);
             }}
           >
-            {page.title ?? page.name ?? `Page ${i + 1}`}
+            {page.title ?? page.name ?? t("Page {number}", { number: i + 1 })}
           </button>
         ))}
       </div>

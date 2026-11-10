@@ -6,14 +6,17 @@ import { mockFetch } from "../../test/mockApi";
 import { clientAction } from "../../kernel/extensions";
 import { SessionProvider } from "../../kernel/session";
 import "./DiscussApp";
+import { setLanguage } from "../../kernel/i18n";
 
-const session = () => ({
-  user: { id: 2, login: "admin", name: "Admin", lang: "fr_FR", tz: "UTC", share: false },
+beforeEach(() => setLanguage("en_US"));
+
+const session = (lang = "en_US") => ({
+  user: { id: 2, login: "admin", name: "Admin", lang, tz: "UTC", share: false },
   allowed_companies: [],
   selected_companies: [],
   groups: [],
   csrf_token: "c",
-  lang: "fr_FR",
+  lang,
   modules: ["discuss"],
 });
 
@@ -65,8 +68,8 @@ const run = (over: Record<string, unknown> = {}) => ({
   ...over,
 });
 
-const base = (ai = status()) => ({
-  "GET /api/v1/auth/session": session,
+const base = (ai = status(), lang = "en_US") => ({
+  "GET /api/v1/auth/session": () => session(lang),
   "GET /api/v1/ai/status": () => ai,
   "GET /api/v1/discuss/channels": () => [channel(1, "general"), channel(2, "sales", 3)],
   "GET /api/v1/discuss/presence": () => ({ online: [] }),
@@ -177,7 +180,7 @@ describe("Discuss AI", () => {
 
   it("translates a message into the user's language, labelled as AI", async () => {
     const { calls } = mockFetch({
-      ...base(),
+      ...base(status(), "fr_FR"),
       "POST /api/v1/ai/features/discuss.translate/run": () =>
         run({ run_id: 79, feature: "discuss.translate", text: "Le lancement est le 3 mars" }),
     });

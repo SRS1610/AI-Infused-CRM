@@ -42,3 +42,6 @@ backend/var/
 frontend/test-results/
 frontend/coverage/
 *.tsbuildinfo
+
+# a symlinked node_modules (worktrees) is a file, not a directory
+node_modules

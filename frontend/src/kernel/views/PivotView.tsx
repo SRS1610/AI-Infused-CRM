@@ -4,6 +4,7 @@ import { api } from "../api/client";
 import type { Domain, FieldMeta, ViewDef, ViewsResponse } from "../api/types";
 import { formatNumber } from "../format";
 import { buildPivot, toCsv } from "./pivotData";
+import { t } from "../i18n";
 
 interface Props {
   model: string;
@@ -28,8 +29,8 @@ export function measureFields(meta: ViewsResponse): FieldMeta[] {
 }
 
 function groupSpec(meta: ViewsResponse, name: string): string {
-  const t = meta.fields[name]?.type;
-  return t === "date" || t === "datetime" ? `${name}:month` : name;
+  const type = meta.fields[name]?.type;
+  return type === "date" || type === "datetime" ? `${name}:month` : name;
 }
 
 /** Pivot table over read_group: up to two row groupings, one column grouping, one measure. */
@@ -57,7 +58,7 @@ export function PivotView({ model, meta, view, domain }: Props) {
     [result.data, rowKeys.join(","), colKey, valueKey], // eslint-disable-line react-hooks/exhaustive-deps
   );
   const label = (n: string) => meta.fields[n]?.string ?? n;
-  const measureLabel = measure === "__count" ? "Count" : label(measure);
+  const measureLabel = measure === "__count" ? t("Count") : label(measure);
 
   const download = () => {
     const blob = new Blob([toCsv(table, rows.map(label))], { type: "text/csv" });
@@ -73,7 +74,7 @@ export function PivotView({ model, meta, view, domain }: Props) {
       <div className="pivot-controls">
         {[0, 1].map((i) => (
           <label key={i}>
-            {i === 0 ? "Rows" : "Then by"}
+            {i === 0 ? t("Rows") : t("Then by")}
             <select
               className="input small"
               value={rows[i] ?? ""}
@@ -84,7 +85,7 @@ export function PivotView({ model, meta, view, domain }: Props) {
                 setRows(next.filter(Boolean));
               }}
             >
-              <option value="">{i === 0 ? "—" : "(none)"}</option>
+              <option value="">{i === 0 ? "—" : t("(none)")}</option>
               {groupable.map((f) => (
                 <option key={f.name} value={f.name}>
                   {f.string}
@@ -94,9 +95,9 @@ export function PivotView({ model, meta, view, domain }: Props) {
           </label>
         ))}
         <label>
-          Columns
+          {t("Columns")}
           <select className="input small" value={col} onChange={(e) => setCol(e.target.value)}>
-            <option value="">(none)</option>
+            <option value="">{t("(none)")}</option>
             {groupable.map((f) => (
               <option key={f.name} value={f.name}>
                 {f.string}
@@ -105,9 +106,9 @@ export function PivotView({ model, meta, view, domain }: Props) {
           </select>
         </label>
         <label>
-          Measure
+          {t("Measure")}
           <select className="input small" value={measure} onChange={(e) => setMeasure(e.target.value)}>
-            <option value="__count">Count</option>
+            <option value="__count">{t("Count")}</option>
             {measures.map((f) => (
               <option key={f.name} value={f.name}>
                 {f.string}
@@ -116,10 +117,10 @@ export function PivotView({ model, meta, view, domain }: Props) {
           </select>
         </label>
         <button type="button" className="btn small ghost" onClick={download} disabled={!table.rows.length}>
-          Download CSV
+          {t("Download CSV")}
         </button>
       </div>
-      {result.isLoading && <div className="loading">Loading…</div>}
+      {result.isLoading && <div className="loading">{t("Loading…")}</div>}
       {result.isError && (
         <div className="alert error" role="alert">
           {(result.error as Error).message}
@@ -129,8 +130,13 @@ export function PivotView({ model, meta, view, domain }: Props) {
         <div className="table-scroll">
           <table className="pivot-table">
             <caption className="sr-only">
-              {measureLabel} by {rows.map(label).join(", ")}
-              {col ? ` and ${label(col)}` : ""}
+              {col
+                ? t("{measure} by {rows} and {column}", {
+                    measure: measureLabel,
+                    rows: rows.map(label).join(", "),
+                    column: label(col),
+                  })
+                : t("{measure} by {rows}", { measure: measureLabel, rows: rows.map(label).join(", ") })}
             </caption>
             <thead>
               <tr>
@@ -146,7 +152,7 @@ export function PivotView({ model, meta, view, domain }: Props) {
                 ))}
                 {col && (
                   <th scope="col" className="num">
-                    Total
+                    {t("Total")}
                   </th>
                 )}
               </tr>
@@ -174,7 +180,7 @@ export function PivotView({ model, meta, view, domain }: Props) {
             <tfoot>
               <tr>
                 <th scope="row" colSpan={Math.max(rows.length, 1)}>
-                  Total
+                  {t("Total")}
                 </th>
                 {table.cols.map((c) => (
                   <td key={c} className="num total">

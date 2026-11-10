@@ -90,6 +90,7 @@ class Cursor:
         self._conn: Connection = engine.connect()
         self._trans = self._conn.begin()
         self._after_commit: list[Callable[[], None]] = []
+        self._undo: list[tuple[int, Callable[[], None]]] = []  # (savepoint depth, callback)
         self._savepoint_depth = 0
         self._rollback_listeners: list[weakref.WeakMethod[Callable[[], None]]] = []
         self.closed = False
@@ -131,6 +132,7 @@ class Cursor:
                 nested.rollback()
             # work done inside the savepoint is gone: so are its after-commit effects and cached values
             del self._after_commit[mark:]
+            self._run_undo(self._savepoint_depth)
             self._notify_rollback()
             raise
         else:
@@ -153,9 +155,27 @@ class Cursor:
     def after_commit(self, callback: Callable[[], None]) -> None:
         self._after_commit.append(callback)
 
+    def on_rollback(self, callback: Callable[[], None]) -> None:
+        """Call ``callback`` if the work done so far is rolled back (the whole transaction, or the
+        savepoint the call happens in). Used to undo in-memory state tied to the transaction."""
+        self._undo.append((self._savepoint_depth, callback))
+
+    def _run_undo(self, depth: int) -> None:
+        keep: list[tuple[int, Callable[[], None]]] = []
+        run: list[tuple[int, Callable[[], None]]] = []
+        for d, cb in self._undo:
+            (run if d >= depth else keep).append((d, cb))
+        self._undo = keep
+        for _, cb in reversed(run):
+            try:
+                cb()
+            except Exception:
+                log.exception("rollback callback failed")
+
     def commit(self) -> None:
         if self._trans.is_active:
             self._trans.commit()
+        self._undo.clear()
         callbacks, self._after_commit = self._after_commit, []
         for cb in callbacks:
             try:
@@ -168,6 +188,7 @@ class Cursor:
         if self._trans.is_active:
             self._trans.rollback()
         self._after_commit.clear()
+        self._run_undo(0)
         self._trans = self._conn.begin()
 
     def close(self) -> None:
@@ -176,6 +197,7 @@ class Cursor:
         try:
             if self._trans.is_active:
                 self._trans.rollback()
+                self._run_undo(0)
         finally:
             self._conn.close()
             self.closed = True

@@ -20,7 +20,7 @@ from tessera.exceptions import AccessDenied, AccessError, UserError
 from tessera.logging import bind_context
 from tessera.orm.environment import SYSTEM_UID, Environment
 from tessera.orm.model import Model
-from tessera.orm.registry import Registry
+from tessera.orm.registry import Registry, current_registry
 from tessera.security.auth import API_KEY_PREFIX, resolve_api_key, resolve_session
 from tessera.security.crypto import constant_time_equals
 
@@ -127,8 +127,8 @@ def _authenticate(ctx: RequestContext) -> None:
 
 def _open_context(request: Request) -> Iterator[RequestContext]:
     url = database_url_for(request)
-    registry = Registry.get(url)
     cr = Cursor(get_engine(url))
+    registry = current_registry(url, cr)
     try:
         env = Environment.new(registry, cr, SYSTEM_UID, su=True)
         ctx = RequestContext(request=request, cr=cr, registry=registry, env=env)

@@ -2,6 +2,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useEffect } from "react";
 import { BrowserRouter, Navigate, Route, Routes, useLocation } from "react-router-dom";
 import { configureFormat } from "./kernel/format";
+import { t } from "./kernel/i18n";
 import "./modules";
 import { AppShell, Home } from "./kernel/shell/AppShell";
 import { LoginPage } from "./kernel/shell/LoginPage";
@@ -33,7 +34,7 @@ function Routed() {
   if (loading)
     return (
       <div className="splash" role="status">
-        Loading Tessera…
+        {t("Loading Tessera…")}
       </div>
     );
   // public customer pages: token links from emails work without an account

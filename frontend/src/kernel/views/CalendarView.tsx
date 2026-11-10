@@ -3,6 +3,7 @@ import { useMemo, useState } from "react";
 import { api, request } from "../api/client";
 import type { Domain, ViewDef, ViewsResponse } from "../api/types";
 import { and } from "../domain";
+import { t, tn } from "../i18n";
 
 interface Props {
   model: string;
@@ -23,6 +24,7 @@ interface Item {
 }
 
 const WEEKDAYS = [1, 2, 3, 4, 5, 6, 0];
+const MODE_LABELS: Record<Mode, () => string> = { day: () => t("Day"), week: () => t("Week"), month: () => t("Month") };
 
 function iso(d: Date): string {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
@@ -112,7 +114,7 @@ export function CalendarView({ model, meta, view, domain, onOpen }: Props) {
     return out;
   }, [records.data]);
 
-  if (!dateField) return <div className="alert info">This calendar view has no date field.</div>;
+  if (!dateField) return <div className="alert info">{t("This calendar view has no date field.")}</div>;
   const today = iso(new Date());
   const shift = (n: number) =>
     setAnchor((a) =>
@@ -134,26 +136,36 @@ export function CalendarView({ model, meta, view, domain, onOpen }: Props) {
     >
       {it.start && <span className="muted">{time(it.start)} </span>}
       {it.title}
-      {it.recurring && <span aria-label="repeats"> ↻</span>}
+      {it.recurring && <span aria-label={t("repeats")}> ↻</span>}
     </button>
   );
 
   return (
     <div className="calendar-view">
       <div className="calendar-toolbar">
-        <button type="button" className="btn small" onClick={() => shift(-1)} aria-label={`Previous ${mode}`}>
+        <button
+          type="button"
+          className="btn small"
+          onClick={() => shift(-1)}
+          aria-label={mode === "month" ? t("Previous month") : mode === "week" ? t("Previous week") : t("Previous day")}
+        >
           ‹
         </button>
         <button type="button" className="btn small" onClick={() => setAnchor(new Date())}>
-          Today
+          {t("Today")}
         </button>
-        <button type="button" className="btn small" onClick={() => shift(1)} aria-label={`Next ${mode}`}>
+        <button
+          type="button"
+          className="btn small"
+          onClick={() => shift(1)}
+          aria-label={mode === "month" ? t("Next month") : mode === "week" ? t("Next week") : t("Next day")}
+        >
           ›
         </button>
         <h2 className="calendar-title" aria-live="polite">
           {label}
         </h2>
-        <div className="view-switcher" role="tablist" aria-label="Calendar range">
+        <div className="view-switcher" role="tablist" aria-label={t("Calendar range")}>
           {(["day", "week", "month"] as Mode[]).map((m) => (
             <button
               key={m}
@@ -163,7 +175,7 @@ export function CalendarView({ model, meta, view, domain, onOpen }: Props) {
               className={`btn small${mode === m ? " active" : " ghost"}`}
               onClick={() => setMode(m)}
             >
-              {m[0].toUpperCase() + m.slice(1)}
+              {MODE_LABELS[m]()}
             </button>
           ))}
         </div>
@@ -186,12 +198,16 @@ export function CalendarView({ model, meta, view, domain, onOpen }: Props) {
                   <div
                     key={key}
                     role="gridcell"
-                    aria-label={`${d.toLocaleDateString()}: ${items.length} record(s)`}
+                    aria-label={tn("{date}: {count} record", "{date}: {count} records", items.length, {
+                      date: d.toLocaleDateString(),
+                    })}
                     className={`calendar-cell${d.getMonth() !== anchor.getMonth() ? " outside" : ""}${key === today ? " today" : ""}`}
                   >
                     <span className="day-number">{d.getDate()}</span>
                     {items.slice(0, 4).map(event)}
-                    {items.length > 4 && <span className="muted small">+{items.length - 4} more</span>}
+                    {items.length > 4 && (
+                      <span className="muted small">{t("+{count} more", { count: items.length - 4 })}</span>
+                    )}
                   </div>
                 );
               })}

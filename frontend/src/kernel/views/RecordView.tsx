@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useNavigate, useParams } from "react-router-dom";
 import { api } from "../api/client";
 import { FormView } from "./FormView";
+import { t } from "../i18n";
 
 /** /m/:model/:id — open any record directly (notifications, search results, links in emails). */
 export function RecordView() {
@@ -11,13 +12,13 @@ export function RecordView() {
   if (views.isLoading)
     return (
       <div className="loading" role="status">
-        Loading…
+        {t("Loading…")}
       </div>
     );
   if (views.isError || !views.data?.views.form)
     return (
       <div className="alert error" role="alert">
-        {(views.error as Error | undefined)?.message ?? "Cannot open this record"}
+        {(views.error as Error | undefined)?.message ?? t("Cannot open this record")}
       </div>
     );
   return (

@@ -10,6 +10,7 @@
     "typecheck": "tsc -b --noEmit",
     "lint": "eslint src",
     "format": "prettier --write src",
+    "i18n:extract": "node scripts/i18n-extract.mjs",
     "test": "vitest",
     "e2e": "playwright test"
   },

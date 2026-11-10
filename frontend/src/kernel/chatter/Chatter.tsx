@@ -6,8 +6,16 @@ import { chatter, type Activity, type ChatterMessage } from "../api/platform";
 import { aiDraftFeature } from "../extensions";
 import { formatDate, formatDatetime } from "../format";
 import { useRealtime } from "../realtime";
+import { t } from "../i18n";
 
 const QUICK_REACTIONS = ["👍", "🎉", "❤️", "👀"];
+
+function activityStateLabel(state: Activity["state"]): string {
+  if (state === "overdue") return t("Overdue");
+  if (state === "today") return t("Due today");
+  if (state === "done") return t("Done");
+  return t("Planned");
+}
 
 function relative(date: string | null): string {
   return date ? formatDatetime(date) : "";
@@ -42,21 +50,21 @@ export function Chatter({ model, resId, canWrite = true }: { model: string; resI
   };
 
   return (
-    <aside className="chatter" aria-label="Discussion">
+    <aside className="chatter" aria-label={t("Discussion")}>
       <div className="chatter-toolbar">
         <button
           type="button"
           className={`btn small${composer === "message" ? " active" : ""}`}
           onClick={() => setComposer(composer === "message" ? null : "message")}
         >
-          Send message
+          {t("Send message")}
         </button>
         <button
           type="button"
           className={`btn small${composer === "note" ? " active" : ""}`}
           onClick={() => setComposer(composer === "note" ? null : "note")}
         >
-          Log note
+          {t("Log note")}
         </button>
         {canWrite && (
           <button
@@ -64,7 +72,7 @@ export function Chatter({ model, resId, canWrite = true }: { model: string; resI
             className={`btn small${composer === "activity" ? " active" : ""}`}
             onClick={() => setComposer(composer === "activity" ? null : "activity")}
           >
-            Activity
+            {t("Activity")}
           </button>
         )}
         <div className="spacer" />
@@ -79,7 +87,7 @@ export function Chatter({ model, resId, canWrite = true }: { model: string; resI
             }}
             title={followers.data.items.map((f) => f.name).join(", ")}
           >
-            {followers.data.following ? "Following" : "Follow"} · {followers.data.items.length}
+            {followers.data.following ? t("Following") : t("Follow")} · {followers.data.items.length}
           </button>
         )}
       </div>
@@ -105,23 +113,23 @@ export function Chatter({ model, resId, canWrite = true }: { model: string; resI
         />
       )}
       {(activities.data?.length ?? 0) > 0 && (
-        <section className="chatter-activities" aria-label="Planned activities">
-          <h3 className="chatter-heading">Planned activities</h3>
+        <section className="chatter-activities" aria-label={t("Planned activities")}>
+          <h3 className="chatter-heading">{t("Planned activities")}</h3>
           {activities.data!.map((a) => (
             <ActivityRow key={a.id} activity={a} onChange={refresh} />
           ))}
         </section>
       )}
       <ol className="chatter-messages" aria-live="polite">
-        {messages.isLoading && <li className="muted">Loading…</li>}
+        {messages.isLoading && <li className="muted">{t("Loading…")}</li>}
         {all.map((m) => (
           <MessageItem key={m.id} message={m} onChange={refresh} />
         ))}
-        {!messages.isLoading && all.length === 0 && <li className="muted">No messages yet.</li>}
+        {!messages.isLoading && all.length === 0 && <li className="muted">{t("No messages yet.")}</li>}
       </ol>
       {hasMore && (
         <button type="button" className="btn small ghost block" onClick={() => void loadOlder()}>
-          Load older messages
+          {t("Load older messages")}
         </button>
       )}
     </aside>
@@ -138,13 +146,13 @@ export function MessageItem({ message: m, onChange }: { message: ChatterMessage;
         <span className="avatar" aria-hidden="true">
           {(m.author?.name ?? m.email_from ?? "S").slice(0, 1).toUpperCase()}
         </span>
-        <strong>{m.author?.name ?? m.email_from ?? "System"}</strong>
+        <strong>{m.author?.name ?? m.email_from ?? t("System")}</strong>
         <span className="muted"> · {relative(m.date)}</span>
-        {m.type === "note" && <span className="badge">Note</span>}
-        {m.type === "email" && <span className="badge">Email</span>}
+        {m.type === "note" && <span className="badge">{t("Note")}</span>}
+        {m.type === "email" && <span className="badge">{t("Email")}</span>}
         {m.ai_assisted && (
-          <span className="badge" title="Drafted with AI and reviewed by the author">
-            AI-assisted
+          <span className="badge" title={t("Drafted with AI and reviewed by the author")}>
+            {t("AI-assisted")}
           </span>
         )}
       </div>
@@ -152,7 +160,7 @@ export function MessageItem({ message: m, onChange }: { message: ChatterMessage;
         <div className="message-edit">
           <textarea
             className="input"
-            aria-label="Edit message"
+            aria-label={t("Edit message")}
             value={draft}
             onChange={(e) => setDraft(e.target.value)}
           />
@@ -165,10 +173,10 @@ export function MessageItem({ message: m, onChange }: { message: ChatterMessage;
               onChange();
             }}
           >
-            Save
+            {t("Save")}
           </button>
           <button type="button" className="btn small ghost" onClick={() => setEditing(false)}>
-            Cancel
+            {t("Cancel")}
           </button>
         </div>
       ) : (
@@ -180,9 +188,9 @@ export function MessageItem({ message: m, onChange }: { message: ChatterMessage;
       )}
       {m.tracking.length > 0 && (
         <ul className="tracking">
-          {m.tracking.map((t) => (
-            <li key={t.field}>
-              {t.label}: <span className="old">{t.old ?? "—"}</span> → <span className="new">{t.new ?? "—"}</span>
+          {m.tracking.map((tr) => (
+            <li key={tr.field}>
+              {tr.label}: <span className="old">{tr.old ?? "—"}</span> → <span className="new">{tr.new ?? "—"}</span>
             </li>
           ))}
         </ul>
@@ -220,7 +228,7 @@ export function MessageItem({ message: m, onChange }: { message: ChatterMessage;
               key={e}
               type="button"
               className="reaction add"
-              aria-label={`React with ${e}`}
+              aria-label={t("React with {emoji}", { emoji: e })}
               onClick={async () => {
                 await chatter.react(m.id, e);
                 onChange();
@@ -232,18 +240,18 @@ export function MessageItem({ message: m, onChange }: { message: ChatterMessage;
           {m.editable && (
             <>
               <button type="button" className="btn small ghost" onClick={() => setEditing(true)}>
-                Edit
+                {t("Edit")}
               </button>
               <button
                 type="button"
                 className="btn small ghost danger"
                 onClick={async () => {
-                  if (!window.confirm("Delete this message?")) return;
+                  if (!window.confirm(t("Delete this message?"))) return;
                   await chatter.remove(m.id);
                   onChange();
                 }}
               >
-                Delete
+                {t("Delete")}
               </button>
             </>
           )}
@@ -316,7 +324,7 @@ export function Composer({
     else setMentions([]);
   };
   const pick = (u: { id: number; login: string }) => {
-    setText((t) => t.replace(/@([\w.-]{1,30})$/, `@${u.login} `));
+    setText((prev) => prev.replace(/@([\w.-]{1,30})$/, `@${u.login} `));
     setPicked((p) => [...p, u]);
     setMentions([]);
     area.current?.focus();
@@ -357,7 +365,7 @@ export function Composer({
   return (
     <div className={`composer${internal ? " internal" : ""}`}>
       <label htmlFor={id} className="sr-only">
-        {internal ? "Internal note" : "Message to followers"}
+        {internal ? t("Internal note") : t("Message to followers")}
       </label>
       {aiUntouched && (
         <div className="composer-ai">
@@ -370,7 +378,9 @@ export function Composer({
         aria-busy={drafting}
         className="input"
         rows={3}
-        placeholder={internal ? "Log an internal note… (@ to mention)" : "Send a message to followers… (@ to mention)"}
+        placeholder={
+          internal ? t("Log an internal note… (@ to mention)") : t("Send a message to followers… (@ to mention)")
+        }
         value={text}
         onChange={(e) => void onInput(e.target.value)}
         onKeyDown={(e) => {
@@ -378,7 +388,7 @@ export function Composer({
         }}
       />
       {mentions.length > 0 && (
-        <ul className="mention-list" role="listbox" aria-label="Mention suggestions">
+        <ul className="mention-list" role="listbox" aria-label={t("Mention suggestions")}>
           {mentions.map((u) => (
             <li key={u.id} role="option" aria-selected="false">
               <button type="button" className="btn ghost small block" onClick={() => pick(u)}>
@@ -402,10 +412,10 @@ export function Composer({
       )}
       <div className="composer-actions">
         <button type="button" className="btn primary small" disabled={busy} onClick={() => void send()}>
-          {internal ? "Log" : "Send"}
+          {internal ? t("Log") : t("Send")}
         </button>
         <label className="btn small ghost">
-          Attach
+          {t("Attach")}
           <input
             type="file"
             className="sr-only"
@@ -426,17 +436,17 @@ export function Composer({
               disabled={drafting || busy}
               onClick={() => void draftWithAi()}
             >
-              {drafting ? "Drafting…" : "✦ Draft with AI"}
+              {drafting ? t("Drafting…") : `✦ ${t("Draft with AI")}`}
             </button>
           ) : (
             <AiUnavailable />
           ))}
         {aiDraft && (
           <button type="button" className="btn small ghost" onClick={() => void discardDraft()}>
-            Discard draft
+            {t("Discard draft")}
           </button>
         )}
-        <span className="muted small">Ctrl+Enter to send</span>
+        <span className="muted small">{t("Ctrl+Enter to send")}</span>
       </div>
     </div>
   );
@@ -465,24 +475,24 @@ function ActivityForm({ model, resId, onDone }: { model: string; resId: number; 
       }}
     >
       <label>
-        Type
+        {t("Type")}
         <select className="input small" value={type} onChange={(e) => setType(e.target.value)}>
-          <option value="chatter.activity_type_todo">To-do</option>
-          <option value="chatter.activity_type_call">Call</option>
-          <option value="chatter.activity_type_meeting">Meeting</option>
-          <option value="chatter.activity_type_email">Email</option>
+          <option value="chatter.activity_type_todo">{t("To-do")}</option>
+          <option value="chatter.activity_type_call">{t("Call")}</option>
+          <option value="chatter.activity_type_meeting">{t("Meeting")}</option>
+          <option value="chatter.activity_type_email">{t("Email")}</option>
         </select>
       </label>
       <label>
-        Summary
+        {t("Summary")}
         <input className="input small" value={summary} onChange={(e) => setSummary(e.target.value)} />
       </label>
       <label>
-        Due
+        {t("Due")}
         <input className="input small" type="date" value={due} onChange={(e) => setDue(e.target.value)} />
       </label>
       <button type="submit" className="btn primary small">
-        Schedule
+        {t("Schedule")}
       </button>
       {error && (
         <div className="alert error" role="alert">
@@ -504,7 +514,7 @@ export function ActivityRow({
 }) {
   return (
     <div className={`activity-row ${a.state}`}>
-      <span className={`state-dot ${a.state}`} aria-label={a.state} />
+      <span className={`state-dot ${a.state}`} aria-label={activityStateLabel(a.state)} />
       <div className="activity-main">
         <strong>{a.type.name}</strong> {a.summary && <span>— {a.summary}</span>}
         {showRecord && a.res_name && (
@@ -514,7 +524,7 @@ export function ActivityRow({
           </a>
         )}
         <div className="muted small">
-          {a.user.name} · due {formatDate(a.date_deadline)}
+          {t("{user} · due {date}", { user: a.user.name, date: formatDate(a.date_deadline) })}
         </div>
       </div>
       <button
@@ -525,7 +535,7 @@ export function ActivityRow({
           onChange();
         }}
       >
-        Done
+        {t("Done")}
       </button>
       <button
         type="button"
@@ -535,7 +545,7 @@ export function ActivityRow({
           onChange();
         }}
       >
-        +1 day
+        {t("+1 day")}
       </button>
     </div>
   );

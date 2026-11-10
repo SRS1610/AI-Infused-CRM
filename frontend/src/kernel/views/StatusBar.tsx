@@ -2,6 +2,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { ApiError } from "../api/client";
 import { workflow } from "../api/platform";
+import { t } from "../i18n";
 
 /** Workflow states with the transitions the user can take now (guards evaluated server-side). */
 export function StatusBar({ model, resId, onChanged }: { model: string; resId: number; onChanged: () => void }) {
@@ -11,18 +12,18 @@ export function StatusBar({ model, resId, onChanged }: { model: string; resId: n
   if (!bar.data?.workflow) return null;
   const visible = bar.data.states.filter((s) => !s.fold || s.current);
   return (
-    <div className="statusbar" aria-label={`${bar.data.workflow.name} workflow`}>
+    <div className="statusbar" aria-label={t("{name} workflow", { name: bar.data.workflow.name })}>
       <div className="statusbar-actions">
-        {bar.data.transitions.map((t) => (
+        {bar.data.transitions.map((tr) => (
           <button
-            key={t.id}
+            key={tr.id}
             type="button"
-            className={`btn small${t.highlight ? " primary" : ""}`}
+            className={`btn small${tr.highlight ? " primary" : ""}`}
             onClick={async () => {
-              if (t.confirm && !window.confirm(t.confirm)) return;
+              if (tr.confirm && !window.confirm(tr.confirm)) return;
               setError(null);
               try {
-                await workflow.transition(model, resId, t.id);
+                await workflow.transition(model, resId, tr.id);
                 await queryClient.invalidateQueries({ queryKey: ["statusbar", model, resId] });
                 onChanged();
               } catch (e) {
@@ -31,7 +32,7 @@ export function StatusBar({ model, resId, onChanged }: { model: string; resId: n
               }
             }}
           >
-            {t.name}
+            {tr.name}
           </button>
         ))}
       </div>

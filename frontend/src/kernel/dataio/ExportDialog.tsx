@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { dataio } from "../api/platform";
 import type { Domain } from "../api/types";
+import { t, tn } from "../i18n";
 
 /** Pick fields (including one level through relations) and download CSV or XLSX. */
 export function ExportDialog({
@@ -49,21 +50,26 @@ export function ExportDialog({
         className="dialog"
         role="dialog"
         aria-modal="true"
-        aria-label="Export"
+        aria-label={t("Export")}
         onMouseDown={(e) => e.stopPropagation()}
       >
-        <h2>Export {ids?.length ? `${ids.length} selected record(s)` : "all matching records"}</h2>
+        <h2>
+          {ids?.length
+            ? tn("Export {count} selected record", "Export {count} selected records", ids.length)
+            : t("Export all matching records")}
+        </h2>
         <div className="export-columns">
           <div>
             <h3>
-              Available{prefix && ` — ${prefix}`}{" "}
+              {t("Available")}
+              {prefix && ` — ${prefix}`}{" "}
               {prefix && (
                 <button
                   type="button"
                   className="btn small ghost"
                   onClick={() => setPrefix(prefix.split("/").slice(0, -1).join("/"))}
                 >
-                  ↑ Up
+                  ↑ {t("Up")}
                 </button>
               )}
             </h3>
@@ -82,7 +88,7 @@ export function ExportDialog({
                     <button
                       type="button"
                       className="btn ghost small"
-                      aria-label={`Fields of ${f.label}`}
+                      aria-label={t("Fields of {field}", { field: f.label })}
                       onClick={() => setPrefix(f.path)}
                     >
                       ›
@@ -93,7 +99,7 @@ export function ExportDialog({
             </ul>
           </div>
           <div>
-            <h3>To export</h3>
+            <h3>{t("To export")}</h3>
             <ol className="field-list">
               {selected.map((p) => (
                 <li key={p}>
@@ -101,7 +107,7 @@ export function ExportDialog({
                   <button
                     type="button"
                     className="btn ghost small"
-                    aria-label={`Remove ${p}`}
+                    aria-label={t("Remove {name}", { name: p })}
                     onClick={() => setSelected((s) => s.filter((x) => x !== p))}
                   >
                     ✕
@@ -113,26 +119,26 @@ export function ExportDialog({
         </div>
         <div className="button-row">
           <label>
-            Format{" "}
+            {t("Format")}{" "}
             <select
               className="input small"
               value={format}
               onChange={(e) => setFormat(e.target.value as "csv" | "xlsx")}
             >
-              <option value="xlsx">Excel (XLSX)</option>
+              <option value="xlsx">{t("Excel (XLSX)")}</option>
               <option value="csv">CSV</option>
             </select>
           </label>
           <button type="button" className="btn primary" disabled={!selected.length} onClick={() => void download()}>
-            Download
+            {t("Download")}
           </button>
           <button type="button" className="btn ghost" onClick={onClose}>
-            Close
+            {t("Close")}
           </button>
         </div>
         {dropped && (
           <div className="alert info" role="status">
-            Left out because you cannot read them: {dropped}
+            {t("Left out because you cannot read them: {fields}", { fields: dropped })}
           </div>
         )}
         {error && (

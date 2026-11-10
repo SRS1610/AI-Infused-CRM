@@ -8,6 +8,7 @@ import { useSession } from "../session";
 import { toggleTheme } from "../theme";
 import { CommandPalette, flattenMenus } from "./CommandPalette";
 import { NotificationBell } from "./NotificationBell";
+import { t } from "../i18n";
 
 function useOnline(): boolean {
   const [online, setOnline] = useState(typeof navigator === "undefined" ? true : navigator.onLine);
@@ -48,12 +49,12 @@ function CompanySwitcher() {
         {selected.size > 1 ? ` +${selected.size - 1}` : ""}
       </button>
       {open && (
-        <div className="dropdown-menu right" role="menu" aria-label="Companies">
+        <div className="dropdown-menu right" role="menu" aria-label={t("Companies")}>
           {session.allowed_companies.map((c) => (
             <div key={c.id} className="menu-row">
               <input
                 type="checkbox"
-                aria-label={`Include ${c.name}`}
+                aria-label={t("Include {company}", { company: c.name })}
                 checked={selected.has(c.id)}
                 onChange={(e) => {
                   const next = e.target.checked ? [...selected, c.id] : [...selected].filter((x) => x !== c.id);
@@ -104,22 +105,22 @@ export function AppShell({ children }: { children: ReactNode }) {
   return (
     <div className="shell">
       <a href="#main" className="skip-link">
-        Skip to content
+        {t("Skip to content")}
       </a>
       <header className="topbar">
         <button
           type="button"
           className="btn ghost nav-toggle"
-          aria-label="Open navigation"
+          aria-label={t("Open navigation")}
           aria-expanded={navOpen}
           onClick={() => setNavOpen((o) => !o)}
         >
           ☰
         </button>
-        <Link to="/" className="brand" aria-label="Home">
+        <Link to="/" className="brand" aria-label={t("Home")}>
           <img src="/icon.svg" alt="" width={24} height={24} /> <span>Tessera</span>
         </Link>
-        <nav className="apps" aria-label="Applications">
+        <nav className="apps" aria-label={t("Applications")}>
           {(menus.data ?? []).map((m) => {
             const first = flattenMenus([m], open)[0];
             return (
@@ -139,7 +140,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           type="button"
           className="btn ghost small"
           onClick={() => setPalette(true)}
-          title="Command palette (Ctrl/⌘+K)"
+          title={t("Command palette (Ctrl/⌘+K)")}
           aria-keyshortcuts="Control+K Meta+K"
         >
           ⌘K
@@ -159,10 +160,10 @@ export function AppShell({ children }: { children: ReactNode }) {
           {userMenu && (
             <div className="dropdown-menu right" role="menu">
               <button type="button" role="menuitem" className="btn ghost block" onClick={() => toggleTheme()}>
-                Toggle dark mode
+                {t("Toggle dark mode")}
               </button>
               <button type="button" role="menuitem" className="btn ghost block" onClick={() => void logout()}>
-                Sign out
+                {t("Sign out")}
               </button>
             </div>
           )}
@@ -170,12 +171,12 @@ export function AppShell({ children }: { children: ReactNode }) {
       </header>
       {!online && (
         <div className="offline-banner" role="status">
-          You are offline — changes cannot be saved until the connection returns.
+          {t("You are offline — changes cannot be saved until the connection returns.")}
         </div>
       )}
       <div className="body">
         {root && root.children.length > 0 && (
-          <nav className={`sidebar${navOpen ? " open" : ""}`} aria-label={`${root.name} menu`}>
+          <nav className={`sidebar${navOpen ? " open" : ""}`} aria-label={t("{app} menu", { app: root.name })}>
             <MenuTree nodes={root.children} current={currentAction} open={open} />
           </nav>
         )}
@@ -224,7 +225,7 @@ export function Home() {
   const { session } = useSession();
   return (
     <div className="home">
-      <h1>Welcome, {session?.user.name}</h1>
+      <h1>{t("Welcome, {name}", { name: session?.user.name })}</h1>
       <ul className="app-grid">
         {(menus.data ?? []).map((m) => {
           const first = flattenMenus([m], (a) => navigate(`/a/${encodeURIComponent(a)}`))[0];

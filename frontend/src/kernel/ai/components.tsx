@@ -3,6 +3,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { ai, aiErrorMessage, type Citation, type Proposal } from "./api";
+import { t } from "../i18n";
 
 export function useAiStatus() {
   return useQuery({ queryKey: ["ai", "status"], queryFn: ai.status, staleTime: 30_000, retry: false });
@@ -15,13 +16,13 @@ export function useAiFeature(name: string | undefined) {
   return { enabled: !!info, available: !!status.data?.available, info, loading: status.isLoading };
 }
 
-export function AiLabel({ text = "AI-drafted" }: { text?: string }) {
+export function AiLabel({ text = t("AI-drafted") }: { text?: string }) {
   return (
     <span
       className="ai-label"
       role="note"
-      aria-label={`${text}: review before using`}
-      title="Written by AI — review it"
+      aria-label={t("{label}: review before using", { label: text })}
+      title={t("Written by AI — review it")}
     >
       ✦ {text}
     </span>
@@ -31,7 +32,7 @@ export function AiLabel({ text = "AI-drafted" }: { text?: string }) {
 export function AiUnavailable() {
   return (
     <span className="ai-unavailable muted small" role="status">
-      AI unavailable
+      {t("AI unavailable")}
     </span>
   );
 }
@@ -47,13 +48,13 @@ export function Feedback({ runId }: { runId: number }) {
     }
   };
   return (
-    <span className="ai-feedback" aria-label="Was this helpful?">
+    <span className="ai-feedback" aria-label={t("Was this helpful?")}>
       <button
         type="button"
         className="btn ghost small"
         aria-pressed={sent === "up"}
         onClick={() => send("up")}
-        title="Helpful"
+        title={t("Helpful")}
       >
         👍
       </button>
@@ -62,7 +63,7 @@ export function Feedback({ runId }: { runId: number }) {
         className="btn ghost small"
         aria-pressed={sent === "down"}
         onClick={() => send("down")}
-        title="Not helpful"
+        title={t("Not helpful")}
       >
         👎
       </button>
@@ -73,7 +74,7 @@ export function Feedback({ runId }: { runId: number }) {
 export function Citations({ items }: { items: Citation[] }) {
   if (!items.length) return null;
   return (
-    <ul className="ai-citations" aria-label="Sources">
+    <ul className="ai-citations" aria-label={t("Sources")}>
       {items.map((c) => (
         <li key={c.id}>
           <Link to={`/m/${c.res_model}/${c.res_id}`}>{c.title || c.id}</Link>
@@ -81,6 +82,18 @@ export function Citations({ items }: { items: Citation[] }) {
       ))}
     </ul>
   );
+}
+
+function proposalStateLabel(state: Proposal["state"]): string {
+  const labels: Record<Proposal["state"], string> = {
+    pending: t("pending"),
+    accepted: t("accepted"),
+    edited: t("edited"),
+    rejected: t("rejected"),
+    expired: t("expired"),
+    failed: t("failed"),
+  };
+  return labels[state] ?? state;
 }
 
 const show = (v: unknown) =>
@@ -127,14 +140,14 @@ export function ProposalCard({ proposal, onDecided }: { proposal: Proposal; onDe
   };
 
   return (
-    <section className={`ai-proposal state-${current.state}`} aria-label={current.title ?? "AI proposal"}>
+    <section className={`ai-proposal state-${current.state}`} aria-label={current.title ?? t("AI proposal")}>
       <header>
-        <strong>{current.title ?? "Proposed change"}</strong> {current.ai_generated && !edited && <AiLabel />}
-        {decided && <span className="badge">{current.state}</span>}
+        <strong>{current.title ?? t("Proposed change")}</strong> {current.ai_generated && !edited && <AiLabel />}
+        {decided && <span className="badge">{proposalStateLabel(current.state)}</span>}
       </header>
       {proposal.kind === "message" ? (
         <label className="field">
-          <span className="sr-only">Message</span>
+          <span className="sr-only">{t("Message")}</span>
           <textarea
             rows={6}
             value={String(draft.body ?? "")}
@@ -146,9 +159,9 @@ export function ProposalCard({ proposal, onDecided }: { proposal: Proposal; onDe
         <table className="ai-diff">
           <thead>
             <tr>
-              <th scope="col">Field</th>
-              <th scope="col">Now</th>
-              <th scope="col">Proposed</th>
+              <th scope="col">{t("Field")}</th>
+              <th scope="col">{t("Now")}</th>
+              <th scope="col">{t("Proposed")}</th>
             </tr>
           </thead>
           <tbody>
@@ -158,7 +171,7 @@ export function ProposalCard({ proposal, onDecided }: { proposal: Proposal; onDe
                 <td>{show(proposal.original?.[k])}</td>
                 <td>
                   <input
-                    aria-label={`Proposed ${k}`}
+                    aria-label={t("Proposed {field}", { field: k })}
                     value={typeof v === "object" ? JSON.stringify(v) : String(v ?? "")}
                     disabled={decided}
                     onChange={(e) => {
@@ -183,10 +196,10 @@ export function ProposalCard({ proposal, onDecided }: { proposal: Proposal; onDe
       {!decided && (
         <div className="ai-actions">
           <button type="button" className="btn primary small" disabled={busy} onClick={accept}>
-            {edited ? "Accept edited" : proposal.kind === "message" ? "Send" : "Accept"}
+            {edited ? t("Accept edited") : proposal.kind === "message" ? t("Send") : t("Accept")}
           </button>
           <button type="button" className="btn small" disabled={busy} onClick={reject}>
-            Reject
+            {t("Reject")}
           </button>
         </div>
       )}
