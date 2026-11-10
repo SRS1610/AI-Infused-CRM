@@ -236,7 +236,13 @@ def build() -> None:
                         "contains": ["printer"],
                         "not_contains": ["board only", "sk-test", "40M"],
                     },
-                    "watch_models": ["ai_test.ticket", "chatter.message", "core.mail_queue", "core.user", "ai_core.provider"],
+                    "watch_models": [
+                        "ai_test.ticket",
+                        "chatter.message",
+                        "core.mail_queue",
+                        "core.user",
+                        "ai_core.provider",
+                    ],
                 }
             )
             tool_blocks = [

@@ -212,6 +212,18 @@ Format: `D-nnn · date · status (Proposed | Accepted | Superseded)`
 - **Decision:** Uninstalling a module without `--drop-data` renames its tables *and* their indexes (to short hashed names) and treats its many2many join tables as owned. Found while uninstalling and reinstalling `ai_core`: the old indexes blocked the reinstall and the join table showed as drift.
 - **Rationale:** U-2 requires a clean `tessera db check` after uninstalling a leaf module, and reinstalling must work.
 
+### D-056 · 2026-11-10 · Accepted — Predictive CRM features are classical models trained per company
+- **Decision:** Lead scoring is a per-company logistic regression trained nightly on won/lost history, stored as JSON (version, hash, training metadata; no pickle) and scored in-process; companies without enough history fall back to the rule scoring. Inputs come from an allow-list that excludes names, places, language, job titles and every protected attribute or proxy (tested). Deal risk is weighted signals with a phrase list for sentiment; routing combines assignment rules, each member's record on similar deals and current load, and is always a proposal unless a rule explicitly allows auto-apply (off by default). The forecast is a Monte-Carlo simulation over stage win rates and slippage; an optional LLM narrative never changes the figures.
+- **Rationale:** AI architecture note §4.7: numbers come from models that can be explained factor by factor; LLMs only narrate.
+
+### D-057 · 2026-11-10 · Accepted — Contact enrichment goes through approved adapters only
+- **Decision:** Enrichment sources implement an adapter interface and are approved per company (`contacts.enrichment_source`; a company row overrides the global one). A suggestion is kept only if an approved adapter returned it, always carries its source, and values from different outside companies are never mixed in one proposal. Phase 1 ships an offline fixture adapter; real adapters plug into `modules/contacts/enrichment.py`.
+- **Rationale:** Source attribution must be 100 % (1.6 table), and no data provider is contracted yet.
+
+### D-058 · 2026-11-10 · Accepted — How Phase 1 AI features are measured
+- **Decision:** Deterministic and statistical features (scoring, risk, routing, forecast, suggested times, duplicates, tag/enrichment accuracy, to-do ranking, translation chrF, domain equivalence, price grounding) are measured for real by the production code on generated data with a known signal, seeded separately from training. LLM features are measured by replaying hand-authored answers and judge scores (D-050), which tests validation, citations, access control, proposals and injection handling, not model quality. Live scores need provider keys and the nightly run.
+- **Rationale:** States plainly what the green thresholds mean until a live provider is configured.
+
 ### D-023 · 2026-11-09 · Proposed — Public web surfaces before Phase 7 use `*_website` bridge modules
 - **Decision:** Modules that need a public page before the `website` builder exists (recruitment job postings, event pages, eLearning courses, blog, forum, survey invitations) depend only on `portal` for their minimal public rendering in their own phase; `recruitment_website`, `events_website`, `elearning_website`, `blog_website`, `forum_website` bridge modules (auto-installed when `website` is present) move those pages into the website builder in Phase 7.
 - **Rationale:** Preserves the layering rule (no dependency on a later phase) while still shipping usable public pages when each module lands.
