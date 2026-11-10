@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { api, ApiError, request } from "../../kernel/api/client";
 import type { ViewDef, ViewNode } from "../../kernel/api/types";
 import { registerClientAction } from "../../kernel/extensions";
+import { t } from "../../kernel/i18n";
 
 interface StudioModel {
   model: string;
@@ -27,19 +28,19 @@ interface Change {
 }
 type Op = Record<string, unknown>;
 
-const FIELD_TYPES: [string, string][] = [
-  ["char", "Text"],
-  ["text", "Long text"],
-  ["html", "Rich text"],
-  ["integer", "Whole number"],
-  ["float", "Decimal number"],
-  ["monetary", "Amount"],
-  ["boolean", "Checkbox"],
-  ["date", "Date"],
-  ["datetime", "Date and time"],
-  ["selection", "Choice"],
-  ["many2one", "Link to one record"],
-  ["many2many", "Links to several records"],
+const fieldTypes = (): [string, string][] => [
+  ["char", t("Text")],
+  ["text", t("Long text")],
+  ["html", t("Rich text")],
+  ["integer", t("Whole number")],
+  ["float", t("Decimal number")],
+  ["monetary", t("Amount")],
+  ["boolean", t("Checkbox")],
+  ["date", t("Date")],
+  ["datetime", t("Date and time")],
+  ["selection", t("Choice")],
+  ["many2one", t("Link to one record")],
+  ["many2many", t("Links to several records")],
 ];
 
 const studio = {
@@ -109,17 +110,17 @@ function AddField({ model, fields, onDone }: { model: string; fields: StudioFiel
     }
   };
   return (
-    <form className="studio-card" onSubmit={submit} aria-label="Add a field">
-      <h3>Add a field</h3>
+    <form className="studio-card" onSubmit={submit} aria-label={t("Add a field")}>
+      <h3>{t("Add a field")}</h3>
       <label className="field">
-        <span>Label</span>
+        <span>{t("Label")}</span>
         <input className="input" required value={label} onChange={(e) => setLabel(e.target.value)} />
       </label>
-      <p className="muted small">Technical name: {label ? slug(label) : "—"}</p>
+      <p className="muted small">{t("Technical name: {name}", { name: label ? slug(label) : "—" })}</p>
       <label className="field">
-        <span>Type</span>
+        <span>{t("Type")}</span>
         <select className="input" value={type} onChange={(e) => setType(e.target.value)}>
-          {FIELD_TYPES.map(([v, l]) => (
+          {fieldTypes().map(([v, l]) => (
             <option key={v} value={v}>
               {l}
             </option>
@@ -128,15 +129,15 @@ function AddField({ model, fields, onDone }: { model: string; fields: StudioFiel
       </label>
       {type === "selection" && (
         <label className="field">
-          <span>Options (comma separated)</span>
+          <span>{t("Options (comma separated)")}</span>
           <input className="input" required value={options} onChange={(e) => setOptions(e.target.value)} />
         </label>
       )}
       {(type === "many2one" || type === "many2many") && (
         <label className="field">
-          <span>Linked model</span>
+          <span>{t("Linked model")}</span>
           <select className="input" required value={comodel} onChange={(e) => setComodel(e.target.value)}>
-            <option value="">Choose…</option>
+            <option value="">{t("Choose…")}</option>
             {(models.data ?? []).map((m) => (
               <option key={m.model} value={m.model}>
                 {m.description}
@@ -146,9 +147,9 @@ function AddField({ model, fields, onDone }: { model: string; fields: StudioFiel
         </label>
       )}
       <label className="field">
-        <span>Place on the form after</span>
+        <span>{t("Place on the form after")}</span>
         <select className="input" value={after} onChange={(e) => setAfter(e.target.value)}>
-          <option value="">End of the form</option>
+          <option value="">{t("End of the form")}</option>
           {fields.map((f) => (
             <option key={f.name} value={f.name}>
               {f.label}
@@ -157,10 +158,10 @@ function AddField({ model, fields, onDone }: { model: string; fields: StudioFiel
         </select>
       </label>
       <label className="checkbox">
-        <input type="checkbox" checked={inList} onChange={(e) => setInList(e.target.checked)} /> Show in the list
+        <input type="checkbox" checked={inList} onChange={(e) => setInList(e.target.checked)} /> {t("Show in the list")}
       </label>
       <label className="checkbox">
-        <input type="checkbox" checked={required} onChange={(e) => setRequired(e.target.checked)} /> Required
+        <input type="checkbox" checked={required} onChange={(e) => setRequired(e.target.checked)} /> {t("Required")}
       </label>
       {error && (
         <div className="alert error" role="alert">
@@ -168,7 +169,7 @@ function AddField({ model, fields, onDone }: { model: string; fields: StudioFiel
         </div>
       )}
       <button type="submit" className="btn primary" disabled={busy || !label}>
-        {busy ? "Adding…" : "Add field"}
+        {busy ? t("Adding…") : t("Add field")}
       </button>
     </form>
   );
@@ -218,7 +219,7 @@ function LayoutEditor({ model, view, onDone }: { model: string; view: ViewDef | 
       if (!hidden.has(field)) ops.push({ op: "set_attr", anchor: { field }, attrs: { readonly: value } });
     if (!ops.length) return;
     try {
-      await studio.changeView(model, "form", ops, "Form layout changed in Studio");
+      await studio.changeView(model, "form", ops, t("Form layout changed in Studio"));
       setOrder(null);
       setHidden(new Set());
       setLocked({});
@@ -228,9 +229,9 @@ function LayoutEditor({ model, view, onDone }: { model: string; view: ViewDef | 
     }
   };
   return (
-    <section className="studio-card" aria-label="Form layout">
-      <h3>Form layout</h3>
-      <p className="muted small">Drag a field onto another to move it after it, or use the arrows.</p>
+    <section className="studio-card" aria-label={t("Form layout")}>
+      <h3>{t("Form layout")}</h3>
+      <p className="muted small">{t("Drag a field onto another to move it after it, or use the arrows.")}</p>
       <ol className="studio-layout">
         {items.map((n) => (
           <li
@@ -251,7 +252,7 @@ function LayoutEditor({ model, view, onDone }: { model: string; view: ViewDef | 
             <button
               type="button"
               className="btn ghost small"
-              aria-label={`Move ${name(n)} up`}
+              aria-label={t("Move {field} up", { field: name(n) })}
               onClick={() => step(name(n), -1)}
             >
               ↑
@@ -259,7 +260,7 @@ function LayoutEditor({ model, view, onDone }: { model: string; view: ViewDef | 
             <button
               type="button"
               className="btn ghost small"
-              aria-label={`Move ${name(n)} down`}
+              aria-label={t("Move {field} down", { field: name(n) })}
               onClick={() => step(name(n), 1)}
             >
               ↓
@@ -270,7 +271,7 @@ function LayoutEditor({ model, view, onDone }: { model: string; view: ViewDef | 
                 checked={!!(locked[name(n)] ?? n.readonly)}
                 onChange={(e) => setLocked({ ...locked, [name(n)]: e.target.checked })}
               />{" "}
-              Read-only
+              {t("Read-only")}
             </label>
             <label className="checkbox small">
               <input
@@ -283,7 +284,7 @@ function LayoutEditor({ model, view, onDone }: { model: string; view: ViewDef | 
                   setHidden(next);
                 }}
               />{" "}
-              Hide
+              {t("Hide")}
             </label>
           </li>
         ))}
@@ -294,7 +295,7 @@ function LayoutEditor({ model, view, onDone }: { model: string; view: ViewDef | 
         </div>
       )}
       <button type="button" className="btn primary" onClick={() => void save()}>
-        Save layout
+        {t("Save layout")}
       </button>
     </section>
   );
@@ -303,7 +304,7 @@ function LayoutEditor({ model, view, onDone }: { model: string; view: ViewDef | 
 function AutomationForm({ model, fields, onDone }: { model: string; fields: StudioFieldInfo[]; onDone: () => void }) {
   const [name, setName] = useState("");
   const [watched, setWatched] = useState("stage_id");
-  const [summary, setSummary] = useState("Follow up");
+  const [summary, setSummary] = useState(() => t("Follow up"));
   const [days, setDays] = useState(1);
   const [error, setError] = useState<string | null>(null);
   const submit = async (e: React.FormEvent) => {
@@ -324,14 +325,14 @@ function AutomationForm({ model, fields, onDone }: { model: string; fields: Stud
     }
   };
   return (
-    <form className="studio-card" onSubmit={submit} aria-label="Add an automated action">
-      <h3>Automated action</h3>
+    <form className="studio-card" onSubmit={submit} aria-label={t("Add an automated action")}>
+      <h3>{t("Automated action")}</h3>
       <label className="field">
-        <span>Name</span>
+        <span>{t("Name")}</span>
         <input className="input" required value={name} onChange={(e) => setName(e.target.value)} />
       </label>
       <label className="field">
-        <span>When this field changes</span>
+        <span>{t("When this field changes")}</span>
         <select className="input" value={watched} onChange={(e) => setWatched(e.target.value)}>
           {fields.map((f) => (
             <option key={f.name} value={f.name}>
@@ -341,11 +342,11 @@ function AutomationForm({ model, fields, onDone }: { model: string; fields: Stud
         </select>
       </label>
       <label className="field">
-        <span>Schedule a to-do</span>
+        <span>{t("Schedule a to-do")}</span>
         <input className="input" required value={summary} onChange={(e) => setSummary(e.target.value)} />
       </label>
       <label className="field">
-        <span>Due in (days)</span>
+        <span>{t("Due in (days)")}</span>
         <input className="input" type="number" min={0} value={days} onChange={(e) => setDays(Number(e.target.value))} />
       </label>
       {error && (
@@ -354,7 +355,7 @@ function AutomationForm({ model, fields, onDone }: { model: string; fields: Stud
         </div>
       )}
       <button type="submit" className="btn primary" disabled={!name}>
-        Add automation
+        {t("Add automation")}
       </button>
     </form>
   );
@@ -379,18 +380,18 @@ function History({ model, onDone }: { model: string; onDone: () => void }) {
     }
   };
   return (
-    <section className="studio-card" aria-label="Change history">
-      <h3>Change history</h3>
+    <section className="studio-card" aria-label={t("Change history")}>
+      <h3>{t("Change history")}</h3>
       <div className="studio-actions">
         <button
           type="button"
           className="btn small"
-          onClick={() => void act(() => studio.snapshot(`Snapshot ${new Date().toLocaleString()}`))}
+          onClick={() => void act(() => studio.snapshot(t("Snapshot {date}", { date: new Date().toLocaleString() })))}
         >
-          Take a snapshot
+          {t("Take a snapshot")}
         </button>
         <a className="btn small" href="/api/v1/studio/export" download>
-          Export as module
+          {t("Export as module")}
         </a>
       </div>
       {error && <div className="alert error">{error}</div>}
@@ -403,17 +404,17 @@ function History({ model, onDone }: { model: string; onDone: () => void }) {
             </span>
             {c.state === "applied" ? (
               <button type="button" className="btn ghost small" onClick={() => void act(() => studio.rollback(c.id))}>
-                Roll back
+                {t("Roll back")}
               </button>
             ) : (
-              <span className="badge">rolled back</span>
+              <span className="badge">{t("rolled back")}</span>
             )}
           </li>
         ))}
       </ul>
       {(snapshots.data?.length ?? 0) > 0 && (
         <>
-          <h4>Snapshots</h4>
+          <h4>{t("Snapshots")}</h4>
           <ul className="studio-changes">
             {snapshots.data!.map((s) => (
               <li key={s.id}>
@@ -423,7 +424,7 @@ function History({ model, onDone }: { model: string; onDone: () => void }) {
                   className="btn ghost small"
                   onClick={() => void act(() => studio.rollbackTo(s.id))}
                 >
-                  Roll back to here
+                  {t("Roll back to here")}
                 </button>
               </li>
             ))}
@@ -456,9 +457,9 @@ export function StudioApp() {
   return (
     <div className="page studio-app">
       <header className="page-header">
-        <h1>Studio</h1>
+        <h1>{t("Studio")}</h1>
         <label className="field inline">
-          <span>Model</span>
+          <span>{t("Model")}</span>
           <select className="input" value={model} onChange={(e) => setModel(e.target.value)}>
             {(models.data ?? []).map((m) => (
               <option key={m.model} value={m.model}>

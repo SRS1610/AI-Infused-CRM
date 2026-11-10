@@ -1,5 +1,6 @@
 // Client of the AI API (/api/v1/ai): feature status, runs, streamed drafts, proposals, feedback, admin.
 import { ApiError, CLIENT_ID, clientState, request } from "../api/client";
+import { t } from "../i18n";
 
 export interface AiFeatureInfo {
   title: string;
@@ -171,11 +172,11 @@ export async function streamFeature(
 
 export function aiCodeMessage(code: string | undefined, fallback: string): string {
   if (code === "ai_unavailable" || code === "provider_unavailable")
-    return "AI is unavailable right now. You can carry on without it.";
-  if (code === "feature_disabled") return "This AI feature is turned off.";
-  if (code === "budget_exceeded" || code === "quota_exceeded") return "The AI budget for this period is used up.";
-  if (code === "model_refused") return "The AI declined this request.";
-  if (code === "invalid_output") return "The AI answer could not be used. Please try again or continue manually.";
+    return t("AI is unavailable right now. You can carry on without it.");
+  if (code === "feature_disabled") return t("This AI feature is turned off.");
+  if (code === "budget_exceeded" || code === "quota_exceeded") return t("The AI budget for this period is used up.");
+  if (code === "model_refused") return t("The AI declined this request.");
+  if (code === "invalid_output") return t("The AI answer could not be used. Please try again or continue manually.");
   return fallback;
 }
 

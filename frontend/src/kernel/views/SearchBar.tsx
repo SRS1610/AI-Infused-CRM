@@ -4,6 +4,7 @@ import { api } from "../api/client";
 import type { Domain, FieldMeta, ViewDef, ViewsResponse } from "../api/types";
 import { searchAddonsFor } from "../extensions";
 import { buildDomain } from "./searchDomain";
+import { t } from "../i18n";
 
 export interface SearchState {
   text: string;
@@ -23,14 +24,15 @@ interface Props {
   inputRef?: React.Ref<HTMLInputElement>;
 }
 
-const OPERATORS: Record<string, [string, string][]> = {
+/** Operators offered per field kind, with labels in the user's language. */
+const operatorTable = (): Record<string, [string, string][]> => ({
   text: [
-    ["ilike", "contains"],
-    ["not_ilike", "does not contain"],
-    ["=", "is"],
-    ["!=", "is not"],
-    ["is_set", "is set"],
-    ["is_not_set", "is not set"],
+    ["ilike", t("contains")],
+    ["not_ilike", t("does not contain")],
+    ["=", t("is")],
+    ["!=", t("is not")],
+    ["is_set", t("is set")],
+    ["is_not_set", t("is not set")],
   ],
   number: [
     ["=", "="],
@@ -39,29 +41,30 @@ const OPERATORS: Record<string, [string, string][]> = {
     [">=", "≥"],
     ["<", "<"],
     ["<=", "≤"],
-    ["is_set", "is set"],
+    ["is_set", t("is set")],
   ],
   date: [
-    ["=", "on"],
-    [">=", "on or after"],
-    ["<=", "on or before"],
-    ["is_set", "is set"],
-    ["is_not_set", "is not set"],
+    ["=", t("on")],
+    [">=", t("on or after")],
+    ["<=", t("on or before")],
+    ["is_set", t("is set")],
+    ["is_not_set", t("is not set")],
   ],
-  boolean: [["=", "is"]],
+  boolean: [["=", t("is")]],
   selection: [
-    ["=", "is"],
-    ["!=", "is not"],
-    ["is_set", "is set"],
+    ["=", t("is")],
+    ["!=", t("is not")],
+    ["is_set", t("is set")],
   ],
   relation: [
-    ["ilike", "name contains"],
-    ["is_set", "is set"],
-    ["is_not_set", "is not set"],
+    ["ilike", t("name contains")],
+    ["is_set", t("is set")],
+    ["is_not_set", t("is not set")],
   ],
-};
+});
 
 function operatorsFor(field?: FieldMeta): [string, string][] {
+  const OPERATORS = operatorTable();
   if (!field) return OPERATORS.text;
   if (["integer", "float", "monetary"].includes(field.type)) return OPERATORS.number;
   if (["date", "datetime"].includes(field.type)) return OPERATORS.date;
@@ -113,7 +116,7 @@ export function SearchBar({ model, meta, view, value, onChange, inputRef }: Prop
   };
 
   const saveFavorite = async () => {
-    const name = window.prompt("Name of this filter");
+    const name = window.prompt(t("Name of this filter"));
     if (!name) return;
     await api.create("web.filter", {
       name,
@@ -132,8 +135,8 @@ export function SearchBar({ model, meta, view, value, onChange, inputRef }: Prop
         ref={inputRef}
         className="input search-input"
         type="search"
-        placeholder={`Search ${meta.model.description}…`}
-        aria-label={`Search ${meta.model.description}`}
+        placeholder={t("Search {model}…", { model: meta.model.description })}
+        aria-label={t("Search {model}", { model: meta.model.description })}
         value={value.text}
         onChange={(e) => onChange({ ...value, text: e.target.value })}
       />
@@ -144,7 +147,8 @@ export function SearchBar({ model, meta, view, value, onChange, inputRef }: Prop
         aria-haspopup="dialog"
         onClick={() => setOpen((o) => !o)}
       >
-        Filters{active ? ` (${active})` : ""}
+        {t("Filters")}
+        {active ? ` (${active})` : ""}
       </button>
       {searchAddonsFor(model).map((a) => (
         <span key={a.key} className="search-addon">
@@ -157,14 +161,14 @@ export function SearchBar({ model, meta, view, value, onChange, inputRef }: Prop
           className="btn ghost small"
           onClick={() => onChange({ ...value, filters: [], groupBy: [], custom: [] })}
         >
-          Clear
+          {t("Clear")}
         </button>
       )}
       {open && (
-        <div className="search-panel" role="dialog" aria-label="Filters and grouping">
+        <div className="search-panel" role="dialog" aria-label={t("Filters and grouping")}>
           <fieldset>
-            <legend>Filters</legend>
-            {filters.length === 0 && <p className="muted">No predefined filters.</p>}
+            <legend>{t("Filters")}</legend>
+            {filters.length === 0 && <p className="muted">{t("No predefined filters.")}</p>}
             {filters.map((f) => (
               <label key={f.name} className="menu-check">
                 <input
@@ -181,7 +185,7 @@ export function SearchBar({ model, meta, view, value, onChange, inputRef }: Prop
                 <button
                   type="button"
                   className="btn small ghost"
-                  aria-label="Remove condition"
+                  aria-label={t("Remove condition")}
                   onClick={() => onChange({ ...value, custom: value.custom.filter((_, j) => j !== i) })}
                 >
                   ×
@@ -191,13 +195,13 @@ export function SearchBar({ model, meta, view, value, onChange, inputRef }: Prop
             <div className="domain-editor">
               <select
                 className="input small"
-                aria-label="Field"
+                aria-label={t("Field")}
                 value={draft.field}
                 onChange={(e) =>
                   setDraft({ field: e.target.value, op: operatorsFor(meta.fields[e.target.value])[0][0], value: "" })
                 }
               >
-                <option value="">Add a condition…</option>
+                <option value="">{t("Add a condition…")}</option>
                 {searchable.map((f) => (
                   <option key={f.name} value={f.name}>
                     {f.string}
@@ -208,7 +212,7 @@ export function SearchBar({ model, meta, view, value, onChange, inputRef }: Prop
                 <>
                   <select
                     className="input small"
-                    aria-label="Operator"
+                    aria-label={t("Operator")}
                     value={draft.op}
                     onChange={(e) => setDraft({ ...draft, op: e.target.value })}
                   >
@@ -222,7 +226,7 @@ export function SearchBar({ model, meta, view, value, onChange, inputRef }: Prop
                     (meta.fields[draft.field].type === "selection" ? (
                       <select
                         className="input small"
-                        aria-label="Value"
+                        aria-label={t("Value")}
                         value={draft.value}
                         onChange={(e) => setDraft({ ...draft, value: e.target.value })}
                       >
@@ -236,17 +240,17 @@ export function SearchBar({ model, meta, view, value, onChange, inputRef }: Prop
                     ) : meta.fields[draft.field].type === "boolean" ? (
                       <select
                         className="input small"
-                        aria-label="Value"
+                        aria-label={t("Value")}
                         value={draft.value}
                         onChange={(e) => setDraft({ ...draft, value: e.target.value })}
                       >
-                        <option value="true">Yes</option>
-                        <option value="false">No</option>
+                        <option value="true">{t("Yes")}</option>
+                        <option value="false">{t("No")}</option>
                       </select>
                     ) : (
                       <input
                         className="input small"
-                        aria-label="Value"
+                        aria-label={t("Value")}
                         type={
                           ["date", "datetime"].includes(meta.fields[draft.field].type)
                             ? "date"
@@ -259,14 +263,14 @@ export function SearchBar({ model, meta, view, value, onChange, inputRef }: Prop
                       />
                     ))}
                   <button type="button" className="btn small" onClick={addCustom}>
-                    Add
+                    {t("Add")}
                   </button>
                 </>
               )}
             </div>
           </fieldset>
           <fieldset>
-            <legend>Group by</legend>
+            <legend>{t("Group by")}</legend>
             {groupBys.map((g) => (
               <label key={g.field} className="menu-check">
                 <input
@@ -277,10 +281,10 @@ export function SearchBar({ model, meta, view, value, onChange, inputRef }: Prop
                 {g.label ?? meta.fields[g.field.split(":")[0]]?.string ?? g.field}
               </label>
             ))}
-            {groupBys.length === 0 && <p className="muted">No grouping options.</p>}
+            {groupBys.length === 0 && <p className="muted">{t("No grouping options.")}</p>}
           </fieldset>
           <fieldset>
-            <legend>Favourites</legend>
+            <legend>{t("Favourites")}</legend>
             {(favorites.data?.items ?? []).map((f) => (
               <button
                 key={f.id}
@@ -294,7 +298,7 @@ export function SearchBar({ model, meta, view, value, onChange, inputRef }: Prop
               </button>
             ))}
             <button type="button" className="btn small" onClick={() => void saveFavorite()}>
-              Save current search
+              {t("Save current search")}
             </button>
           </fieldset>
         </div>

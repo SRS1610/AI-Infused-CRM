@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { search, type SearchHit } from "../api/platform";
 import type { MenuNode } from "../api/types";
+import { t } from "../i18n";
 
 export interface PaletteItem {
   id: string;
@@ -22,12 +23,12 @@ export function flattenMenus(menus: MenuNode[], open: (action: string) => void, 
 
 export function fuzzyScore(query: string, text: string): number {
   const q = query.toLowerCase();
-  const t = text.toLowerCase();
+  const hay = text.toLowerCase();
   if (!q) return 1;
-  if (t.includes(q)) return 100 - t.indexOf(q);
+  if (hay.includes(q)) return 100 - hay.indexOf(q);
   let ti = 0;
   for (const ch of q) {
-    ti = t.indexOf(ch, ti);
+    ti = hay.indexOf(ch, ti);
     if (ti < 0) return 0;
     ti++;
   }
@@ -96,14 +97,14 @@ export function CommandPalette({
         className="palette"
         role="dialog"
         aria-modal="true"
-        aria-label="Command palette"
+        aria-label={t("Command palette")}
         onMouseDown={(e) => e.stopPropagation()}
       >
         <input
           ref={input}
           className="input palette-input"
-          placeholder="Go to…"
-          aria-label="Go to menu or record"
+          placeholder={t("Go to…")}
+          aria-label={t("Go to menu or record")}
           role="combobox"
           aria-expanded="true"
           aria-controls="palette-results"
@@ -144,7 +145,7 @@ export function CommandPalette({
               {r.hint && <span className="muted"> — {r.hint}</span>}
             </li>
           ))}
-          {results.length === 0 && <li className="muted">No match</li>}
+          {results.length === 0 && <li className="muted">{t("No match")}</li>}
         </ul>
       </div>
     </div>

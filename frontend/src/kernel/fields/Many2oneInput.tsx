@@ -1,6 +1,7 @@
 import { useEffect, useId, useRef, useState } from "react";
 import { api } from "../api/client";
 import type { Domain, Many2oneValue } from "../api/types";
+import { t } from "../i18n";
 
 interface Props {
   comodel: string;
@@ -112,7 +113,7 @@ export function Many2oneInput({ comodel, value, onChange, domain, disabled, requ
                 void choose(option);
               }}
             >
-              {option === "create" ? <em>Create “{text}”</em> : option.display_name}
+              {option === "create" ? <em>{t("Create “{name}”", { name: text })}</em> : option.display_name}
             </li>
           ))}
         </ul>

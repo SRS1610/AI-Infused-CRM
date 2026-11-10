@@ -1,5 +1,6 @@
 // Display formatting with Intl, honouring the user's language and timezone.
 import type { FieldMeta, RecordData } from "./api/types";
+import { t, tn } from "./i18n";
 
 let locale = "en-US";
 let timeZone: string | undefined;
@@ -48,15 +49,15 @@ export function currencyCode(record: RecordData, field: FieldMeta): string | nul
 
 export function displayValue(field: FieldMeta | undefined, value: any, record: RecordData = {}): string {
   if (!field) return value === null || value === undefined ? "" : String(value);
-  if (value === null || value === undefined || value === false) return field.type === "boolean" ? "No" : "";
+  if (value === null || value === undefined || value === false) return field.type === "boolean" ? t("No") : "";
   switch (field.type) {
     case "many2one":
       return value.display_name ?? `#${value.id}`;
     case "one2many":
     case "many2many":
-      return Array.isArray(value) ? `${value.length} record${value.length === 1 ? "" : "s"}` : "";
+      return Array.isArray(value) ? tn("{count} record", "{count} records", value.length) : "";
     case "boolean":
-      return value ? "Yes" : "No";
+      return value ? t("Yes") : t("No");
     case "selection":
       return field.selection?.find(([k]) => k === value)?.[1] ?? String(value);
     case "integer":
