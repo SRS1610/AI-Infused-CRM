@@ -179,7 +179,7 @@ def test_reconcile_screen_endpoints(env):
     line = statement(env, [{"amount": 15.0, "payment_ref": inv.name}]).line_ids
     model = env["account.bank_statement_line"]
     rows = model.get_reconcile_lines(journal_id=line.journal_id.ids[0], show="open", query=inv.name)
-    assert [r["id"] for r in rows] == line.ids
+    assert line.ids[0] in [r["id"] for r in rows]  # API tests may have committed other lines quoting it
     result = model.action_auto_reconcile_all(journal_id=line.journal_id.ids[0])
     assert result["reconciled"] >= 1 and line.state == "reconciled"
     assert line.ids[0] in [r["id"] for r in model.get_reconcile_lines(show="reconciled")]

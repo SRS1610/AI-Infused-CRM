@@ -14,7 +14,7 @@ from tessera.i18n import _
 from tessera.orm import Model, api, fields
 
 LINE_STATES = [("draft", "Draft"), ("posted", "To reconcile"), ("reconciled", "Reconciled")]
-LINE_EDITABLE_WHEN_POSTED = {"narration", "to_check", "reconcile_model_id", "state", "is_reconciled", "amount_residual"}
+LINE_EDITABLE_WHEN_POSTED = {"narration", "to_check"}  # the bank module itself writes with _bank_internal
 
 
 class JournalBank(Model):
