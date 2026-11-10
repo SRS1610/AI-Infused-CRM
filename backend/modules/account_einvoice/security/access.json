@@ -1,0 +1,6 @@
+[
+  {"id": "access_edi_document_invoice", "model": "core.model_access", "values": {"name": "account.edi_document: account.group_account_invoice", "model_name": "account.edi_document", "group_id": "account.group_account_invoice", "perm_read": true, "perm_write": true, "perm_create": true, "perm_unlink": false}},
+  {"id": "access_edi_document_readonly", "model": "core.model_access", "values": {"name": "account.edi_document: account.group_account_readonly", "model_name": "account.edi_document", "group_id": "account.group_account_readonly", "perm_read": true, "perm_write": false, "perm_create": false, "perm_unlink": false}},
+  {"id": "access_edi_document_manager", "model": "core.model_access", "values": {"name": "account.edi_document: account.group_account_manager", "model_name": "account.edi_document", "group_id": "account.group_account_manager", "perm_read": true, "perm_write": true, "perm_create": true, "perm_unlink": true}},
+  {"id": "access_edi_mock_manager", "model": "core.model_access", "values": {"name": "account.edi_mock_transmission: account.group_account_manager", "model_name": "account.edi_mock_transmission", "group_id": "account.group_account_manager", "perm_read": true, "perm_write": false, "perm_create": false, "perm_unlink": false}}
+]

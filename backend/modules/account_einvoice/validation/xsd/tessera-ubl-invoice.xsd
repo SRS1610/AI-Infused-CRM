@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Tessera entry point for validating UBL 2.1 invoices with the unmodified OASIS schemas.
+  Some OASIS schema modules import a namespace without a location (resolved by an XML catalogue in other tools);
+  importing those namespaces here first, with their location, lets libxml2 resolve them.
+  Licensed under the Apache License, Version 2.0 (this file only).
+-->
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified">
+  <xsd:import namespace="urn:un:unece:uncefact:data:specification:CoreComponentTypeSchemaModule:2" schemaLocation="CCTS_CCT_SchemaModule.xsd"/>
+  <xsd:import namespace="http://www.w3.org/2000/09/xmldsig#" schemaLocation="xmldsig-core-schema.xsd"/>
+  <xsd:import namespace="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2" schemaLocation="maindoc/UBL-Invoice-2.1.xsd"/>
+</xsd:schema>

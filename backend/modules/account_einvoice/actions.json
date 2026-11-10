@@ -1,0 +1,7 @@
+[
+  {"id": "action_edi_documents", "name": "E-invoices", "model": "account.edi_document", "views": ["list", "form"],
+   "view_refs": {"list": "account_einvoice.view_edi_document_list", "form": "account_einvoice.view_edi_document_form"},
+   "search_view": "account_einvoice.view_edi_document_search"},
+  {"id": "action_mock_transmissions", "name": "Peppol network (mock)", "model": "account.edi_mock_transmission", "views": ["list", "form"],
+   "view_refs": {"list": "account_einvoice.view_mock_transmission_list"}}
+]

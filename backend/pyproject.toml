@@ -51,6 +51,7 @@ dependencies = [
   "scikit-learn>=1.5",
   "numpy>=2.0",
   "signxml>=5.2.0",
+  "saxonche>=12.5",
 ]
 
 [project.optional-dependencies]

@@ -55,6 +55,7 @@ KERNEL_TEST_MODULES = [
     "account_bank",
     "payment",
     "account_dunning",
+    "account_einvoice",
 ]
 
 
