@@ -366,7 +366,7 @@ JUDGE_SCHEMA = {
 
 
 def judge(env: Environment, client: CassetteClient, rubric: str, output: str, case: dict[str, Any]) -> float | None:
-    """LLM-as-judge score (1–5) for rubric metrics; replayed from the cassette like any other call."""
+    """LLM-as-judge score (1 to 5) for rubric metrics; replayed from the cassette like any other call."""
     from tessera.ai.prompts import escape
 
     reference = case.get("expected", {}).get("reference", "")
