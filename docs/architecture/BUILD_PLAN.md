@@ -394,6 +394,21 @@ Modules: `sale` (full), `product` (full), `sale_subscription`, `sale_rental`, `s
 | 2-k | Commission statement for the demo plan equals the independent spreadsheet cross-check; AI explanation references only numbers present in the statement. |
 | 2-l | Phase 1 DB upgraded to Phase 2 passes the full suite (U-3); `account` reports on 100k lines render < 2 s p95. |
 
+### 3.1 Sub-phases (D-069)
+
+Data model: [ERD_PHASE_2.md](ERD_PHASE_2.md).
+
+| Sub-phase | Modules | Exit tests |
+|---|---|---|
+| 2.0 Plan and data model | — | ERD, decisions D-069–D-074 |
+| 2.1 Accounting core | `account` (charts: generic, US, EU), `product` 2.0 units | 2-b, 2-c, tax-engine part of 2-e, ledger invariants (D-073), portal invoices |
+| 2.2 Product and sales | `product` 2.0, `sale` 2.0 | variants, pricelists, promotions, templates, invoicing policies, down payments, returns; Phase 1 → 2 migration (U-3) |
+| 2.3 Bank, payments, dunning, e-invoicing | `account_bank`, `payment`, `account_dunning`, `account_einvoice` | 2-d, 2-h, 2-j |
+| 2.4 Management accounting and reports | `account_analytic`, `account_budget`, `account_asset`, `account_reports`, `account_tax` | 2-a, 2-e (tax report), 2-g, report performance in 2-l |
+| 2.5 Recurring revenue and commissions | `sale_subscription`, `sale_rental`, `sale_commission` | 2-f, 2-k |
+| 2.6 AI features | every Phase 2 module | §1.3 gates, 2-i |
+| 2.7 Closing | `auth_saml`, demo data, docs | U-1–U-11, 2-l, demo script, summary |
+
 ---
 
 ## 4. Phase 2b — E-Signature (Sign)

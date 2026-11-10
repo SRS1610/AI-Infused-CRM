@@ -278,6 +278,36 @@ Format: `D-nnn · date · status (Proposed | Accepted | Superseded)`
 - **Decision:** The API serves `GET /metrics` (Prometheus): requests labelled by route template and status class, background job attempts and run time per job and outcome, AI feature runs per feature and outcome with tokens, cost and provider time, and the in-process gateway's metrics. Open in development; in production only with `TESSERA_METRICS_TOKEN`.
 - **Rationale:** U-10 asks for metrics of every job and AI feature; only the gateway service had them, so jobs and in-process AI were invisible. Route templates (not raw paths) keep label cardinality bounded; metrics reveal usage, so production needs a token.
 
+### D-069 · 2026-11-10 · Accepted — Phase 2 is delivered in sub-phases 2.0–2.7; module names follow the build plan
+- **Decision:** Phase 2 lands as 2.0 plan and data model, 2.1 accounting core, 2.2 product and sales, 2.3 bank / payments / dunning / e-invoicing, 2.4 analytic / budgets / assets / reports / tax return, 2.5 subscriptions / rentals / commissions, 2.6 AI features, 2.7 SAML, demo and acceptance (BUILD_PLAN §3.1). Module names are the build plan's (`account_tax`, `account_reports`, `account_dunning`, `account_einvoice`); the dependency map's `account_tax_report` and `einvoice` are renamed to match. SAML ships as its own `auth_saml` module. Modules whose AI feature the plan does not list ship the dependency map's: `product` description drafts, `account_analytic` allocation suggestions, `account_einvoice` mapping-error explanations, `payment` failed-payment summaries.
+- **Alternatives:** One increment for the whole phase; the dependency map's names.
+- **Rationale:** Keeps the branch runnable at each boundary and puts the ledger (everything else posts through it) first. Every module ships an AI feature (§1.2-6).
+
+### D-070 · 2026-11-10 · Accepted — Units of measure stay in `product`
+- **Decision:** `product.uom` (Phase 1) gains reference / bigger / smaller types, rounding and conversion; there is no separate `uom` module in Phase 2.
+- **Alternatives:** Move units to a new `uom` module (model rename and data migration on every Phase 1 database).
+- **Rationale:** The dependency map already counts units as part of `product`; nothing in Phase 2 needs units without products. Revisit if Phase 3 needs units without `product`.
+
+### D-071 · 2026-11-10 · Accepted — Product variants are child products of a template product
+- **Decision:** A product with attribute lines is a template (not sold itself); generating variants creates one `product.product` per combination with `template_id`, `attribute_value_ids` and `price_extra`. Shared fields are copied from the template and kept in sync; they are read-only on variants.
+- **Alternatives:** Separate `product.template` model with delegation inheritance (the ORM has none; every Phase 1 reference to `product.product` and every product field would move).
+- **Rationale:** Every document keeps pointing at `product.product`, Phase 1 products need no migration, and a variant is a real product (its own code, barcode, price, stock in Phase 3).
+
+### D-072 · 2026-11-10 · Accepted — Partner accounting settings are optional overrides with company fallback
+- **Decision:** `contacts.partner` gains receivable / payable accounts, payment terms and fiscal position as plain fields. A document uses the partner's value only when it belongs to the document's company; otherwise the company default applies.
+- **Alternatives:** Company-dependent property values in a side table.
+- **Rationale:** Partners are shared between companies (Phase 1); the fallback makes a shared partner usable everywhere without a property engine. Revisit if customers need per-company overrides on shared partners.
+
+### D-073 · 2026-11-10 · Accepted — Ledger invariants are enforced by the ORM and by PostgreSQL
+- **Decision:** Journal items carry `debit`, `credit` and `balance` with `CHECK` constraints; a deferred constraint trigger refuses any commit that leaves a posted entry unbalanced; posted entries are read-only except for reconciliation and narrative fields and can never be deleted. Numbers are allocated at posting from a gapless sequence per journal, fiscal year and refund flag (`INV/2026/00001`); cancelled entries keep theirs. Lock dates (fiscal year, period, tax) are checked on post, reset and cancel. Sales and purchase journals chain a SHA-256 hash over posted entries; `tessera account integrity` verifies it.
+- **Alternatives:** ORM checks only; numbering at creation.
+- **Rationale:** Build plan risk 6 and the P2 security track (accounting lock integrity): a bug or a direct SQL write cannot silently unbalance the ledger, and numbering at posting is what tax authorities expect (no gaps from abandoned drafts).
+
+### D-074 · 2026-11-10 · Accepted — `sale.quotation` remains the sales document
+- **Decision:** A quotation becomes a sales order in place when it is accepted or confirmed (state `accepted`, labelled *Sales order*). Line taxes become `account.tax` records; the `sale` 2.0.0 migration maps each distinct Phase 1 `tax_percent` to a sale tax of that rate per company and drops the column.
+- **Alternatives:** A new `sale.order` model with a data migration from quotations.
+- **Rationale:** D-011 planned the in-place extension; every Phase 1 reference (CRM, portal, PDF, AI features) keeps working.
+
 ### D-023 · 2026-11-09 · Proposed — Public web surfaces before Phase 7 use `*_website` bridge modules
 - **Decision:** Modules that need a public page before the `website` builder exists (recruitment job postings, event pages, eLearning courses, blog, forum, survey invitations) depend only on `portal` for their minimal public rendering in their own phase; `recruitment_website`, `events_website`, `elearning_website`, `blog_website`, `forum_website` bridge modules (auto-installed when `website` is present) move those pages into the website builder in Phase 7.
 - **Rationale:** Preserves the layering rule (no dependency on a later phase) while still shipping usable public pages when each module lands.
