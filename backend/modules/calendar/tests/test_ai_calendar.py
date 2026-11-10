@@ -91,10 +91,11 @@ def test_suggestions_for_an_existing_meeting_and_booking_links_share_free_busy(e
     meeting = demo["calendar.event"].create(
         {"name": "Contract review", "start": d(2030, 3, 4, 14), "stop": d(2030, 3, 4, 15), "attendee_ids": [{"partner_id": ava.ids[0]}]}
     )
+    before = _counts(env)
     found = A.suggest_for(demo, {"start": "2030-03-04T00:00:00Z", "end": "2030-03-06T00:00:00Z"}, meeting)
-    assert found["searched"]["attendees"][0] == demo.user.partner_id.ids[0] and ava.ids[0] in found["searched"]["attendees"]
+    assert set(found["searched"]["attendees"]) == {demo.user.partner_id.ids[0], ava.ids[0]}
     assert found["slots"][0]["start"].startswith("2030-03-04T14:00")  # its own slot does not block it
-    assert _counts(env)["calendar_event"] == _counts(env)["calendar_event"]  # nothing booked
+    assert _counts(env) == before  # nothing booked
     # the booking page of the same user now uses the shared free/busy (all-day events block whole days)
     link = demo["calendar.booking_link"].create({"name": "Intro", "duration_minutes": 30, "min_notice_hours": 0, "days_ahead": 30})
     tomorrow = (dt.datetime.now(UTC) + dt.timedelta(days=2)).replace(hour=0, minute=0, second=0, microsecond=0)
