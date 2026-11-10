@@ -1,0 +1,5 @@
+[
+  {"id": "menu_dunning_runs", "name": "Payment reminders", "parent": "account.menu_customers", "sequence": 50, "action": "account_dunning.action_dunning_runs"},
+  {"id": "menu_dunning_lines", "name": "Reminders sent", "parent": "account.menu_customers", "sequence": 55, "action": "account_dunning.action_dunning_lines"},
+  {"id": "menu_dunning_levels", "name": "Dunning levels", "parent": "account.menu_config", "sequence": 90, "action": "account_dunning.action_dunning_levels"}
+]

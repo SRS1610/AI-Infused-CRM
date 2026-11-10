@@ -63,6 +63,7 @@ def build_demo_camt(env: Any, company: Any, *, register_payments: bool = True) -
             ("company_id", "=", company.ids[0]),
             ("state", "=", "posted"),
             ("ref", "like", "DEMO-"),
+            ("ref", "not_like", "DEMO-LATE-"),  # the dunning demo keeps its late invoices unpaid
             ("move_type", "in", ["out_invoice", "in_invoice"]),
             ("payment_state", "in", ["not_paid", "partial"]),
         ],
