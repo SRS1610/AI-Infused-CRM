@@ -1,0 +1,3 @@
+[
+  {"id": "sched_purge", "model": "core.scheduled_job", "noupdate": true, "values": {"name": "Purge expired SAML login requests and replay-cache entries", "job_name": "auth_saml.purge", "cron": "17 * * * *"}}
+]

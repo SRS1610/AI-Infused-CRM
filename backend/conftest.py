@@ -51,6 +51,7 @@ KERNEL_TEST_MODULES = [
     "ai_test",
     "studio",
     "account",
+    "auth_saml",
 ]
 
 

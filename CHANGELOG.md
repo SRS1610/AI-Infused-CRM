@@ -17,6 +17,14 @@ All notable changes are recorded here, grouped by phase. Format follows [Keep a 
   New *Catalogue* menu; demo T-shirt variants and *Wholesale* / *Europe (EUR)* lists. `tessera db migrate`
   types existing units.
 
+### Sub-phase 2.7 — SAML single sign-on
+- **SAML 2.0 single sign-on (`auth_saml`, D-013, D-069).** Administrators add SAML identity providers under
+  Settings → Users & Companies; the login page offers them next to OIDC. Service-provider initiated login
+  (HTTP-Redirect request, optionally signed; HTTP-POST response) with signatures checked against the
+  configured IdP certificates only, signature-wrapping and XXE defences, one-use requests bound to the
+  browser, an assertion replay cache, and accounts linked by administrator, by trusted e-mail or created on
+  first login (off by default). Guide: [docs/admin/saml.md](docs/admin/saml.md).
+
 ## [Unreleased] — Phase 1 complete, awaiting sign-off
 
 Summary of what works, what is stubbed and the known gaps: [docs/phase-1-summary.md](docs/phase-1-summary.md).

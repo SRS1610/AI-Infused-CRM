@@ -1,0 +1,16 @@
+name = "auth_saml"
+version = "1.0.0"
+summary = "SAML 2.0 single sign-on: identity providers, signed assertions, account links (D-013)"
+category = "Platform"
+phase = 2
+layer = "B"
+depends = ["core", "web"]
+license = "Apache-2.0"
+installable = true
+
+[load]
+security = ["security/access.json"]
+data = ["data/scheduled_jobs.json"]
+views = ["views.json"]
+actions = "actions.json"
+menus = "menus.json"

@@ -8,6 +8,7 @@ Cookie-authenticated unsafe requests must carry the session's CSRF token in ``X-
 
 from __future__ import annotations
 
+import re
 from collections.abc import Iterator
 from dataclasses import dataclass, field
 from typing import Any
@@ -28,6 +29,21 @@ from tessera.security.crypto import constant_time_equals
 SAFE_METHODS = {"GET", "HEAD", "OPTIONS"}
 ANONYMOUS_UID = 0
 CSRF_EXEMPT_ANONYMOUS = {"/api/v1/auth/login", "/api/v1/auth/totp", "/api/v1/auth/logout"}
+# login endpoints contributed by modules (e.g. a SAML assertion consumer, posted by the identity provider's page)
+_CSRF_EXEMPT_ANONYMOUS_PATTERNS: list[re.Pattern[str]] = []
+
+
+def exempt_login_path(pattern: str) -> None:
+    """Treat unsafe requests to paths fully matching ``pattern`` that carry a session cookie but no valid CSRF
+    token as anonymous (instead of refusing them), like ``/auth/login``. Only for endpoints that authenticate
+    the caller themselves and never act on an existing session."""
+    compiled = re.compile(pattern)
+    if all(p.pattern != compiled.pattern for p in _CSRF_EXEMPT_ANONYMOUS_PATTERNS):
+        _CSRF_EXEMPT_ANONYMOUS_PATTERNS.append(compiled)
+
+
+def _csrf_exempt(path: str) -> bool:
+    return path in CSRF_EXEMPT_ANONYMOUS or any(p.fullmatch(path) for p in _CSRF_EXEMPT_ANONYMOUS_PATTERNS)
 
 
 @dataclass
@@ -128,7 +144,7 @@ def _authenticate(ctx: RequestContext) -> None:
         if session is not None and request.method not in SAFE_METHODS:
             csrf = request.headers.get("x-csrf-token")
             if not csrf or not constant_time_equals(csrf, str(session.csrf_token)):
-                if request.url.path not in CSRF_EXEMPT_ANONYMOUS:
+                if not _csrf_exempt(request.url.path):
                     raise AccessError(_("Missing or invalid CSRF token"), csrf=True)
                 # logging in again with a stale cookie: proceed as anonymous instead of failing
                 token, session = None, None

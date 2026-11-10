@@ -171,7 +171,14 @@ def _limited(key: str, message: str, request: Request) -> JSONResponse:
     )
 
 
-_LOGIN_PATHS = ("/api/v1/auth/login", "/api/v1/auth/totp", "/api/v1/auth/oidc/")
+_LOGIN_PATHS: tuple[str, ...] = ("/api/v1/auth/login", "/api/v1/auth/totp", "/api/v1/auth/oidc/")
+
+
+def register_login_path(prefix: str) -> None:
+    """POST requests under ``prefix`` share the per-address login rate limit (modules adding sign-in endpoints)."""
+    global _LOGIN_PATHS
+    if prefix not in _LOGIN_PATHS:
+        _LOGIN_PATHS = (*_LOGIN_PATHS, prefix)
 
 
 class RateLimitMiddleware(BaseHTTPMiddleware):

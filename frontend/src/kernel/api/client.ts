@@ -110,6 +110,8 @@ export const api = {
   logout: () => request<{ ok: boolean }>("POST", "/auth/logout"),
   session: () => request<SessionInfo>("GET", "/auth/session"),
   providers: () => request<{ code: string; name: string }[]>("GET", "/auth/providers"),
+  // SAML identity providers (auth_saml module; the endpoint is missing when the module is not installed)
+  samlProviders: () => request<{ id: number; name: string }[]>("GET", "/auth/saml/providers"),
 
   // web metadata
   menus: () => request<MenuNode[]>("GET", "/web/menus"),
