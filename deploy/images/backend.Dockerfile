@@ -10,7 +10,7 @@ ENV PYTHONUNBUFFERED=1 \
 
 # WeasyPrint (PDF) and psycopg runtime libraries
 RUN apt-get update && apt-get install -y --no-install-recommends \
-      libpango-1.0-0 libpangoft2-1.0-0 libharfbuzz0b libcairo2 libgdk-pixbuf-2.0-0 \
+      libpango-1.0-0 libpangoft2-1.0-0 libharfbuzz0b libharfbuzz-subset0 libcairo2 libgdk-pixbuf-2.0-0 \
       libffi8 shared-mime-info fonts-dejavu-core libpq5 curl ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 

@@ -68,10 +68,13 @@ jobs:
           cache-dependency-glob: backend/uv.lock
       - run: uv python install 3.12
       - run: uv sync --frozen
+      - name: System libraries for PDF rendering and report tests
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends libpango-1.0-0 libpangoft2-1.0-0 libharfbuzz-subset0 poppler-utils
       - name: Prepare database extensions
         run: |
           PGPASSWORD=tessera psql -h localhost -U tessera -d tessera_test -c "CREATE EXTENSION IF NOT EXISTS vector; CREATE EXTENSION IF NOT EXISTS pg_trgm; CREATE EXTENSION IF NOT EXISTS unaccent; CREATE EXTENSION IF NOT EXISTS btree_gin; CREATE EXTENSION IF NOT EXISTS pgcrypto;"
-      - run: uv run pytest -n auto --cov --cov-report=xml --cov-report=term
+      # serial: the suite builds one shared test database and some API tests commit
+      - run: uv run pytest --cov --cov-report=xml --cov-report=term
       - uses: actions/upload-artifact@v4
         if: always()
         with:

@@ -64,6 +64,7 @@ dev = [
   "types-PyYAML",
   "types-python-dateutil",
   "pre-commit>=4.0",
+  "zxing-cpp>=3.1.1",
 ]
 
 [project.scripts]
