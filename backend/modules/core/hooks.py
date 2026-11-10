@@ -94,6 +94,10 @@ def _serialize(value: Any) -> Any:
         return f"<{len(value)} bytes>"
     if hasattr(value, "isoformat"):
         return value.isoformat()
+    if isinstance(value, dict):  # x2many create / update commands carry nested values
+        return {k: _serialize(v) for k, v in value.items()}
+    if isinstance(value, list | tuple):
+        return [_serialize(v) for v in value]
     return value
 
 

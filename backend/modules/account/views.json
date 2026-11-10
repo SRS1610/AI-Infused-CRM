@@ -1,0 +1,1950 @@
+[
+ {
+  "id": "view_invoice_form",
+  "model": "account.move",
+  "type": "form",
+  "name": "account.move.invoice.form",
+  "chatter": true,
+  "root": {
+   "kind": "sheet",
+   "children": [
+    {
+     "kind": "buttons",
+     "children": [
+      {
+       "kind": "button",
+       "method": "action_post",
+       "label": "Confirm",
+       "invisible": [
+        "state",
+        "!=",
+        "draft"
+       ]
+      },
+      {
+       "kind": "button",
+       "method": "action_send",
+       "label": "Send by email",
+       "invisible": {
+        "any": [
+         [
+          "state",
+          "!=",
+          "posted"
+         ],
+         [
+          "move_type",
+          "not_in",
+          [
+           "out_invoice",
+           "out_refund"
+          ]
+         ]
+        ]
+       }
+      },
+      {
+       "kind": "button",
+       "method": "action_register_payment",
+       "label": "Register payment",
+       "dialog_title": "Register a payment",
+       "submit_label": "Create payment",
+       "params": [
+        {
+         "name": "amount",
+         "label": "Amount (empty = everything due)",
+         "type": "number"
+        },
+        {
+         "name": "date",
+         "label": "Payment date",
+         "type": "date"
+        },
+        {
+         "name": "communication",
+         "label": "Memo",
+         "type": "text"
+        }
+       ],
+       "invisible": {
+        "any": [
+         [
+          "state",
+          "!=",
+          "posted"
+         ],
+         [
+          "payment_state",
+          "not_in",
+          [
+           "not_paid",
+           "partial"
+          ]
+         ]
+        ]
+       }
+      },
+      {
+       "kind": "button",
+       "method": "action_reverse",
+       "label": "Credit note",
+       "dialog_title": "Create a credit note",
+       "submit_label": "Create",
+       "params": [
+        {
+         "name": "reason",
+         "label": "Reason",
+         "type": "text"
+        },
+        {
+         "name": "date",
+         "label": "Credit note date",
+         "type": "date"
+        },
+        {
+         "name": "mode",
+         "label": "What happens",
+         "type": "select",
+         "options": [
+          [
+           "refund",
+           "Draft credit note to review"
+          ],
+          [
+           "cancel",
+           "Full refund: post and match with the invoice"
+          ],
+          [
+           "modify",
+           "Full refund and a new draft invoice to correct"
+          ]
+         ]
+        }
+       ],
+       "invisible": [
+        "state",
+        "!=",
+        "posted"
+       ]
+      },
+      {
+       "kind": "button",
+       "method": "button_draft",
+       "label": "Reset to draft",
+       "invisible": {
+        "any": [
+         [
+          "state",
+          "!=",
+          "posted"
+         ],
+         [
+          "inalterable_hash",
+          "!=",
+          null
+         ]
+        ]
+       }
+      },
+      {
+       "kind": "button",
+       "method": "button_cancel",
+       "label": "Cancel",
+       "confirm": "Cancel this entry? A posted entry keeps its number.",
+       "invisible": [
+        "state",
+        "=",
+        "cancel"
+       ]
+      }
+     ]
+    },
+    {
+     "kind": "field",
+     "name": "name",
+     "widget": "title",
+     "readonly": true
+    },
+    {
+     "kind": "group",
+     "name": "main",
+     "columns": 2,
+     "children": [
+      {
+       "kind": "field",
+       "name": "partner_id"
+      },
+      {
+       "kind": "field",
+       "name": "invoice_date"
+      },
+      {
+       "kind": "field",
+       "name": "payment_reference"
+      },
+      {
+       "kind": "field",
+       "name": "payment_term_id"
+      },
+      {
+       "kind": "field",
+       "name": "ref"
+      },
+      {
+       "kind": "field",
+       "name": "invoice_date_due"
+      },
+      {
+       "kind": "field",
+       "name": "journal_id"
+      },
+      {
+       "kind": "field",
+       "name": "currency_id"
+      },
+      {
+       "kind": "field",
+       "name": "state",
+       "readonly": true,
+       "widget": "badge"
+      },
+      {
+       "kind": "field",
+       "name": "payment_state",
+       "readonly": true,
+       "widget": "badge"
+      },
+      {
+       "kind": "field",
+       "name": "move_type",
+       "invisible": [
+        "id",
+        "!=",
+        -1
+       ]
+      },
+      {
+       "kind": "field",
+       "name": "inalterable_hash",
+       "invisible": [
+        "id",
+        "!=",
+        -1
+       ]
+      }
+     ]
+    },
+    {
+     "kind": "notebook",
+     "pages": [
+      {
+       "kind": "page",
+       "name": "page_lines",
+       "title": "Invoice lines",
+       "children": [
+        {
+         "kind": "field",
+         "name": "invoice_line_ids",
+         "columns": [
+          {
+           "field": "product_id"
+          },
+          {
+           "field": "name"
+          },
+          {
+           "field": "account_id"
+          },
+          {
+           "field": "quantity"
+          },
+          {
+           "field": "price_unit"
+          },
+          {
+           "field": "discount"
+          },
+          {
+           "field": "tax_ids"
+          },
+          {
+           "field": "price_subtotal"
+          }
+         ]
+        },
+        {
+         "kind": "group",
+         "name": "totals",
+         "columns": 1,
+         "children": [
+          {
+           "kind": "field",
+           "name": "amount_untaxed"
+          },
+          {
+           "kind": "field",
+           "name": "amount_tax"
+          },
+          {
+           "kind": "field",
+           "name": "amount_total"
+          },
+          {
+           "kind": "field",
+           "name": "amount_residual"
+          }
+         ]
+        }
+       ]
+      },
+      {
+       "kind": "page",
+       "name": "page_items",
+       "title": "Journal items",
+       "children": [
+        {
+         "kind": "field",
+         "name": "line_ids",
+         "readonly": true,
+         "columns": [
+          {
+           "field": "account_id"
+          },
+          {
+           "field": "partner_id"
+          },
+          {
+           "field": "name"
+          },
+          {
+           "field": "debit"
+          },
+          {
+           "field": "credit"
+          },
+          {
+           "field": "amount_currency"
+          },
+          {
+           "field": "currency_id"
+          },
+          {
+           "field": "date_maturity"
+          },
+          {
+           "field": "reconciled"
+          }
+         ]
+        }
+       ]
+      },
+      {
+       "kind": "page",
+       "name": "page_other",
+       "title": "Other information",
+       "children": [
+        {
+         "kind": "group",
+         "name": "other",
+         "columns": 2,
+         "children": [
+          {
+           "kind": "field",
+           "name": "invoice_user_id"
+          },
+          {
+           "kind": "field",
+           "name": "fiscal_position_id"
+          },
+          {
+           "kind": "field",
+           "name": "invoice_origin"
+          },
+          {
+           "kind": "field",
+           "name": "date"
+          },
+          {
+           "kind": "field",
+           "name": "auto_post_date"
+          },
+          {
+           "kind": "field",
+           "name": "to_check"
+          },
+          {
+           "kind": "field",
+           "name": "company_id"
+          }
+         ]
+        },
+        {
+         "kind": "field",
+         "name": "narration"
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  }
+ },
+ {
+  "id": "view_move_form",
+  "model": "account.move",
+  "type": "form",
+  "name": "account.move.entry.form",
+  "chatter": true,
+  "root": {
+   "kind": "sheet",
+   "children": [
+    {
+     "kind": "buttons",
+     "children": [
+      {
+       "kind": "button",
+       "method": "action_post",
+       "label": "Post",
+       "invisible": [
+        "state",
+        "!=",
+        "draft"
+       ]
+      },
+      {
+       "kind": "button",
+       "method": "action_reverse",
+       "label": "Reverse",
+       "dialog_title": "Reverse this entry",
+       "params": [
+        {
+         "name": "reason",
+         "label": "Reason",
+         "type": "text"
+        },
+        {
+         "name": "date",
+         "label": "Reversal date",
+         "type": "date"
+        }
+       ],
+       "invisible": [
+        "state",
+        "!=",
+        "posted"
+       ]
+      },
+      {
+       "kind": "button",
+       "method": "button_draft",
+       "label": "Reset to draft",
+       "invisible": {
+        "any": [
+         [
+          "state",
+          "!=",
+          "posted"
+         ],
+         [
+          "inalterable_hash",
+          "!=",
+          null
+         ]
+        ]
+       }
+      },
+      {
+       "kind": "button",
+       "method": "button_cancel",
+       "label": "Cancel",
+       "confirm": "Cancel this entry?",
+       "invisible": [
+        "state",
+        "=",
+        "cancel"
+       ]
+      }
+     ]
+    },
+    {
+     "kind": "field",
+     "name": "name",
+     "widget": "title",
+     "readonly": true
+    },
+    {
+     "kind": "group",
+     "name": "main",
+     "columns": 2,
+     "children": [
+      {
+       "kind": "field",
+       "name": "date"
+      },
+      {
+       "kind": "field",
+       "name": "journal_id"
+      },
+      {
+       "kind": "field",
+       "name": "ref"
+      },
+      {
+       "kind": "field",
+       "name": "partner_id"
+      },
+      {
+       "kind": "field",
+       "name": "currency_id"
+      },
+      {
+       "kind": "field",
+       "name": "state",
+       "readonly": true,
+       "widget": "badge"
+      },
+      {
+       "kind": "field",
+       "name": "inalterable_hash",
+       "invisible": [
+        "id",
+        "!=",
+        -1
+       ]
+      }
+     ]
+    },
+    {
+     "kind": "notebook",
+     "pages": [
+      {
+       "kind": "page",
+       "name": "page_items",
+       "title": "Journal items",
+       "children": [
+        {
+         "kind": "field",
+         "name": "line_ids",
+         "columns": [
+          {
+           "field": "account_id"
+          },
+          {
+           "field": "partner_id"
+          },
+          {
+           "field": "name"
+          },
+          {
+           "field": "debit"
+          },
+          {
+           "field": "credit"
+          },
+          {
+           "field": "amount_currency"
+          },
+          {
+           "field": "currency_id"
+          },
+          {
+           "field": "tax_ids"
+          },
+          {
+           "field": "date_maturity"
+          }
+         ]
+        }
+       ]
+      },
+      {
+       "kind": "page",
+       "name": "page_other",
+       "title": "Other information",
+       "children": [
+        {
+         "kind": "group",
+         "name": "other",
+         "columns": 2,
+         "children": [
+          {
+           "kind": "field",
+           "name": "reversed_entry_id"
+          },
+          {
+           "kind": "field",
+           "name": "to_check"
+          },
+          {
+           "kind": "field",
+           "name": "company_id"
+          }
+         ]
+        },
+        {
+         "kind": "field",
+         "name": "narration"
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  }
+ },
+ {
+  "id": "view_invoice_list",
+  "model": "account.move",
+  "type": "list",
+  "name": "account.move.invoice.list",
+  "columns": [
+   {
+    "field": "name"
+   },
+   {
+    "field": "partner_id"
+   },
+   {
+    "field": "invoice_date"
+   },
+   {
+    "field": "invoice_date_due"
+   },
+   {
+    "field": "invoice_origin",
+    "optional": "hide"
+   },
+   {
+    "field": "ref",
+    "optional": "hide"
+   },
+   {
+    "field": "amount_untaxed_signed",
+    "sum": true,
+    "label": "Untaxed"
+   },
+   {
+    "field": "amount_total_signed",
+    "sum": true,
+    "label": "Total"
+   },
+   {
+    "field": "amount_residual_signed",
+    "sum": true,
+    "label": "Amount due"
+   },
+   {
+    "field": "payment_state",
+    "widget": "badge"
+   },
+   {
+    "field": "state",
+    "widget": "badge"
+   }
+  ]
+ },
+ {
+  "id": "view_move_list",
+  "model": "account.move",
+  "type": "list",
+  "name": "account.move.list",
+  "columns": [
+   {
+    "field": "date"
+   },
+   {
+    "field": "name"
+   },
+   {
+    "field": "journal_id"
+   },
+   {
+    "field": "ref"
+   },
+   {
+    "field": "partner_id"
+   },
+   {
+    "field": "amount_total_signed",
+    "sum": true,
+    "label": "Amount"
+   },
+   {
+    "field": "state",
+    "widget": "badge"
+   }
+  ]
+ },
+ {
+  "id": "view_move_search",
+  "model": "account.move",
+  "type": "search",
+  "name": "account.move.search",
+  "fields": [
+   "name",
+   "partner_id",
+   "ref",
+   "invoice_origin",
+   "journal_id"
+  ],
+  "filters": [
+   {
+    "name": "draft",
+    "label": "Draft",
+    "domain": [
+     [
+      "state",
+      "=",
+      "draft"
+     ]
+    ]
+   },
+   {
+    "name": "posted",
+    "label": "Posted",
+    "domain": [
+     [
+      "state",
+      "=",
+      "posted"
+     ]
+    ]
+   },
+   {
+    "name": "unpaid",
+    "label": "To collect / to pay",
+    "domain": [
+     [
+      "state",
+      "=",
+      "posted"
+     ],
+     [
+      "payment_state",
+      "in",
+      [
+       "not_paid",
+       "partial"
+      ]
+     ]
+    ]
+   },
+   {
+    "name": "overdue",
+    "label": "Overdue",
+    "domain": [
+     [
+      "state",
+      "=",
+      "posted"
+     ],
+     [
+      "payment_state",
+      "in",
+      [
+       "not_paid",
+       "partial"
+      ]
+     ],
+     [
+      "invoice_date_due",
+      "<",
+      "$today"
+     ]
+    ]
+   },
+   {
+    "name": "to_check",
+    "label": "To check",
+    "domain": [
+     [
+      "to_check",
+      "=",
+      true
+     ]
+    ]
+   },
+   {
+    "name": "mine",
+    "label": "My invoices",
+    "domain": [
+     [
+      "invoice_user_id",
+      "=",
+      "$uid"
+     ]
+    ]
+   }
+  ],
+  "group_bys": [
+   {
+    "field": "partner_id"
+   },
+   {
+    "field": "state"
+   },
+   {
+    "field": "payment_state"
+   },
+   {
+    "field": "journal_id"
+   },
+   {
+    "field": "invoice_date:month"
+   }
+  ]
+ },
+ {
+  "id": "view_move_pivot",
+  "model": "account.move",
+  "type": "pivot",
+  "name": "account.move.pivot",
+  "row": "partner_id",
+  "col": "invoice_date:month",
+  "measures": [
+   "amount_untaxed_signed"
+  ]
+ },
+ {
+  "id": "view_move_graph",
+  "model": "account.move",
+  "type": "graph",
+  "name": "account.move.graph",
+  "row": "invoice_date:month",
+  "measures": [
+   "amount_untaxed_signed"
+  ]
+ },
+ {
+  "id": "view_move_line_list",
+  "model": "account.move_line",
+  "type": "list",
+  "name": "account.move_line.list",
+  "columns": [
+   {
+    "field": "date"
+   },
+   {
+    "field": "move_name"
+   },
+   {
+    "field": "journal_id",
+    "optional": "hide"
+   },
+   {
+    "field": "account_id"
+   },
+   {
+    "field": "partner_id"
+   },
+   {
+    "field": "name"
+   },
+   {
+    "field": "debit",
+    "sum": true
+   },
+   {
+    "field": "credit",
+    "sum": true
+   },
+   {
+    "field": "balance",
+    "sum": true
+   },
+   {
+    "field": "amount_currency",
+    "optional": "hide"
+   },
+   {
+    "field": "currency_id",
+    "optional": "hide"
+   },
+   {
+    "field": "date_maturity",
+    "optional": "hide"
+   },
+   {
+    "field": "amount_residual",
+    "sum": true,
+    "optional": "hide"
+   },
+   {
+    "field": "full_reconcile_id",
+    "optional": "hide"
+   },
+   {
+    "field": "reconciled",
+    "optional": "hide"
+   }
+  ]
+ },
+ {
+  "id": "view_move_line_search",
+  "model": "account.move_line",
+  "type": "search",
+  "name": "account.move_line.search",
+  "fields": [
+   "account_id",
+   "partner_id",
+   "move_name",
+   "name",
+   "journal_id"
+  ],
+  "filters": [
+   {
+    "name": "posted",
+    "label": "Posted",
+    "domain": [
+     [
+      "parent_state",
+      "=",
+      "posted"
+     ]
+    ]
+   },
+   {
+    "name": "unreconciled",
+    "label": "Open items",
+    "domain": [
+     [
+      "reconciled",
+      "=",
+      false
+     ],
+     [
+      "account_id.reconcile",
+      "=",
+      true
+     ],
+     [
+      "parent_state",
+      "=",
+      "posted"
+     ]
+    ]
+   },
+   {
+    "name": "receivable",
+    "label": "Receivables",
+    "domain": [
+     [
+      "account_id.account_type",
+      "=",
+      "asset_receivable"
+     ]
+    ]
+   },
+   {
+    "name": "payable",
+    "label": "Payables",
+    "domain": [
+     [
+      "account_id.account_type",
+      "=",
+      "liability_payable"
+     ]
+    ]
+   }
+  ],
+  "group_bys": [
+   {
+    "field": "account_id"
+   },
+   {
+    "field": "partner_id"
+   },
+   {
+    "field": "journal_id"
+   },
+   {
+    "field": "date:month"
+   }
+  ]
+ },
+ {
+  "id": "view_move_line_pivot",
+  "model": "account.move_line",
+  "type": "pivot",
+  "name": "account.move_line.pivot",
+  "row": "account_id",
+  "col": "date:month",
+  "measures": [
+   "balance"
+  ]
+ },
+ {
+  "id": "view_payment_form",
+  "model": "account.payment",
+  "type": "form",
+  "name": "account.payment.form",
+  "chatter": true,
+  "root": {
+   "kind": "sheet",
+   "children": [
+    {
+     "kind": "buttons",
+     "children": [
+      {
+       "kind": "button",
+       "method": "action_post",
+       "label": "Confirm",
+       "invisible": [
+        "state",
+        "!=",
+        "draft"
+       ]
+      },
+      {
+       "kind": "button",
+       "method": "action_cancel",
+       "label": "Cancel",
+       "confirm": "Cancel this payment? Its matches with invoices are undone.",
+       "invisible": [
+        "state",
+        "=",
+        "cancel"
+       ]
+      }
+     ]
+    },
+    {
+     "kind": "field",
+     "name": "name",
+     "widget": "title",
+     "readonly": true
+    },
+    {
+     "kind": "group",
+     "name": "main",
+     "columns": 2,
+     "children": [
+      {
+       "kind": "field",
+       "name": "payment_type"
+      },
+      {
+       "kind": "field",
+       "name": "partner_type"
+      },
+      {
+       "kind": "field",
+       "name": "partner_id"
+      },
+      {
+       "kind": "field",
+       "name": "amount"
+      },
+      {
+       "kind": "field",
+       "name": "currency_id"
+      },
+      {
+       "kind": "field",
+       "name": "date"
+      },
+      {
+       "kind": "field",
+       "name": "journal_id"
+      },
+      {
+       "kind": "field",
+       "name": "payment_method"
+      },
+      {
+       "kind": "field",
+       "name": "ref"
+      },
+      {
+       "kind": "field",
+       "name": "state",
+       "readonly": true,
+       "widget": "badge"
+      },
+      {
+       "kind": "field",
+       "name": "is_matched",
+       "readonly": true
+      },
+      {
+       "kind": "field",
+       "name": "is_reconciled",
+       "readonly": true
+      }
+     ]
+    },
+    {
+     "kind": "notebook",
+     "pages": [
+      {
+       "kind": "page",
+       "name": "page_invoices",
+       "title": "Invoices",
+       "children": [
+        {
+         "kind": "field",
+         "name": "reconciled_invoice_ids",
+         "readonly": true
+        }
+       ]
+      },
+      {
+       "kind": "page",
+       "name": "page_entry",
+       "title": "Journal entry",
+       "children": [
+        {
+         "kind": "field",
+         "name": "move_id",
+         "readonly": true
+        },
+        {
+         "kind": "field",
+         "name": "destination_account_id"
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  }
+ },
+ {
+  "id": "view_payment_list",
+  "model": "account.payment",
+  "type": "list",
+  "name": "account.payment.list",
+  "columns": [
+   {
+    "field": "date"
+   },
+   {
+    "field": "name"
+   },
+   {
+    "field": "journal_id"
+   },
+   {
+    "field": "partner_id"
+   },
+   {
+    "field": "payment_method",
+    "optional": "hide"
+   },
+   {
+    "field": "amount",
+    "sum": true
+   },
+   {
+    "field": "currency_id",
+    "optional": "hide"
+   },
+   {
+    "field": "is_matched",
+    "optional": "hide"
+   },
+   {
+    "field": "state",
+    "widget": "badge"
+   }
+  ]
+ },
+ {
+  "id": "view_payment_search",
+  "model": "account.payment",
+  "type": "search",
+  "name": "account.payment.search",
+  "fields": [
+   "name",
+   "partner_id",
+   "ref",
+   "journal_id"
+  ],
+  "filters": [
+   {
+    "name": "inbound",
+    "label": "Received",
+    "domain": [
+     [
+      "payment_type",
+      "=",
+      "inbound"
+     ]
+    ]
+   },
+   {
+    "name": "outbound",
+    "label": "Sent",
+    "domain": [
+     [
+      "payment_type",
+      "=",
+      "outbound"
+     ]
+    ]
+   },
+   {
+    "name": "unmatched",
+    "label": "Not matched with the bank",
+    "domain": [
+     [
+      "is_matched",
+      "=",
+      false
+     ],
+     [
+      "state",
+      "=",
+      "posted"
+     ]
+    ]
+   }
+  ],
+  "group_bys": [
+   {
+    "field": "journal_id"
+   },
+   {
+    "field": "partner_id"
+   },
+   {
+    "field": "date:month"
+   }
+  ]
+ },
+ {
+  "id": "view_account_list",
+  "model": "account.account",
+  "type": "list",
+  "name": "account.account.list",
+  "columns": [
+   {
+    "field": "code"
+   },
+   {
+    "field": "name"
+   },
+   {
+    "field": "account_type"
+   },
+   {
+    "field": "reconcile"
+   },
+   {
+    "field": "currency_id",
+    "optional": "hide"
+   },
+   {
+    "field": "company_id",
+    "optional": "hide"
+   },
+   {
+    "field": "deprecated",
+    "optional": "hide"
+   }
+  ]
+ },
+ {
+  "id": "view_account_form",
+  "model": "account.account",
+  "type": "form",
+  "name": "account.account.form",
+  "root": {
+   "kind": "sheet",
+   "children": [
+    {
+     "kind": "group",
+     "name": "main",
+     "columns": 2,
+     "children": [
+      {
+       "kind": "field",
+       "name": "code"
+      },
+      {
+       "kind": "field",
+       "name": "name"
+      },
+      {
+       "kind": "field",
+       "name": "account_type"
+      },
+      {
+       "kind": "field",
+       "name": "internal_group",
+       "readonly": true
+      },
+      {
+       "kind": "field",
+       "name": "reconcile"
+      },
+      {
+       "kind": "field",
+       "name": "currency_id"
+      },
+      {
+       "kind": "field",
+       "name": "tag_ids"
+      },
+      {
+       "kind": "field",
+       "name": "deprecated"
+      },
+      {
+       "kind": "field",
+       "name": "company_id"
+      }
+     ]
+    },
+    {
+     "kind": "field",
+     "name": "note"
+    }
+   ]
+  }
+ },
+ {
+  "id": "view_account_search",
+  "model": "account.account",
+  "type": "search",
+  "name": "account.account.search",
+  "fields": [
+   "code",
+   "name"
+  ],
+  "filters": [
+   {
+    "name": "receivable",
+    "label": "Receivable",
+    "domain": [
+     [
+      "account_type",
+      "=",
+      "asset_receivable"
+     ]
+    ]
+   },
+   {
+    "name": "payable",
+    "label": "Payable",
+    "domain": [
+     [
+      "account_type",
+      "=",
+      "liability_payable"
+     ]
+    ]
+   },
+   {
+    "name": "pl",
+    "label": "Profit and loss",
+    "domain": [
+     [
+      "internal_group",
+      "in",
+      [
+       "income",
+       "expense"
+      ]
+     ]
+    ]
+   },
+   {
+    "name": "bs",
+    "label": "Balance sheet",
+    "domain": [
+     [
+      "internal_group",
+      "in",
+      [
+       "asset",
+       "liability",
+       "equity"
+      ]
+     ]
+    ]
+   }
+  ],
+  "group_bys": [
+   {
+    "field": "account_type"
+   },
+   {
+    "field": "internal_group"
+   }
+  ]
+ },
+ {
+  "id": "view_tax_list",
+  "model": "account.tax",
+  "type": "list",
+  "name": "account.tax.list",
+  "columns": [
+   {
+    "field": "name"
+   },
+   {
+    "field": "type_tax_use"
+   },
+   {
+    "field": "amount_type"
+   },
+   {
+    "field": "amount"
+   },
+   {
+    "field": "price_include"
+   },
+   {
+    "field": "tax_group_id"
+   },
+   {
+    "field": "company_id",
+    "optional": "hide"
+   }
+  ]
+ },
+ {
+  "id": "view_tax_form",
+  "model": "account.tax",
+  "type": "form",
+  "name": "account.tax.form",
+  "root": {
+   "kind": "sheet",
+   "children": [
+    {
+     "kind": "group",
+     "name": "main",
+     "columns": 2,
+     "children": [
+      {
+       "kind": "field",
+       "name": "name"
+      },
+      {
+       "kind": "field",
+       "name": "description"
+      },
+      {
+       "kind": "field",
+       "name": "type_tax_use"
+      },
+      {
+       "kind": "field",
+       "name": "amount_type"
+      },
+      {
+       "kind": "field",
+       "name": "amount"
+      },
+      {
+       "kind": "field",
+       "name": "tax_group_id"
+      },
+      {
+       "kind": "field",
+       "name": "price_include"
+      },
+      {
+       "kind": "field",
+       "name": "include_base_amount"
+      },
+      {
+       "kind": "field",
+       "name": "is_base_affected"
+      },
+      {
+       "kind": "field",
+       "name": "sequence"
+      },
+      {
+       "kind": "field",
+       "name": "tax_scope"
+      },
+      {
+       "kind": "field",
+       "name": "country_id"
+      },
+      {
+       "kind": "field",
+       "name": "company_id"
+      },
+      {
+       "kind": "field",
+       "name": "active"
+      }
+     ]
+    },
+    {
+     "kind": "notebook",
+     "pages": [
+      {
+       "kind": "page",
+       "name": "page_rep",
+       "title": "Distribution",
+       "children": [
+        {
+         "kind": "field",
+         "name": "repartition_line_ids",
+         "columns": [
+          {
+           "field": "document_type"
+          },
+          {
+           "field": "repartition_type"
+          },
+          {
+           "field": "factor_percent"
+          },
+          {
+           "field": "account_id"
+          },
+          {
+           "field": "tag_ids"
+          }
+         ]
+        }
+       ]
+      },
+      {
+       "kind": "page",
+       "name": "page_children",
+       "title": "Children taxes",
+       "children": [
+        {
+         "kind": "field",
+         "name": "children_tax_ids"
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  }
+ },
+ {
+  "id": "view_journal_list",
+  "model": "account.journal",
+  "type": "list",
+  "name": "account.journal.list",
+  "columns": [
+   {
+    "field": "name"
+   },
+   {
+    "field": "code"
+   },
+   {
+    "field": "type"
+   },
+   {
+    "field": "default_account_id"
+   },
+   {
+    "field": "currency_id",
+    "optional": "hide"
+   },
+   {
+    "field": "restrict_mode_hash_table",
+    "optional": "hide"
+   },
+   {
+    "field": "company_id",
+    "optional": "hide"
+   }
+  ]
+ },
+ {
+  "id": "view_journal_form",
+  "model": "account.journal",
+  "type": "form",
+  "name": "account.journal.form",
+  "root": {
+   "kind": "sheet",
+   "children": [
+    {
+     "kind": "group",
+     "name": "main",
+     "columns": 2,
+     "children": [
+      {
+       "kind": "field",
+       "name": "name"
+      },
+      {
+       "kind": "field",
+       "name": "code"
+      },
+      {
+       "kind": "field",
+       "name": "type"
+      },
+      {
+       "kind": "field",
+       "name": "sequence"
+      },
+      {
+       "kind": "field",
+       "name": "default_account_id"
+      },
+      {
+       "kind": "field",
+       "name": "suspense_account_id"
+      },
+      {
+       "kind": "field",
+       "name": "currency_id"
+      },
+      {
+       "kind": "field",
+       "name": "bank_account_id"
+      },
+      {
+       "kind": "field",
+       "name": "refund_sequence"
+      },
+      {
+       "kind": "field",
+       "name": "restrict_mode_hash_table"
+      },
+      {
+       "kind": "field",
+       "name": "payment_through_outstanding"
+      },
+      {
+       "kind": "field",
+       "name": "company_id"
+      },
+      {
+       "kind": "field",
+       "name": "active"
+      }
+     ]
+    }
+   ]
+  }
+ },
+ {
+  "id": "view_payment_term_form",
+  "model": "account.payment_term",
+  "type": "form",
+  "name": "account.payment_term.form",
+  "root": {
+   "kind": "sheet",
+   "children": [
+    {
+     "kind": "group",
+     "name": "main",
+     "columns": 2,
+     "children": [
+      {
+       "kind": "field",
+       "name": "name"
+      },
+      {
+       "kind": "field",
+       "name": "sequence"
+      },
+      {
+       "kind": "field",
+       "name": "early_discount"
+      },
+      {
+       "kind": "field",
+       "name": "discount_percentage"
+      },
+      {
+       "kind": "field",
+       "name": "discount_days"
+      },
+      {
+       "kind": "field",
+       "name": "early_pay_discount_computation"
+      },
+      {
+       "kind": "field",
+       "name": "company_id"
+      },
+      {
+       "kind": "field",
+       "name": "active"
+      }
+     ]
+    },
+    {
+     "kind": "field",
+     "name": "line_ids",
+     "columns": [
+      {
+       "field": "value"
+      },
+      {
+       "field": "value_amount"
+      },
+      {
+       "field": "nb_days"
+      },
+      {
+       "field": "delay_type"
+      },
+      {
+       "field": "days_next_month"
+      }
+     ]
+    },
+    {
+     "kind": "field",
+     "name": "note"
+    }
+   ]
+  }
+ },
+ {
+  "id": "view_payment_term_list",
+  "model": "account.payment_term",
+  "type": "list",
+  "name": "account.payment_term.list",
+  "columns": [
+   {
+    "field": "name"
+   },
+   {
+    "field": "early_discount"
+   },
+   {
+    "field": "company_id",
+    "optional": "hide"
+   }
+  ]
+ },
+ {
+  "id": "view_fiscal_position_form",
+  "model": "account.fiscal_position",
+  "type": "form",
+  "name": "account.fiscal_position.form",
+  "root": {
+   "kind": "sheet",
+   "children": [
+    {
+     "kind": "group",
+     "name": "main",
+     "columns": 2,
+     "children": [
+      {
+       "kind": "field",
+       "name": "name"
+      },
+      {
+       "kind": "field",
+       "name": "sequence"
+      },
+      {
+       "kind": "field",
+       "name": "auto_apply"
+      },
+      {
+       "kind": "field",
+       "name": "vat_required"
+      },
+      {
+       "kind": "field",
+       "name": "country_ids"
+      },
+      {
+       "kind": "field",
+       "name": "exclude_country_ids"
+      },
+      {
+       "kind": "field",
+       "name": "company_id"
+      },
+      {
+       "kind": "field",
+       "name": "active"
+      }
+     ]
+    },
+    {
+     "kind": "notebook",
+     "pages": [
+      {
+       "kind": "page",
+       "name": "page_taxes",
+       "title": "Tax mapping",
+       "children": [
+        {
+         "kind": "field",
+         "name": "tax_ids",
+         "columns": [
+          {
+           "field": "tax_src_id"
+          },
+          {
+           "field": "tax_dest_id"
+          }
+         ]
+        }
+       ]
+      },
+      {
+       "kind": "page",
+       "name": "page_accounts",
+       "title": "Account mapping",
+       "children": [
+        {
+         "kind": "field",
+         "name": "account_ids",
+         "columns": [
+          {
+           "field": "account_src_id"
+          },
+          {
+           "field": "account_dest_id"
+          }
+         ]
+        }
+       ]
+      },
+      {
+       "kind": "page",
+       "name": "page_note",
+       "title": "Legal notes",
+       "children": [
+        {
+         "kind": "field",
+         "name": "note"
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  }
+ },
+ {
+  "id": "view_fiscal_position_list",
+  "model": "account.fiscal_position",
+  "type": "list",
+  "name": "account.fiscal_position.list",
+  "columns": [
+   {
+    "field": "name"
+   },
+   {
+    "field": "auto_apply"
+   },
+   {
+    "field": "vat_required"
+   },
+   {
+    "field": "company_id",
+    "optional": "hide"
+   }
+  ]
+ },
+ {
+  "id": "view_fiscal_year_form",
+  "model": "account.fiscal_year",
+  "type": "form",
+  "name": "account.fiscal_year.form",
+  "root": {
+   "kind": "sheet",
+   "children": [
+    {
+     "kind": "buttons",
+     "children": [
+      {
+       "kind": "button",
+       "method": "action_close",
+       "label": "Close the year",
+       "confirm": "Closing locks every entry of the year for everyone.",
+       "invisible": [
+        "state",
+        "=",
+        "closed"
+       ]
+      }
+     ]
+    },
+    {
+     "kind": "group",
+     "name": "main",
+     "columns": 2,
+     "children": [
+      {
+       "kind": "field",
+       "name": "name"
+      },
+      {
+       "kind": "field",
+       "name": "date_from"
+      },
+      {
+       "kind": "field",
+       "name": "date_to"
+      },
+      {
+       "kind": "field",
+       "name": "state",
+       "readonly": true,
+       "widget": "badge"
+      },
+      {
+       "kind": "field",
+       "name": "company_id"
+      }
+     ]
+    }
+   ]
+  }
+ },
+ {
+  "id": "view_fiscal_year_list",
+  "model": "account.fiscal_year",
+  "type": "list",
+  "name": "account.fiscal_year.list",
+  "columns": [
+   {
+    "field": "name"
+   },
+   {
+    "field": "date_from"
+   },
+   {
+    "field": "date_to"
+   },
+   {
+    "field": "state",
+    "widget": "badge"
+   },
+   {
+    "field": "company_id",
+    "optional": "hide"
+   }
+  ]
+ },
+ {
+  "id": "view_bank_account_list",
+  "model": "account.bank_account",
+  "type": "list",
+  "name": "account.bank_account.list",
+  "columns": [
+   {
+    "field": "acc_number"
+   },
+   {
+    "field": "partner_id"
+   },
+   {
+    "field": "bank_name"
+   },
+   {
+    "field": "bic"
+   },
+   {
+    "field": "currency_id",
+    "optional": "hide"
+   }
+  ]
+ }
+]

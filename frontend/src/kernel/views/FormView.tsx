@@ -11,6 +11,7 @@ import { formPanelsFor } from "../extensions";
 import { useRealtime, type RealtimeEvent } from "../realtime";
 import { useSession } from "../session";
 import { StatusBar } from "./StatusBar";
+import { ButtonDialog } from "./ButtonDialog";
 import { t } from "../i18n";
 
 interface Props {
@@ -165,11 +166,12 @@ export function FormView({ model, recordId, meta, view, defaults, onSaved, onBac
     if (recordId === null) onBack();
   };
 
-  const callMethod = async (method: string) => {
+  const [pending, setPending] = useState<ViewNode | null>(null);
+  const callMethod = async (method: string, kwargs: Record<string, unknown> = {}) => {
     const id = await save();
     if (!id) return;
     try {
-      await api.call(model, id, method);
+      await api.call(model, id, method, [], kwargs);
       await loaded.refetch();
       await queryClient.invalidateQueries({ queryKey: ["list", model] });
     } catch (e) {
@@ -242,7 +244,11 @@ export function FormView({ model, recordId, meta, view, defaults, onSaved, onBac
             key={key}
             type="button"
             className="btn"
-            onClick={() => node.method && void callMethod(node.method)}
+            onClick={() => {
+              if (!node.method) return;
+              if (node.params?.length || node.confirm) setPending(node);
+              else void callMethod(node.method);
+            }}
             disabled={saving}
           >
             {node.label ?? node.method}
@@ -386,6 +392,17 @@ export function FormView({ model, recordId, meta, view, defaults, onSaved, onBac
         </div>
       )}
       {view.root ? render(view.root, "root") : null}
+      {pending && (
+        <ButtonDialog
+          node={pending}
+          onCancel={() => setPending(null)}
+          onSubmit={(kwargs) => {
+            const method = pending.method as string;
+            setPending(null);
+            void callMethod(method, kwargs);
+          }}
+        />
+      )}
     </form>
   );
   const panels = recordId !== null ? formPanelsFor(model) : [];

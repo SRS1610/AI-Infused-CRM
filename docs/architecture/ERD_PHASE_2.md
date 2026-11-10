@@ -113,7 +113,7 @@ works in every company (D-072).
 | Table | Key columns | Notes |
 |---|---|---|
 | `account_journal` | `name`, `code` (≤ 5), `type` (sale / purchase / cash / bank / general), `default_account_id`, `suspense_account_id`, `currency_id`, `bank_account_id`, `refund_sequence`, `restrict_mode_hash_table`, `company_id` | `UNIQUE (code, company_id)`. |
-| `account_fiscal_year` | `name`, `date_from`, `date_to`, `state` (open / closed), `company_id` | Non-overlapping per company (exclusion constraint). Dates outside any fiscal year fall in the calendar year. Closing posts the closing entry (income and expense → retained earnings) and sets `fiscalyear_lock_date`. |
+| `account_fiscal_year` | `name`, `date_from`, `date_to`, `state` (open / closed), `company_id` | Non-overlapping per company. Dates outside any fiscal year fall in the calendar year. Closing locks the year (`fiscalyear_lock_date`); there is no closing entry: reports compute the current year's earnings and carry earlier years' results to retained earnings. |
 
 - **Numbering (2-b).** A journal entry gets its number when it is posted: `<code>/<year>/<n:05>`
   (refunds `R<code>/…` when `refund_sequence`), from a gapless `core.sequence` per journal, fiscal year

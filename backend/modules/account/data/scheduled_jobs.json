@@ -1,0 +1,3 @@
+[
+  {"id": "sched_fx_revaluation", "model": "core.scheduled_job", "noupdate": true, "values": {"name": "Unrealised exchange differences (month end)", "job_name": "account.fx_revaluation", "cron": "15 2 1 * *"}}
+]

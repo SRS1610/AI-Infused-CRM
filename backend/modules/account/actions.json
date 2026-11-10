@@ -1,0 +1,253 @@
+[
+ {
+  "id": "action_invoices",
+  "name": "Customer invoices",
+  "model": "account.move",
+  "views": [
+   "list",
+   "form",
+   "pivot",
+   "graph"
+  ],
+  "view_refs": {
+   "list": "account.view_invoice_list",
+   "form": "account.view_invoice_form"
+  },
+  "search_view": "account.view_move_search",
+  "domain": [
+   [
+    "move_type",
+    "=",
+    "out_invoice"
+   ]
+  ],
+  "context": {
+   "default_move_type": "out_invoice"
+  }
+ },
+ {
+  "id": "action_refunds",
+  "name": "Customer credit notes",
+  "model": "account.move",
+  "views": [
+   "list",
+   "form"
+  ],
+  "view_refs": {
+   "list": "account.view_invoice_list",
+   "form": "account.view_invoice_form"
+  },
+  "search_view": "account.view_move_search",
+  "domain": [
+   [
+    "move_type",
+    "=",
+    "out_refund"
+   ]
+  ],
+  "context": {
+   "default_move_type": "out_refund"
+  }
+ },
+ {
+  "id": "action_bills",
+  "name": "Vendor bills",
+  "model": "account.move",
+  "views": [
+   "list",
+   "form",
+   "pivot"
+  ],
+  "view_refs": {
+   "list": "account.view_invoice_list",
+   "form": "account.view_invoice_form"
+  },
+  "search_view": "account.view_move_search",
+  "domain": [
+   [
+    "move_type",
+    "=",
+    "in_invoice"
+   ]
+  ],
+  "context": {
+   "default_move_type": "in_invoice"
+  }
+ },
+ {
+  "id": "action_vendor_refunds",
+  "name": "Vendor credit notes",
+  "model": "account.move",
+  "views": [
+   "list",
+   "form"
+  ],
+  "view_refs": {
+   "list": "account.view_invoice_list",
+   "form": "account.view_invoice_form"
+  },
+  "search_view": "account.view_move_search",
+  "domain": [
+   [
+    "move_type",
+    "=",
+    "in_refund"
+   ]
+  ],
+  "context": {
+   "default_move_type": "in_refund"
+  }
+ },
+ {
+  "id": "action_entries",
+  "name": "Journal entries",
+  "model": "account.move",
+  "views": [
+   "list",
+   "form"
+  ],
+  "view_refs": {
+   "list": "account.view_move_list",
+   "form": "account.view_move_form"
+  },
+  "search_view": "account.view_move_search",
+  "context": {
+   "default_move_type": "entry"
+  }
+ },
+ {
+  "id": "action_items",
+  "name": "Journal items",
+  "model": "account.move_line",
+  "views": [
+   "list",
+   "pivot"
+  ],
+  "search_view": "account.view_move_line_search",
+  "domain": [
+   [
+    "display_type",
+    "not_in",
+    [
+     "line_section",
+     "line_note"
+    ]
+   ]
+  ]
+ },
+ {
+  "id": "action_payments_in",
+  "name": "Customer payments",
+  "model": "account.payment",
+  "views": [
+   "list",
+   "form"
+  ],
+  "search_view": "account.view_payment_search",
+  "domain": [
+   [
+    "partner_type",
+    "=",
+    "customer"
+   ]
+  ],
+  "context": {
+   "default_partner_type": "customer",
+   "default_payment_type": "inbound"
+  }
+ },
+ {
+  "id": "action_payments_out",
+  "name": "Vendor payments",
+  "model": "account.payment",
+  "views": [
+   "list",
+   "form"
+  ],
+  "search_view": "account.view_payment_search",
+  "domain": [
+   [
+    "partner_type",
+    "=",
+    "supplier"
+   ]
+  ],
+  "context": {
+   "default_partner_type": "supplier",
+   "default_payment_type": "outbound"
+  }
+ },
+ {
+  "id": "action_accounts",
+  "name": "Chart of accounts",
+  "model": "account.account",
+  "views": [
+   "list",
+   "form"
+  ],
+  "search_view": "account.view_account_search"
+ },
+ {
+  "id": "action_taxes",
+  "name": "Taxes",
+  "model": "account.tax",
+  "views": [
+   "list",
+   "form"
+  ]
+ },
+ {
+  "id": "action_journals",
+  "name": "Journals",
+  "model": "account.journal",
+  "views": [
+   "list",
+   "form"
+  ]
+ },
+ {
+  "id": "action_payment_terms",
+  "name": "Payment terms",
+  "model": "account.payment_term",
+  "views": [
+   "list",
+   "form"
+  ]
+ },
+ {
+  "id": "action_fiscal_positions",
+  "name": "Fiscal positions",
+  "model": "account.fiscal_position",
+  "views": [
+   "list",
+   "form"
+  ]
+ },
+ {
+  "id": "action_fiscal_years",
+  "name": "Fiscal years",
+  "model": "account.fiscal_year",
+  "views": [
+   "list",
+   "form"
+  ]
+ },
+ {
+  "id": "action_tax_groups",
+  "name": "Tax groups",
+  "model": "account.tax_group",
+  "views": [
+   "list",
+   "form"
+  ]
+ },
+ {
+  "id": "action_bank_accounts",
+  "name": "Bank accounts",
+  "model": "account.bank_account",
+  "views": [
+   "list",
+   "form"
+  ]
+ }
+]

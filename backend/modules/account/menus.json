@@ -1,0 +1,155 @@
+[
+ {
+  "id": "menu_root",
+  "name": "Accounting",
+  "sequence": 40,
+  "icon": "landmark",
+  "groups": [
+   "account.group_account_invoice",
+   "account.group_account_readonly"
+  ]
+ },
+ {
+  "id": "menu_customers",
+  "name": "Customers",
+  "parent": "account.menu_root",
+  "sequence": 10
+ },
+ {
+  "id": "menu_invoices",
+  "name": "Invoices",
+  "parent": "account.menu_customers",
+  "sequence": 10,
+  "action": "account.action_invoices"
+ },
+ {
+  "id": "menu_refunds",
+  "name": "Credit notes",
+  "parent": "account.menu_customers",
+  "sequence": 20,
+  "action": "account.action_refunds"
+ },
+ {
+  "id": "menu_payments_in",
+  "name": "Payments",
+  "parent": "account.menu_customers",
+  "sequence": 30,
+  "action": "account.action_payments_in"
+ },
+ {
+  "id": "menu_vendors",
+  "name": "Vendors",
+  "parent": "account.menu_root",
+  "sequence": 20
+ },
+ {
+  "id": "menu_bills",
+  "name": "Bills",
+  "parent": "account.menu_vendors",
+  "sequence": 10,
+  "action": "account.action_bills"
+ },
+ {
+  "id": "menu_vendor_refunds",
+  "name": "Refunds",
+  "parent": "account.menu_vendors",
+  "sequence": 20,
+  "action": "account.action_vendor_refunds"
+ },
+ {
+  "id": "menu_payments_out",
+  "name": "Payments",
+  "parent": "account.menu_vendors",
+  "sequence": 30,
+  "action": "account.action_payments_out"
+ },
+ {
+  "id": "menu_accounting",
+  "name": "Accounting",
+  "parent": "account.menu_root",
+  "sequence": 30,
+  "groups": [
+   "account.group_account_user",
+   "account.group_account_readonly"
+  ]
+ },
+ {
+  "id": "menu_entries",
+  "name": "Journal entries",
+  "parent": "account.menu_accounting",
+  "sequence": 10,
+  "action": "account.action_entries"
+ },
+ {
+  "id": "menu_items",
+  "name": "Journal items",
+  "parent": "account.menu_accounting",
+  "sequence": 20,
+  "action": "account.action_items"
+ },
+ {
+  "id": "menu_config",
+  "name": "Configuration",
+  "parent": "account.menu_root",
+  "sequence": 90,
+  "groups": [
+   "account.group_account_manager"
+  ]
+ },
+ {
+  "id": "menu_accounts",
+  "name": "Chart of accounts",
+  "parent": "account.menu_config",
+  "sequence": 10,
+  "action": "account.action_accounts"
+ },
+ {
+  "id": "menu_taxes",
+  "name": "Taxes",
+  "parent": "account.menu_config",
+  "sequence": 20,
+  "action": "account.action_taxes"
+ },
+ {
+  "id": "menu_tax_groups",
+  "name": "Tax groups",
+  "parent": "account.menu_config",
+  "sequence": 25,
+  "action": "account.action_tax_groups"
+ },
+ {
+  "id": "menu_journals",
+  "name": "Journals",
+  "parent": "account.menu_config",
+  "sequence": 30,
+  "action": "account.action_journals"
+ },
+ {
+  "id": "menu_fiscal_positions",
+  "name": "Fiscal positions",
+  "parent": "account.menu_config",
+  "sequence": 40,
+  "action": "account.action_fiscal_positions"
+ },
+ {
+  "id": "menu_payment_terms",
+  "name": "Payment terms",
+  "parent": "account.menu_config",
+  "sequence": 50,
+  "action": "account.action_payment_terms"
+ },
+ {
+  "id": "menu_fiscal_years",
+  "name": "Fiscal years",
+  "parent": "account.menu_config",
+  "sequence": 60,
+  "action": "account.action_fiscal_years"
+ },
+ {
+  "id": "menu_bank_accounts",
+  "name": "Bank accounts",
+  "parent": "account.menu_config",
+  "sequence": 70,
+  "action": "account.action_bank_accounts"
+ }
+]

@@ -1,0 +1,18 @@
+name = "account"
+version = "1.0.0"
+summary = "Invoicing and accounting: chart of accounts, journals, invoices and bills, taxes, payments, reconciliation, multi-currency"
+category = "Accounting"
+phase = 2
+depends = ["contacts", "product", "chatter", "workflow", "reports", "portal", "ai_core"]
+license = "Apache-2.0"
+installable = true
+application = true
+post_init = "hooks:post_init"
+
+[load]
+security = ["security/groups.json", "security/access.json"]
+data = ["data/payment_terms.json", "data/scheduled_jobs.json", "data/reports.json"]
+demo = ["data/demo/accounting.json"]
+views = ["views.json"]
+actions = "actions.json"
+menus = "menus.json"
