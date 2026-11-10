@@ -1,0 +1,64 @@
+[
+  {"id": "view_provider_list", "model": "auth_saml.provider", "type": "list", "name": "auth_saml.provider.list",
+   "columns": [{"field": "name"}, {"field": "idp_entity_id"}, {"field": "company_id"},
+               {"field": "allow_signup"}, {"field": "trust_email"}, {"field": "active"}]},
+  {"id": "view_provider_form", "model": "auth_saml.provider", "type": "form", "name": "auth_saml.provider.form",
+   "root": {"kind": "sheet", "children": [
+     {"kind": "buttons", "children": [
+       {"kind": "button", "method": "action_generate_sp_keypair", "label": "Generate signing key",
+        "confirm": "A new key replaces the current one; give the new metadata to the identity provider. Continue?"}
+     ]},
+     {"kind": "field", "name": "name", "widget": "title"},
+     {"kind": "group", "name": "general", "columns": 2, "children": [
+       {"kind": "field", "name": "active"},
+       {"kind": "field", "name": "sequence"},
+       {"kind": "field", "name": "company_id"}
+     ]},
+     {"kind": "notebook", "pages": [
+       {"kind": "page", "name": "page_idp", "title": "Identity provider", "children": [
+         {"kind": "group", "name": "idp", "columns": 1, "children": [
+           {"kind": "field", "name": "idp_entity_id"},
+           {"kind": "field", "name": "idp_sso_url", "widget": "url"},
+           {"kind": "field", "name": "idp_certificates", "placeholder": "-----BEGIN CERTIFICATE-----"}
+         ]}
+       ]},
+       {"kind": "page", "name": "page_sp", "title": "This application", "children": [
+         {"kind": "group", "name": "sp", "columns": 1, "children": [
+           {"kind": "field", "name": "sp_entity_id"},
+           {"kind": "field", "name": "acs_url", "readonly": true},
+           {"kind": "field", "name": "metadata_url", "readonly": true, "widget": "url"},
+           {"kind": "field", "name": "name_id_format"},
+           {"kind": "field", "name": "sign_requests"},
+           {"kind": "field", "name": "sp_certificate", "invisible": ["sign_requests", "=", false]},
+           {"kind": "field", "name": "sp_private_key", "widget": "password", "invisible": ["sign_requests", "=", false]}
+         ]}
+       ]},
+       {"kind": "page", "name": "page_accounts", "title": "Accounts", "children": [
+         {"kind": "group", "name": "mapping", "columns": 2, "children": [
+           {"kind": "field", "name": "email_attribute", "placeholder": "NameID"},
+           {"kind": "field", "name": "name_attribute"},
+           {"kind": "field", "name": "trust_email"},
+           {"kind": "field", "name": "allow_signup"}
+         ]},
+         {"kind": "field", "name": "identity_ids", "columns": [{"field": "subject"}, {"field": "user_id"}, {"field": "last_login"}]}
+       ]},
+       {"kind": "page", "name": "page_security", "title": "Security", "children": [
+         {"kind": "group", "name": "security", "columns": 2, "children": [
+           {"kind": "field", "name": "want_assertions_signed"},
+           {"kind": "field", "name": "clock_skew"}
+         ]}
+       ]}
+     ]}
+   ]}},
+  {"id": "view_identity_list", "model": "auth_saml.identity", "type": "list", "name": "auth_saml.identity.list",
+   "columns": [{"field": "provider_id"}, {"field": "subject"}, {"field": "user_id"}, {"field": "last_login"}]},
+  {"id": "view_identity_form", "model": "auth_saml.identity", "type": "form", "name": "auth_saml.identity.form",
+   "root": {"kind": "sheet", "children": [
+     {"kind": "group", "name": "main", "columns": 1, "children": [
+       {"kind": "field", "name": "provider_id"},
+       {"kind": "field", "name": "subject"},
+       {"kind": "field", "name": "user_id"},
+       {"kind": "field", "name": "last_login", "readonly": true}
+     ]}
+   ]}}
+]

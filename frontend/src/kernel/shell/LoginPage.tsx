@@ -13,6 +13,19 @@ export function LoginPage() {
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const providers = useQuery({ queryKey: ["providers"], queryFn: api.providers, retry: false });
+  const samlProviders = useQuery({ queryKey: ["saml-providers"], queryFn: api.samlProviders, retry: false });
+  const sso = [
+    ...(providers.data ?? []).map((p) => ({
+      key: `oidc:${p.code}`,
+      name: p.name,
+      href: `/api/v1/auth/oidc/${encodeURIComponent(p.code)}/start`,
+    })),
+    ...(samlProviders.data ?? []).map((p) => ({
+      key: `saml:${p.id}`,
+      name: p.name,
+      href: `/api/v1/auth/saml/${encodeURIComponent(p.id)}/login`,
+    })),
+  ];
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -89,11 +102,11 @@ export function LoginPage() {
         <button type="submit" className="btn primary block" disabled={busy}>
           {busy ? t("Signing in…") : preAuth ? t("Verify") : t("Sign in")}
         </button>
-        {!preAuth && (providers.data ?? []).length > 0 && (
+        {!preAuth && sso.length > 0 && (
           <div className="sso">
             <p className="muted">{t("or continue with")}</p>
-            {providers.data!.map((p) => (
-              <a key={p.code} className="btn block" href={`/api/v1/auth/oidc/${encodeURIComponent(p.code)}/start`}>
+            {sso.map((p) => (
+              <a key={p.key} className="btn block" href={p.href}>
                 {p.name}
               </a>
             ))}

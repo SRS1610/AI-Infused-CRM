@@ -1,0 +1,4 @@
+[
+  {"id": "action_providers", "name": "SAML providers", "model": "auth_saml.provider", "views": ["list", "form"], "groups": ["core.group_system"], "context": {"active_test": false}},
+  {"id": "action_identities", "name": "SAML account links", "model": "auth_saml.identity", "views": ["list", "form"], "groups": ["core.group_system"]}
+]

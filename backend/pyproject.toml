@@ -50,6 +50,7 @@ dependencies = [
   # classical models for scoring, risk and forecasting (AI architecture note §4.7)
   "scikit-learn>=1.5",
   "numpy>=2.0",
+  "signxml>=5.2.0",
 ]
 
 [project.optional-dependencies]

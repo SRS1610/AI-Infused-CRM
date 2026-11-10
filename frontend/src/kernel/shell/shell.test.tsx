@@ -71,6 +71,7 @@ describe("login and shell", () => {
               status: 401,
             }),
       "GET /api/v1/auth/providers": () => [{ code: "okta", name: "Okta" }],
+      "GET /api/v1/auth/saml/providers": () => [{ id: 3, name: "Contoso SAML" }],
       "POST /api/v1/auth/login": () => ({ totp_required: true, pre_auth_token: "pre" }),
       "POST /api/v1/auth/totp": () => {
         loggedIn = true;
@@ -81,6 +82,10 @@ describe("login and shell", () => {
     renderApp();
     expect(await screen.findByRole("heading", { name: "Sign in to Tessera" })).toBeInTheDocument();
     expect(await screen.findByRole("link", { name: "Okta" })).toHaveAttribute("href", "/api/v1/auth/oidc/okta/start");
+    expect(await screen.findByRole("link", { name: "Contoso SAML" })).toHaveAttribute(
+      "href",
+      "/api/v1/auth/saml/3/login",
+    );
     await userEvent.type(screen.getByLabelText("Login"), "admin");
     await userEvent.type(screen.getByLabelText("Password"), "admin1234");
     await userEvent.click(screen.getByRole("button", { name: "Sign in" }));
@@ -105,6 +110,31 @@ describe("login and shell", () => {
     await userEvent.type(screen.getByLabelText("Password"), "nope");
     await userEvent.click(screen.getByRole("button", { name: "Sign in" }));
     expect(await screen.findByRole("alert")).toHaveTextContent("Invalid login or password");
+  });
+
+  it("offers SAML providers on their own and hides the list when SAML is not installed", async () => {
+    mockFetch({
+      "GET /api/v1/auth/session": () =>
+        new Response(JSON.stringify({ error: "AccessDenied", message: "x" }), { status: 401 }),
+      "GET /api/v1/auth/providers": () => [],
+      "GET /api/v1/auth/saml/providers": () => [{ id: 7, name: "Corporate SSO" }],
+    });
+    const { unmount } = renderApp();
+    expect(await screen.findByRole("link", { name: "Corporate SSO" })).toHaveAttribute(
+      "href",
+      "/api/v1/auth/saml/7/login",
+    );
+    expect(screen.getByText("or continue with")).toBeInTheDocument();
+    unmount();
+    mockFetch({
+      "GET /api/v1/auth/session": () =>
+        new Response(JSON.stringify({ error: "AccessDenied", message: "x" }), { status: 401 }),
+      "GET /api/v1/auth/providers": () => [],
+    });
+    renderApp();
+    expect(await screen.findByRole("heading", { name: "Sign in to Tessera" })).toBeInTheDocument();
+    await waitFor(() => expect(screen.queryByText("or continue with")).not.toBeInTheDocument());
+    expect(screen.queryByRole("link")).not.toBeInTheDocument();
   });
 
   it("switches companies, opens the palette and signs out", async () => {
