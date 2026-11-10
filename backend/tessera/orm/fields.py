@@ -68,6 +68,7 @@ _FIELD_OPTIONS: dict[str, Any] = {
     "copy": None,
     "pii": False,
     "readonly_if": None,
+    "required_if": None,
 }
 
 
@@ -116,6 +117,7 @@ class Field:
         self._copy: bool | None = kwargs.get("copy")
         self.pii: bool = kwargs.get("pii", False)
         self.readonly_if: Any = kwargs.get("readonly_if")
+        self.required_if: Any = kwargs.get("required_if")  # domain: required when the record matches
         self.extra: dict[str, Any] = {k: v for k, v in kwargs.items() if k not in _FIELD_OPTIONS and k != "default"}
 
     # -- metadata ------------------------------------------------------------------
@@ -207,6 +209,7 @@ class Field:
             "pii": self.pii,
             "comodel": self.comodel_name,
             "readonly_if": self.readonly_if,
+            "required_if": self.required_if,
             "copy": self.copy,
         }
 

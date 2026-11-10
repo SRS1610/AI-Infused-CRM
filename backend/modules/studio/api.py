@@ -43,16 +43,26 @@ def models(ctx: RequestContext = Depends(designer)) -> list[dict[str, Any]]:
 
 @router.get("/models/{model}/fields")
 def model_fields(model: str, ctx: RequestContext = Depends(designer)) -> list[dict[str, Any]]:
+    """Fields of the model; Studio fields also carry their current options (for Edit field)."""
     cls = S._model_cls(ctx.env, model)
-    studio = set(
-        ctx.env["studio.field"].elevated().search([("model_name", "=", model), ("active", "=", True)]).mapped("name")
-    )
+    studio = {
+        r.name: r
+        for r in ctx.env["studio.field"].elevated().search([("model_name", "=", model), ("active", "=", True)])
+    }
     out = []
     for name, f in sorted(cls._fields.items()):
         if name == "id" or f.type_name in ("vector",):
             continue
-        out.append({"name": name, "label": f.label, "type": f.type_name, "studio": name in studio, "store": f.store})
+        row = {"name": name, "label": f.label, "type": f.type_name, "studio": name in studio, "store": f.store}
+        if name in studio:
+            row["options"] = S.field_options(studio[name])
+        out.append(row)
     return out
+
+
+@router.get("/groups")
+def groups(ctx: RequestContext = Depends(designer)) -> list[dict[str, Any]]:
+    return S.list_groups(ctx.env)
 
 
 class FieldIn(BaseModel):
@@ -71,6 +81,16 @@ def add_field(data: FieldIn, ctx: RequestContext = Depends(designer)) -> dict[st
     )
 
 
+class FieldEditIn(BaseModel):
+    options: dict[str, Any] = Field(default_factory=dict)
+
+
+@router.patch("/models/{model}/fields/{name}")
+def edit_field(model: str, name: str, data: FieldEditIn, ctx: RequestContext = Depends(designer)) -> dict[str, Any]:
+    """Change the label or options of a Studio field (one change in the history)."""
+    return _change(S.edit_field(ctx.env, model, name, **data.options))
+
+
 class OpsIn(BaseModel):
     operations: list[dict[str, Any]]
     summary: str = "Layout changed in Studio"
@@ -84,13 +104,16 @@ def change_view(model: str, view_type: str, data: OpsIn, ctx: RequestContext = D
 class ViewIn(BaseModel):
     model: str
     view_type: str
-    name: str
-    definition: dict[str, Any]
+    name: str = ""
+    definition: dict[str, Any] | None = Field(default=None, description="Omit to start from the generated default")
+    make_default: bool = False
 
 
 @router.post("/views", status_code=201)
 def create_view(data: ViewIn, ctx: RequestContext = Depends(designer)) -> dict[str, Any]:
-    return _change(S.create_view(ctx.env, data.model, data.view_type, data.definition, data.name))
+    return _change(
+        S.create_view(ctx.env, data.model, data.view_type, data.definition, data.name, make_default=data.make_default)
+    )
 
 
 @router.post("/automations", status_code=201)
@@ -100,15 +123,36 @@ def add_automation(values: dict[str, Any], ctx: RequestContext = Depends(designe
 
 class WorkflowIn(BaseModel):
     model: str
-    name: str
-    state_field: str
+    name: str = Field(min_length=1, max_length=120)
+    state_field: str = ""
     states: list[dict[str, Any]]
-    transitions: list[dict[str, Any]]
+    transitions: list[dict[str, Any]] = Field(default_factory=list)
+    strict: bool = True
+    new_field: dict[str, Any] | None = Field(default=None, description="{label, name}: add a choice field for it")
+    replace: bool = False
 
 
 @router.post("/workflows", status_code=201)
 def create_workflow(data: WorkflowIn, ctx: RequestContext = Depends(designer)) -> dict[str, Any]:
-    return _change(S.create_workflow(ctx.env, data.model, data.state_field, data.states, data.transitions, data.name))
+    return _change(
+        S.create_workflow(
+            ctx.env,
+            data.model,
+            data.state_field,
+            data.states,
+            data.transitions,
+            data.name,
+            strict=data.strict,
+            new_field=data.new_field,
+            replace=data.replace,
+        )
+    )
+
+
+@router.get("/models/{model}/workflow")
+def workflow(model: str, ctx: RequestContext = Depends(designer)) -> dict[str, Any]:
+    """The model's active workflow (``{"workflow": null}`` when it has none)."""
+    return {"workflow": S.workflow_info(ctx.env, model)}
 
 
 @router.get("/changes")

@@ -2161,3 +2161,82 @@ tr.clickable {
   gap: 8px;
   flex-wrap: wrap;
 }
+.studio-main {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(260px, 360px);
+  gap: 16px;
+  align-items: start;
+}
+@media (max-width: 900px) {
+  .studio-main {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+.studio-work {
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+}
+.studio-subform {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+}
+.studio-more summary {
+  cursor: pointer;
+  color: var(--text-muted);
+  margin-bottom: 6px;
+}
+.studio-more[open] {
+  display: grid;
+  gap: 8px;
+}
+.condition-editor {
+  display: grid;
+  gap: 6px;
+  padding: 8px;
+  border: 1px dashed var(--border);
+  border-radius: 6px;
+}
+.condition-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+}
+.condition-raw {
+  overflow-wrap: anywhere;
+}
+.studio-transitions {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 6px;
+}
+.studio-transition {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+  padding: 6px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+}
+.studio-transition > details {
+  flex-basis: 100%;
+}
+.workflow-diagram {
+  margin: 0;
+  padding-left: 1.5rem;
+  display: grid;
+  gap: 6px;
+}
+.workflow-diagram ul {
+  list-style: none;
+  margin: 2px 0 0;
+  padding-left: 0.5rem;
+}
+.workflow-diagram .badge {
+  margin-left: 6px;
+}

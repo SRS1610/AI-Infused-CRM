@@ -1302,6 +1302,20 @@ class Model:
         for fields_, method in self._constraint_methods:
             if not fields_ or changed & set(fields_):
                 getattr(self, method)()
+        self._check_required_if(changed)
+
+    def _check_required_if(self, changed: set[str]) -> None:
+        """Fields declared with ``required_if`` (a domain) must be set on records matching it."""
+        for field in self._fields.values():
+            if not field.required_if or isinstance(field, F.Boolean):
+                continue
+            domain = Domain(field.required_if)
+            if not changed & ({field.name} | {f.split(".")[0] for f in domain.fields()}):
+                continue
+            for rec in self.elevated():
+                value = rec[field.name]
+                if (value in (None, "", False) or (isinstance(value, Model) and not value)) and domain.evaluate(rec):
+                    raise ValidationError(f"Field '{field.label}' is required", field=field.name)
 
     # ------------------------------------------------------------------ convenience
     def copy_data(self, default: Vals | None = None, *, nested: bool = False) -> list[Vals]:

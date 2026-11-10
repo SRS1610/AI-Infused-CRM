@@ -1,7 +1,7 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useCallback, useEffect, useId, useMemo, useState } from "react";
 import { api, ApiError, CLIENT_ID } from "../api/client";
-import type { FieldsMeta, RecordData, ViewDef, ViewNode, ViewsResponse } from "../api/types";
+import type { FieldMeta, FieldsMeta, RecordData, ViewDef, ViewNode, ViewsResponse } from "../api/types";
 import { evaluate } from "../domain";
 import { FieldInput } from "../fields/FieldInput";
 import { useHotkeys } from "../hotkeys";
@@ -36,6 +36,11 @@ export function collectFields(node: ViewNode | ViewNode[] | undefined, out: Set<
   if (node.field) out.add(node.field);
   for (const key of ["children", "pages"] as const) if (Array.isArray(node[key])) collectFields(node[key], out);
   return out;
+}
+
+/** Always required, or required while the record matches the field's `required_if` condition. */
+export function isRequired(field: FieldMeta, record: RecordData): boolean {
+  return field.required || (!!field.required_if && evaluate(field.required_if, record));
 }
 
 /** Convert a read() value to the shape the API accepts on write. */
@@ -118,7 +123,7 @@ export function FormView({ model, recordId, meta, view, defaults, onSaved, onBac
     const missing: Record<string, string> = {};
     for (const name of fieldNames) {
       const f = meta.fields[name];
-      if (!f?.required || f.type === "boolean" || SYSTEM.has(name)) continue;
+      if (!f || !isRequired(f, record) || f.type === "boolean" || SYSTEM.has(name)) continue;
       const v = record[name];
       if (v === null || v === undefined || v === "" || (Array.isArray(v) && v.length === 0 && f.type !== "one2many"))
         missing[name] = t("{field} is required", { field: f.string });
@@ -267,7 +272,8 @@ export function FormView({ model, recordId, meta, view, defaults, onSaved, onBac
       !canWrite ||
       node.readonly === true ||
       (field.readonly && !(recordId === null && !field.compute)) ||
-      (node.readonly_if !== undefined && evaluate(node.readonly_if, record));
+      evaluate(node.readonly_if ?? field.readonly_if, record);
+    const required = isRequired(field, record);
     const isTitle = node.widget === "title";
     return (
       <div
@@ -276,14 +282,14 @@ export function FormView({ model, recordId, meta, view, defaults, onSaved, onBac
       >
         <label htmlFor={id} className={isTitle ? "sr-only" : undefined}>
           {node.label ?? field.string}
-          {field.required && !readonly && (
+          {required && !readonly && (
             <span aria-hidden="true" className="req">
               *
             </span>
           )}
         </label>
         <FieldInput
-          field={field}
+          field={required === field.required ? field : { ...field, required }}
           value={record[name]}
           record={record}
           onChange={(v) => setValue(name, v)}

@@ -43,6 +43,8 @@ export interface FieldMeta {
   inverse_name?: string;
   domain?: Domain;
   readonly_if?: Domain;
+  required_if?: Domain;
+  groups?: string[];
 }
 
 export type FieldsMeta = Record<string, FieldMeta>;

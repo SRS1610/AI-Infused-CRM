@@ -23,6 +23,7 @@ FIELD_TYPES = [
 ]
 CHANGE_KINDS = [
     ("add_field", "Field added"),
+    ("edit_field", "Field changed"),
     ("view_change", "View changed"),
     ("new_view", "View created"),
     ("automation", "Automated action"),
@@ -50,7 +51,7 @@ class StudioField(Model):
     comodel = fields.Char(help="Target model of link fields")
     currency_field = fields.Char(help="Currency field of amount fields")
     groups = fields.Json(default=list, help="External ids of the groups that may see the field")
-    widget = fields.Char()
+    widget = fields.Char(help="Client widget used where Studio places the field")
     tracking = fields.Boolean()
     active = fields.Boolean(default=True)
 
