@@ -16,6 +16,12 @@ COLUMNS = (
 )
 
 
+def default_of(stored: Any) -> Any:
+    """Studio stores a default as ``{"value": …}`` (a bare JSON string would read back as JSON text);
+    older rows hold the bare value."""
+    return stored["value"] if isinstance(stored, dict) and set(stored) == {"value"} else stored
+
+
 def make_field(row: Mapping[str, Any]) -> F.Field:
     kwargs: dict[str, Any] = {"help": row.get("help") or ""}
     if row.get("required"):
@@ -26,8 +32,8 @@ def make_field(row: Mapping[str, Any]) -> F.Field:
         kwargs["readonly_if"] = row["readonly_if"]
     if row.get("required_if"):
         kwargs["required_if"] = row["required_if"]
-    if row.get("default") is not None:
-        kwargs["default"] = row["default"]
+    if default_of(row.get("default")) is not None:
+        kwargs["default"] = default_of(row["default"])
     if row.get("groups"):
         kwargs["groups"] = tuple(row["groups"])
     if row.get("tracking"):

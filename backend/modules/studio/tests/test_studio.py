@@ -210,9 +210,9 @@ def test_api_403_for_non_designers(app: Any) -> None:
     demo = Session(TestClient(app, base_url="http://localhost"), "demo", "demo1234")
     app.openapi_schema = None
     paths = {p: ops for p, ops in app.openapi()["paths"].items() if p.startswith("/api/v1/studio")}
-    assert sum(len(ops) for ops in paths.values()) >= 12
+    assert sum(len(ops) for ops in paths.values()) >= 16
     for full_path, ops in paths.items():
-        path = full_path.replace("{model}", "crm.lead").replace("{view_type}", "form")
+        path = full_path.replace("{model}", "crm.lead").replace("{view_type}", "form").replace("{name}", "x_a")
         path = path.replace("{change_id}", "1").replace("{snapshot_id}", "1")
         for method in ops:
             resp = demo.client.request(method, path, headers=demo.headers, json={})
