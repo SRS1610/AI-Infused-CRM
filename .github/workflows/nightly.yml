@@ -85,7 +85,7 @@ jobs:
       - run: uv python install 3.12
       - run: uv sync --frozen
       - name: Database extensions
-        run: PGPASSWORD=tessera psql -h localhost -U tessera -d tessera_perf_reports -c "CREATE EXTENSION IF NOT EXISTS vector; CREATE EXTENSION IF NOT EXISTS pg_trgm; CREATE EXTENSION IF NOT EXISTS unaccent;"
+        run: PGPASSWORD=tessera psql -h localhost -U tessera -d tessera_perf_reports -c "CREATE EXTENSION IF NOT EXISTS vector; CREATE EXTENSION IF NOT EXISTS pg_trgm; CREATE EXTENSION IF NOT EXISTS unaccent; CREATE EXTENSION IF NOT EXISTS btree_gist;"
       - run: uv run tessera seed demo --phase 2
       - run: uv run tessera perf reports --lines 100000 --json perf-reports.json
       - uses: actions/upload-artifact@v4

@@ -1,0 +1,85 @@
+[
+  {"id": "view_product_form_rental", "inherit": "product.view_product_form", "name": "product.product.form.rental",
+   "operations": [
+     {"op": "insert_after", "anchor": {"name": "page_sales"}, "node": {"kind": "page", "name": "page_rental", "title": "Rental", "children": [
+       {"kind": "group", "name": "rental_main", "columns": 2, "children": [
+         {"kind": "field", "name": "rent_ok"}, {"kind": "field", "name": "rental_units", "invisible": ["rent_ok", "=", false]},
+         {"kind": "field", "name": "extra_hourly", "invisible": ["rent_ok", "=", false]}, {"kind": "field", "name": "extra_daily", "invisible": ["rent_ok", "=", false]},
+         {"kind": "field", "name": "rental_deposit", "invisible": ["rent_ok", "=", false]}
+       ]},
+       {"kind": "field", "name": "rental_pricing_ids", "invisible": ["rent_ok", "=", false],
+        "columns": [{"field": "duration"}, {"field": "unit"}, {"field": "price"}, {"field": "currency_id"}, {"field": "pricelist_id"}, {"field": "company_id", "optional": "hide"}, {"field": "active", "optional": "hide"}]}
+     ]}}
+   ]},
+  {"id": "view_rental_pricing_form", "model": "sale.rental_pricing", "type": "form", "name": "sale.rental_pricing.form",
+   "root": {"kind": "sheet", "children": [
+     {"kind": "group", "name": "main", "columns": 2, "children": [
+       {"kind": "field", "name": "product_id"}, {"kind": "field", "name": "pricelist_id"},
+       {"kind": "field", "name": "duration"}, {"kind": "field", "name": "unit"},
+       {"kind": "field", "name": "price"}, {"kind": "field", "name": "currency_id"},
+       {"kind": "field", "name": "company_id"}, {"kind": "field", "name": "active"}
+     ]}
+   ]}},
+  {"id": "view_rental_pricing_list", "model": "sale.rental_pricing", "type": "list", "name": "sale.rental_pricing.list",
+   "columns": [{"field": "product_id"}, {"field": "duration"}, {"field": "unit"}, {"field": "price"}, {"field": "currency_id"}, {"field": "pricelist_id"}, {"field": "company_id", "optional": "hide"}]},
+
+  {"id": "view_quotation_form_rental", "inherit": "sale.view_quotation_form", "name": "sale.quotation.form.rental",
+   "operations": [
+     {"op": "insert_after", "anchor": {"name": "page_lines"}, "node": {"kind": "page", "name": "page_rentals", "title": "Rentals", "invisible": ["is_rental_order", "=", false], "children": [
+       {"kind": "field", "name": "rental_status", "readonly": true, "widget": "badge"},
+       {"kind": "field", "name": "rental_line_ids", "readonly": true,
+        "columns": [{"field": "product_id"}, {"field": "quantity"}, {"field": "start_date"}, {"field": "return_date"}, {"field": "rental_status", "widget": "badge"}, {"field": "pickup_datetime"}, {"field": "returned_datetime"}, {"field": "late_fee"}, {"field": "rental_price_detail"}, {"field": "price_subtotal"}]}
+     ]}},
+     {"op": "append", "anchor": {"path": "/root/children/0"}, "node": {"kind": "button", "method": "action_rental_pickup", "label": "Pick up", "confirm": "Register the pickup of every reserved rental now?", "invisible": {"any": [["state", "!=", "accepted"], ["rental_status", "!=", "reserved"]]}}},
+     {"op": "append", "anchor": {"path": "/root/children/0"}, "node": {"kind": "button", "method": "action_rental_return", "label": "Return", "confirm": "Register the return of every rental out with the customer now? Late fees are added to the order.", "invisible": {"any": [["state", "!=", "accepted"], ["rental_status", "not_in", ["pickedup", "late"]]]}}}
+   ]},
+  {"id": "view_quotation_line_form_rental", "inherit": "sale.view_quotation_line_form", "name": "sale.quotation_line.form.rental",
+   "operations": [
+     {"op": "insert_after", "anchor": {"name": "delivery"}, "node": {"kind": "group", "name": "rental", "title": "Rental", "columns": 2, "children": [
+       {"kind": "field", "name": "is_rental"}, {"kind": "field", "name": "rental_status", "readonly": true, "widget": "badge"},
+       {"kind": "field", "name": "start_date", "invisible": ["is_rental", "=", false]}, {"kind": "field", "name": "return_date", "invisible": ["is_rental", "=", false]},
+       {"kind": "field", "name": "pickup_datetime", "readonly": true, "invisible": ["is_rental", "=", false]}, {"kind": "field", "name": "returned_datetime", "readonly": true, "invisible": ["is_rental", "=", false]},
+       {"kind": "field", "name": "rental_price_detail", "readonly": true, "invisible": ["is_rental", "=", false]}, {"kind": "field", "name": "late_fee", "readonly": true, "invisible": ["is_rental", "=", false]},
+       {"kind": "field", "name": "rental_charge", "readonly": true, "invisible": ["rental_charge", "=", null]}, {"kind": "field", "name": "rental_origin_line_id", "readonly": true, "invisible": ["rental_charge", "=", null]}
+     ]}},
+     {"op": "insert_after", "anchor": {"name": "rental"}, "node": {"kind": "field", "name": "rental_allocation_ids", "readonly": true, "invisible": ["is_rental", "=", false],
+       "columns": [{"field": "unit"}, {"field": "date_start"}, {"field": "date_end"}]}},
+     {"op": "prepend", "anchor": {"path": "/root"}, "node": {"kind": "buttons", "children": [
+       {"kind": "button", "method": "action_pickup", "label": "Pick up", "invisible": ["rental_status", "!=", "reserved"]},
+       {"kind": "button", "method": "action_return", "label": "Return", "invisible": ["rental_status", "not_in", ["pickedup", "late"]]}
+     ]}}
+   ]},
+  {"id": "view_rental_line_list", "model": "sale.quotation_line", "type": "list", "name": "sale.quotation_line.rental.list",
+   "columns": [{"field": "quotation_id"}, {"field": "product_id"}, {"field": "quantity"}, {"field": "start_date"}, {"field": "return_date"}, {"field": "rental_status", "widget": "badge"}, {"field": "pickup_datetime", "optional": "show"}, {"field": "returned_datetime", "optional": "show"}, {"field": "late_fee", "sum": true}, {"field": "price_subtotal", "sum": true}]},
+  {"id": "view_rental_line_search", "model": "sale.quotation_line", "type": "search", "name": "sale.quotation_line.rental.search",
+   "fields": ["product_id", "quotation_id"],
+   "filters": [
+     {"name": "reserved", "label": "To pick up", "domain": [["rental_status", "=", "reserved"]]},
+     {"name": "out", "label": "Out with customers", "domain": [["rental_status", "in", ["pickedup", "late"]]]},
+     {"name": "late", "label": "Late", "domain": [["rental_status", "=", "late"]]},
+     {"name": "returned", "label": "Returned", "domain": [["rental_status", "=", "returned"]]}
+   ],
+   "group_bys": [{"field": "product_id"}, {"field": "rental_status"}, {"field": "start_date:month"}]},
+  {"id": "view_rental_order_list", "model": "sale.quotation", "type": "list", "name": "sale.quotation.rental.list",
+   "columns": [{"field": "name"}, {"field": "partner_id"}, {"field": "user_id"}, {"field": "state", "widget": "badge"}, {"field": "rental_status", "widget": "badge"}, {"field": "amount_total", "sum": true}, {"field": "invoice_status", "widget": "badge", "optional": "show"}]},
+
+  {"id": "view_rental_allocation_calendar", "model": "sale.rental_allocation", "type": "calendar", "name": "sale.rental_allocation.calendar",
+   "date_start": "date_start", "date_stop": "date_end", "title": "name", "expand_endpoint": "/sale_rental/calendar"},
+  {"id": "view_rental_allocation_list", "model": "sale.rental_allocation", "type": "list", "name": "sale.rental_allocation.list",
+   "columns": [{"field": "product_id"}, {"field": "unit"}, {"field": "date_start"}, {"field": "date_end"}, {"field": "order_id"}, {"field": "partner_id"}, {"field": "rental_status", "widget": "badge"}, {"field": "company_id", "optional": "hide"}]},
+  {"id": "view_rental_allocation_form", "model": "sale.rental_allocation", "type": "form", "name": "sale.rental_allocation.form",
+   "root": {"kind": "sheet", "children": [
+     {"kind": "field", "name": "name", "widget": "title", "readonly": true},
+     {"kind": "group", "name": "main", "columns": 2, "children": [
+       {"kind": "field", "name": "product_id"}, {"kind": "field", "name": "unit"},
+       {"kind": "field", "name": "date_start"}, {"kind": "field", "name": "date_end"},
+       {"kind": "field", "name": "order_id"}, {"kind": "field", "name": "partner_id"},
+       {"kind": "field", "name": "line_id"}, {"kind": "field", "name": "rental_status"}
+     ]}
+   ]}},
+  {"id": "view_rental_allocation_search", "model": "sale.rental_allocation", "type": "search", "name": "sale.rental_allocation.search",
+   "fields": ["product_id", "order_id", "partner_id"],
+   "filters": [{"name": "upcoming", "label": "Current and upcoming", "domain": [["date_end", ">=", "$now"]]}],
+   "group_bys": [{"field": "product_id"}, {"field": "date_start:week"}]},
+  {"id": "view_rental_allocation_pivot", "model": "sale.rental_allocation", "type": "pivot", "name": "sale.rental_allocation.pivot", "row": "product_id", "col": "date_start:month", "measures": []}
+]

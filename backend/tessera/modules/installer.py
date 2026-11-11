@@ -483,7 +483,7 @@ def module_states(*, database_url: str | None = None) -> list[ModuleState]:
     return out
 
 
-EXTENSIONS = ("vector", "pg_trgm", "unaccent", "btree_gin", "pgcrypto")
+EXTENSIONS = ("vector", "pg_trgm", "unaccent", "btree_gin", "btree_gist", "pgcrypto")
 
 
 def ensure_extensions(cr: Cursor) -> list[str]:
