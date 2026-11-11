@@ -1,0 +1,5 @@
+[
+  {"id": "plan_monthly", "model": "sale.subscription_plan", "noupdate": true, "values": {"name": "Monthly", "sequence": 10, "billing_period_value": 1, "billing_period_unit": "month", "user_closable": true}},
+  {"id": "plan_quarterly", "model": "sale.subscription_plan", "noupdate": true, "values": {"name": "Quarterly", "sequence": 20, "billing_period_value": 3, "billing_period_unit": "month"}},
+  {"id": "plan_yearly", "model": "sale.subscription_plan", "noupdate": true, "values": {"name": "Yearly", "sequence": 30, "billing_period_value": 1, "billing_period_unit": "year", "auto_close_limit": 60}}
+]

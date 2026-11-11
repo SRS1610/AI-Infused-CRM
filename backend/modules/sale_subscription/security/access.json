@@ -1,0 +1,10 @@
+[
+  {"id": "access_plan_user", "model": "core.model_access", "values": {"name": "subscription plan: sales user read", "model_name": "sale.subscription_plan", "group_id": "sale.group_sale_user", "perm_read": true}},
+  {"id": "access_plan_manager", "model": "core.model_access", "values": {"name": "subscription plan: sales administrator", "model_name": "sale.subscription_plan", "group_id": "sale.group_sale_manager", "perm_read": true, "perm_write": true, "perm_create": true, "perm_unlink": true}},
+  {"id": "access_close_reason_user", "model": "core.model_access", "values": {"name": "close reason: sales user read", "model_name": "sale.subscription_close_reason", "group_id": "sale.group_sale_user", "perm_read": true}},
+  {"id": "access_close_reason_manager", "model": "core.model_access", "values": {"name": "close reason: sales administrator", "model_name": "sale.subscription_close_reason", "group_id": "sale.group_sale_manager", "perm_read": true, "perm_write": true, "perm_create": true, "perm_unlink": true}},
+  {"id": "access_log_user", "model": "core.model_access", "values": {"name": "subscription MRR history: sales user read", "model_name": "sale.subscription_log", "group_id": "sale.group_sale_user", "perm_read": true}},
+  {"id": "access_log_system", "model": "core.model_access", "values": {"name": "subscription MRR history: admin read", "model_name": "sale.subscription_log", "group_id": "core.group_system", "perm_read": true}},
+  {"id": "rule_log_own", "model": "core.record_rule", "values": {"name": "MRR history of own subscriptions", "model_name": "sale.subscription_log", "group_ids": ["sale.group_sale_user"], "domain": {"any": [["subscription_id.user_id", "=", "$uid"], ["subscription_id.user_id", "=", null]]}}},
+  {"id": "rule_log_all", "model": "core.record_rule", "values": {"name": "MRR history of all subscriptions", "model_name": "sale.subscription_log", "group_ids": ["sale.group_sale_all"], "domain": {"all": []}}}
+]
