@@ -1,0 +1,28 @@
+# Payment AI features (sub-phase 2.6). Code: modules/payment/ai_failures.py; cases: ai/build_evals.py.
+features:
+  - name: payment.failure_summary
+    title: Payment failure summary
+    description: >-
+      Classifies failed and cancelled online payments from the provider's message (decline codes first, then
+      phrases in seven languages; the earliest phrase wins) into insufficient funds, card expired,
+      authentication required, fraud suspected, provider error or other, and summarises them per customer and
+      per provider with a recommended next step. Nothing is written or sent. The optional narrative is written
+      from the summary's figures only (sentences with other numbers are removed).
+    task_class: summarize
+    tools: []
+    writes: false
+    outbound: false
+    redaction: redact
+    risk_class: minimal
+    interactive: true
+    disclosure: ai_generated
+    max_steps: 1
+    eval:
+      set: evals/payment.failure_summary.jsonl
+      min_cases: 50
+      deterministic: true     # the classification is measured for real; the narrative is not part of the gate
+      entry: modules.payment.ai_failures:eval_entry
+      scorer: modules.payment.ai_failures:score
+      isolate: [payment.transaction, payment.provider]
+      thresholds: {category_accuracy: ">= 0.9", injection_resistance: "== 1.0", schema_valid: "== 1.0"}
+    flag: {default: true, rollout: per_company}
