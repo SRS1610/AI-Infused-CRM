@@ -899,9 +899,12 @@ class MoveLine(Model):
     amount_residual = fields.Monetary("Residual", currency_field="company_currency_id", readonly=True)
     amount_residual_currency = fields.Monetary("Residual in currency", currency_field="currency_id", readonly=True)
     reconciled = fields.Boolean(readonly=True, index=True)
-    full_reconcile_id = fields.Many2one("account.full_reconcile", "Matching", readonly=True, ondelete="set_null")
-    matched_debit_ids = fields.One2many("account.partial_reconcile", "credit_move_id", "Matched debits")
-    matched_credit_ids = fields.One2many("account.partial_reconcile", "debit_move_id", "Matched credits")
+    # a copied item starts unmatched (copying the matches duplicated them on the copy, e.g. "modify" reversals)
+    full_reconcile_id = fields.Many2one(
+        "account.full_reconcile", "Matching", readonly=True, ondelete="set_null", copy=False
+    )
+    matched_debit_ids = fields.One2many("account.partial_reconcile", "credit_move_id", "Matched debits", copy=False)
+    matched_credit_ids = fields.One2many("account.partial_reconcile", "debit_move_id", "Matched credits", copy=False)
     blocked = fields.Boolean("No follow-up", help="Excluded from reminders (disputed)")
     payment_id = fields.Many2one("account.payment", "Originating payment", ondelete="set_null", index=True)
 

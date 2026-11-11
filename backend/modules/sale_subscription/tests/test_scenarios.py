@@ -499,7 +499,8 @@ def test_subscription_scenario(env: Any, sc: dict[str, Any]) -> None:
         elif action == "close":
             mine.action_close(reason=args["reason"], when=args["when"])
         elif action == "card":
-            sub.payment_token_id.write({"provider_ref": args["ref"]})
+            # the customer saves another card at the provider (users cannot rewrite a saved method, SEC-53)
+            sub.payment_token_id.elevated().write({"provider_ref": args["ref"]})
         elif action == "renewal_price":
             _renewal(sub).line_ids[:1].write(args)
         elif action == "renewal_confirm":
