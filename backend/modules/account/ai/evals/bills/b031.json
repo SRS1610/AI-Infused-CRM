@@ -1,0 +1,145 @@
+{
+ "gold": {
+  "amount_tax": 1858.0,
+  "amount_total": 11148.0,
+  "amount_untaxed": 9290.0,
+  "currency": "EUR",
+  "due_date": "2026-06-28",
+  "iban": "FR2130006078323561710186335",
+  "invoice_date": "2026-05-29",
+  "invoice_number": "CL-2026-4335",
+  "lines": [
+   {
+    "account": "expense",
+    "amount": 810.0,
+    "description": "Vermittlungshonorar",
+    "quantity": 1.0,
+    "tax": "purchase_vat_20",
+    "tax_rate": 20.0,
+    "unit_price": 810.0
+   },
+   {
+    "account": "expense",
+    "amount": 1120.0,
+    "description": "Steuerberatung Quartal",
+    "quantity": 1.0,
+    "tax": "purchase_vat_20",
+    "tax_rate": 20.0,
+    "unit_price": 1120.0
+   },
+   {
+    "account": "expense",
+    "amount": 4150.0,
+    "description": "Rechtsberatung Vertragsprüfung",
+    "quantity": 1.0,
+    "tax": "purchase_vat_20",
+    "tax_rate": 20.0,
+    "unit_price": 4150.0
+   },
+   {
+    "account": "expense",
+    "amount": 3210.0,
+    "description": "Beratungstag",
+    "quantity": 1.0,
+    "tax": "purchase_vat_20",
+    "tax_rate": 20.0,
+    "unit_price": 3210.0
+   }
+  ],
+  "move_type": "in_invoice",
+  "needs_review": false,
+  "partner_name": "Cabinet Lefèvre Avocats SELARL",
+  "partner_vat": "FR61850916266"
+ },
+ "spec": {
+  "amount_tax": 1858.0,
+  "amount_total": 11148.0,
+  "amount_untaxed": 9290.0,
+  "buyer": {
+   "city": "75001 Paris",
+   "country": "France",
+   "name": "My Company (Europe)",
+   "street": "8 avenue de l'Opéra",
+   "vat": "FR32123456789"
+  },
+  "credit_note": false,
+  "currency": "EUR",
+  "due_date": "2026-06-28",
+  "id": "b031",
+  "invoice_date": "2026-05-29",
+  "invoice_number": "CL-2026-4335",
+  "kind": "digital",
+  "lang": "de",
+  "layout": "compact",
+  "lines": [
+   {
+    "amount": 810.0,
+    "description": "Vermittlungshonorar",
+    "quantity": 1.0,
+    "tax_rate": 20.0,
+    "unit_price": 810.0
+   },
+   {
+    "amount": 1120.0,
+    "description": "Steuerberatung Quartal",
+    "quantity": 1.0,
+    "tax_rate": 20.0,
+    "unit_price": 1120.0
+   },
+   {
+    "amount": 4150.0,
+    "description": "Rechtsberatung Vertragsprüfung",
+    "quantity": 1.0,
+    "tax_rate": 20.0,
+    "unit_price": 4150.0
+   },
+   {
+    "amount": 3210.0,
+    "description": "Beratungstag",
+    "quantity": 1.0,
+    "tax_rate": 20.0,
+    "unit_price": 3210.0
+   }
+  ],
+  "move_type": "in_invoice",
+  "notes": "",
+  "reverse_charge": false,
+  "seed": 640931,
+  "seller": {
+   "address": "12 rue des Lilas, 69003 Lyon",
+   "country": "FR",
+   "iban": "FR21 3000 6078 3235 6171 0186 335",
+   "name": "Cabinet Lefèvre Avocats SELARL",
+   "vat": "FR61850916266"
+  },
+  "tax_lines": [
+   {
+    "amount": 1858.0,
+    "base": 9290.0,
+    "rate": 20.0
+   }
+  ]
+ },
+ "world": {
+  "history": [
+   {
+    "date": "2026-04-24",
+    "lines": [
+     {
+      "account": "expense",
+      "description": "Honoraires de recrutement",
+      "quantity": 1.0,
+      "tax": "purchase_vat_20",
+      "unit_price": 2600.0
+     }
+    ]
+   }
+  ],
+  "vendor": {
+   "iban": "FR21 3000 6078 3235 6171 0186 335",
+   "known": true,
+   "name": "Cabinet Lefèvre Avocats SELARL",
+   "vat": "FR61850916266"
+  }
+ }
+}

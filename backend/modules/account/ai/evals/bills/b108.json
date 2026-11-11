@@ -1,0 +1,97 @@
+{
+ "gold": {
+  "amount_tax": 620.66,
+  "amount_total": 3723.98,
+  "amount_untaxed": 3103.32,
+  "currency": "EUR",
+  "due_date": "2026-09-27",
+  "iban": "FR7230006329783223411470126",
+  "invoice_date": "2026-08-28",
+  "invoice_number": "LM-2026-5362",
+  "lines": [
+   {
+    "account": "software",
+    "amount": 3103.32,
+    "description": "Abonnement logiciel de comptabilité",
+    "quantity": 4.0,
+    "tax": "purchase_vat_20",
+    "tax_rate": 20.0,
+    "unit_price": 775.83
+   }
+  ],
+  "move_type": "in_invoice",
+  "needs_review": false,
+  "partner_name": "Logiciels Martin SAS",
+  "partner_vat": "FR61972442949"
+ },
+ "spec": {
+  "amount_tax": 620.66,
+  "amount_total": 3723.98,
+  "amount_untaxed": 3103.32,
+  "buyer": {
+   "city": "75001 Paris",
+   "country": "France",
+   "name": "My Company (Europe)",
+   "street": "8 avenue de l'Opéra",
+   "vat": "FR32123456789"
+  },
+  "credit_note": false,
+  "currency": "EUR",
+  "due_date": "2026-09-27",
+  "id": "b108",
+  "invoice_date": "2026-08-28",
+  "invoice_number": "LM-2026-5362",
+  "kind": "image_pdf",
+  "lang": "fr",
+  "layout": "modern",
+  "lines": [
+   {
+    "amount": 3103.32,
+    "description": "Abonnement logiciel de comptabilité",
+    "quantity": 4.0,
+    "tax_rate": 20.0,
+    "unit_price": 775.83
+   }
+  ],
+  "move_type": "in_invoice",
+  "notes": "",
+  "reverse_charge": false,
+  "seed": 588100,
+  "seller": {
+   "address": "27 quai de la Fosse, 44000 Nantes",
+   "country": "FR",
+   "iban": "FR72 3000 6329 7832 2341 1470 126",
+   "name": "Logiciels Martin SAS",
+   "vat": "FR61972442949"
+  },
+  "tax_lines": [
+   {
+    "amount": 620.66,
+    "base": 3103.32,
+    "rate": 20.0
+   }
+  ]
+ },
+ "world": {
+  "history": [
+   {
+    "date": "2026-07-24",
+    "lines": [
+     {
+      "account": "software",
+      "description": "Hébergement cloud - forfait mensuel",
+      "quantity": 1.0,
+      "tax": "purchase_vat_20",
+      "unit_price": 450.9
+     }
+    ]
+   }
+  ],
+  "vendor": {
+   "iban": "FR72 3000 6329 7832 2341 1470 126",
+   "known": true,
+   "name": "Logiciels Martin SAS",
+   "vat": "FR61972442949"
+  }
+ }
+}

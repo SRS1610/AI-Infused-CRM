@@ -2041,5 +2041,139 @@
     "optional": "hide"
    }
   ]
+ },
+ {
+  "id": "view_move_anomaly_list",
+  "model": "account.move_anomaly",
+  "type": "list",
+  "name": "account.move_anomaly.list",
+  "columns": [
+   {
+    "field": "move_id"
+   },
+   {
+    "field": "partner_id"
+   },
+   {
+    "field": "kind"
+   },
+   {
+    "field": "severity",
+    "widget": "badge"
+   },
+   {
+    "field": "explanation"
+   },
+   {
+    "field": "related_move_id",
+    "optional": "hide"
+   },
+   {
+    "field": "state",
+    "widget": "badge"
+   }
+  ]
+ },
+ {
+  "id": "view_move_anomaly_form",
+  "model": "account.move_anomaly",
+  "type": "form",
+  "name": "account.move_anomaly.form",
+  "root": {
+   "kind": "sheet",
+   "children": [
+    {
+     "kind": "buttons",
+     "children": [
+      {
+       "kind": "button",
+       "method": "action_dismiss",
+       "label": "Not an anomaly",
+       "invisible": [
+        "state",
+        "!=",
+        "open"
+       ],
+       "params": [
+        {
+         "name": "note",
+         "label": "Why (optional)",
+         "type": "text"
+        }
+       ]
+      },
+      {
+       "kind": "button",
+       "method": "action_confirm",
+       "label": "Confirm the problem",
+       "invisible": [
+        "state",
+        "!=",
+        "open"
+       ],
+       "params": [
+        {
+         "name": "note",
+         "label": "Note (optional)",
+         "type": "text"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "kind": "group",
+     "name": "main",
+     "columns": 2,
+     "children": [
+      {
+       "kind": "field",
+       "name": "move_id",
+       "readonly": true
+      },
+      {
+       "kind": "field",
+       "name": "partner_id",
+       "readonly": true
+      },
+      {
+       "kind": "field",
+       "name": "kind",
+       "readonly": true
+      },
+      {
+       "kind": "field",
+       "name": "severity",
+       "readonly": true
+      },
+      {
+       "kind": "field",
+       "name": "related_move_id",
+       "readonly": true
+      },
+      {
+       "kind": "field",
+       "name": "state",
+       "readonly": true
+      },
+      {
+       "kind": "field",
+       "name": "decided_by",
+       "readonly": true
+      },
+      {
+       "kind": "field",
+       "name": "note",
+       "readonly": true
+      }
+     ]
+    },
+    {
+     "kind": "field",
+     "name": "explanation",
+     "readonly": true
+    }
+   ]
+  }
  }
 ]

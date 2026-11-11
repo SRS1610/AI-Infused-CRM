@@ -61,6 +61,10 @@ def to_anthropic_messages(messages: list[Message]) -> list[dict[str, Any]]:
                 blocks.append({"type": "text", "text": b.text or ""})
             elif b.type == "tool_use":
                 blocks.append({"type": "tool_use", "id": b.id, "name": b.name, "input": b.input or {}})
+            elif b.type == "image":
+                kind = "document" if b.media_type == "application/pdf" else "image"
+                source = {"type": "base64", "media_type": b.media_type, "data": b.data or ""}
+                blocks.append({"type": kind, "source": source})
             else:
                 blocks.append(
                     {

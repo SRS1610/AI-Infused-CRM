@@ -1,0 +1,113 @@
+{
+ "gold": {
+  "amount_tax": 0.0,
+  "amount_total": 3280.0,
+  "amount_untaxed": 3280.0,
+  "currency": "EUR",
+  "due_date": null,
+  "iban": "ES0421001485182111912581",
+  "invoice_date": "2026-02-07",
+  "invoice_number": "AC101-967",
+  "lines": [
+   {
+    "account": "expense",
+    "amount": 1200.0,
+    "description": "Jornada de consultoría",
+    "quantity": 1.0,
+    "tax": "purchase_vat_20_rc",
+    "tax_rate": 0.0,
+    "unit_price": 1200.0
+   },
+   {
+    "account": "expense",
+    "amount": 2080.0,
+    "description": "Asesoría jurídica",
+    "quantity": 1.0,
+    "tax": "purchase_vat_20_rc",
+    "tax_rate": 0.0,
+    "unit_price": 2080.0
+   }
+  ],
+  "move_type": "in_invoice",
+  "needs_review": false,
+  "partner_name": "Asesores Castellana SL",
+  "partner_vat": "ESB86007500"
+ },
+ "spec": {
+  "amount_tax": 0.0,
+  "amount_total": 3280.0,
+  "amount_untaxed": 3280.0,
+  "buyer": {
+   "city": "75001 Paris",
+   "country": "France",
+   "name": "My Company (Europe)",
+   "street": "8 avenue de l'Opéra",
+   "vat": "FR32123456789"
+  },
+  "credit_note": false,
+  "currency": "EUR",
+  "due_date": null,
+  "id": "b023",
+  "invoice_date": "2026-02-07",
+  "invoice_number": "AC101-967",
+  "kind": "digital",
+  "lang": "es",
+  "layout": "compact",
+  "lines": [
+   {
+    "amount": 1200.0,
+    "description": "Jornada de consultoría",
+    "quantity": 1.0,
+    "tax_rate": 0.0,
+    "unit_price": 1200.0
+   },
+   {
+    "amount": 2080.0,
+    "description": "Asesoría jurídica",
+    "quantity": 1.0,
+    "tax_rate": 0.0,
+    "unit_price": 2080.0
+   }
+  ],
+  "move_type": "in_invoice",
+  "notes": "",
+  "reverse_charge": true,
+  "seed": 387926,
+  "seller": {
+   "address": "Avinguda Diagonal 400, 08037 Barcelona",
+   "country": "ES",
+   "iban": "ES04 2100 1485 1821 1191 2581",
+   "name": "Asesores Castellana SL",
+   "vat": "ESB86007500"
+  },
+  "tax_lines": [
+   {
+    "amount": 0.0,
+    "base": 3280.0,
+    "rate": 0.0
+   }
+  ]
+ },
+ "world": {
+  "history": [
+   {
+    "date": "2026-01-03",
+    "lines": [
+     {
+      "account": "expense",
+      "description": "Jornada de consultoría",
+      "quantity": 1.0,
+      "tax": "purchase_vat_20_rc",
+      "unit_price": 3560.0
+     }
+    ]
+   }
+  ],
+  "vendor": {
+   "iban": "ES04 2100 1485 1821 1191 2581",
+   "known": true,
+   "name": "Asesores Castellana SL",
+   "vat": "ESB86007500"
+  }
+ }
+}

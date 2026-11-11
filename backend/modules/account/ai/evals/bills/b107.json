@@ -1,0 +1,145 @@
+{
+ "gold": {
+  "amount_tax": 0.0,
+  "amount_total": 411.7,
+  "amount_untaxed": 411.7,
+  "currency": "EUR",
+  "due_date": "2026-05-16",
+  "iban": "ES9021009965562291555777",
+  "invoice_date": "2026-04-01",
+  "invoice_number": "001313/26",
+  "lines": [
+   {
+    "account": "cogs",
+    "amount": 231.64,
+    "description": "Placas de circuito rev. B",
+    "quantity": 2.0,
+    "tax": "purchase_vat_20_rc",
+    "tax_rate": 0.0,
+    "unit_price": 115.82
+   },
+   {
+    "account": "cogs",
+    "amount": 68.24,
+    "description": "Perfiles de aluminio 2 m",
+    "quantity": 2.0,
+    "tax": "purchase_vat_20_rc",
+    "tax_rate": 0.0,
+    "unit_price": 34.12
+   },
+   {
+    "account": "cogs",
+    "amount": 19.89,
+    "description": "Tornillos inoxidables M8",
+    "quantity": 3.0,
+    "tax": "purchase_vat_20_rc",
+    "tax_rate": 0.0,
+    "unit_price": 6.63
+   },
+   {
+    "account": "cogs",
+    "amount": 91.93,
+    "description": "Cajas de embalaje",
+    "quantity": 1.0,
+    "tax": "purchase_vat_20_rc",
+    "tax_rate": 0.0,
+    "unit_price": 91.93
+   }
+  ],
+  "move_type": "in_invoice",
+  "needs_review": false,
+  "partner_name": "Embalajes Levante SA",
+  "partner_vat": "ESB24582328"
+ },
+ "spec": {
+  "amount_tax": 0.0,
+  "amount_total": 411.7,
+  "amount_untaxed": 411.7,
+  "buyer": {
+   "city": "75001 Paris",
+   "country": "France",
+   "name": "My Company (Europe)",
+   "street": "8 avenue de l'Opéra",
+   "vat": "FR32123456789"
+  },
+  "credit_note": false,
+  "currency": "EUR",
+  "due_date": "2026-05-16",
+  "id": "b107",
+  "invoice_date": "2026-04-01",
+  "invoice_number": "001313/26",
+  "kind": "image_pdf",
+  "lang": "es",
+  "layout": "classic",
+  "lines": [
+   {
+    "amount": 231.64,
+    "description": "Placas de circuito rev. B",
+    "quantity": 2.0,
+    "tax_rate": 0.0,
+    "unit_price": 115.82
+   },
+   {
+    "amount": 68.24,
+    "description": "Perfiles de aluminio 2 m",
+    "quantity": 2.0,
+    "tax_rate": 0.0,
+    "unit_price": 34.12
+   },
+   {
+    "amount": 19.89,
+    "description": "Tornillos inoxidables M8",
+    "quantity": 3.0,
+    "tax_rate": 0.0,
+    "unit_price": 6.63
+   },
+   {
+    "amount": 91.93,
+    "description": "Cajas de embalaje",
+    "quantity": 1.0,
+    "tax_rate": 0.0,
+    "unit_price": 91.93
+   }
+  ],
+  "move_type": "in_invoice",
+  "notes": "",
+  "reverse_charge": true,
+  "seed": 529932,
+  "seller": {
+   "address": "Calle de Alcalá 85, 28009 Madrid",
+   "country": "ES",
+   "iban": "ES90 2100 9965 5622 9155 5777",
+   "name": "Embalajes Levante SA",
+   "vat": "ESB24582328"
+  },
+  "tax_lines": [
+   {
+    "amount": 0.0,
+    "base": 411.7,
+    "rate": 0.0
+   }
+  ]
+ },
+ "world": {
+  "history": [
+   {
+    "date": "2026-02-25",
+    "lines": [
+     {
+      "account": "cogs",
+      "description": "Perfiles de aluminio 2 m",
+      "quantity": 4.0,
+      "tax": "purchase_vat_20_rc",
+      "unit_price": 122.11
+     }
+    ]
+   }
+  ],
+  "vendor": {
+   "iban": "ES90 2100 9965 5622 9155 5777",
+   "known": true,
+   "name": "Embalajes Levante SA",
+   "vat": "ESB24582328"
+  }
+ }
+}

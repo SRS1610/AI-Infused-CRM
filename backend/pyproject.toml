@@ -52,6 +52,8 @@ dependencies = [
   "numpy>=2.0",
   "signxml>=5.2.0",
   "saxonche>=12.5",
+  "pypdf>=5.0",
+  "pillow>=10",
 ]
 
 [project.optional-dependencies]

@@ -1,0 +1,101 @@
+{
+ "gold": {
+  "amount_tax": 1178.0,
+  "amount_total": 7068.0,
+  "amount_untaxed": 5890.0,
+  "currency": "EUR",
+  "due_date": "2026-06-21",
+  "iban": "FR2130006078323561710186335",
+  "invoice_date": "2026-04-22",
+  "invoice_number": "CL-2026-7958",
+  "lines": [
+   {
+    "account": "expense",
+    "amount": 1920.0,
+    "description": "Honoraires de recrutement",
+    "quantity": 1.0,
+    "tax": "purchase_vat_20",
+    "tax_rate": 20.0,
+    "unit_price": 1920.0
+   },
+   {
+    "account": "expense",
+    "amount": 3970.0,
+    "description": "Mission d'expertise comptable",
+    "quantity": 1.0,
+    "tax": "purchase_vat_20",
+    "tax_rate": 20.0,
+    "unit_price": 3970.0
+   }
+  ],
+  "move_type": "in_invoice",
+  "needs_review": false,
+  "partner_name": "Cabinet Lefèvre Avocats SELARL",
+  "partner_vat": "FR61850916266"
+ },
+ "spec": {
+  "amount_tax": 1178.0,
+  "amount_total": 7068.0,
+  "amount_untaxed": 5890.0,
+  "buyer": {
+   "city": "75001 Paris",
+   "country": "France",
+   "name": "My Company (Europe)",
+   "street": "8 avenue de l'Opéra",
+   "vat": "FR32123456789"
+  },
+  "credit_note": false,
+  "currency": "EUR",
+  "due_date": "2026-06-21",
+  "id": "b123",
+  "invoice_date": "2026-04-22",
+  "invoice_number": "CL-2026-7958",
+  "kind": "digital",
+  "lang": "fr",
+  "layout": "compact",
+  "lines": [
+   {
+    "amount": 1920.0,
+    "description": "Honoraires de recrutement",
+    "quantity": 1.0,
+    "tax_rate": 20.0,
+    "unit_price": 1920.0
+   },
+   {
+    "amount": 3970.0,
+    "description": "Mission d'expertise comptable",
+    "quantity": 1.0,
+    "tax_rate": 20.0,
+    "unit_price": 3970.0
+   }
+  ],
+  "move_type": "in_invoice",
+  "notes": "",
+  "reverse_charge": false,
+  "seed": 332623,
+  "seller": {
+   "address": "12 rue des Lilas, 69003 Lyon",
+   "country": "FR",
+   "iban": "FR21 3000 6078 3235 6171 0186 335",
+   "name": "Cabinet Lefèvre Avocats SELARL",
+   "vat": "FR61850916266"
+  },
+  "tax_lines": [
+   {
+    "amount": 1178.0,
+    "base": 5890.0,
+    "rate": 20.0
+   }
+  ]
+ },
+ "world": {
+  "history": [],
+  "vendor": {
+   "iban": "FR21 3000 6078 3235 6171 0186 335",
+   "known": true,
+   "name": "Cabinet Lefèvre Avocats SELARL",
+   "other_company": true,
+   "vat": "FR61850916266"
+  }
+ }
+}

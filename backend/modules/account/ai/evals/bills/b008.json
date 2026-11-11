@@ -1,0 +1,100 @@
+{
+ "gold": {
+  "amount_tax": 19.34,
+  "amount_total": 116.06,
+  "amount_untaxed": 96.72,
+  "currency": "EUR",
+  "due_date": "2026-03-01",
+  "iban": "FR0830006085155796626481387",
+  "invoice_date": "2026-01-15",
+  "invoice_number": "BP-2026-4143",
+  "lines": [
+   {
+    "account": "bank_fees",
+    "amount": 35.73,
+    "description": "Frais de tenue de compte",
+    "quantity": 1.0,
+    "tax": "purchase_vat_20",
+    "tax_rate": 20.0,
+    "unit_price": 35.73
+   },
+   {
+    "account": "bank_fees",
+    "amount": 60.99,
+    "description": "Commission sur virement international",
+    "quantity": 1.0,
+    "tax": "purchase_vat_20",
+    "tax_rate": 20.0,
+    "unit_price": 60.99
+   }
+  ],
+  "move_type": "in_invoice",
+  "needs_review": false,
+  "partner_name": "Banque Populaire du Centre SA",
+  "partner_vat": "FR12350772617"
+ },
+ "spec": {
+  "amount_tax": 19.34,
+  "amount_total": 116.06,
+  "amount_untaxed": 96.72,
+  "buyer": {
+   "city": "75001 Paris",
+   "country": "France",
+   "name": "My Company (Europe)",
+   "street": "8 avenue de l'Opéra",
+   "vat": "FR32123456789"
+  },
+  "credit_note": false,
+  "currency": "EUR",
+  "due_date": "2026-03-01",
+  "id": "b008",
+  "invoice_date": "2026-01-15",
+  "invoice_number": "BP-2026-4143",
+  "kind": "digital",
+  "lang": "fr",
+  "layout": "letter",
+  "lines": [
+   {
+    "amount": 35.73,
+    "description": "Frais de tenue de compte",
+    "quantity": 1.0,
+    "tax_rate": 20.0,
+    "unit_price": 35.73
+   },
+   {
+    "amount": 60.99,
+    "description": "Commission sur virement international",
+    "quantity": 1.0,
+    "tax_rate": 20.0,
+    "unit_price": 60.99
+   }
+  ],
+  "move_type": "in_invoice",
+  "notes": "",
+  "reverse_charge": false,
+  "seed": 244078,
+  "seller": {
+   "address": "12 rue des Lilas, 69003 Lyon",
+   "country": "FR",
+   "iban": "FR08 3000 6085 1557 9662 6481 387",
+   "name": "Banque Populaire du Centre SA",
+   "vat": "FR12350772617"
+  },
+  "tax_lines": [
+   {
+    "amount": 19.34,
+    "base": 96.72,
+    "rate": 20.0
+   }
+  ]
+ },
+ "world": {
+  "history": [],
+  "vendor": {
+   "iban": "FR08 3000 6085 1557 9662 6481 387",
+   "known": false,
+   "name": "Banque Populaire du Centre SA",
+   "vat": "FR12350772617"
+  }
+ }
+}

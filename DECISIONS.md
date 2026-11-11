@@ -405,6 +405,22 @@ Format: `D-nnn · date · status (Proposed | Accepted | Superseded)`
 - **Decision:** Any sentence stating a number or a listed specification claim (English, French, German synonyms) not present in the catalogue facts is removed before the proposal is made. Accepting writes the user's language only.
 - **Rationale:** No invented specifications in customer-facing text.
 
+### D-096 · 2026-11-11 · Accepted — Images reach a model only through the gateway, only for `vision` features without redaction
+- **Decision:** The gateway request format carries base64 image or PDF blocks; the gateway refuses them for features declaring `redaction: redact` (an image cannot be redacted) or for any task class other than `vision`. The Anthropic, OpenAI and Google adapters translate them; `run_feature` takes optional `attachments`.
+- **Rationale:** Bill reading needs the page, and personal data must only go to providers approved for it.
+
+### D-097 · 2026-11-11 · Accepted — Digital documents are read deterministically first
+- **Decision:** A PDF's text layer is parsed in code (`pypdf`); a model is only the fallback for scans and image-only PDFs, and its amounts are re-checked against the tax engine (and the text layer when there is one). Each reading is audited in `ai_core.run`. The whole draft bill (and a new vendor if needed) is one proposal.
+- **Rationale:** Cheaper, reproducible, and the numbers come from the document.
+
+### D-098 · 2026-11-11 · Accepted — Anomaly flags are records, not proposals
+- **Decision:** `account.move_anomaly` stores flags (duplicate, unusual amount, new vendor with a large amount, changed bank account) with an explanation and dismiss / confirm; a notification is sent; posting is never blocked.
+- **Rationale:** The build plan classes these as notification / flag, and the ledger rules (D-073) stay untouched.
+
+### D-099 · 2026-11-11 · Accepted — Forecast numbers come from the engine
+- **Decision:** The cash-flow forecast is computed by an engine (open items by due date adjusted by each partner's payment delay, recurring movements); a narrative quoting any number not among the engine's figures is replaced by a plain summary of the figures.
+- **Rationale:** Numbers never come from a model (BUILD_PLAN §3).
+
 ### D-023 · 2026-11-09 · Proposed — Public web surfaces before Phase 7 use `*_website` bridge modules
 - **Decision:** Modules that need a public page before the `website` builder exists (recruitment job postings, event pages, eLearning courses, blog, forum, survey invitations) depend only on `portal` for their minimal public rendering in their own phase; `recruitment_website`, `events_website`, `elearning_website`, `blog_website`, `forum_website` bridge modules (auto-installed when `website` is present) move those pages into the website builder in Phase 7.
 - **Rationale:** Preserves the layering rule (no dependency on a later phase) while still shipping usable public pages when each module lands.

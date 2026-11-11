@@ -32,6 +32,7 @@ def to_openai_messages(system: str, messages: list[Message]) -> list[dict[str, A
         texts = [b.text or "" for b in m.content if b.type == "text"]
         calls = [b for b in m.content if b.type == "tool_use"]
         results = [b for b in m.content if b.type == "tool_result"]
+        images = [b for b in m.content if b.type == "image"]
         if m.role == "assistant":
             msg: dict[str, Any] = {"role": "assistant", "content": "".join(texts) or None}
             if calls:
@@ -54,9 +55,20 @@ def to_openai_messages(system: str, messages: list[Message]) -> list[dict[str, A
                     "content": f"ERROR: {content}" if r.is_error else content,
                 }
             )
-        if texts:
+        if images:
+            parts: list[dict[str, Any]] = [_image_part(b) for b in images]
+            parts.append({"type": "text", "text": "".join(texts)})
+            out.append({"role": "user", "content": parts})
+        elif texts:
             out.append({"role": "user", "content": "".join(texts)})
     return out
+
+
+def _image_part(b: Block) -> dict[str, Any]:
+    url = f"data:{b.media_type};base64,{b.data or ''}"
+    if b.media_type == "application/pdf":
+        return {"type": "file", "file": {"filename": "document.pdf", "file_data": url}}
+    return {"type": "image_url", "image_url": {"url": url}}
 
 
 def _closed(schema: dict[str, Any]) -> bool:

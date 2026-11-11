@@ -1,0 +1,97 @@
+{
+ "gold": {
+  "amount_tax": 0.0,
+  "amount_total": 207.93,
+  "amount_untaxed": 207.93,
+  "currency": "EUR",
+  "due_date": "2026-03-12",
+  "iban": "ES9021009965562291555777",
+  "invoice_date": "2026-02-10",
+  "invoice_number": "EL-2026-1038",
+  "lines": [
+   {
+    "account": "cogs",
+    "amount": 207.93,
+    "description": "Tornillos inoxidables M8",
+    "quantity": 1.0,
+    "tax": "purchase_vat_20_rc",
+    "tax_rate": 0.0,
+    "unit_price": 207.93
+   }
+  ],
+  "move_type": "in_invoice",
+  "needs_review": false,
+  "partner_name": "Embalajes Levante SA",
+  "partner_vat": "ESB24582328"
+ },
+ "spec": {
+  "amount_tax": 0.0,
+  "amount_total": 207.93,
+  "amount_untaxed": 207.93,
+  "buyer": {
+   "city": "75001 Paris",
+   "country": "France",
+   "name": "My Company (Europe)",
+   "street": "8 avenue de l'Opéra",
+   "vat": "FR32123456789"
+  },
+  "credit_note": false,
+  "currency": "EUR",
+  "due_date": "2026-03-12",
+  "id": "b022",
+  "invoice_date": "2026-02-10",
+  "invoice_number": "EL-2026-1038",
+  "kind": "digital",
+  "lang": "es",
+  "layout": "modern",
+  "lines": [
+   {
+    "amount": 207.93,
+    "description": "Tornillos inoxidables M8",
+    "quantity": 1.0,
+    "tax_rate": 0.0,
+    "unit_price": 207.93
+   }
+  ],
+  "move_type": "in_invoice",
+  "notes": "",
+  "reverse_charge": true,
+  "seed": 147172,
+  "seller": {
+   "address": "Calle de Alcalá 85, 28009 Madrid",
+   "country": "ES",
+   "iban": "ES90 2100 9965 5622 9155 5777",
+   "name": "Embalajes Levante SA",
+   "vat": "ESB24582328"
+  },
+  "tax_lines": [
+   {
+    "amount": 0.0,
+    "base": 207.93,
+    "rate": 0.0
+   }
+  ]
+ },
+ "world": {
+  "history": [
+   {
+    "date": "2026-01-06",
+    "lines": [
+     {
+      "account": "cogs",
+      "description": "Placas de circuito rev. B",
+      "quantity": 4.0,
+      "tax": "purchase_vat_20_rc",
+      "unit_price": 237.15
+     }
+    ]
+   }
+  ],
+  "vendor": {
+   "iban": "ES90 2100 9965 5622 9155 5777",
+   "known": true,
+   "name": "Embalajes Levante SA",
+   "vat": "ESB24582328"
+  }
+ }
+}

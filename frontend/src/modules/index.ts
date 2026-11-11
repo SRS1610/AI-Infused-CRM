@@ -12,3 +12,6 @@ import "./discuss/DiscussApp";
 import "./account_bank/BankReconcile";
 import "./sale/SaleAi";
 import "./product/ProductAi";
+import "./account/BillImport";
+import "./account/BillAnomalies";
+import "./account/CashflowForecast";

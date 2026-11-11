@@ -1,0 +1,84 @@
+{
+ "gold": {
+  "amount_tax": 0.0,
+  "amount_total": 119.44,
+  "amount_untaxed": 119.44,
+  "currency": "GBP",
+  "due_date": null,
+  "iban": "GB65NWBK57306876579883",
+  "invoice_date": "2026-05-12",
+  "invoice_number": "003035/26",
+  "lines": [
+   {
+    "account": "expense",
+    "amount": 119.44,
+    "description": "Office chairs",
+    "quantity": 4.0,
+    "tax": "purchase_vat_0_import",
+    "tax_rate": 0.0,
+    "unit_price": 29.86
+   }
+  ],
+  "move_type": "in_invoice",
+  "needs_review": false,
+  "partner_name": "Thames Office Supplies Ltd",
+  "partner_vat": "GB196181641"
+ },
+ "spec": {
+  "amount_tax": 0.0,
+  "amount_total": 119.44,
+  "amount_untaxed": 119.44,
+  "buyer": {
+   "city": "75001 Paris",
+   "country": "France",
+   "name": "My Company (Europe)",
+   "street": "8 avenue de l'Opéra",
+   "vat": "FR32123456789"
+  },
+  "credit_note": false,
+  "currency": "GBP",
+  "due_date": null,
+  "id": "b078",
+  "invoice_date": "2026-05-12",
+  "invoice_number": "003035/26",
+  "kind": "scan",
+  "lang": "en",
+  "layout": "compact",
+  "lines": [
+   {
+    "amount": 119.44,
+    "description": "Office chairs",
+    "quantity": 4.0,
+    "tax_rate": 0.0,
+    "unit_price": 29.86
+   }
+  ],
+  "move_type": "in_invoice",
+  "notes": "",
+  "reverse_charge": false,
+  "seed": 388650,
+  "seller": {
+   "address": "8 Deansgate, Manchester M3 2BW",
+   "country": "GB",
+   "iban": "GB65 NWBK 5730 6876 5798 83",
+   "name": "Thames Office Supplies Ltd",
+   "vat": "GB196181641"
+  },
+  "tax_lines": [
+   {
+    "amount": 0.0,
+    "base": 119.44,
+    "rate": 0.0
+   }
+  ]
+ },
+ "world": {
+  "history": [],
+  "vendor": {
+   "iban": "GB65 NWBK 5730 6876 5798 83",
+   "known": false,
+   "name": "Thames Office Supplies Ltd",
+   "vat": "GB196181641"
+  }
+ }
+}

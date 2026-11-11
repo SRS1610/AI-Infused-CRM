@@ -84,7 +84,7 @@ cases. Evaluation runs only see their own corpus (the case records and the modul
 the target database's business data is hidden for the duration of the run, which is rolled back, so the
 scores do not depend on the database they run against.
 
-## Feature inventory
+## Feature inventory (Phase 2)
 
 ### Sales and products (sub-phase 2.6)
 
@@ -95,6 +95,18 @@ scores do not depend on the database they run against.
 | `sale.quote_from_text` — quote lines from pasted text | minimal | small (extract) | write proposal (draft lines) | the pasted text only; catalogue matching runs in Tessera as the user (code, name trigrams, gateway embeddings) | unmatched or ambiguous items are flagged, never invented; a planted instruction that the model turns into a real catalogue item still becomes a proposed line the user must reject; replay scores measure the pipeline (hand-authored extractions) |
 | `sale.pricing_breach` — pricing-policy flags | limited | none (rules + customer statistics; optional small-tier summary) | notification / flag (no proposal) | quotation lines, bands, pricelist prices, product cost (computation only), the customer's confirmed orders (aggregate) | "unusual for the customer" ignores volume deals (the two labelled false positives of the eval set); flags are stored only when a quotation is sent, confirmed or checked on request |
 | `product.description_draft` — sales description drafts | minimal | mid (draft) | write proposal (`description_sale`, user's language) | the product's catalogue facts read as the user | the spec check covers numbers and a list of common claims in English, French and German; judge scores in replay are hand-authored (D-058) |
+
+### Accounting (`account`)
+
+| Feature | Risk class | Model tier (task class) | Writes / outbound | Data used | Evaluation (replay, `tessera ai eval run --module account`) | Limitations |
+|---|---|---|---|---|---|---|
+| `account.bill_ocr` — invoice and bill reading with auto-coding | limited | mid (`vision`); digital PDFs need no model | one **action proposal** per document (draft + new vendor); nothing written before acceptance | the uploaded document; partners, bank accounts, products, accounts, taxes and the partner's posted invoice lines **the user can read**; `redaction: minimal` (a page image cannot be redacted, so only PII-approved providers) | 125 synthetic bills (EN/FR/DE/ES, 4 layouts, 84 digital / 35 scans / 6 image-only PDFs, 8 customer invoices, 2 credit notes, 6 prompt injections, 3 isolation cases): header F1 0.998, line F1 0.994, account / tax accuracy 0.992 / 1.0 (both: 0.992), proposal gate 1.0, isolation 1.0 | the corpus is synthetic and the parser was tuned on its layouts; scans are **replayed hand-authored answers** (the gold reading with 7 typical slips), so their scores measure the pipeline — matching, coding, checks, proposal — not a vision model; real documents will need the model and corrections more often |
+| `account.anomaly` — anomaly flags on bills | limited | small (`classify`), only for the optional explanation; detection is deterministic | flags + notification (BUILD_PLAN: notification / flag); no proposal; never blocks posting | the vendor's bills, bank accounts and the company's bill amounts of the last year, read as the user (the background job acts for the bill's company) | 127 labelled cases: duplicate recall 0.968, false-positive rate 0.013 (one legitimately repeated order is flagged; one hand-re-keyed copy a cent off, 14 days later with a new number, is missed) | facts-level evaluation: the ledger adapter and the flags are covered by tests, not by the set; cross-vendor duplicates (the same document filed under two vendors) are not looked for |
+| `account.cashflow_forecast` — cash-flow forecast | limited | mid (`summarize`) for the narrative only; figures from the engine | none | bank and outstanding accounts, open invoices / bills, paid documents (payment delays), bank movements not linked to invoices, read as the user | back-test on 120 simulated 9-month histories, 8 weeks after the cut-off: MAPE of the weekly position 0.085 (median 0.053; flat-balance baseline 0.164); narratives: numbers from the engine 1.0 (14 hand-authored narratives with a wrong or injected figure rejected) | MAPE explodes when the actual balance is near zero; no bank-statement lines not yet booked, no planned taxes, loans or investments; narratives are replayed |
+
+Numbers never come from a model: the bill reader keeps a model's amounts only as a *reading* that is
+re-checked against the tax engine and, for PDFs, against the text layer; the anomaly explanation and the
+forecast narrative are replaced by a summary of the facts when they quote a number that is not in them.
 
 ## Known limitations (Phase 1.5)
 

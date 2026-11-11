@@ -2396,3 +2396,301 @@ msgstr "Paiements clients"
 msgid "Vendor payments"
 msgstr "Paiements fournisseurs"
 
+#. field label
+msgid "Payment status"
+msgstr "Statut de paiement"
+
+#. model description
+msgid "Anomaly flag"
+msgstr "Alerte d'anomalie"
+
+#. field label
+msgid "Document"
+msgstr "Document"
+
+#. field label
+msgid "Kind"
+msgstr "Type"
+
+#. selection value duplicate_number
+msgid "Same invoice number"
+msgstr "Même numéro de facture"
+
+#. selection value duplicate_amount
+msgid "Same amount and date"
+msgstr "Même montant et même date"
+
+#. selection value near_duplicate_text
+msgid "Nearly identical document"
+msgstr "Document presque identique"
+
+#. selection value unusual_amount
+msgid "Unusual amount for this vendor"
+msgstr "Montant inhabituel pour ce fournisseur"
+
+#. selection value new_vendor_large
+msgid "First bill of a new vendor, large amount"
+msgstr "Première facture d'un nouveau fournisseur, montant élevé"
+
+#. selection value bank_account_changed
+msgid "Bank account changed recently"
+msgstr "Compte bancaire modifié récemment"
+
+#. field label
+msgid "Severity"
+msgstr "Gravité"
+
+#. selection value low
+msgid "Low"
+msgstr "Faible"
+
+#. selection value medium
+msgid "Medium"
+msgstr "Moyenne"
+
+#. selection value high
+msgid "High"
+msgstr "Élevée"
+
+#. field label
+msgid "Score"
+msgstr "Score"
+
+#. field help
+msgid "Strength of the signal (robust z-score, similarity…)"
+msgstr "Force du signal (z-score robuste, similarité…)"
+
+#. field label
+msgid "Explanation"
+msgstr "Explication"
+
+#. field label
+msgid "Similar document"
+msgstr "Document similaire"
+
+#. field label
+msgid "Details"
+msgstr "Détails"
+
+#. selection value dismissed
+msgid "Dismissed"
+msgstr "Écartée"
+
+#. selection value confirmed
+msgid "Confirmed"
+msgstr "Confirmée"
+
+#. field label
+msgid "Decided By"
+msgstr "Décidé par"
+
+#. field label
+msgid "Decided At"
+msgstr "Décidé le"
+
+#. field label
+msgid "Ai Generated"
+msgstr "Généré par l'IA"
+
+#. field label
+msgid "Document text"
+msgstr "Texte du document"
+
+#. field help
+msgid "Text read from the source document"
+msgstr "Texte lu sur le document source"
+
+#. field label
+#. menu name
+#. action name
+msgid "Anomaly flags"
+msgstr "Alertes d'anomalie"
+
+#. field label
+msgid "Open anomaly flags"
+msgstr "Alertes d'anomalie ouvertes"
+
+#: ai_anomaly.py
+msgid "Open a bill to explain its flags"
+msgstr "Ouvrez une facture fournisseur pour expliquer ses alertes"
+
+#: ai_anomaly.py
+msgid "The vendor's bank account was added or changed {days} days ago: confirm it with the vendor through a known contact before paying."
+msgstr "Le compte bancaire du fournisseur a été ajouté ou modifié il y a {days} jours : confirmez-le auprès du fournisseur par un contact connu avant de payer."
+
+#: ai_anomaly.py
+msgid "Check bill {name}"
+msgstr "Vérifier la facture {name}"
+
+#: ai_anomaly.py
+msgid "Same invoice number {number} as {other} of {date} ({amount})."
+msgstr "Même numéro de facture {number} que {other} du {date} ({amount})."
+
+#: ai_anomaly.py
+msgid "{amount} is {ratio} times the usual amount of this vendor (median {median} over {count} bills)."
+msgstr "{amount} représente {ratio} fois le montant habituel de ce fournisseur (médiane {median} sur {count} factures)."
+
+#: ai_anomaly.py
+msgid "First bill of this vendor and above the company's usual large amount ({amount} ≥ {threshold})."
+msgstr "Première facture de ce fournisseur, au-dessus des montants élevés habituels de la société ({amount} ≥ {threshold})."
+
+#: ai_anomaly.py
+msgid "The bill asks for payment to an IBAN ending in {tail}, which is not the bank account on file for this vendor."
+msgstr "La facture demande un paiement sur un IBAN se terminant par {tail}, qui n'est pas le compte bancaire enregistré pour ce fournisseur."
+
+#: ai_anomaly.py
+msgid "Invoice number {number} reads like {onumber} of {other} (characters a scan confuses)."
+msgstr "Le numéro de facture {number} se lit comme {onumber} de {other} (caractères qu'un scan confond)."
+
+#: ai_anomaly.py
+msgid "Same amount {amount} as {other}, {days} days apart."
+msgstr "Même montant {amount} que {other}, à {days} jours d'écart."
+
+#: ai_anomaly.py
+msgid "The document is {percent}% identical to {other} of {date}, same amount {amount}."
+msgstr "Le document est identique à {percent} % à {other} du {date}, même montant {amount}."
+
+#: ai_api.py
+msgid "No such document"
+msgstr "Document introuvable"
+
+#: ai_api.py ai_bill.py
+msgid "The document is too large (15 MB at most)"
+msgstr "Le document est trop volumineux (15 Mo au maximum)"
+
+#: ai_api.py ai_bill.py
+msgid "Upload a PDF or an image (PNG, JPEG, WebP)"
+msgstr "Téléversez un PDF ou une image (PNG, JPEG, WebP)"
+
+#: ai_api.py
+msgid "No such flag"
+msgstr "Alerte introuvable"
+
+#: ai_bill.py
+msgid "Create {kind} from {who} ({count} lines)"
+msgstr "Créer {kind} de {who} ({count} lignes)"
+
+#: ai_bill.py
+msgid "Fill {name} from the document ({count} lines)"
+msgstr "Remplir {name} depuis le document ({count} lignes)"
+
+#: ai_bill.py
+msgid "The document looks like a {detected}; it is read as a {requested} as asked."
+msgstr "Le document ressemble à un {detected} ; il est lu comme un {requested}, comme demandé."
+
+#: ai_bill.py
+msgid "Not found on the document: {field}"
+msgstr "Introuvable sur le document : {field}"
+
+#: ai_bill.py
+msgid "Amounts not found in the document's text: {amounts}"
+msgstr "Montants introuvables dans le texte du document : {amounts}"
+
+#: ai_bill.py
+msgid "A document becomes an invoice, a bill or a credit note"
+msgstr "Un document devient une facture client, une facture fournisseur ou un avoir"
+
+#: ai_bill.py
+msgid "This is not a document-reading proposal"
+msgstr "Ce n'est pas une proposition de lecture de document"
+
+#: ai_bill.py
+msgid "Unknown currency {code}: the company currency is used"
+msgstr "Devise inconnue {code} : la devise de la société est utilisée"
+
+#: ai_bill.py
+msgid "No account for {line}"
+msgstr "Aucun compte pour {line}"
+
+#: ai_bill.py
+msgid "Only an empty draft invoice or bill can be filled from a document"
+msgstr "Seul un brouillon de facture vide peut être rempli depuis un document"
+
+#: ai_bill.py
+msgid "Lines can only be created from a document"
+msgstr "Les lignes ne peuvent qu'être créées depuis un document"
+
+#: ai_bill.py
+msgid "The draft was changed in the meantime: read the document again"
+msgstr "Le brouillon a été modifié entre-temps : relisez le document"
+
+#: ai_bill.py
+msgid "Account {id} does not belong to this company"
+msgstr "Le compte {id} n'appartient pas à cette société"
+
+#: ai_bill.py
+msgid "A tax does not belong to this company"
+msgstr "Une taxe n'appartient pas à cette société"
+
+#: ai_bill.py
+msgid "New vendor"
+msgstr "Nouveau fournisseur"
+
+#: ai_cashflow.py
+msgid "Cash today is {opening}. The forecast reaches its lowest point, {low}, on {low_date} and ends at {closing} on {end}. Open receivables: {receivables}; open payables: {payables}."
+msgstr "La trésorerie est aujourd'hui de {opening}. La prévision atteint son point bas, {low}, le {low_date} et se termine à {closing} le {end}. Créances ouvertes : {receivables} ; dettes ouvertes : {payables}."
+
+#. action name
+#: ai_cashflow.py
+msgid "Cash-flow forecast"
+msgstr "Prévision de trésorerie"
+
+#: ai_coding.py
+msgid "Foreign VAT at {rate}%: not deductible here, the line has no tax"
+msgstr "TVA étrangère à {rate} % : non déductible ici, la ligne n'a pas de taxe"
+
+#: ai_coding.py
+msgid "No {rate}% tax in this company"
+msgstr "Aucune taxe à {rate} % dans cette société"
+
+#: ai_coding.py
+msgid "Like \"{label}\" on {move}"
+msgstr "Comme « {label} » sur {move}"
+
+#: ai_coding.py
+msgid "Company default account"
+msgstr "Compte par défaut de la société"
+
+#: ai_coding.py
+msgid "Product {name}"
+msgstr "Article {name}"
+
+#: ai_coding.py
+msgid "Keyword \"{word}\""
+msgstr "Mot-clé « {word} »"
+
+#: ai_coding.py
+msgid "Usual account of this partner"
+msgstr "Compte habituel de ce partenaire"
+
+#: models/ai_anomaly.py
+msgid "This flag is already {state}"
+msgstr "Cette alerte est déjà {state}"
+
+#. view label
+msgid "Not an anomaly"
+msgstr "Pas une anomalie"
+
+#. view label
+msgid "Why (optional)"
+msgstr "Pourquoi (facultatif)"
+
+#. view label
+msgid "Confirm the problem"
+msgstr "Confirmer le problème"
+
+#. view label
+msgid "Note (optional)"
+msgstr "Note (facultative)"
+
+#. menu name
+msgid "Read from documents"
+msgstr "Lire depuis des documents"
+
+#. action name
+msgid "Read bills from documents"
+msgstr "Lire des factures fournisseurs depuis des documents"
+
+#. action name
+msgid "Read invoices from documents"
+msgstr "Lire des factures clients depuis des documents"

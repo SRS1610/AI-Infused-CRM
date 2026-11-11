@@ -118,3 +118,94 @@ uv run tessera account integrity
 
 Every internal user can read taxes, accounts, journals, payment terms and fiscal positions (sales people
 choose taxes on quotations). Records are separated by company.
+
+## AI features
+
+Three AI features ship with `account` (sub-phase 2.6). Each has a per-company switch (*AI → Features*);
+switched off, its buttons and panels disappear and its API answers `404 feature_disabled` without calling
+the AI gateway. Everything they read is read **as the user** (access rights, record rules, companies).
+Their evaluations are described in [docs/ai/governance.md](../ai/governance.md#accounting-account).
+
+### Reading bills and invoices from documents (`account.bill_ocr`)
+
+*Vendors → Read from documents* (and *Customers → Read from documents*), the **Read a document** button in
+the search bar of invoice and bill lists, or **Read from a document** on an empty draft: upload a PDF or a
+photo / scan (PNG, JPEG, WebP; 15 MB at most).
+
+1. **Reading.** A PDF's text layer is read without a model, in English, French, German and Spanish
+   (labels, number formats such as `1 234,56` / `1.234,56` / `1,234.56`, dates such as `14/03/2026`,
+   `14. März 2026`, `March 14, 2026`). A line is only accepted when quantity × unit price equals its amount.
+   When the reading is incomplete or does not add up, the text is sent to the model; a scan or an image-only
+   PDF is sent as an image to the **vision** route (task class `vision`). Images cannot be redacted, so the
+   feature declares `redaction: minimal`: it is only routed to providers approved for personal data.
+2. **Partner.** Matched among the partners the user can read: VAT ID, then IBAN (bank accounts on file),
+   then name. An unknown issuer is proposed for creation (with its IBAN) together with the bill. A document
+   issued by the company itself is read as a customer invoice (the partner is the customer); a credit note
+   as a refund.
+3. **Coding.** Each line gets an account and taxes, in this order of trust: a product whose reference or
+   name appears on the line; the partner's **posted** documents (the most similar past line, else the
+   partner's usual account); keywords of the chart in four languages (rent, software, travel, bank fees,
+   commissions, goods, general expenses; German compound words included); the company's default account.
+   The printed rate must exist among the company's taxes for that use; a 0 % line on a document that
+   mentions reverse charge gets the company's self-assessed tax; VAT charged by a vendor of another country
+   is not the company's deductible VAT, so the line gets no tax and the reading is marked for review.
+4. **Checks.** Lines must add up to the untaxed amount, the taxes computed by the tax engine on the coded
+   lines to the printed tax, and both to the total. Any difference, a missing field, an unknown rate or an
+   amount the model read that does not appear in the text layer marks the reading **Needs review**, with
+   each difference; the draft is then created *To check*.
+5. **Anomalies.** The anomaly checks below run on the reading before the bill exists (possible duplicate,
+   changed bank account…) and are shown as warnings.
+6. **Proposal.** All of it — partner, header and **every auto-coded line** — is one proposal. Nothing is
+   written until the user clicks **Create the draft** (accounts can be changed per line first: *Accept
+   edited*); then the draft is created as that user, the document is attached to it and its text is kept
+   for duplicate detection. Rejecting leaves nothing behind but the audit trail. The draft is posted the
+   usual way.
+
+Every reading is audited in `ai_core.run`, including those done without a model (provider `tessera`,
+model `bill-parser`).
+
+**Limits.** Multi-page tables are read page by page; descriptions printed on two lines keep their first
+line; the layout heuristics were tuned on the synthetic evaluation corpus (four layouts) and real documents
+will more often need the model or a correction. Credit notes are recognised by their title. A document
+with several VAT IDs of other companies (factoring, agents) may be matched to the wrong one: check the
+partner.
+
+### Anomaly flags on bills (`account.anomaly`)
+
+After a vendor bill is created or posted, a background job checks it (also **Check again** in the
+*Anomaly checks* panel of the bill):
+
+| Flag | When |
+|---|---|
+| Same invoice number | another bill of the vendor has the same number, also written differently (`INV-0042` / `inv 42`) or with characters a scan confuses (`O`/`0`, `I`/`1`…) |
+| Same amount and date | same amount within 7 days |
+| Nearly identical document | the document texts are ≥ 85 % identical (word shingles) with the same amount, within 10 days or with the same number |
+| Unusual amount | robust z-score ≥ 3.5 against the vendor's last bills (median / MAD, at least 4 bills) and at least 50 % away from the median; or under a fifth of the median with z ≤ −2 |
+| First bill of a new vendor, large amount | no earlier bill and an amount above the 90th percentile of the company's bills of the last year (5,000 while the company has fewer than 10 bills) |
+| Bank account changed recently | a bank account of the vendor was added or changed in the last 30 days although it was already billing, or the bill shows an IBAN that is not on file |
+
+Each flag carries its explanation (with the similar document) and the bill's responsible user is notified.
+Flags **never block posting**. *Not an anomaly* dismisses a flag (it is not raised again for the same
+document); *Confirm the problem* keeps it for the audit trail. **Explain** asks the model for a plain-words
+summary of the open flags; an answer quoting a number that is not in the flags is replaced by the flags
+themselves. *Vendors → Anomaly flags* lists the open flags of the company.
+
+### Cash-flow forecast (`account.cashflow_forecast`)
+
+*Accounting → Reporting → Cash-flow forecast* shows the expected cash position for the next 4, 8, 13 or 26
+weeks, as a chart (with a range) and a table:
+
+- today's balance of the bank and cash accounts (and of the outstanding receipts / payments accounts, where
+  registered payments wait for their bank statement);
+- open invoices and bills by due date, shifted by each partner's usual payment delay (median of its last
+  six payments; the company's median otherwise); receivables more than 90 days overdue count for half;
+- invoices and bills **not issued yet**: the daily amount issued over the last 13 weeks, spread with the
+  observed issue-to-payment delays;
+- recurring bank movements not linked to an invoice (salaries, rent, subscriptions: monthly, stable amount
+  and day) on their usual day; the remaining movements as their weekly average, whose variability gives the
+  range.
+
+**Explain the forecast** asks the model for a short commentary of these figures. Every number in it is
+checked against the forecast: a commentary with another number is replaced by a summary of the figures
+(labelled *From the figures*). The forecast does not see bank statement lines that are not yet booked,
+taxes not yet invoiced, or loans; it assumes the company pays its own bills when they are due as before.

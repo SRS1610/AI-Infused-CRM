@@ -2394,3 +2394,301 @@ msgstr ""
 msgid "Vendor payments"
 msgstr ""
 
+#. field label
+msgid "Payment status"
+msgstr ""
+
+#. model description
+msgid "Anomaly flag"
+msgstr ""
+
+#. field label
+msgid "Document"
+msgstr ""
+
+#. field label
+msgid "Kind"
+msgstr ""
+
+#. selection value duplicate_number
+msgid "Same invoice number"
+msgstr ""
+
+#. selection value duplicate_amount
+msgid "Same amount and date"
+msgstr ""
+
+#. selection value near_duplicate_text
+msgid "Nearly identical document"
+msgstr ""
+
+#. selection value unusual_amount
+msgid "Unusual amount for this vendor"
+msgstr ""
+
+#. selection value new_vendor_large
+msgid "First bill of a new vendor, large amount"
+msgstr ""
+
+#. selection value bank_account_changed
+msgid "Bank account changed recently"
+msgstr ""
+
+#. field label
+msgid "Severity"
+msgstr ""
+
+#. selection value low
+msgid "Low"
+msgstr ""
+
+#. selection value medium
+msgid "Medium"
+msgstr ""
+
+#. selection value high
+msgid "High"
+msgstr ""
+
+#. field label
+msgid "Score"
+msgstr ""
+
+#. field help
+msgid "Strength of the signal (robust z-score, similarity…)"
+msgstr ""
+
+#. field label
+msgid "Explanation"
+msgstr ""
+
+#. field label
+msgid "Similar document"
+msgstr ""
+
+#. field label
+msgid "Details"
+msgstr ""
+
+#. selection value dismissed
+msgid "Dismissed"
+msgstr ""
+
+#. selection value confirmed
+msgid "Confirmed"
+msgstr ""
+
+#. field label
+msgid "Decided By"
+msgstr ""
+
+#. field label
+msgid "Decided At"
+msgstr ""
+
+#. field label
+msgid "Ai Generated"
+msgstr ""
+
+#. field label
+msgid "Document text"
+msgstr ""
+
+#. field help
+msgid "Text read from the source document"
+msgstr ""
+
+#. field label
+#. menu name
+#. action name
+msgid "Anomaly flags"
+msgstr ""
+
+#. field label
+msgid "Open anomaly flags"
+msgstr ""
+
+#: ai_anomaly.py
+msgid "Open a bill to explain its flags"
+msgstr ""
+
+#: ai_anomaly.py
+msgid "The vendor's bank account was added or changed {days} days ago: confirm it with the vendor through a known contact before paying."
+msgstr ""
+
+#: ai_anomaly.py
+msgid "Check bill {name}"
+msgstr ""
+
+#: ai_anomaly.py
+msgid "Same invoice number {number} as {other} of {date} ({amount})."
+msgstr ""
+
+#: ai_anomaly.py
+msgid "{amount} is {ratio} times the usual amount of this vendor (median {median} over {count} bills)."
+msgstr ""
+
+#: ai_anomaly.py
+msgid "First bill of this vendor and above the company's usual large amount ({amount} ≥ {threshold})."
+msgstr ""
+
+#: ai_anomaly.py
+msgid "The bill asks for payment to an IBAN ending in {tail}, which is not the bank account on file for this vendor."
+msgstr ""
+
+#: ai_anomaly.py
+msgid "Invoice number {number} reads like {onumber} of {other} (characters a scan confuses)."
+msgstr ""
+
+#: ai_anomaly.py
+msgid "Same amount {amount} as {other}, {days} days apart."
+msgstr ""
+
+#: ai_anomaly.py
+msgid "The document is {percent}% identical to {other} of {date}, same amount {amount}."
+msgstr ""
+
+#: ai_api.py
+msgid "No such document"
+msgstr ""
+
+#: ai_api.py ai_bill.py
+msgid "The document is too large (15 MB at most)"
+msgstr ""
+
+#: ai_api.py ai_bill.py
+msgid "Upload a PDF or an image (PNG, JPEG, WebP)"
+msgstr ""
+
+#: ai_api.py
+msgid "No such flag"
+msgstr ""
+
+#: ai_bill.py
+msgid "Create {kind} from {who} ({count} lines)"
+msgstr ""
+
+#: ai_bill.py
+msgid "Fill {name} from the document ({count} lines)"
+msgstr ""
+
+#: ai_bill.py
+msgid "The document looks like a {detected}; it is read as a {requested} as asked."
+msgstr ""
+
+#: ai_bill.py
+msgid "Not found on the document: {field}"
+msgstr ""
+
+#: ai_bill.py
+msgid "Amounts not found in the document's text: {amounts}"
+msgstr ""
+
+#: ai_bill.py
+msgid "A document becomes an invoice, a bill or a credit note"
+msgstr ""
+
+#: ai_bill.py
+msgid "This is not a document-reading proposal"
+msgstr ""
+
+#: ai_bill.py
+msgid "Unknown currency {code}: the company currency is used"
+msgstr ""
+
+#: ai_bill.py
+msgid "No account for {line}"
+msgstr ""
+
+#: ai_bill.py
+msgid "Only an empty draft invoice or bill can be filled from a document"
+msgstr ""
+
+#: ai_bill.py
+msgid "Lines can only be created from a document"
+msgstr ""
+
+#: ai_bill.py
+msgid "The draft was changed in the meantime: read the document again"
+msgstr ""
+
+#: ai_bill.py
+msgid "Account {id} does not belong to this company"
+msgstr ""
+
+#: ai_bill.py
+msgid "A tax does not belong to this company"
+msgstr ""
+
+#: ai_bill.py
+msgid "New vendor"
+msgstr ""
+
+#: ai_cashflow.py
+msgid "Cash today is {opening}. The forecast reaches its lowest point, {low}, on {low_date} and ends at {closing} on {end}. Open receivables: {receivables}; open payables: {payables}."
+msgstr ""
+
+#. action name
+#: ai_cashflow.py
+msgid "Cash-flow forecast"
+msgstr ""
+
+#: ai_coding.py
+msgid "Foreign VAT at {rate}%: not deductible here, the line has no tax"
+msgstr ""
+
+#: ai_coding.py
+msgid "No {rate}% tax in this company"
+msgstr ""
+
+#: ai_coding.py
+msgid "Like \"{label}\" on {move}"
+msgstr ""
+
+#: ai_coding.py
+msgid "Company default account"
+msgstr ""
+
+#: ai_coding.py
+msgid "Product {name}"
+msgstr ""
+
+#: ai_coding.py
+msgid "Keyword \"{word}\""
+msgstr ""
+
+#: ai_coding.py
+msgid "Usual account of this partner"
+msgstr ""
+
+#: models/ai_anomaly.py
+msgid "This flag is already {state}"
+msgstr ""
+
+#. view label
+msgid "Not an anomaly"
+msgstr ""
+
+#. view label
+msgid "Why (optional)"
+msgstr ""
+
+#. view label
+msgid "Confirm the problem"
+msgstr ""
+
+#. view label
+msgid "Note (optional)"
+msgstr ""
+
+#. menu name
+msgid "Read from documents"
+msgstr ""
+
+#. action name
+msgid "Read bills from documents"
+msgstr ""
+
+#. action name
+msgid "Read invoices from documents"
+msgstr ""

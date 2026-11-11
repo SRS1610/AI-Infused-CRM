@@ -1,0 +1,84 @@
+{
+ "gold": {
+  "amount_tax": 82.71,
+  "amount_total": 1264.29,
+  "amount_untaxed": 1181.58,
+  "currency": "EUR",
+  "due_date": "2026-06-25",
+  "iban": "DE86370400444366470390",
+  "invoice_date": "2026-05-26",
+  "invoice_number": "R202608370",
+  "lines": [
+   {
+    "account": "travel",
+    "amount": 1181.58,
+    "description": "Flug Frankfurt - Paris",
+    "quantity": 3.0,
+    "tax": null,
+    "tax_rate": 7.0,
+    "unit_price": 393.86
+   }
+  ],
+  "move_type": "in_invoice",
+  "needs_review": true,
+  "partner_name": "Hotel Adler Berlin GmbH",
+  "partner_vat": "DE883212019"
+ },
+ "spec": {
+  "amount_tax": 82.71,
+  "amount_total": 1264.29,
+  "amount_untaxed": 1181.58,
+  "buyer": {
+   "city": "75001 Paris",
+   "country": "France",
+   "name": "My Company (Europe)",
+   "street": "8 avenue de l'Opéra",
+   "vat": "FR32123456789"
+  },
+  "credit_note": false,
+  "currency": "EUR",
+  "due_date": "2026-06-25",
+  "id": "b044",
+  "invoice_date": "2026-05-26",
+  "invoice_number": "R202608370",
+  "kind": "digital",
+  "lang": "de",
+  "layout": "letter",
+  "lines": [
+   {
+    "amount": 1181.58,
+    "description": "Flug Frankfurt - Paris",
+    "quantity": 3.0,
+    "tax_rate": 7.0,
+    "unit_price": 393.86
+   }
+  ],
+  "move_type": "in_invoice",
+  "notes": "",
+  "reverse_charge": false,
+  "seed": 748722,
+  "seller": {
+   "address": "Friedrichstraße 112, 10117 Berlin",
+   "country": "DE",
+   "iban": "DE86 3704 0044 4366 4703 90",
+   "name": "Hotel Adler Berlin GmbH",
+   "vat": "DE883212019"
+  },
+  "tax_lines": [
+   {
+    "amount": 82.71,
+    "base": 1181.58,
+    "rate": 7.0
+   }
+  ]
+ },
+ "world": {
+  "history": [],
+  "vendor": {
+   "iban": "DE86 3704 0044 4366 4703 90",
+   "known": false,
+   "name": "Hotel Adler Berlin GmbH",
+   "vat": "DE883212019"
+  }
+ }
+}

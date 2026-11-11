@@ -34,11 +34,15 @@ class Stop(StrEnum):
     error = "error"
 
 
+IMAGE_TYPES = ("image/png", "image/jpeg", "image/webp", "image/gif", "application/pdf")
+
+
 class Block(BaseModel):
     """One content block. ``text`` for text, ``tool_use`` (id/name/input) for a model's tool call,
-    ``tool_result`` (tool_use_id/content/is_error) for the runtime's answer."""
+    ``tool_result`` (tool_use_id/content/is_error) for the runtime's answer, ``image`` (media_type/data,
+    base64) for a page image or a PDF document read by a vision-capable model (task class ``vision``)."""
 
-    type: Literal["text", "tool_use", "tool_result"]
+    type: Literal["text", "tool_use", "tool_result", "image"]
     text: str | None = None
     id: str | None = None
     name: str | None = None
@@ -46,6 +50,8 @@ class Block(BaseModel):
     tool_use_id: str | None = None
     content: str | None = None
     is_error: bool = False
+    media_type: str | None = None
+    data: str | None = None  # base64 content of an ``image`` block
 
 
 class Message(BaseModel):

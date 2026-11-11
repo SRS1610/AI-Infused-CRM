@@ -1,0 +1,97 @@
+{
+ "gold": {
+  "amount_tax": 83.04,
+  "amount_total": 498.22,
+  "amount_untaxed": 415.18,
+  "currency": "EUR",
+  "due_date": "2026-04-07",
+  "iban": "FR7930006949095073376273704",
+  "invoice_date": "2026-04-07",
+  "invoice_number": "PB833-4003",
+  "lines": [
+   {
+    "account": "rent",
+    "amount": 415.18,
+    "description": "Nettoyage des locaux - avril",
+    "quantity": 1.0,
+    "tax": "purchase_vat_20",
+    "tax_rate": 20.0,
+    "unit_price": 415.18
+   }
+  ],
+  "move_type": "in_invoice",
+  "needs_review": false,
+  "partner_name": "Propreté Bastille SARL",
+  "partner_vat": "FR37152571336"
+ },
+ "spec": {
+  "amount_tax": 83.04,
+  "amount_total": 498.22,
+  "amount_untaxed": 415.18,
+  "buyer": {
+   "city": "75001 Paris",
+   "country": "France",
+   "name": "My Company (Europe)",
+   "street": "8 avenue de l'Opéra",
+   "vat": "FR32123456789"
+  },
+  "credit_note": false,
+  "currency": "EUR",
+  "due_date": "2026-04-07",
+  "id": "b054",
+  "invoice_date": "2026-04-07",
+  "invoice_number": "PB833-4003",
+  "kind": "digital",
+  "lang": "fr",
+  "layout": "modern",
+  "lines": [
+   {
+    "amount": 415.18,
+    "description": "Nettoyage des locaux - avril",
+    "quantity": 1.0,
+    "tax_rate": 20.0,
+    "unit_price": 415.18
+   }
+  ],
+  "move_type": "in_invoice",
+  "notes": "",
+  "reverse_charge": false,
+  "seed": 230812,
+  "seller": {
+   "address": "12 rue des Lilas, 69003 Lyon",
+   "country": "FR",
+   "iban": "FR79 3000 6949 0950 7337 6273 704",
+   "name": "Propreté Bastille SARL",
+   "vat": "FR37152571336"
+  },
+  "tax_lines": [
+   {
+    "amount": 83.04,
+    "base": 415.18,
+    "rate": 20.0
+   }
+  ]
+ },
+ "world": {
+  "history": [
+   {
+    "date": "2026-03-03",
+    "lines": [
+     {
+      "account": "rent",
+      "description": "Nettoyage des locaux - mars",
+      "quantity": 1.0,
+      "tax": "purchase_vat_20",
+      "unit_price": 349.43
+     }
+    ]
+   }
+  ],
+  "vendor": {
+   "iban": "FR79 3000 6949 0950 7337 6273 704",
+   "known": true,
+   "name": "Propreté Bastille SARL",
+   "vat": "FR37152571336"
+  }
+ }
+}
