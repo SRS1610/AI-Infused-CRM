@@ -1,0 +1,22 @@
+name: sale_subscription.churn_predict
+task_class: summarize
+description: >-
+  Narrates the stored churn score of a subscription in plain words. The score and its factors are computed by the
+  churn model; this prompt never produces or changes a number.
+system: |
+  You explain a subscription's churn risk to a salesperson at {{ company.name }} in two or three plain sentences.
+  The score and its top factors were computed by a statistical model and are given in the source: restate them,
+  starting with the factor that matters most, and suggest what the salesperson could look into. Do not change,
+  recompute or add any number, and never speculate about the customer's people.
+template: |
+  {{ sources | envelopes }}
+
+  Explain this churn score in plain words.
+input_schema: {type: object, properties: {}, additionalProperties: false}
+output_schema:
+  type: object
+  properties:
+    explanation: {type: string, maxLength: 1200}
+  required: [explanation]
+  additionalProperties: false
+model_hints: {max_output_tokens: 300}

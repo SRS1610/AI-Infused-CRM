@@ -13,244 +13,6 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.18.0\n"
 
-#. model description
-#. field label
-#: field:sale.quotation.plan_id model:sale.subscription_plan
-msgid "Subscription plan"
-msgstr ""
-
-#. field label
-#: field:sale.subscription_close_reason.name field:sale.subscription_plan.name
-msgid "Name"
-msgstr ""
-
-#. field label
-#: field:sale.subscription_close_reason.sequence field:sale.subscription_plan.sequence
-msgid "Sequence"
-msgstr ""
-
-#. field label
-#: field:sale.subscription_close_reason.active field:sale.subscription_plan.active
-msgid "Active"
-msgstr ""
-
-#. field label
-#: field:sale.subscription_plan.billing_period_value
-msgid "Bill every"
-msgstr ""
-
-#. field label
-#. selection value period
-#: field:sale.subscription_plan.billing_period_unit selection:account.move.subscription_kind
-msgid "Billing period"
-msgstr ""
-
-#. selection value week
-#: selection:sale.subscription_plan.billing_period_unit
-msgid "Weeks"
-msgstr ""
-
-#. selection value month
-#: selection:sale.subscription_plan.billing_period_unit
-msgid "Months"
-msgstr ""
-
-#. selection value year
-#: selection:sale.subscription_plan.billing_period_unit
-msgid "Years"
-msgstr ""
-
-#. field label
-#: field:sale.subscription_plan.auto_close_limit
-msgid "Close after (days unpaid)"
-msgstr ""
-
-#. field help
-#: field:sale.subscription_plan.auto_close_limit
-msgid ""
-"A subscription whose invoice is still unpaid this many days after its due date is closed (reason:"
-" payment failure). 0 never closes automatically."
-msgstr ""
-
-#. field label
-#: field:sale.subscription_plan.payment_retry_days
-msgid "Retry a failed payment every (days)"
-msgstr ""
-
-#. field help
-#: field:sale.subscription_plan.payment_retry_days
-msgid "How often a declined saved payment method is charged again. 0 does not retry."
-msgstr ""
-
-#. field label
-#: field:sale.subscription_plan.user_closable
-msgid "Customers can close"
-msgstr ""
-
-#. field help
-#: field:sale.subscription_plan.user_closable
-msgid "Customers may close their subscription from the portal (at the period end)"
-msgstr ""
-
-#. field label
-#: field:sale.subscription_plan.renewal_reminder_days
-msgid "Renewal quotation (days before the end)"
-msgstr ""
-
-#. field help
-#: field:sale.subscription_plan.renewal_reminder_days
-msgid ""
-"For fixed-term subscriptions, the renewal quotation is created and sent this many days before the"
-" end date. 0 creates none."
-msgstr ""
-
-#. field label
-#: field:sale.subscription_log.company_id field:sale.subscription_plan.company_id
-msgid "Company"
-msgstr ""
-
-#. field help
-#: field:sale.subscription_plan.company_id
-msgid "Leave empty to share the plan"
-msgstr ""
-
-#. field label
-#: field:sale.subscription_plan.note
-msgid "Description"
-msgstr ""
-
-#. field label
-#. menu name
-#. action name
-#: actions.json:action_subscriptions field:sale.subscription_plan.subscription_count
-#: menus.json:menu_subscriptions menus.json:menu_subscriptions_root
-msgid "Subscriptions"
-msgstr ""
-
-#. model description
-#: model:sale.subscription_close_reason
-msgid "Subscription close reason"
-msgstr ""
-
-#. field label
-#: field:sale.subscription_close_reason.customer_visible
-msgid "Offered to customers"
-msgstr ""
-
-#. field help
-#: field:sale.subscription_close_reason.customer_visible
-msgid "Customers can pick this reason when they close on the portal"
-msgstr ""
-
-#. model description
-#: model:sale.subscription_log
-msgid "Subscription MRR change"
-msgstr ""
-
-#. field label
-#: field:account.move.subscription_id field:sale.quotation.is_subscription
-#: field:sale.subscription_log.subscription_id
-msgid "Subscription"
-msgstr ""
-
-#. field label
-#: field:sale.subscription_log.partner_id
-msgid "Customer"
-msgstr ""
-
-#. field label
-#: field:sale.subscription_log.plan_id
-msgid "Plan"
-msgstr ""
-
-#. field label
-#: field:sale.subscription_log.user_id
-msgid "Salesperson"
-msgstr ""
-
-#. field label
-#: field:sale.subscription_log.event_date
-msgid "Date"
-msgstr ""
-
-#. field label
-#: field:sale.subscription_log.event_type
-msgid "Event"
-msgstr ""
-
-#. selection value new
-#. view label
-#: selection:sale.subscription_log.event_type views.json:view_log_search
-msgid "New"
-msgstr ""
-
-#. selection value upsell
-#. view label
-#: selection:sale.subscription_log.event_type views.json:view_subscription_form
-msgid "Upsell"
-msgstr ""
-
-#. selection value downsell
-#: selection:sale.subscription_log.event_type
-msgid "Downsell"
-msgstr ""
-
-#. selection value churn
-#. view label
-#: selection:sale.subscription_log.event_type views.json:view_log_search
-msgid "Churn"
-msgstr ""
-
-#. selection value reactivation
-#: selection:sale.subscription_log.event_type
-msgid "Reactivation"
-msgstr ""
-
-#. selection value renewal
-#: selection:sale.subscription_log.event_type
-msgid "Renewal"
-msgstr ""
-
-#. field label
-#: field:sale.subscription_log.currency_id
-msgid "Currency"
-msgstr ""
-
-#. field label
-#: field:sale.subscription_log.amount_signed
-msgid "MRR change"
-msgstr ""
-
-#. field label
-#: field:sale.subscription_log.recurring_monthly
-msgid "MRR after"
-msgstr ""
-
-#. field label
-#: field:sale.quotation.company_currency_id field:sale.subscription_log.company_currency_id
-msgid "Company currency"
-msgstr ""
-
-#. field label
-#: field:sale.subscription_log.amount_company
-msgid "MRR change (company currency)"
-msgstr ""
-
-#. field help
-#: field:sale.subscription_log.amount_company
-msgid "Converted at the event date"
-msgstr ""
-
-#. field label
-#: field:sale.quotation.close_reason_id field:sale.subscription_log.reason_id
-msgid "Close reason"
-msgstr ""
-
-#. field label
-#: field:sale.subscription_log.note
-msgid "Note"
-msgstr ""
-
 #. field label
 #: field:product.product.recurring_invoice
 msgid "Subscription product"
@@ -259,6 +21,18 @@ msgstr ""
 #. field help
 #: field:product.product.recurring_invoice
 msgid "Invoiced every billing period on subscriptions (the price is per period)"
+msgstr ""
+
+#. field label
+#. model description
+#: field:sale.quotation.plan_id model:sale.subscription_plan
+msgid "Subscription plan"
+msgstr ""
+
+#. field label
+#: field:account.move.subscription_id field:sale.quotation.is_subscription
+#: field:sale.subscription_log.subscription_id
+msgid "Subscription"
 msgstr ""
 
 #. field label
@@ -357,8 +131,18 @@ msgid "Monthly recurring revenue: the recurring amount per month (untaxed)"
 msgstr ""
 
 #. field label
+#: field:sale.quotation.company_currency_id field:sale.subscription_log.company_currency_id
+msgid "Company currency"
+msgstr ""
+
+#. field label
 #: field:sale.quotation.recurring_monthly_company
 msgid "MRR (company currency)"
+msgstr ""
+
+#. field label
+#: field:sale.quotation.close_reason_id field:sale.subscription_log.reason_id
+msgid "Close reason"
 msgstr ""
 
 #. field label
@@ -402,7 +186,7 @@ msgid "Changes"
 msgstr ""
 
 #. field label
-#: field:sale.quotation.payment_token_id
+#: ai_churn.py:146 field:sale.quotation.payment_token_id
 msgid "Saved payment method"
 msgstr ""
 
@@ -472,6 +256,12 @@ msgstr ""
 msgid "Subscription document"
 msgstr ""
 
+#. selection value period
+#. field label
+#: field:sale.subscription_plan.billing_period_unit selection:account.move.subscription_kind
+msgid "Billing period"
+msgstr ""
+
 #. selection value proration
 #: selection:account.move.subscription_kind
 msgid "Mid-period change"
@@ -502,23 +292,466 @@ msgstr ""
 msgid "Subscription Period Key"
 msgstr ""
 
-#: api.py:31 api.py:47 api.py:49
+#. model description
+#: model:sale.subscription_churn_model
+msgid "Churn prediction model (AI)"
+msgstr ""
+
+#. field label
+#: field:sale.subscription_churn_model.name field:sale.subscription_close_reason.name
+#: field:sale.subscription_plan.name
+msgid "Name"
+msgstr ""
+
+#. field label
+#: field:sale.subscription_churn_model.company_id field:sale.subscription_log.company_id
+#: field:sale.subscription_plan.company_id
+msgid "Company"
+msgstr ""
+
+#. field label
+#: field:sale.subscription_churn_model.active field:sale.subscription_close_reason.active
+#: field:sale.subscription_plan.active
+msgid "Active"
+msgstr ""
+
+#. field label
+#: field:sale.subscription_churn_model.algorithm
+msgid "Algorithm"
+msgstr ""
+
+#. field label
+#: field:sale.subscription_churn_model.artefact
+msgid "Artefact"
+msgstr ""
+
+#. field help
+#: field:sale.subscription_churn_model.artefact
+msgid "Standardisation and coefficients (JSON, no pickle)"
+msgstr ""
+
+#. field label
+#: field:sale.subscription_churn_model.artefact_hash
+msgid "Artefact Hash"
+msgstr ""
+
+#. field help
+#: field:sale.subscription_churn_model.artefact_hash
+msgid "SHA-256 of the artefact, checked before scoring"
+msgstr ""
+
+#. field label
+#: field:sale.subscription_churn_model.metrics
+msgid "Metrics"
+msgstr ""
+
+#. field help
+#: field:sale.subscription_churn_model.metrics
+msgid "Training rows, churned, base rate, hold-out AUC"
+msgstr ""
+
+#. field label
+#: field:sale.subscription_churn_model.trained_at
+msgid "Trained At"
+msgstr ""
+
+#. field label
+#: field:sale.quotation.churn_probability
+msgid "Churn probability"
+msgstr ""
+
+#. field label
+#: field:sale.quotation.churn_score
+msgid "Churn score"
+msgstr ""
+
+#. field help
+#: field:sale.quotation.churn_score
+msgid "0-100, from the churn prediction"
+msgstr ""
+
+#. field label
+#: field:sale.quotation.churn_risk
+msgid "Churn risk"
+msgstr ""
+
+#. selection value low
+#: selection:sale.quotation.churn_risk
+msgid "Low"
+msgstr ""
+
+#. selection value medium
+#: selection:sale.quotation.churn_risk
+msgid "Medium"
+msgstr ""
+
+#. selection value high
+#: selection:sale.quotation.churn_risk
+msgid "High"
+msgstr ""
+
+#. field label
+#: field:sale.quotation.churn_factors
+msgid "Churn Factors"
+msgstr ""
+
+#. field help
+#: field:sale.quotation.churn_factors
+msgid "Top contributing factors: feature, direction, weight"
+msgstr ""
+
+#. field label
+#: field:sale.quotation.churn_facts
+msgid "Churn Facts"
+msgstr ""
+
+#. field help
+#: field:sale.quotation.churn_facts
+msgid "The churn facts the score was computed from"
+msgstr ""
+
+#. field label
+#: field:sale.quotation.churn_scored_at
+msgid "Churn scored on"
+msgstr ""
+
+#. field label
+#: field:sale.quotation.churn_model_id
+msgid "Churn model"
+msgstr ""
+
+#. field label
+#: field:sale.subscription_close_reason.sequence field:sale.subscription_plan.sequence
+msgid "Sequence"
+msgstr ""
+
+#. field label
+#: field:sale.subscription_plan.billing_period_value
+msgid "Bill every"
+msgstr ""
+
+#. selection value week
+#: selection:sale.subscription_plan.billing_period_unit
+msgid "Weeks"
+msgstr ""
+
+#. selection value month
+#: selection:sale.subscription_plan.billing_period_unit
+msgid "Months"
+msgstr ""
+
+#. selection value year
+#: selection:sale.subscription_plan.billing_period_unit
+msgid "Years"
+msgstr ""
+
+#. field label
+#: field:sale.subscription_plan.auto_close_limit
+msgid "Close after (days unpaid)"
+msgstr ""
+
+#. field help
+#: field:sale.subscription_plan.auto_close_limit
+msgid ""
+"A subscription whose invoice is still unpaid this many days after its due date is closed (reason:"
+" payment failure). 0 never closes automatically."
+msgstr ""
+
+#. field label
+#: field:sale.subscription_plan.payment_retry_days
+msgid "Retry a failed payment every (days)"
+msgstr ""
+
+#. field help
+#: field:sale.subscription_plan.payment_retry_days
+msgid "How often a declined saved payment method is charged again. 0 does not retry."
+msgstr ""
+
+#. field label
+#: field:sale.subscription_plan.user_closable
+msgid "Customers can close"
+msgstr ""
+
+#. field help
+#: field:sale.subscription_plan.user_closable
+msgid "Customers may close their subscription from the portal (at the period end)"
+msgstr ""
+
+#. field label
+#: field:sale.subscription_plan.renewal_reminder_days
+msgid "Renewal quotation (days before the end)"
+msgstr ""
+
+#. field help
+#: field:sale.subscription_plan.renewal_reminder_days
+msgid ""
+"For fixed-term subscriptions, the renewal quotation is created and sent this many days before the"
+" end date. 0 creates none."
+msgstr ""
+
+#. field help
+#: field:sale.subscription_plan.company_id
+msgid "Leave empty to share the plan"
+msgstr ""
+
+#. field label
+#: field:sale.subscription_plan.note
+msgid "Description"
+msgstr ""
+
+#. field label
+#. menu name
+#. action name
+#: actions.json:action_subscriptions field:sale.subscription_plan.subscription_count
+#: menus.json:menu_subscriptions menus.json:menu_subscriptions_root
+msgid "Subscriptions"
+msgstr ""
+
+#. model description
+#: model:sale.subscription_close_reason
+msgid "Subscription close reason"
+msgstr ""
+
+#. field label
+#: field:sale.subscription_close_reason.customer_visible
+msgid "Offered to customers"
+msgstr ""
+
+#. field help
+#: field:sale.subscription_close_reason.customer_visible
+msgid "Customers can pick this reason when they close on the portal"
+msgstr ""
+
+#. model description
+#: model:sale.subscription_log
+msgid "Subscription MRR change"
+msgstr ""
+
+#. field label
+#: field:sale.subscription_log.partner_id
+msgid "Customer"
+msgstr ""
+
+#. field label
+#: field:sale.subscription_log.plan_id
+msgid "Plan"
+msgstr ""
+
+#. field label
+#: field:sale.subscription_log.user_id
+msgid "Salesperson"
+msgstr ""
+
+#. field label
+#: field:sale.subscription_log.event_date
+msgid "Date"
+msgstr ""
+
+#. field label
+#: field:sale.subscription_log.event_type
+msgid "Event"
+msgstr ""
+
+#. selection value new
+#. view label
+#: selection:sale.subscription_log.event_type views.json:view_log_search
+msgid "New"
+msgstr ""
+
+#. selection value upsell
+#. view label
+#: selection:sale.subscription_log.event_type views.json:view_subscription_form
+msgid "Upsell"
+msgstr ""
+
+#. selection value downsell
+#: selection:sale.subscription_log.event_type
+msgid "Downsell"
+msgstr ""
+
+#. selection value churn
+#. view label
+#: selection:sale.subscription_log.event_type views.json:view_log_search
+msgid "Churn"
+msgstr ""
+
+#. selection value reactivation
+#: selection:sale.subscription_log.event_type
+msgid "Reactivation"
+msgstr ""
+
+#. selection value renewal
+#: selection:sale.subscription_log.event_type
+msgid "Renewal"
+msgstr ""
+
+#. field label
+#: field:sale.subscription_log.currency_id
+msgid "Currency"
+msgstr ""
+
+#. field label
+#: field:sale.subscription_log.amount_signed
+msgid "MRR change"
+msgstr ""
+
+#. field label
+#: field:sale.subscription_log.recurring_monthly
+msgid "MRR after"
+msgstr ""
+
+#. field label
+#: field:sale.subscription_log.amount_company
+msgid "MRR change (company currency)"
+msgstr ""
+
+#. field help
+#: field:sale.subscription_log.amount_company
+msgid "Converted at the event date"
+msgstr ""
+
+#. field label
+#: field:sale.subscription_log.note
+msgid "Note"
+msgstr ""
+
+#: ai_api.py:30 api.py:31 api.py:47 api.py:49
 msgid "Subscription not found"
+msgstr ""
+
+#: ai_churn.py:134
+#, python-brace-format
+msgid "Customer for {months} months"
+msgstr ""
+
+#: ai_churn.py:135
+#, python-brace-format
+msgid "Monthly recurring revenue {amount}"
+msgstr ""
+
+#: ai_churn.py:136
+#, python-brace-format
+msgid "{count} subscribed products"
+msgstr ""
+
+#: ai_churn.py:137
+#, python-brace-format
+msgid "Average discount {percent} %"
+msgstr ""
+
+#: ai_churn.py:139
+#, python-brace-format
+msgid "Renewed {count} times"
+msgstr ""
+
+#: ai_churn.py:140
+#, python-brace-format
+msgid "{count} upgrades"
+msgstr ""
+
+#: ai_churn.py:141
+#, python-brace-format
+msgid "{count} downgrades"
+msgstr ""
+
+#: ai_churn.py:142
+#, python-brace-format
+msgid "MRR change over 90 days: {amount}"
+msgstr ""
+
+#: ai_churn.py:143
+#, python-brace-format
+msgid "Paused {count} times"
+msgstr ""
+
+#: ai_churn.py:145
+#, python-brace-format
+msgid "{count} failed payments"
+msgstr ""
+
+#: ai_churn.py:147
+#, python-brace-format
+msgid "{count} unpaid invoices"
+msgstr ""
+
+#: ai_churn.py:148
+#, python-brace-format
+msgid "Overdue {amount}"
+msgstr ""
+
+#: ai_churn.py:149
+#, python-brace-format
+msgid "{count} e-mails from the customer"
+msgstr ""
+
+#: ai_churn.py:150
+#, python-brace-format
+msgid "Reactivated {count} times"
+msgstr ""
+
+#. view label
+#: ai_churn.py:138 views.json:view_subscription_search
+msgid "Fixed term"
+msgstr ""
+
+#: ai_churn.py:138
+msgid "Open-ended"
+msgstr ""
+
+#: ai_churn.py:144
+msgid "Paused now"
+msgstr ""
+
+#: ai_churn.py:144
+msgid "Not paused"
+msgstr ""
+
+#: ai_churn.py:146
+msgid "No saved payment method"
+msgstr ""
+
+#: ai_features.py:245
+msgid "The subscription's state, close reason and the customer's identity are never model inputs"
+msgstr ""
+
+#: ai_features.py:258
+msgid "Only running subscriptions are scored"
+msgstr ""
+
+#: ai_features.py:280 ai_features.py:453
+msgid "Choose a subscription"
+msgstr ""
+
+#: ai_features.py:283
+msgid "This subscription has no churn score yet"
+msgstr ""
+
+#: ai_features.py:457
+msgid "Renewal outreach is drafted for running subscriptions"
+msgstr ""
+
+#: ai_features.py:477
+#, python-brace-format
+msgid "Renewal e-mail to {customer}"
+msgstr ""
+
+#: ai_features.py:479
+msgid " — unverified figures removed"
 msgstr ""
 
 #: api.py:40
 msgid "Sign in or use the link from your email"
 msgstr ""
 
-#: api.py:181
+#: api.py:182
 msgid "This subscription cannot be closed online: contact us"
 msgstr ""
 
-#: api.py:183
+#: api.py:184
 msgid "This subscription is already closing"
 msgstr ""
 
-#: api.py:186
+#: api.py:187
 msgid "Choose why you close the subscription"
 msgstr ""
 
@@ -530,7 +763,7 @@ msgstr ""
 msgid "Invalid or expired link"
 msgstr ""
 
-#: api.py:187
+#: api.py:188
 msgid "Closed by the customer"
 msgstr ""
 
@@ -891,12 +1124,12 @@ msgstr ""
 
 #. view label
 #: views.json:view_subscription_search
-msgid "Fixed term"
+msgid "Payment failures"
 msgstr ""
 
 #. view label
 #: views.json:view_subscription_search
-msgid "Payment failures"
+msgid "At risk (AI)"
 msgstr ""
 
 #. view label

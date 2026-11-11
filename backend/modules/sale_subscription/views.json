@@ -52,7 +52,7 @@
        ]}
      ]}
    ]}},
-  {"id": "view_subscription_list", "model": "sale.quotation", "type": "list", "name": "sale.quotation.subscription.list", "columns": [{"field": "name"}, {"field": "partner_id"}, {"field": "plan_id"}, {"field": "start_date"}, {"field": "next_invoice_date"}, {"field": "end_date", "optional": "show"}, {"field": "recurring_total"}, {"field": "recurring_monthly", "sum": true}, {"field": "user_id", "optional": "hide"}, {"field": "subscription_state", "widget": "badge"}]},
+  {"id": "view_subscription_list", "model": "sale.quotation", "type": "list", "name": "sale.quotation.subscription.list", "columns": [{"field": "name"}, {"field": "partner_id"}, {"field": "plan_id"}, {"field": "start_date"}, {"field": "next_invoice_date"}, {"field": "end_date", "optional": "show"}, {"field": "recurring_total"}, {"field": "recurring_monthly", "sum": true}, {"field": "user_id", "optional": "hide"}, {"field": "subscription_state", "widget": "badge"}, {"field": "churn_risk", "widget": "badge", "optional": "hide"}]},
   {"id": "view_subscription_kanban", "model": "sale.quotation", "type": "kanban", "name": "sale.quotation.subscription.kanban", "default_group_by": "subscription_state", "root": {"kind": "card", "children": [{"kind": "field", "name": "name", "widget": "title"}, {"kind": "field", "name": "partner_id"}, {"kind": "field", "name": "plan_id"}, {"kind": "field", "name": "recurring_monthly"}, {"kind": "field", "name": "next_invoice_date"}]}},
   {"id": "view_subscription_search", "model": "sale.quotation", "type": "search", "name": "sale.quotation.subscription.search", "fields": ["name", "partner_id", "plan_id"],
    "filters": [
@@ -61,7 +61,8 @@
      {"name": "paused", "label": "Paused", "domain": [["subscription_state", "=", "paused"]]},
      {"name": "churned", "label": "Churned", "domain": [["subscription_state", "=", "churned"]]},
      {"name": "fixed_term", "label": "Fixed term", "domain": [["end_date", "!=", null]]},
-     {"name": "failures", "label": "Payment failures", "domain": [["payment_failure_count", ">", 0]]}
+     {"name": "failures", "label": "Payment failures", "domain": [["payment_failure_count", ">", 0]]},
+     {"name": "churn_risk", "label": "At risk (AI)", "domain": [["churn_risk", "in", ["medium", "high"]]]}
    ],
    "group_bys": [{"field": "subscription_state"}, {"field": "plan_id"}, {"field": "user_id"}, {"field": "partner_id"}, {"field": "close_reason_id"}, {"field": "start_date:month"}]},
   {"id": "view_subscription_pivot", "model": "sale.quotation", "type": "pivot", "name": "sale.quotation.subscription.pivot", "row": "plan_id", "col": "subscription_state", "measures": ["recurring_monthly_company"]},
