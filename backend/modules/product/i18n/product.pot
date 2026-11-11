@@ -570,6 +570,15 @@ msgstr ""
 msgid "The price is at most the cost plus this amount"
 msgstr ""
 
+#: ai_features.py:134
+msgid "Descriptions are drafted on a product"
+msgstr ""
+
+#: ai_features.py:166
+#, python-brace-format
+msgid "Sales description for {product}"
+msgstr ""
+
 #: models/attribute.py:53
 msgid "A colour is written #rgb or #rrggbb"
 msgstr ""
@@ -646,7 +655,7 @@ msgstr ""
 msgid "Cannot convert '{from_unit}' into '{to_unit}': they measure different things"
 msgstr ""
 
-#: models/product.py:468
+#: models/product.py:487
 #, python-brace-format
 msgid "These attributes make {count} variants; the limit is {limit}"
 msgstr ""
@@ -683,12 +692,12 @@ msgstr ""
 msgid "A variant cannot be the template of other variants"
 msgstr ""
 
-#: models/product.py:485
+#: models/product.py:504
 #, python-brace-format
 msgid "'{name}' is a variant: generate variants from its template"
 msgstr ""
 
-#: models/product.py:487
+#: models/product.py:506
 #, python-brace-format
 msgid "Add attributes to '{name}' before generating variants"
 msgstr ""
@@ -702,7 +711,7 @@ msgstr ""
 msgid "A category cannot be its own parent"
 msgstr ""
 
-#: models/product.py:397
+#: models/product.py:398 models/product.py:416
 #, python-brace-format
 msgid "'{field}' is shared by every variant of '{template}': change it on the template"
 msgstr ""

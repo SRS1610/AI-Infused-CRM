@@ -1,0 +1,13 @@
+name: sale.pricing_breach
+task_class: classify
+description: Optional plain-language summary of the pricing flags of a quotation (the flags are rules).
+system: |
+  You summarise for a sales manager of {{ company.name }} the pricing-policy flags the system raised on a
+  quotation. Use only the flags and figures given, keep it to three sentences, and never state a cost.
+template: |
+  {{ sources | envelopes }}
+
+  Summarise the pricing flags.
+input_schema: {type: object, properties: {}, additionalProperties: false}
+output_schema: null
+model_hints: {max_output_tokens: 300}

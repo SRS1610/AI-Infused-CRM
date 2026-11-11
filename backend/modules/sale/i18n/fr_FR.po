@@ -16,13 +16,241 @@ msgstr ""
 "Generated-By: Babel 2.18.0\n"
 
 #. model description
+#: model:sale.discount_band
+msgid "Approved discount band"
+msgstr "Fourchette de remise approuvée"
+
 #. field label
+#: field:sale.discount_band.name field:sale.order_template.name field:sale.promotion.name
+msgid "Name"
+msgstr "Nom"
+
+#. field label
+#: field:sale.discount_band.sequence field:sale.order_template.sequence
+#: field:sale.order_template_line.sequence field:sale.order_template_option.sequence
+#: field:sale.promotion.sequence field:sale.quotation_line.sequence
+msgid "Sequence"
+msgstr "Séquence"
+
+#. field help
+#: field:sale.discount_band.sequence
+msgid "Among equally specific bands, the first one applies"
+msgstr "Entre des fourchettes aussi précises, la première s'applique"
+
+#. field label
+#: field:sale.discount_band.active field:sale.order_template.active field:sale.promotion.active
+msgid "Active"
+msgstr "Actif"
+
+#. field label
+#: field:sale.discount_band.company_id field:sale.order_template.company_id
+#: field:sale.order_template_line.company_id field:sale.order_template_option.company_id
+#: field:sale.pricing_flag.company_id field:sale.promotion.company_id
+#: field:sale.promotion_reward.company_id field:sale.promotion_rule.company_id
+#: field:sale.quotation.company_id field:sale.quotation_line.company_id
+msgid "Company"
+msgstr "Société"
+
+#. field label
+#: field:sale.discount_band.category_id
+msgid "Product category"
+msgstr "Catégorie de produits"
+
+#. field help
+#: field:sale.discount_band.category_id
+msgid "Applies to products of this category and its sub-categories (empty = every product)"
+msgstr "S'applique aux produits de cette catégorie et de ses sous-catégories (vide = tous les produits)"
+
+#. field label
+#: field:sale.discount_band.partner_tag_ids
+msgid "Customer segments"
+msgstr "Segments de clientèle"
+
+#. field help
+#: field:sale.discount_band.partner_tag_ids
+msgid "Applies to customers with one of these tags (empty = every customer)"
+msgstr "S'applique aux clients ayant l'une de ces étiquettes (vide = tous les clients)"
+
+#. field label
+#: field:sale.discount_band.min_quantity
+msgid "From quantity"
+msgstr "À partir de la quantité"
+
+#. field help
+#: field:sale.discount_band.min_quantity
+msgid "Applies to lines of at least this quantity"
+msgstr "S'applique aux lignes d'au moins cette quantité"
+
+#. field label
+#: field:sale.discount_band.min_discount
+msgid "Minimum discount %"
+msgstr "Remise minimale %"
+
+#. field label
+#: field:sale.discount_band.max_discount
+msgid "Maximum discount %"
+msgstr "Remise maximale %"
+
+#. field label
+#: field:sale.discount_band.min_margin
+msgid "Minimum margin %"
+msgstr "Marge minimale %"
+
+#. field help
+#: field:sale.discount_band.min_margin
+msgid "A net unit price below cost plus this margin is flagged by the pricing check"
+msgstr "Un prix unitaire net inférieur au coût plus cette marge est signalé par le contrôle des prix"
+
+#. field label
+#: field:sale.discount_band.approver_group_id
+msgid "Approved above the band by"
+msgstr "Approuvé au-delà de la fourchette par"
+
+#. field help
+#: field:sale.discount_band.approver_group_id
+msgid "Members of this group approve discounts above the band (default: sales administrators)"
+msgstr ""
+"Les membres de ce groupe approuvent les remises au-delà de la fourchette (par défaut : "
+"administrateurs des ventes)"
+
+#. field label
+#. selection value note
+#: field:sale.discount_band.note selection:sale.order_template_line.display_type
+#: selection:sale.quotation_line.display_type
+msgid "Note"
+msgstr "Note"
+
+#. model description
+#: model:sale.pricing_flag
+msgid "Pricing-policy flag"
+msgstr "Alerte de politique tarifaire"
+
+#. field label
+#. model description
 #. workflow.definition.name
 #. reports.template.name
 #: data/reports.json:report_quotation data/workflow.json:wf_quotation
-#: field:sale.quotation_line.quotation_id model:sale.quotation
+#: field:sale.pricing_flag.quotation_id field:sale.quotation_line.quotation_id model:sale.quotation
 msgid "Quotation"
 msgstr "Devis"
+
+#. field label
+#: field:sale.pricing_flag.line_id
+msgid "Line"
+msgstr "Ligne"
+
+#. field label
+#: field:sale.pricing_flag.code field:sale.promotion.code
+msgid "Code"
+msgstr "Code"
+
+#. selection value below_margin
+#: selection:sale.pricing_flag.code
+msgid "Below the minimum margin"
+msgstr "Sous la marge minimale"
+
+#. selection value below_pricelist
+#: selection:sale.pricing_flag.code
+msgid "Price below the pricelist beyond the band"
+msgstr "Prix sous la liste de prix au-delà de la fourchette"
+
+#. selection value discount_above_band
+#: selection:sale.pricing_flag.code
+msgid "Discount above the approved band"
+msgstr "Remise au-delà de la fourchette approuvée"
+
+#. selection value unusual_for_customer
+#: selection:sale.pricing_flag.code
+msgid "Unusual for this customer"
+msgstr "Inhabituel pour ce client"
+
+#. field label
+#: field:sale.pricing_flag.severity
+msgid "Severity"
+msgstr "Gravité"
+
+#. selection value warning
+#: selection:sale.pricing_flag.severity
+msgid "Warning"
+msgstr "Avertissement"
+
+#. selection value breach
+#: selection:sale.pricing_flag.severity
+msgid "Breach"
+msgstr "Infraction"
+
+#. field label
+#: field:sale.pricing_flag.message
+msgid "Message"
+msgstr "Message"
+
+#. field label
+#: field:sale.pricing_flag.band_id
+msgid "Band"
+msgstr "Fourchette"
+
+#. field label
+#: field:sale.order_template_line.discount field:sale.order_template_option.discount
+#: field:sale.pricing_flag.value field:sale.promotion_reward.discount_percent
+#: field:sale.quotation_line.discount
+msgid "Discount %"
+msgstr "Remise %"
+
+#. field help
+#: field:sale.pricing_flag.value
+msgid "Discount (or effective discount) of the line when it was flagged"
+msgstr "Remise (ou remise effective) de la ligne au moment de l'alerte"
+
+#. field label
+#: field:sale.pricing_flag.signature
+msgid "Signature"
+msgstr "Signature"
+
+#. field help
+#: field:sale.pricing_flag.signature
+msgid "Code, line and rounded values: a changed line is a new flag"
+msgstr "Code, ligne et valeurs arrondies : une ligne modifiée donne une nouvelle alerte"
+
+#. field label
+#: field:sale.pricing_flag.state field:sale.quotation.state
+msgid "State"
+msgstr "État"
+
+#. selection value open
+#. view label
+#: selection:sale.pricing_flag.state views.json:view_pricing_flag_search
+msgid "To review"
+msgstr "À examiner"
+
+#. selection value approved
+#: selection:sale.pricing_flag.state
+msgid "Approved"
+msgstr "Approuvé"
+
+#. selection value resolved
+#: selection:sale.pricing_flag.state
+msgid "Resolved"
+msgstr "Résolu"
+
+#. field label
+#: field:sale.pricing_flag.approved_by
+msgid "Approved By"
+msgstr "Approuvé par"
+
+#. field label
+#: field:sale.pricing_flag.approved_at
+msgid "Approved At"
+msgstr "Approuvé le"
+
+#. field label
+#: field:sale.pricing_flag.ai_run_id
+msgid "AI run"
+msgstr "Exécution IA"
+
+#. field help
+#: field:sale.pricing_flag.ai_run_id
+msgid "The audit run of the check that raised the flag"
+msgstr "L'exécution auditée du contrôle qui a levé l'alerte"
 
 #. field label
 #: field:sale.quotation.name
@@ -68,14 +296,6 @@ msgstr "Date à laquelle le devis est devenu une commande"
 #: field:sale.quotation.user_id
 msgid "Salesperson"
 msgstr "Commercial"
-
-#. field label
-#: field:sale.order_template.company_id field:sale.order_template_line.company_id
-#: field:sale.order_template_option.company_id field:sale.promotion.company_id
-#: field:sale.promotion_reward.company_id field:sale.promotion_rule.company_id
-#: field:sale.quotation.company_id field:sale.quotation_line.company_id
-msgid "Company"
-msgstr "Société"
 
 #. field label
 #: field:sale.promotion.currency_id field:sale.quotation.currency_id
@@ -168,11 +388,6 @@ msgstr "Total"
 #: field:sale.order_template.note field:sale.quotation.note
 msgid "Terms and conditions"
 msgstr "Conditions générales"
-
-#. field label
-#: field:sale.quotation.state
-msgid "State"
-msgstr "État"
 
 #. selection value draft
 #. workflow.state.name
@@ -332,13 +547,6 @@ msgid "Order state"
 msgstr "État de la commande"
 
 #. field label
-#: field:sale.order_template.sequence field:sale.order_template_line.sequence
-#: field:sale.order_template_option.sequence field:sale.promotion.sequence
-#: field:sale.quotation_line.sequence
-msgid "Sequence"
-msgstr "Séquence"
-
-#. field label
 #: field:sale.order_template_line.display_type field:sale.quotation_line.display_type
 msgid "Display Type"
 msgstr "Type d'affichage"
@@ -347,11 +555,6 @@ msgstr "Type d'affichage"
 #: selection:sale.order_template_line.display_type selection:sale.quotation_line.display_type
 msgid "Section"
 msgstr "Section"
-
-#. selection value note
-#: selection:sale.order_template_line.display_type selection:sale.quotation_line.display_type
-msgid "Note"
-msgstr "Note"
 
 #. field label
 #: field:sale.order_template_line.product_id field:sale.order_template_option.product_id
@@ -395,12 +598,6 @@ msgstr "Prix saisi"
 #: field:sale.quotation_line.price_manual
 msgid "The unit price was typed: the pricelist no longer changes it"
 msgstr "Le prix unitaire a été saisi : la liste de prix ne le modifie plus"
-
-#. field label
-#: field:sale.order_template_line.discount field:sale.order_template_option.discount
-#: field:sale.promotion_reward.discount_percent field:sale.quotation_line.discount
-msgid "Discount %"
-msgstr "Remise %"
 
 #. field label
 #: field:sale.quotation_line.is_optional
@@ -588,11 +785,6 @@ msgstr "Prix de ce client (par défaut : la liste de prix de son pays, sinon cel
 msgid "A promotion code must be unique"
 msgstr "Un code promotionnel doit être unique"
 
-#. field label
-#: field:sale.order_template.name field:sale.promotion.name
-msgid "Name"
-msgstr "Nom"
-
 #. field help
 #: field:sale.promotion.name
 msgid "Shown on the reward lines"
@@ -602,11 +794,6 @@ msgstr "Affiché sur les lignes de remise"
 #: field:sale.promotion.sequence
 msgid "Promotions apply in this order"
 msgstr "Les promotions s'appliquent dans cet ordre"
-
-#. field label
-#: field:sale.order_template.active field:sale.promotion.active
-msgid "Active"
-msgstr "Actif"
 
 #. field help
 #: field:sale.promotion.company_id
@@ -641,11 +828,6 @@ msgstr "Automatique"
 #: selection:sale.promotion.program_type views.json:view_promotion_search
 msgid "With a code"
 msgstr "Avec un code"
-
-#. field label
-#: field:sale.promotion.code
-msgid "Code"
-msgstr "Code"
 
 #. field help
 #: field:sale.promotion.code
@@ -821,6 +1003,175 @@ msgstr "Vide = la description de vente du produit"
 msgid "Quotation template optional product"
 msgstr "Produit optionnel de modèle de devis"
 
+#: ai_api.py:28
+msgid "No such quotation"
+msgstr "Devis introuvable"
+
+#: ai_api.py:93
+msgid "No such pricing flag"
+msgstr "Alerte tarifaire introuvable"
+
+#: ai_common.py:47
+msgid "AI is not installed"
+msgstr "L'IA n'est pas installée"
+
+#: ai_discount.py:224
+#, python-brace-format, python-format
+msgid "Discount {discount} % on {product} (band {low}–{high} %)"
+msgstr "Remise de {discount} % sur {product} (fourchette {low}–{high} %)"
+
+#: ai_discount.py:178
+#, python-brace-format
+msgid "Band {band}: {low} to {high} %"
+msgstr "Fourchette {band} : de {low} à {high} %"
+
+#: ai_discount.py:257
+msgid "Only sales managers see the acceptance of discount suggestions"
+msgstr "Seuls les responsables des ventes voient l'acceptation des remises suggérées"
+
+#: ai_discount.py:271
+msgid "Only draft or sent quotations get discount suggestions"
+msgstr "Seuls les devis brouillons ou envoyés reçoivent des remises suggérées"
+
+#: ai_discount.py:279
+msgid "Discount suggestions work on a quotation"
+msgstr "Les remises suggérées s'appliquent à un devis"
+
+#: ai_discount.py:177 ai_discount.py:223
+msgid "A discount suggestion left its band"
+msgstr "Une remise suggérée est sortie de sa fourchette"
+
+#: ai_discount.py:181
+#, python-brace-format
+msgid "Best expected margin given {won} won of {rows} decided quotations in this category"
+msgstr "Meilleure marge attendue d'après {won} devis gagnés sur {rows} devis tranchés dans cette catégorie"
+
+#: ai_discount.py:188
+msgid "Not enough won and lost history: placed in the band by quantity"
+msgstr "Historique de gains et de pertes insuffisant : placée dans la fourchette selon la quantité"
+
+#: ai_discount.py:166
+msgid "No approved discount band applies to this line"
+msgstr "Aucune fourchette de remise approuvée ne s'applique à cette ligne"
+
+#: ai_pricing.py:276
+msgid "Pricing flags are checked on a quotation"
+msgstr "Les alertes tarifaires sont contrôlées sur un devis"
+
+#: ai_pricing.py:126
+#, python-brace-format
+msgid "Discount {discount} % above the {band} band (at most {max} %)"
+msgstr "Remise de {discount} % au-delà de la fourchette {band} (au plus {max} %)"
+
+#: ai_pricing.py:239
+#, python-brace-format
+msgid "Pricing to review on {order}"
+msgstr "Prix à examiner sur {order}"
+
+#: ai_pricing.py:117
+#, python-brace-format
+msgid "Net price below cost plus the {margin} % minimum margin"
+msgstr "Prix net inférieur au coût plus la marge minimale de {margin} %"
+
+#: ai_pricing.py:119
+msgid "Net price below cost"
+msgstr "Prix net inférieur au coût"
+
+#: ai_pricing.py:140
+#, python-brace-format
+msgid "Typed price {percent} % below the pricelist, more than the {band} band allows ({max} %)"
+msgstr "Prix saisi {percent} % sous la liste de prix, plus que ne le permet la fourchette {band} ({max} %)"
+
+#: ai_pricing.py:156
+#, python-brace-format, python-format
+msgid "Discount {discount} % is unusual for this customer (usually {mean} % over {count} lines)"
+msgstr ""
+"Une remise de {discount} % est inhabituelle pour ce client (habituellement {mean} % sur {count} "
+"lignes)"
+
+#: ai_quote_text.py:287
+#, python-brace-format
+msgid "Request for {order}"
+msgstr "Demande pour {order}"
+
+#: ai_quote_text.py:310
+#, python-brace-format
+msgid "Add {count} lines from the request to {order}"
+msgstr "Ajouter {count} lignes de la demande à {order}"
+
+#: ai_quote_text.py:208
+#, python-brace-format
+msgid "Unit '{unit}' not understood: the product's unit is used"
+msgstr "Unité « {unit} » non comprise : l'unité du produit est utilisée"
+
+#: ai_quote_text.py:211
+#, python-brace-format
+msgid "Unit '{unit}' does not fit this product: the product's unit is used"
+msgstr "L'unité « {unit} » ne convient pas à ce produit : l'unité du produit est utilisée"
+
+#: ai_quote_text.py:275
+msgid "Lines from text are added to a quotation"
+msgstr "Les lignes issues d'un texte sont ajoutées à un devis"
+
+#: ai_quote_text.py:285
+msgid "Paste the customer's request first"
+msgstr "Collez d'abord la demande du client"
+
+#: ai_quote_text.py:245
+msgid "Quantity not understood: 1 is used"
+msgstr "Quantité non comprise : 1 est utilisé"
+
+#: ai_quote_text.py:247
+#, python-brace-format
+msgid "Quantity {qty} is not in the text: 1 is used"
+msgstr "La quantité {qty} n'est pas dans le texte : 1 est utilisé"
+
+#: ai_upsell.py:281
+#, python-brace-format
+msgid "Add {product} to {order}"
+msgstr "Ajouter {product} à {order}"
+
+#: ai_upsell.py:269
+msgid "Only draft or sent quotations can get new lines"
+msgstr "Seuls les devis brouillons ou envoyés peuvent recevoir de nouvelles lignes"
+
+#: ai_upsell.py:271
+msgid "The quantity must be positive"
+msgstr "La quantité doit être positive"
+
+#: ai_upsell.py:274
+msgid "This product cannot be sold on this quotation"
+msgstr "Ce produit ne peut pas être vendu sur ce devis"
+
+#: ai_upsell.py:276
+#, python-brace-format
+msgid "{product} is already on the quotation"
+msgstr "{product} figure déjà sur le devis"
+
+#: ai_upsell.py:295
+msgid "Product suggestions work on a quotation"
+msgstr "Les suggestions de produits s'appliquent à un devis"
+
+#: ai_upsell.py:172
+#, python-brace-format
+msgid "Accessory of {product}"
+msgstr "Accessoire de {product}"
+
+#: ai_upsell.py:174
+#, python-brace-format
+msgid "Optional product of {product}"
+msgstr "Produit optionnel de {product}"
+
+#: ai_upsell.py:218
+#, python-brace-format
+msgid "Bought with {product} in {both} of {orders} orders"
+msgstr "Acheté avec {product} dans {both} commandes sur {orders}"
+
+#: ai_upsell.py:229
+#, python-brace-format
+msgid "Popular: in {count} of {orders} orders"
+msgstr "Populaire : dans {count} commandes sur {orders}"
+
 #: api.py:26 api.py:39
 msgid "Quotation not found"
 msgstr "Devis introuvable"
@@ -883,6 +1234,27 @@ msgstr "La commande {name} n'a aucun montant à payer d'avance"
 #, python-brace-format
 msgid "The down payment is larger than the order total ({total})"
 msgstr "L'acompte dépasse le total de la commande ({total})"
+
+#: models/discount_band.py:80
+msgid "A discount band goes from a minimum to a maximum between 0 and 100 %"
+msgstr "Une fourchette de remise va d'un minimum à un maximum compris entre 0 et 100 %"
+
+#: models/discount_band.py:83
+msgid "The minimum margin is between 0 and 1000 %"
+msgstr "La marge minimale est comprise entre 0 et 1000 %"
+
+#: models/discount_band.py:85
+msgid "The quantity of a band cannot be negative"
+msgstr "La quantité d'une fourchette ne peut pas être négative"
+
+#: models/discount_band.py:156
+#, python-brace-format
+msgid "This flag is already {state}"
+msgstr "Cette alerte est déjà : {state}"
+
+#: models/discount_band.py:159
+msgid "Only the approvers of this discount band can approve it"
+msgstr "Seuls les approbateurs de cette fourchette de remise peuvent l'approuver"
 
 #: models/product.py:59
 msgid "A product cannot be its own optional product or accessory"
@@ -1322,6 +1694,31 @@ msgstr "Notes"
 msgid "Archived"
 msgstr "Archivés"
 
+#. view title
+#: views.json:view_discount_band_form
+msgid "Applies to"
+msgstr "S'applique à"
+
+#. view title
+#: views.json:view_discount_band_form
+msgid "Approved range"
+msgstr "Fourchette approuvée"
+
+#. view label
+#: views.json:view_pricing_flag_form
+msgid "Approve the price"
+msgstr "Approuver le prix"
+
+#. view confirm
+#: views.json:view_pricing_flag_form
+msgid "Approve this price for the quotation?"
+msgstr "Approuver ce prix pour le devis ?"
+
+#. view label
+#: views.json:view_pricing_flag_search
+msgid "Breaches"
+msgstr "Infractions"
+
 #. menu name
 #: menus.json:menu_root
 msgid "Sales"
@@ -1372,6 +1769,18 @@ msgid "Sales analysis"
 msgstr "Analyse des ventes"
 
 #. menu name
+#. action name
+#: actions.json:action_pricing_flags menus.json:menu_pricing_flags
+msgid "Pricing flags"
+msgstr "Alertes tarifaires"
+
+#. menu name
+#. action name
+#: actions.json:action_discount_bands menus.json:menu_discount_bands
+msgid "Discount bands"
+msgstr "Fourchettes de remise"
+
+#. menu name
 #: menus.json:menu_config
 msgid "Configuration"
 msgstr "Configuration"
@@ -1405,4 +1814,23 @@ msgid "Sales orders with ordered or delivered quantities not invoiced yet (or re
 msgstr ""
 "Commandes clients dont des quantités commandées ou livrées ne sont pas encore facturées (ou des "
 "retours à créditer)."
+
+#. action help
+#: actions.json:action_discount_bands
+msgid ""
+"How much discount each product category, customer segment and quantity may get without approval. "
+"Discount suggestions never leave these bands; the pricing check flags lines that do."
+msgstr ""
+"La remise que chaque catégorie de produits, segment de clientèle et quantité peut obtenir sans "
+"approbation. Les remises suggérées ne sortent jamais de ces fourchettes ; le contrôle des prix "
+"signale les lignes qui en sortent."
+
+#. action help
+#: actions.json:action_pricing_flags
+msgid ""
+"Quotation lines below the minimum margin, below the pricelist or above their discount band, or "
+"unusual for the customer. Approvers of the band approve them."
+msgstr ""
+"Lignes de devis sous la marge minimale, sous la liste de prix ou au-delà de leur fourchette de "
+"remise, ou inhabituelles pour le client. Les approbateurs de la fourchette les approuvent."
 

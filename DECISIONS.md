@@ -387,6 +387,24 @@ Format: `D-nnn · date · status (Proposed | Accepted | Superseded)`
 - **Alternatives:** Extending the same order in place on renewal; chaining period dates; crediting pauses.
 - **Rationale:** Deterministic, auditable amounts (2-f), no duplicate invoices, per-subscription MRR that always adds up.
 
+### D-092 · 2026-11-11 · Accepted — Sales AI learns from company-wide aggregates, shows only what the user can read
+- **Decision:** Upsell co-purchase counts, discount win/loss models and "unusual for this customer" statistics read the company's decided orders with elevated rights, but only as aggregate numbers. Products, quotations and lines shown or proposed are read again as the user. Costs feed computations but never appear in a message, prompt or result.
+- **Alternatives:** Statistics only over orders the user can read (too sparse for salespeople limited to their own documents).
+- **Rationale:** Useful statistics without exposing other users' records (gate 1).
+
+### D-093 · 2026-11-11 · Accepted — Discount bands are the hard limit for AI discount suggestions
+- **Decision:** `sale.discount_band` picks the most specific band (deepest category, then customer segment, then larger minimum quantity, then sequence). Suggestions are rounded to 0.5 points, clamped to the band and re-checked before the proposal (one proposal per line). A user may still edit a line beyond the band; the pricing check then flags it for the band's approver group.
+- **Alternatives:** Blocking out-of-band discounts on the line itself.
+- **Rationale:** 100 % within band by construction without changing how sales lines behave.
+
+### D-094 · 2026-11-11 · Accepted — For quote lines from text, the model extracts and Tessera chooses products
+- **Decision:** The model returns descriptions, quantities, units, codes and constraints only. Catalogue matching is deterministic and runs as the user (code, then trigrams, then embeddings, requiring a clear lead over the runner-up); anything else is flagged, never added. Quantities must appear in the text; prices come from the pricelist.
+- **Rationale:** Zero fabricated products by construction.
+
+### D-095 · 2026-11-11 · Accepted — Spec check for AI product descriptions
+- **Decision:** Any sentence stating a number or a listed specification claim (English, French, German synonyms) not present in the catalogue facts is removed before the proposal is made. Accepting writes the user's language only.
+- **Rationale:** No invented specifications in customer-facing text.
+
 ### D-023 · 2026-11-09 · Proposed — Public web surfaces before Phase 7 use `*_website` bridge modules
 - **Decision:** Modules that need a public page before the `website` builder exists (recruitment job postings, event pages, eLearning courses, blog, forum, survey invitations) depend only on `portal` for their minimal public rendering in their own phase; `recruitment_website`, `events_website`, `elearning_website`, `blog_website`, `forum_website` bridge modules (auto-installed when `website` is present) move those pages into the website builder in Phase 7.
 - **Rationale:** Preserves the layering rule (no dependency on a later phase) while still shipping usable public pages when each module lands.

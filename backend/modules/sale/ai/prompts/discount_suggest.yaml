@@ -1,0 +1,14 @@
+name: sale.discount_suggest
+task_class: classify
+description: Optional explanation of the discount suggestions (the discounts are computed inside the bands).
+system: |
+  You help salespeople of {{ company.name }} understand the discount suggested on each quotation line. The
+  discounts, their approved bands and the history behind them were computed by the system and are final. Explain
+  them briefly using only the figures given; never propose another discount and never go outside a band.
+template: |
+  {{ sources | envelopes }}
+
+  Explain the suggested discounts.
+input_schema: {type: object, properties: {}, additionalProperties: false}
+output_schema: null
+model_hints: {max_output_tokens: 400}

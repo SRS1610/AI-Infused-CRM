@@ -172,6 +172,19 @@ All notable changes are recorded here, grouped by phase. Format follows [Keep a 
   Portal: subscriptions on *My documents* with status, next invoice, invoices and closing when the plan
   allows it. A 20-scenario fixture asserts every amount and date; demo with eight subscriptions. Guide:
   [docs/user/subscriptions.md](docs/user/subscriptions.md).
+- **Sales and product AI (`sale` 2.1.0, `product` 2.0.1).** Five features with flags, prompts, evaluation sets
+  and scorers (`tessera ai eval run`): **upsell suggestions** from co-purchase rules over confirmed orders
+  (history back-test top-3 precision 0.78 on 132 cases, popularity baseline 0.30; adding a line is a
+  proposal); **discount suggestions** inside new approved **discount bands** (`sale.discount_band`: category,
+  customer segment, quantity, min/max discount, minimum margin, approver group) from a won/lost model, 100 %
+  within band, one proposal per line so the acceptance rate is computable; **quote lines from pasted text**
+  (model extraction, deterministic catalogue matching by code, trigrams and embeddings, unmatched items
+  flagged — line F1 0.98, 0 fabricated products); **pricing-policy flags** (`sale.pricing_flag`: below
+  margin, below pricelist, above band, unusual for the customer; stored when a quotation is sent or
+  confirmed, notified to sales administrators, approved by the band's approvers — precision 0.95); **product
+  description drafts** in the user's language with a spec check that removes invented specifications (judge
+  0.86, 0 invented specs). Quotation and product form panels; guides in
+  [docs/user/sale.md](docs/user/sale.md) and [docs/user/product.md](docs/user/product.md).
 
 ### Sub-phase 2.7 — SAML single sign-on
 - **SAML 2.0 single sign-on (`auth_saml`, D-013, D-069).** Administrators add SAML identity providers under

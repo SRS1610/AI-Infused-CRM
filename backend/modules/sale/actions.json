@@ -6,5 +6,7 @@
   {"id": "action_customers", "name": "Customers", "model": "contacts.partner", "views": ["kanban", "list", "form"], "search_view": "contacts.view_partner_search", "context": {"default_is_company": true}},
   {"id": "action_products", "name": "Products", "model": "product.product", "views": ["kanban", "list", "form"], "search_view": "product.view_product_search"},
   {"id": "action_templates", "name": "Quotation templates", "model": "sale.order_template", "views": ["list", "form"]},
-  {"id": "action_promotions", "name": "Promotions", "model": "sale.promotion", "views": ["list", "form"], "search_view": "sale.view_promotion_search"}
+  {"id": "action_promotions", "name": "Promotions", "model": "sale.promotion", "views": ["list", "form"], "search_view": "sale.view_promotion_search"},
+  {"id": "action_discount_bands", "name": "Discount bands", "model": "sale.discount_band", "views": ["list", "form"], "help": "How much discount each product category, customer segment and quantity may get without approval. Discount suggestions never leave these bands; the pricing check flags lines that do."},
+  {"id": "action_pricing_flags", "name": "Pricing flags", "model": "sale.pricing_flag", "views": ["list", "form"], "search_view": "sale.view_pricing_flag_search", "help": "Quotation lines below the minimum margin, below the pricelist or above their discount band, or unusual for the customer. Approvers of the band approve them."}
 ]

@@ -576,6 +576,15 @@ msgstr "Marge maximale"
 msgid "The price is at most the cost plus this amount"
 msgstr "Le prix vaut au plus le coût plus ce montant"
 
+#: ai_features.py:134
+msgid "Descriptions are drafted on a product"
+msgstr "Les descriptions sont rédigées sur un produit"
+
+#: ai_features.py:166
+#, python-brace-format
+msgid "Sales description for {product}"
+msgstr "Description commerciale de {product}"
+
 #: models/attribute.py:53
 msgid "A colour is written #rgb or #rrggbb"
 msgstr "Une couleur s'écrit #rgb ou #rrggbb"
@@ -652,7 +661,7 @@ msgstr "Choisissez la liste de prix sur laquelle la règle est basée"
 msgid "Cannot convert '{from_unit}' into '{to_unit}': they measure different things"
 msgstr "Impossible de convertir « {from_unit} » en « {to_unit} » : elles ne mesurent pas la même chose"
 
-#: models/product.py:468
+#: models/product.py:487
 #, python-brace-format
 msgid "These attributes make {count} variants; the limit is {limit}"
 msgstr "Ces attributs donnent {count} variantes ; la limite est de {limit}"
@@ -689,12 +698,12 @@ msgstr "La taxe doit être comprise entre 0 et 100 %"
 msgid "A variant cannot be the template of other variants"
 msgstr "Une variante ne peut pas être le modèle d'autres variantes"
 
-#: models/product.py:485
+#: models/product.py:504
 #, python-brace-format
 msgid "'{name}' is a variant: generate variants from its template"
 msgstr "« {name} » est une variante : générez les variantes depuis son modèle"
 
-#: models/product.py:487
+#: models/product.py:506
 #, python-brace-format
 msgid "Add attributes to '{name}' before generating variants"
 msgstr "Ajoutez des attributs à « {name} » avant de générer les variantes"
@@ -708,7 +717,7 @@ msgstr "La catégorie « {category} » a déjà une unité de référence"
 msgid "A category cannot be its own parent"
 msgstr "Une catégorie ne peut pas être son propre parent"
 
-#: models/product.py:397
+#: models/product.py:398 models/product.py:416
 #, python-brace-format
 msgid "'{field}' is shared by every variant of '{template}': change it on the template"
 msgstr "« {field} » est commun à toutes les variantes de « {template} » : modifiez-le sur le modèle"
