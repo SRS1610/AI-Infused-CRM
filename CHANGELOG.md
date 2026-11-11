@@ -134,6 +134,26 @@ All notable changes are recorded here, grouped by phase. Format follows [Keep a 
   dedicated feature-flag and permission tests (beyond the evaluation's zero-mutation and injection
   checks), governance inventory entries. Asset, tax, analytic, e-invoice and payment AI features are not
   started (an unfinished asset classification draft is kept on branch `wip-asset-ai-partial`).
+### Sub-phase 2.5 — Subscriptions, rentals, commissions
+- **Rentals (`sale_rental` 1.0.0, 2-f rental half).** Rentable products with a number of units, rental prices
+  per hours / days / weeks / months (optionally per pricelist and company), late fees per hour and per day and a
+  security deposit. Rental lines on sales orders with pickup and return dates; the price is the cheapest
+  combination of rules covering the duration, measured on the salesperson's wall clock (daylight-saving safe).
+  Confirming an order reserves numbered units; overbooking is refused by the application and by a GiST exclusion
+  constraint on `tstzrange` per (product, unit) (`btree_gist`, now created by the installer with the other
+  extensions), with an advisory lock serialising concurrent confirmations; touching periods are allowed. Pickup,
+  return (late fee line, deposit credited on return), hourly *late* job with notification, availability calendar,
+  `availability()` per day / hour and `rental_history()` daily utilisation for the 2.6 demand features. Rentals are
+  invoiced by order on rental revenue, deposits on customer deposits.
+  Guide: [docs/user/rental.md](docs/user/rental.md).
+- **Commissions (`sale_commission` 1.0.0, 2-k).** Monthly or quarterly plans on the invoiced or paid basis, rates
+  by product, category or all products with a fixed amount per unit, retroactive accelerators by achievement of a
+  target, salespeople and sales teams assigned over date ranges. Statements per salesperson and period from posted
+  invoice and credit note lines (salesperson = the invoice's, a credit note's = its invoice's; credit notes reduce
+  the period they are posted in), idempotent recompute, adjustments, confirmation, payout by vendor bill and *Paid*
+  when the bill is paid; *My commissions* with record rules. `statement_facts()` for the 2.6 explanation. The demo
+  plan's statements equal an independent cross-check (`tests/data/commission_crosscheck.csv`, made by a separate
+  script). Guide: [docs/user/commissions.md](docs/user/commissions.md).
 
 ### Sub-phase 2.7 — SAML single sign-on
 - **SAML 2.0 single sign-on (`auth_saml`, D-013, D-069).** Administrators add SAML identity providers under

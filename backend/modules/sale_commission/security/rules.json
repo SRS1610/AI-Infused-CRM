@@ -1,0 +1,6 @@
+[
+  {"id": "rule_statement_own", "model": "core.record_rule", "values": {"name": "Salespeople see their own commission statements", "model_name": "sale.commission_statement", "group_ids": ["sale.group_sale_user"], "domain": {"all": [["user_id", "=", "$uid"]]}}},
+  {"id": "rule_statement_all", "model": "core.record_rule", "values": {"name": "Sales administrators and billing see every statement", "model_name": "sale.commission_statement", "group_ids": ["sale.group_sale_manager", "account.group_account_invoice"], "domain": {"all": []}}},
+  {"id": "rule_statement_line_own", "model": "core.record_rule", "values": {"name": "Salespeople see the lines of their own statements", "model_name": "sale.commission_statement_line", "group_ids": ["sale.group_sale_user"], "domain": {"all": [["statement_id.user_id", "=", "$uid"]]}}},
+  {"id": "rule_statement_line_all", "model": "core.record_rule", "values": {"name": "Sales administrators and billing see every statement line", "model_name": "sale.commission_statement_line", "group_ids": ["sale.group_sale_manager", "account.group_account_invoice"], "domain": {"all": []}}}
+]

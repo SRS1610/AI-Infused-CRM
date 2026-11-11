@@ -1,0 +1,6 @@
+[
+  {"id": "menu_commission_root", "name": "Commissions", "parent": "sale.menu_root", "sequence": 35},
+  {"id": "menu_my_statements", "name": "My commissions", "parent": "sale_commission.menu_commission_root", "sequence": 10, "action": "sale_commission.action_my_statements"},
+  {"id": "menu_statements", "name": "Statements", "parent": "sale_commission.menu_commission_root", "sequence": 20, "action": "sale_commission.action_statements", "groups": ["sale.group_sale_manager", "account.group_account_invoice"]},
+  {"id": "menu_plans", "name": "Commission plans", "parent": "sale.menu_config", "sequence": 40, "action": "sale_commission.action_plans"}
+]

@@ -1,0 +1,3 @@
+[
+  {"id": "sched_rental_late", "model": "core.scheduled_job", "noupdate": true, "values": {"name": "Late rentals (hourly)", "job_name": "sale_rental.mark_late", "cron": "17 * * * *"}}
+]

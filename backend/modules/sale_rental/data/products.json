@@ -1,0 +1,10 @@
+[
+  {"id": "product_rental_deposit", "model": "product.product", "noupdate": true,
+   "values": {"name": "Rental deposit", "default_code": "RENTAL-DEPOSIT", "type": "service", "sale_ok": false, "purchase_ok": false,
+              "invoice_policy": "order", "list_price": 0, "taxes_id": [], "supplier_taxes_id": [],
+              "description_sale": "Security deposit for rented equipment, credited back on return"}},
+  {"id": "product_rental_late_fee", "model": "product.product", "noupdate": true,
+   "values": {"name": "Late return fee", "default_code": "RENTAL-LATE", "type": "service", "sale_ok": false, "purchase_ok": false,
+              "invoice_policy": "order", "list_price": 0, "taxes_id": [], "supplier_taxes_id": [],
+              "description_sale": "Charge for rented equipment returned after the agreed date"}}
+]

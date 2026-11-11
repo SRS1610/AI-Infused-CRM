@@ -1,0 +1,74 @@
+[
+  {"id": "view_plan_form", "model": "sale.commission_plan", "type": "form", "name": "sale.commission_plan.form", "chatter": true,
+   "root": {"kind": "sheet", "children": [
+     {"kind": "buttons", "children": [
+       {"kind": "button", "method": "action_generate_statements", "label": "Compute statements", "dialog_title": "Compute the statements of a period", "submit_label": "Compute",
+        "params": [{"name": "date", "label": "A day of the period (empty: the last complete period)", "type": "date"}]}
+     ]},
+     {"kind": "field", "name": "name", "widget": "title"},
+     {"kind": "group", "name": "main", "columns": 2, "children": [
+       {"kind": "field", "name": "period"}, {"kind": "field", "name": "basis"},
+       {"kind": "field", "name": "target_amount"}, {"kind": "field", "name": "currency_id", "readonly": true},
+       {"kind": "field", "name": "company_id"}, {"kind": "field", "name": "expense_account_id"},
+       {"kind": "field", "name": "statement_count", "readonly": true}, {"kind": "field", "name": "active"}
+     ]},
+     {"kind": "notebook", "pages": [
+       {"kind": "page", "name": "page_rules", "title": "Rates", "children": [
+         {"kind": "field", "name": "rule_ids", "columns": [{"field": "sequence", "widget": "handle"}, {"field": "applies_to"}, {"field": "category_id"}, {"field": "product_id"}, {"field": "rate"}, {"field": "fixed_amount"}]}
+       ]},
+       {"kind": "page", "name": "page_targets", "title": "Accelerators", "children": [
+         {"kind": "field", "name": "target_ids", "columns": [{"field": "min_achievement"}, {"field": "multiplier"}]}
+       ]},
+       {"kind": "page", "name": "page_users", "title": "Salespeople", "children": [
+         {"kind": "field", "name": "user_ids", "columns": [{"field": "user_id"}, {"field": "team_id"}, {"field": "date_from"}, {"field": "date_to"}, {"field": "target_amount"}]}
+       ]},
+       {"kind": "page", "name": "page_notes", "title": "Notes", "children": [{"kind": "field", "name": "note"}]}
+     ]}
+   ]}},
+  {"id": "view_plan_list", "model": "sale.commission_plan", "type": "list", "name": "sale.commission_plan.list",
+   "columns": [{"field": "sequence", "widget": "handle"}, {"field": "name"}, {"field": "period"}, {"field": "basis"}, {"field": "target_amount"}, {"field": "company_id", "optional": "hide"}]},
+
+  {"id": "view_statement_form", "model": "sale.commission_statement", "type": "form", "name": "sale.commission_statement.form", "chatter": true,
+   "root": {"kind": "sheet", "children": [
+     {"kind": "buttons", "children": [
+       {"kind": "button", "method": "action_compute", "label": "Recompute", "invisible": ["state", "!=", "draft"]},
+       {"kind": "button", "method": "action_confirm", "label": "Confirm", "invisible": ["state", "!=", "draft"]},
+       {"kind": "button", "method": "action_draft", "label": "Back to draft", "invisible": {"any": [["state", "!=", "confirmed"], ["bill_id", "!=", null]]}},
+       {"kind": "button", "method": "action_create_bill", "label": "Create the bill", "confirm": "Create a vendor bill to the salesperson for this statement?", "invisible": {"any": [["state", "!=", "confirmed"], ["bill_id", "!=", null]]}}
+     ]},
+     {"kind": "field", "name": "name", "widget": "title", "readonly": true},
+     {"kind": "group", "name": "main", "columns": 2, "children": [
+       {"kind": "field", "name": "user_id"}, {"kind": "field", "name": "plan_id"},
+       {"kind": "field", "name": "period_label", "readonly": true}, {"kind": "field", "name": "basis", "readonly": true},
+       {"kind": "field", "name": "date_from"}, {"kind": "field", "name": "date_to"},
+       {"kind": "field", "name": "state", "widget": "badge", "readonly": true}, {"kind": "field", "name": "bill_id"},
+       {"kind": "field", "name": "company_id", "readonly": true}, {"kind": "field", "name": "computed_at", "readonly": true}
+     ]},
+     {"kind": "group", "name": "totals", "title": "Totals", "columns": 2, "children": [
+       {"kind": "field", "name": "base_amount"}, {"kind": "field", "name": "target_amount"},
+       {"kind": "field", "name": "achievement"}, {"kind": "field", "name": "multiplier"},
+       {"kind": "field", "name": "raw_amount"}, {"kind": "field", "name": "commission_amount"},
+       {"kind": "field", "name": "adjustment_amount", "readonly_if": ["state", "!=", "draft"]}, {"kind": "field", "name": "adjustment_note", "readonly_if": ["state", "!=", "draft"]},
+       {"kind": "field", "name": "total_amount", "readonly": true}
+     ]},
+     {"kind": "notebook", "pages": [
+       {"kind": "page", "name": "page_lines", "title": "Lines", "children": [
+         {"kind": "field", "name": "line_ids", "readonly": true, "columns": [{"field": "date"}, {"field": "move_id"}, {"field": "partner_id"}, {"field": "product_id"}, {"field": "category_id", "optional": "hide"}, {"field": "quantity"}, {"field": "base_amount", "sum": true}, {"field": "rate"}, {"field": "fixed_amount"}, {"field": "raw_amount", "sum": true}, {"field": "multiplier"}, {"field": "amount", "sum": true}]}
+       ]}
+     ]}
+   ]}},
+  {"id": "view_statement_list", "model": "sale.commission_statement", "type": "list", "name": "sale.commission_statement.list",
+   "columns": [{"field": "period_label"}, {"field": "user_id"}, {"field": "plan_id"}, {"field": "base_amount", "sum": true}, {"field": "achievement"}, {"field": "multiplier"}, {"field": "total_amount", "sum": true}, {"field": "state", "widget": "badge"}, {"field": "bill_id", "optional": "show"}, {"field": "company_id", "optional": "hide"}]},
+  {"id": "view_statement_search", "model": "sale.commission_statement", "type": "search", "name": "sale.commission_statement.search",
+   "fields": ["user_id", "plan_id", "period_label"],
+   "filters": [
+     {"name": "mine", "label": "Mine", "domain": [["user_id", "=", "$uid"]]},
+     {"name": "draft", "label": "Draft", "domain": [["state", "=", "draft"]]},
+     {"name": "to_pay", "label": "To pay", "domain": [["state", "=", "confirmed"]]},
+     {"name": "paid", "label": "Paid", "domain": [["state", "=", "paid"]]}
+   ],
+   "group_bys": [{"field": "user_id"}, {"field": "plan_id"}, {"field": "state"}, {"field": "date_from:month"}]},
+  {"id": "view_statement_pivot", "model": "sale.commission_statement", "type": "pivot", "name": "sale.commission_statement.pivot", "row": "user_id", "col": "date_from:month", "measures": ["total_amount"]},
+  {"id": "view_statement_line_list", "model": "sale.commission_statement_line", "type": "list", "name": "sale.commission_statement_line.list",
+   "columns": [{"field": "statement_id"}, {"field": "date"}, {"field": "move_id"}, {"field": "product_id"}, {"field": "base_amount", "sum": true}, {"field": "rate"}, {"field": "multiplier"}, {"field": "amount", "sum": true}]}
+]
