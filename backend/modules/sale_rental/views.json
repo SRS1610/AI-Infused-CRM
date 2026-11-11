@@ -81,5 +81,32 @@
    "fields": ["product_id", "order_id", "partner_id"],
    "filters": [{"name": "upcoming", "label": "Current and upcoming", "domain": [["date_end", ">=", "$now"]]}],
    "group_bys": [{"field": "product_id"}, {"field": "date_start:week"}]},
-  {"id": "view_rental_allocation_pivot", "model": "sale.rental_allocation", "type": "pivot", "name": "sale.rental_allocation.pivot", "row": "product_id", "col": "date_start:month", "measures": []}
+  {"id": "view_rental_allocation_pivot", "model": "sale.rental_allocation", "type": "pivot", "name": "sale.rental_allocation.pivot", "row": "product_id", "col": "date_start:month", "measures": []},
+  {"id": "view_rental_anomaly_list", "model": "sale.rental_anomaly", "type": "list", "name": "sale.rental_anomaly.list", "columns": [{"field": "detected_on"}, {"field": "kind", "widget": "badge"}, {"field": "summary"}, {"field": "product_id"}, {"field": "partner_id"}, {"field": "order_id", "optional": "show"}, {"field": "user_id", "optional": "hide"}, {"field": "state", "widget": "badge"}]},
+  {"id": "view_rental_anomaly_form", "model": "sale.rental_anomaly", "type": "form", "name": "sale.rental_anomaly.form",
+   "root": {"kind": "sheet", "children": [
+     {"kind": "buttons", "children": [
+       {"kind": "button", "method": "action_dismiss", "label": "Dismiss", "invisible": ["state", "!=", "open"]}
+     ]},
+     {"kind": "group", "children": [
+       {"kind": "field", "name": "summary"},
+       {"kind": "field", "name": "kind"},
+       {"kind": "field", "name": "detected_on"},
+       {"kind": "field", "name": "state"},
+       {"kind": "field", "name": "product_id"},
+       {"kind": "field", "name": "partner_id"},
+       {"kind": "field", "name": "order_id"},
+       {"kind": "field", "name": "line_id"},
+       {"kind": "field", "name": "user_id"},
+       {"kind": "field", "name": "score"}
+     ]}
+   ]}},
+  {"id": "view_rental_anomaly_search", "model": "sale.rental_anomaly", "type": "search", "name": "sale.rental_anomaly.search", "fields": ["product_id", "partner_id"],
+   "filters": [
+     {"name": "open", "label": "Open", "domain": [["state", "=", "open"]]},
+     {"name": "late", "label": "Late returns", "domain": [["kind", "=", "late_returns"]]},
+     {"name": "long", "label": "Long bookings", "domain": [["kind", "=", "long_booking"]]},
+     {"name": "utilisation", "label": "Utilisation", "domain": [["kind", "in", ["utilisation_spike", "utilisation_drop"]]]}
+   ],
+   "group_bys": [{"field": "kind"}, {"field": "product_id"}, {"field": "partner_id"}, {"field": "detected_on:month"}]}
 ]

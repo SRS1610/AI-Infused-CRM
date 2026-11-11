@@ -4,5 +4,6 @@
   {"id": "menu_rental_lines", "name": "Pickups and returns", "parent": "sale_rental.menu_rental_root", "sequence": 20, "action": "sale_rental.action_rental_lines"},
   {"id": "menu_rental_calendar", "name": "Availability calendar", "parent": "sale_rental.menu_rental_root", "sequence": 30, "action": "sale_rental.action_rental_calendar"},
   {"id": "menu_rental_products", "name": "Rental products", "parent": "sale_rental.menu_rental_root", "sequence": 40, "action": "sale_rental.action_rental_products"},
-  {"id": "menu_rental_pricing", "name": "Rental prices", "parent": "sale.menu_config", "sequence": 30, "action": "sale_rental.action_rental_pricing"}
+  {"id": "menu_rental_pricing", "name": "Rental prices", "parent": "sale.menu_config", "sequence": 30, "action": "sale_rental.action_rental_pricing"},
+  {"id": "menu_rental_anomalies", "name": "Usage alerts", "parent": "sale_rental.menu_rental_root", "sequence": 35, "action": "sale_rental.action_rental_anomalies"}
 ]

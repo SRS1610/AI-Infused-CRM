@@ -3,5 +3,7 @@
   {"id": "access_rental_pricing_manager", "model": "core.model_access", "values": {"name": "rental price: sales administrator", "model_name": "sale.rental_pricing", "group_id": "sale.group_sale_manager", "perm_read": true, "perm_write": true, "perm_create": true, "perm_unlink": true}},
   {"id": "access_rental_pricing_product_manager", "model": "core.model_access", "values": {"name": "rental price: product administrator", "model_name": "sale.rental_pricing", "group_id": "product.group_product_manager", "perm_read": true, "perm_write": true, "perm_create": true, "perm_unlink": true}},
   {"id": "access_rental_allocation_user", "model": "core.model_access", "values": {"name": "rental reservation: sales user read", "model_name": "sale.rental_allocation", "group_id": "sale.group_sale_user", "perm_read": true}},
+  {"id": "access_rental_anomaly_user", "model": "core.model_access", "values": {"name": "rental usage alert: sales user read", "model_name": "sale.rental_anomaly", "group_id": "sale.group_sale_user", "perm_read": true}},
+  {"id": "access_rental_anomaly_system", "model": "core.model_access", "values": {"name": "rental usage alert: admin", "model_name": "sale.rental_anomaly", "group_id": "core.group_system", "perm_read": true, "perm_write": true, "perm_create": true, "perm_unlink": true}},
   {"id": "access_rental_allocation_system", "model": "core.model_access", "values": {"name": "rental reservation: admin read", "model_name": "sale.rental_allocation", "group_id": "core.group_system", "perm_read": true}}
 ]

@@ -36,7 +36,7 @@ msgid "This unit is already rented out for an overlapping period"
 msgstr "Cette unité est déjà louée sur une période qui se chevauche"
 
 #. field label
-#: field:sale.rental_allocation.name
+#: field:sale.rental_allocation.name field:sale.rental_anomaly.name
 msgid "Name"
 msgstr "Nom"
 
@@ -46,22 +46,24 @@ msgid "Rental line"
 msgstr "Ligne de location"
 
 #. field label
-#: field:sale.rental_allocation.order_id
+#: field:sale.rental_allocation.order_id field:sale.rental_anomaly.order_id
 msgid "Order"
 msgstr "Commande"
 
 #. field label
-#: field:sale.rental_allocation.partner_id
+#: field:sale.rental_allocation.partner_id field:sale.rental_anomaly.partner_id
 msgid "Customer"
 msgstr "Client"
 
 #. field label
-#: field:sale.rental_allocation.company_id field:sale.rental_pricing.company_id
+#: field:sale.rental_allocation.company_id field:sale.rental_anomaly.company_id
+#: field:sale.rental_pricing.company_id
 msgid "Company"
 msgstr "Société"
 
 #. field label
-#: field:sale.rental_allocation.product_id field:sale.rental_pricing.product_id
+#: field:sale.rental_allocation.product_id field:sale.rental_anomaly.product_id
+#: field:sale.rental_pricing.product_id
 msgid "Product"
 msgstr "Produit"
 
@@ -84,6 +86,105 @@ msgstr "Au"
 #: field:sale.rental_allocation.rental_status
 msgid "Status"
 msgstr "Statut"
+
+#. model description
+#: model:sale.rental_anomaly
+msgid "Rental usage alert (AI)"
+msgstr "Alerte d'utilisation de location (IA)"
+
+#. field label
+#: field:sale.rental_anomaly.summary
+msgid "Alert"
+msgstr "Alerte"
+
+#. field label
+#: field:sale.rental_anomaly.kind
+msgid "Kind"
+msgstr "Type"
+
+#. selection value late_returns
+#: selection:sale.rental_anomaly.kind
+msgid "Repeated late returns"
+msgstr "Retours en retard répétés"
+
+#. selection value long_booking
+#: selection:sale.rental_anomaly.kind
+msgid "Unusually long booking"
+msgstr "Réservation inhabituellement longue"
+
+#. selection value utilisation_spike
+#: selection:sale.rental_anomaly.kind
+msgid "Utilisation spike"
+msgstr "Pic d'utilisation"
+
+#. selection value utilisation_drop
+#: selection:sale.rental_anomaly.kind
+msgid "Utilisation drop"
+msgstr "Chute d'utilisation"
+
+#. field label
+#: field:sale.rental_anomaly.key
+msgid "Key"
+msgstr "Clé"
+
+#. field help
+#: field:sale.rental_anomaly.key
+msgid "What the alert is about (one open alert per key)"
+msgstr "Objet de l'alerte (une seule alerte ouverte par clé)"
+
+#. field label
+#. view title
+#: field:sale.quotation_line.is_rental field:sale.quotation_line.rental_origin_line_id
+#: field:sale.rental_anomaly.line_id views.json:view_product_form_rental
+#: views.json:view_quotation_line_form_rental
+msgid "Rental"
+msgstr "Location"
+
+#. field label
+#: field:sale.rental_anomaly.user_id
+msgid "Notified"
+msgstr "Notifié"
+
+#. field label
+#: field:sale.rental_anomaly.score
+msgid "Score"
+msgstr "Score"
+
+#. field help
+#: field:sale.rental_anomaly.score
+msgid "How unusual: the late share, the z-score or the relative gap"
+msgstr "Degré d'anomalie : la part de retards, le score z ou l'écart relatif"
+
+#. field label
+#: field:sale.rental_anomaly.details
+msgid "Details"
+msgstr "Détails"
+
+#. field help
+#: field:sale.rental_anomaly.details
+msgid "The figures behind the alert"
+msgstr "Les chiffres à l'origine de l'alerte"
+
+#. field label
+#: field:sale.rental_anomaly.detected_on
+msgid "Detected On"
+msgstr "Détectée le"
+
+#. field label
+#: field:sale.rental_anomaly.state
+msgid "State"
+msgstr "État"
+
+#. selection value open
+#. view label
+#: selection:sale.rental_anomaly.state views.json:view_rental_anomaly_search
+msgid "Open"
+msgstr "Ouverte"
+
+#. selection value dismissed
+#: selection:sale.rental_anomaly.state
+msgid "Dismissed"
+msgstr "Écartée"
 
 #. constraint message
 #: model:product.product
@@ -108,7 +209,9 @@ msgstr "Unités louables"
 #. field help
 #: field:product.product.rental_units
 msgid "How many units can be out at the same time (serial numbers come with inventory)"
-msgstr "Nombre d'unités pouvant être louées en même temps (les numéros de série arrivent avec la gestion des stocks)"
+msgstr ""
+"Nombre d'unités pouvant être louées en même temps (les numéros de série arrivent avec la gestion "
+"des stocks)"
 
 #. field label
 #. menu name
@@ -224,13 +327,6 @@ msgstr "Vide = toutes les sociétés"
 msgid "Active"
 msgstr "Actif"
 
-#. field label
-#. view title
-#: field:sale.quotation_line.is_rental field:sale.quotation_line.rental_origin_line_id
-#: views.json:view_product_form_rental views.json:view_quotation_line_form_rental
-msgid "Rental"
-msgstr "Location"
-
 #. field help
 #: field:sale.quotation_line.is_rental
 msgid "Rent the product for a period instead of selling it"
@@ -330,6 +426,36 @@ msgstr "Commande de location"
 msgid "Rentals"
 msgstr "Locations"
 
+#: ai_api.py:34
+msgid "Product not found"
+msgstr "Produit introuvable"
+
+#: ai_api.py:60
+msgid "Alert not found"
+msgstr "Alerte introuvable"
+
+#: ai_features.py:51
+msgid "Choose a rental product"
+msgstr "Choisissez un produit de location"
+
+#: ai_features.py:54
+#, python-brace-format
+msgid "{product} is not rented"
+msgstr "{product} n'est pas proposé à la location"
+
+#: ai_features.py:310
+msgid "Choose a rental alert"
+msgstr "Choisissez une alerte de location"
+
+#: ai_features.py:239
+#, python-brace-format
+msgid "Rental alert: {alert}"
+msgstr "Alerte de location : {alert}"
+
+#: ai_features.py:240
+msgid "Flagged by the rental usage check (AI). Review it in Rentals > Usage alerts."
+msgstr "Signalée par le contrôle d'utilisation des locations (IA). Consultez-la dans Locations > Alertes d'utilisation."
+
 #: api.py:55
 msgid "Ask for at most one year"
 msgstr "Demandez au plus une année"
@@ -362,11 +488,37 @@ msgstr "Utilisez des dates-heures ISO 8601"
 #: models/allocation.py:114
 #, python-brace-format
 msgid "{product} is not available from {start} to {end}: {free} of {units} units free, {needed} needed"
-msgstr "{product} n'est pas disponible du {start} au {end} : {free} unités libres sur {units}, {needed} nécessaires"
+msgstr ""
+"{product} n'est pas disponible du {start} au {end} : {free} unités libres sur {units}, {needed} "
+"nécessaires"
 
 #: models/allocation.py:198
 msgid "Use ISO 8601 dates"
 msgstr "Utilisez des dates ISO 8601"
+
+#: models/anomaly.py:51
+#, python-brace-format
+msgid "{customer} returned {late} of their last {rentals} rentals late (up to {hours} h)"
+msgstr "{customer} a rendu en retard {late} de ses {rentals} dernières locations (jusqu'à {hours} h)"
+
+#: models/anomaly.py:56
+#, python-brace-format
+msgid "{product} booked for {days} days by {customer}; usually {usual} days"
+msgstr "{product} réservé pour {days} jours par {customer} ; habituellement {usual} jours"
+
+#: models/anomaly.py:77
+msgid "Only salespeople can dismiss rental alerts"
+msgstr "Seuls les commerciaux peuvent écarter les alertes de location"
+
+#: models/anomaly.py:61
+#, python-brace-format
+msgid "{product}: {actual} unit-days out in the last 7 days, {expected} expected"
+msgstr "{product} : {actual} jours-unités sortis ces 7 derniers jours, {expected} attendus"
+
+#: models/anomaly.py:66
+#, python-brace-format
+msgid "{product}: only {actual} unit-days out in the last 7 days, {expected} expected"
+msgstr "{product} : seulement {actual} jours-unités sortis ces 7 derniers jours, {expected} attendus"
 
 #: models/product.py:84
 msgid "A rental cannot last more than five years"
@@ -568,7 +720,9 @@ msgstr "Retour"
 #. view confirm
 #: views.json:view_quotation_form_rental
 msgid "Register the return of every rental out with the customer now? Late fees are added to the order."
-msgstr "Enregistrer maintenant le retour de toutes les locations chez le client ? Les pénalités de retard sont ajoutées à la commande."
+msgstr ""
+"Enregistrer maintenant le retour de toutes les locations chez le client ? Les pénalités de retard"
+" sont ajoutées à la commande."
 
 #. view label
 #: views.json:view_rental_line_search
@@ -584,6 +738,26 @@ msgstr "Chez les clients"
 #: views.json:view_rental_allocation_search
 msgid "Current and upcoming"
 msgstr "En cours et à venir"
+
+#. view label
+#: views.json:view_rental_anomaly_form
+msgid "Dismiss"
+msgstr "Écarter"
+
+#. view label
+#: views.json:view_rental_anomaly_search
+msgid "Late returns"
+msgstr "Retours en retard"
+
+#. view label
+#: views.json:view_rental_anomaly_search
+msgid "Long bookings"
+msgstr "Réservations longues"
+
+#. view label
+#: views.json:view_rental_anomaly_search
+msgid "Utilisation"
+msgstr "Utilisation"
 
 #. menu name
 #. action name
@@ -608,10 +782,18 @@ msgstr "Calendrier des disponibilités"
 msgid "Rental products"
 msgstr "Produits de location"
 
+#. menu name
+#. action name
+#: actions.json:action_rental_anomalies menus.json:menu_rental_anomalies
+msgid "Usage alerts"
+msgstr "Alertes d'utilisation"
+
 #. action help
 #: actions.json:action_rental_orders
 msgid "Orders with rental lines: add a line for a rentable product with its pickup and return dates."
-msgstr "Commandes avec des lignes de location : ajoutez une ligne pour un produit louable avec ses dates de retrait et de retour."
+msgstr ""
+"Commandes avec des lignes de location : ajoutez une ligne pour un produit louable avec ses dates "
+"de retrait et de retour."
 
 #. action help
 #: actions.json:action_rental_lines
@@ -621,5 +803,14 @@ msgstr "Locations confirmées : enregistrez les retraits et les retours, voyez c
 #. action help
 #: actions.json:action_rental_calendar
 msgid "Every reserved unit, per product and day. A unit cannot be reserved twice for overlapping periods."
-msgstr "Chaque unité réservée, par produit et par jour. Une unité ne peut pas être réservée deux fois sur des périodes qui se chevauchent."
+msgstr ""
+"Chaque unité réservée, par produit et par jour. Une unité ne peut pas être réservée deux fois sur"
+" des périodes qui se chevauchent."
+
+#. action help
+#: actions.json:action_rental_anomalies
+msgid ""
+"Raised every day by the rental usage check (AI): customers who keep returning late, unusually "
+"long bookings, utilisation far from the forecast."
+msgstr "Levées chaque jour par le contrôle d'utilisation des locations (IA) : clients qui rendent souvent en retard, réservations inhabituellement longues, utilisation très éloignée de la prévision."
 
