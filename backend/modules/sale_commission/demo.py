@@ -1,10 +1,10 @@
 """Commission demo scenario (``tessera seed demo --phase 2``) and the 2-k cross-check data.
 
-For a month, Hugo Lambert and Nadia Keller (the demo plan's salespeople) get invoices — two from sales orders — and credit
-notes, plus documents that must not count: an invoice of the month before, a draft invoice and another salesperson's
-invoice. ``tests/data/commission_crosscheck.csv`` holds the statements expected for that month, computed separately
-(``tests/data/make_crosscheck.py``). The seeding step uses the last complete month and computes its statements.
-Idempotent per month."""
+For a month, Hugo Lambert and Nadia Keller (the demo plan's salespeople) get invoices — two from sales orders — and
+credit notes, plus documents that must not count: an invoice of the month before, a draft invoice and another
+salesperson's invoice. ``tests/data/commission_crosscheck.csv`` holds the statements expected for that month,
+computed separately (``tests/data/make_crosscheck.py``). The seeding step uses the last complete month and computes
+its statements. Idempotent per month."""
 
 from __future__ import annotations
 
