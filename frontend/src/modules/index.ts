@@ -10,3 +10,6 @@ import "./crm/AiInsights";
 import "./crm/AiAssist";
 import "./discuss/DiscussApp";
 import "./account_bank/BankReconcile";
+import "./account/BillImport";
+import "./account/BillAnomalies";
+import "./account/CashflowForecast";

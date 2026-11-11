@@ -2330,3 +2330,58 @@ tr.clickable {
   align-items: center;
   margin: 12px 0;
 }
+/* accounting AI: document reading, anomaly flags, cash-flow forecast */
+.alert.warning {
+  border-color: var(--warning);
+  background: color-mix(in srgb, var(--warning) 12%, var(--surface));
+  display: block;
+}
+.alert.warning ul {
+  margin: 4px 0 0;
+  padding-left: 18px;
+}
+.bill-review select {
+  max-width: 220px;
+}
+.bill-anomalies ul {
+  list-style: none;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+}
+.bill-anomalies .severity-high {
+  border-left: 3px solid var(--danger);
+  padding-left: 8px;
+}
+.bill-anomalies .severity-medium,
+.bill-anomalies .severity-low {
+  border-left: 3px solid var(--warning);
+  padding-left: 8px;
+}
+.cashflow-chart svg {
+  max-width: 760px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+.cashflow-chart .grid {
+  stroke: var(--border);
+}
+.cashflow-chart .zero {
+  stroke: var(--danger);
+  stroke-dasharray: 4 3;
+}
+.cashflow-chart .band {
+  fill: color-mix(in srgb, var(--chart-1) 15%, transparent);
+}
+.cashflow-chart .position {
+  stroke: var(--chart-1);
+  stroke-width: 2;
+}
+.cashflow-chart .point {
+  fill: var(--chart-1);
+}
+.cashflow-chart .tick {
+  fill: var(--text-muted);
+  font-size: 11px;
+}
