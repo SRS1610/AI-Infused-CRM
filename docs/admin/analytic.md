@@ -76,6 +76,31 @@ counts more than account type or journal). Example: *Departments* mandatory for 
 When a plan is mandatory for a product line (or a journal entry item), posting is refused until the line's
 distribution covers that plan at 100 %, and a posted line's distribution cannot be emptied.
 
+## AI: allocation suggestions (`account_analytic.allocation_suggest`)
+
+Sub-phase 2.6. On an invoice or a bill, *Analytic suggestions (AI)* → **Suggest analytic distributions** proposes a
+distribution for each line:
+
+1. the **distribution models** that apply (`distribution_for`) keep the plans they cover — they are the company's
+   policy;
+2. for the other plans, the nine most similar **posted invoice and bill lines of the last two years that the user can
+   read** vote for the distribution they used. Similarity: same product 3, same partner 2, same account 1.5, label
+   words 2 × Jaccard; lines older than a year count 0.7; each vote weighs the cube of the similarity, so a few close
+   lines outweigh many loose ones. The winner needs at least two lines behind it and 40 % of the votes.
+
+Each suggestion is a **proposal** on the line's `analytic_distribution`: nothing changes before *Accept*, and
+accepting goes through the ledger's checks (mandatory plans, analytic items of posted lines regenerated). Read-only
+accountants see suggestions without proposals. The feature has a per-company switch (*AI → Features*): switched
+off, the panel disappears and `POST /api/v1/account_analytic/ai/moves/{id}/suggest` (or `/lines/{id}/suggest`)
+answers `404 feature_disabled`. Every request is an `ai_core.run`.
+
+**Metric.** The evaluation counts a suggestion as right only when the whole distribution — every analytic account
+and every percentage — equals the expected one (*exact-distribution accuracy*, threshold 0.8): a split that is only
+partly right still needs a manual correction. The per-plan accuracy is reported for information.
+
+Limits: a vendor or customer never seen gets no suggestion beyond the models (cold start); a new kind of purchase
+from a known vendor gets the vendor's usual allocation.
+
 ## Access
 
 | Group | Plans, accounts, models | Analytic items |
