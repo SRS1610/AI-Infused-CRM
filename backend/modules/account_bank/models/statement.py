@@ -145,7 +145,9 @@ class BankStatement(Model):
     def action_auto_reconcile(self) -> dict[str, Any]:
         from modules.account_bank.rules import auto_reconcile
 
-        return auto_reconcile(self.mapped("line_ids").filtered(lambda line: line.state == "posted"))
+        lines = self.mapped("line_ids").filtered(lambda line: line.state == "posted")
+        lines.check_access("write")  # matching runs elevated: not for read-only users (U-9 SEC-52)
+        return auto_reconcile(lines)
 
 
 class BankStatementLine(Model):
@@ -386,4 +388,7 @@ class BankStatementLine(Model):
         domain: list[Any] = [("state", "=", "posted")]
         if journal_id:
             domain.append(("journal_id", "=", int(journal_id)))
-        return auto_reconcile(self.search(domain))
+        self.check_access_rights("write")  # matching runs elevated: not for read-only users (U-9 SEC-52)
+        lines = self.search(domain)
+        lines.check_access("write")
+        return auto_reconcile(lines)

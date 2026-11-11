@@ -341,11 +341,19 @@ msgstr ""
 msgid "Invalid signature"
 msgstr ""
 
-#: models/provider.py:71
+#: models/provider.py:129
+msgid "A saved payment method can only be renamed or archived"
+msgstr ""
+
+#: models/provider.py:72
 msgid "The payment journal must belong to the provider's company"
 msgstr ""
 
-#: models/transaction.py:89
+#: models/transaction.py:91
+msgid "Payment transactions are updated by the payment provider only"
+msgstr ""
+
+#: models/transaction.py:96
 msgid "Only draft, cancelled or failed transactions can be deleted"
 msgstr ""
 

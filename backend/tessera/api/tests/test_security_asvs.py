@@ -1,4 +1,5 @@
-"""Regression tests of the Phase 1 security review (``docs/security/asvs-phase-1.md``).
+"""Regression tests of the security reviews (``docs/security/asvs-phase-1.md`` SEC-01…SEC-17,
+``docs/security/asvs-phase-2.md`` SEC-50 onwards).
 
 Each test is named after the finding it closes (SEC-xx) and fails on the code before the fix.
 """
@@ -456,3 +457,323 @@ def test_sec14_jsonrpc_batch_is_capped(admin: Session) -> None:
     assert isinstance(ok, list) and len(ok) == 3
     refused = admin.post("/api/v1/jsonrpc", json=[{**call, "id": i} for i in range(MAX_BATCH + 1)]).json()
     assert isinstance(refused, dict) and refused["error"]["code"] == -32600
+
+
+# ===============================================================================================================
+# Phase 2 review (docs/security/asvs-phase-2.md)
+# ===============================================================================================================
+
+
+def _p2_user(env: Any, login: str, groups: list[str], company: Any | None = None) -> Any:
+    """An environment of a new user of ``company`` (default: the current one) with exactly ``groups``."""
+    company = company or env.company
+    user = env["core.user"].create(
+        {
+            "name": login,
+            "login": _uniq(login),
+            "company_id": company.ids[0],
+            "company_ids": [("set", company.ids)],
+            "group_ids": [("set", [env.ref(g).ids[0] for g in groups])],
+        }
+    )
+    return env.with_user(user.ids[0])
+
+
+# -- Every Phase 2 model: company isolation (BUILD_PLAN §11 "authz tests for every new model") -------------------
+
+PHASE2_MODULES = {
+    "account",
+    "account_analytic",
+    "account_asset",
+    "account_bank",
+    "account_budget",
+    "account_dunning",
+    "account_einvoice",
+    "account_reports",
+    "account_tax",
+    "auth_saml",
+    "payment",
+    "product",
+    "sale",
+    "sale_commission",
+    "sale_rental",
+    "sale_subscription",
+}
+# models without a stored company: shared definitions, or children only reached through a company-scoped parent
+SHARED_PHASE2_MODELS = {
+    "account.account_tag",  # tax grids, shared by the charts
+    "account.fiscal_position_account",  # SEC-60: lines of a company-scoped fiscal position
+    "account.fiscal_position_tax",  # SEC-60
+    "account.full_reconcile",  # SEC-60: matching numbers; the matched items are company-scoped
+    "account.payment_term_line",  # SEC-60: lines of a company-scoped payment term
+    "account.report",  # report definitions (data), shared by every company
+    "account.report_line",
+    "auth_saml.assertion",  # administrators only
+    "auth_saml.identity",
+    "auth_saml.request",
+    "product.attribute",  # catalogue definitions shared like Phase 1 categories and units
+    "product.attribute_line",
+    "product.attribute_value",
+    "product.category",
+    "product.uom",
+    "sale.subscription_close_reason",
+}
+
+
+def test_sec_phase2_every_company_model_is_isolated(env) -> None:  # type: ignore[no-untyped-def]
+    """Every Phase 2 model has a stored ``company_id`` (so the multi-company rule applies) or is a listed shared
+    model; a user of another company with the widest business roles sees none of the EU company's records."""
+    from modules.account.tests.common import eu_env, invoice, partner
+    from tessera.orm import fields as orm_fields
+
+    e = eu_env(env)
+    eu = e.company
+    customer = partner(e, "Isolation SA", company_id=eu.ids[0])
+    invoice(e, customer, [{"price_unit": 10.0}]).action_register_payment()  # entries, items, payment, matches
+    e["product.product"].create({"name": "Isolation product", "company_id": eu.ids[0]})
+    e["sale.quotation"].create({"partner_id": customer.ids[0], "company_id": eu.ids[0]})
+    groups = ["account.group_account_manager", "sale.group_sale_manager", "sale.group_sale_all"]
+    outsider = _p2_user(env, "isolation", [*groups, "product.group_product_manager"], env.ref("core.main_company"))
+    unscoped, checked = [], []
+    for name, cls in sorted(env.registry.models.items()):
+        if getattr(cls, "_module", None) not in PHASE2_MODULES or getattr(cls, "_abstract", False):
+            continue
+        field = cls._fields.get("company_id")
+        if not (field is not None and field.store and isinstance(field, orm_fields.Many2one)):
+            if name not in SHARED_PHASE2_MODELS:
+                unscoped.append(name)
+            continue
+        theirs = env[name].elevated().with_context(active_test=False).search([("company_id", "=", eu.ids[0])])
+        if not theirs:
+            continue
+        try:
+            seen = outsider[name].with_context(active_test=False).search([("id", "in", theirs.ids)])
+        except AccessError:
+            continue  # no read right at all
+        assert not seen, f"{name}: {len(seen)} record(s) of another company visible"
+        checked.append(name)
+    assert not unscoped, f"company-specific models without a stored company_id: {unscoped}"
+    expected = {"account.move", "account.move_line", "account.payment", "account.partial_reconcile", "sale.quotation"}
+    assert expected <= set(checked), checked
+
+
+# -- SEC-50: the ledger's own fields cannot be written through the generic API ----------------------------------
+
+
+def test_sec50_ledger_fields_cannot_be_set_through_the_api(commit_env, admin: Session, app) -> None:  # type: ignore[no-untyped-def]
+    # a company of its own, so the committed invoice does not change the main company's books
+    main = commit_env.ref("core.main_company")
+    company = commit_env["core.company"].create({"name": _uniq("Ledger Co"), "currency_id": main.currency_id.ids[0]})
+    clerk = _new_user(admin, "account.group_account_invoice")
+    commit_env["core.user"].browse([clerk["id"]]).write(
+        {"company_id": company.ids[0], "company_ids": [("set", company.ids)]}
+    )
+    commit_env.cr.commit()
+    s = Session(TestClient(app, base_url="http://localhost"), clerk["login"], clerk["password"])
+    customer = s.post("/api/v1/models/contacts.partner", json={"values": {"name": _uniq("Ledger customer")}}).json()
+    base = {
+        "move_type": "out_invoice",
+        "partner_id": customer["id"],
+        "invoice_date": "2026-05-04",
+        "invoice_line_ids": [["create", {"name": "Service", "price_unit": 100.0}]],
+    }
+    # a posted entry with a number of the caller's choice, skipping numbering, lock dates and the hash chain
+    forged = s.post("/api/v1/models/account.move", json={"values": {**base, "state": "posted", "name": "X/1"}})
+    assert forged.status_code == 400, forged.text
+    assert s.post("/api/v1/models/account.move", json={"values": {**base, "name": "INV/2026/99999"}}).status_code == 400
+    # the same through creation defaults in the client context
+    by_default = s.post(
+        "/api/v1/jsonrpc",
+        json={
+            "jsonrpc": "2.0",
+            "id": 1,
+            "method": "create",
+            "params": {
+                "model": "account.move",
+                "values": base,
+                "context": {"default_state": "posted", "default_name": "X/2"},
+            },
+        },
+    ).json()
+    assert "error" in by_default, by_default
+    made = s.post("/api/v1/models/account.move", json={"values": base})
+    assert made.status_code == 201, made.text
+    move_id = made.json()["id"]
+    assert s.post(f"/api/v1/models/account.move/{move_id}/call/action_post", json={}).status_code == 200
+    due = s.get(f"/api/v1/models/account.move/{move_id}", params={"fields": "amount_residual"}).json()
+    # marking it paid without a payment
+    paid = s.patch(f"/api/v1/models/account.move/{move_id}", json={"values": {"payment_state": "paid"}})
+    assert paid.status_code == 400, paid.text
+    rpc = s.post(
+        "/api/v1/jsonrpc",
+        json={
+            "jsonrpc": "2.0",
+            "id": 1,
+            "method": "write",
+            "params": {"model": "account.move", "ids": [move_id], "values": {"amount_residual": 0}},
+        },
+    ).json()
+    assert "error" in rpc, rpc
+    items = s.get(
+        "/api/v1/models/account.move_line",
+        params={"domain": json.dumps([["move_id", "=", move_id]]), "fields": "display_type"},
+    ).json()["items"]
+    term = next(i["id"] for i in items if i["display_type"] == "payment_term")
+    income = next(i["id"] for i in items if i["display_type"] == "product")
+    for values in ({"reconciled": True, "amount_residual": 0}, {"parent_state": "draft"}):
+        changed = s.patch(f"/api/v1/models/account.move_line/{term}", json={"values": values})
+        assert changed.status_code == 400, changed.text
+    match = s.post(
+        "/api/v1/models/account.partial_reconcile",
+        json={"values": {"debit_move_id": term, "credit_move_id": income, "amount": due["amount_residual"]}},
+    )
+    assert match.status_code == 400, match.text
+    after = s.get(f"/api/v1/models/account.move/{move_id}", params={"fields": "payment_state,amount_residual"}).json()
+    assert after["payment_state"] == "not_paid" and after["amount_residual"] == due["amount_residual"] > 0
+
+
+# -- SEC-51: a payment cannot cancel a journal entry it did not book ---------------------------------------------
+
+
+def test_sec51_payment_cannot_cancel_another_entry(env) -> None:  # type: ignore[no-untyped-def]
+    from modules.account.tests.common import eu_env, invoice, partner
+
+    e = eu_env(env)
+    foreign = invoice(e, partner(e, "SEC-51 Lyon SA"), [{"price_unit": 10.0}])
+    clerk = _p2_user(env, "sec51-clerk", ["account.group_account_invoice"], env.ref("core.main_company"))
+    journal = clerk["account.journal"].search([("type", "=", "bank")], limit=1)
+    customer = partner(clerk, "SEC-51 customer")
+    vals = {"amount": 5.0, "partner_id": customer.ids[0], "journal_id": journal.ids[0]}
+    with pytest.raises(UserError):
+        clerk["account.payment"].create({**vals, "move_id": foreign.ids[0]})
+    with pytest.raises(UserError):
+        clerk["account.payment"].create({**vals, "state": "posted"})
+    payment = clerk["account.payment"].create(vals)
+    with pytest.raises(UserError):
+        payment.write({"move_id": foreign.ids[0]})
+    # even with the link forced in the database, cancelling only touches the payment's own entry
+    payment.elevated().write({"move_id": foreign.ids[0]})
+    with pytest.raises(UserError):
+        payment.action_cancel()
+    assert foreign.state == "posted"
+
+
+# -- SEC-52: privileged actions are not open to every user who can read the record --------------------------------
+
+
+def test_sec52_privileged_actions_need_the_right_role(env) -> None:  # type: ignore[no-untyped-def]
+    import datetime as dt
+
+    from modules.account.tests.common import invoice, partner
+
+    plain = _p2_user(env, "sec52-plain", ["core.group_user"])
+    accountant = _p2_user(env, "sec52-accountant", ["account.group_account_user"])
+    auditor = _p2_user(env, "sec52-auditor", ["account.group_account_readonly"])
+    year = env["account.fiscal_year"].create(
+        {"name": _uniq("FY"), "date_from": dt.date(2093, 1, 1), "date_to": dt.date(2093, 12, 31)}
+    )
+    # closing a year sets the company's lock date: advisers only (every user can read fiscal years)
+    for user_env in (plain, accountant):
+        with pytest.raises(AccessError):
+            user_env["account.fiscal_year"].browse(year.ids).action_close()
+    assert year.state == "open"
+    # charging a customer's saved card
+    provider = env.ref(f"payment.{env.company.ids[0]}_provider_test")
+    provider.write({"state": "test"})
+    customer = partner(env, "SEC-52 customer")
+    token = env["payment.token"].create(
+        {"provider_id": provider.ids[0], "partner_id": customer.ids[0], "provider_ref": "c:pm", "display": "Visa"}
+    )
+    with pytest.raises(AccessError):
+        auditor["payment.token"].browse(token.ids).action_charge(500.0)
+    assert not env["payment.transaction"].search([("token_id", "=", token.ids[0])])
+    # e-mailing an invoice (stores a PDF, posts in the chatter, sends the access link anywhere)
+    move = invoice(env, customer, [{"price_unit": 10.0}])
+    with pytest.raises(AccessError):
+        auditor["account.move"].browse(move.ids).action_send("someone@example.test")
+    with pytest.raises(AccessError):
+        auditor["account.move"].browse(move.ids).action_generate_ubl()
+    # matching bank transactions (runs elevated, posts entries)
+    with pytest.raises(AccessError):
+        auditor["account.bank_statement_line"].action_auto_reconcile_all()
+
+
+# -- SEC-53: payment transactions and saved methods follow the provider -----------------------------------------
+
+
+def test_sec53_payment_records_are_provider_managed(env) -> None:  # type: ignore[no-untyped-def]
+    from modules.account.tests.common import invoice, partner
+    from modules.payment import service
+
+    provider = env.ref(f"payment.{env.company.ids[0]}_provider_test")
+    provider.write({"state": "test"})
+    customer = partner(env, "SEC-53 customer")
+    move = invoice(env, customer, [{"price_unit": 40.0}])
+    tx = service.create_invoice_transaction(move)
+    token = env["payment.token"].create(
+        {"provider_id": provider.ids[0], "partner_id": customer.ids[0], "provider_ref": "c:pm", "display": "Visa"}
+    )
+    clerk = _p2_user(env, "sec53-clerk", ["account.group_account_invoice"])
+    for values in ({"amount": 1.0}, {"state": "done"}, {"provider_reference": "cs_someone_else"}):
+        with pytest.raises(UserError):
+            clerk["payment.transaction"].browse(tx.ids).write(values)
+    with pytest.raises(UserError):
+        clerk["payment.token"].browse(token.ids).write({"partner_id": partner(env, "SEC-53 other").ids[0]})
+    clerk["payment.token"].browse(token.ids).write({"display": "Company card", "active": False})
+    assert float(tx.amount) == float(move.amount_residual) and tx.state == "draft"
+    assert token.partner_id.ids == customer.ids
+
+
+# -- SEC-54: the test payment provider does not exist in production ---------------------------------------------
+
+
+def test_sec54_test_payment_provider_is_refused_in_production(env, monkeypatch) -> None:  # type: ignore[no-untyped-def]
+    from modules.payment.providers import ProviderError, adapter_for
+
+    provider = env.ref(f"payment.{env.company.ids[0]}_provider_test")
+    provider.write({"state": "test"})
+    assert adapter_for(provider) is not None
+    assert provider.ids[0] in env["payment.provider"]._available(env.company).ids
+    monkeypatch.setattr(get_settings(), "env", "production")
+    with pytest.raises(ProviderError):
+        adapter_for(provider)
+    assert provider.ids[0] not in env["payment.provider"]._available(env.company).ids
+
+
+# -- SEC-55: report exports never hand a formula to a spreadsheet ----------------------------------------------
+
+
+def test_sec55_report_exports_neutralise_formulas() -> None:
+    import io
+
+    from openpyxl import load_workbook
+
+    from modules.account_reports.export import _csv, _xlsx
+
+    data = {
+        "report": {"name": "General ledger", "code": "gl"},
+        "columns": [{"label": "Label", "type": "text"}, {"label": "Balance", "type": "monetary"}],
+        "lines": [{"name": '=HYPERLINK("http://evil.test","x")', "level": 0, "values": ["@SUM(1+1)", -12.5]}],
+        "currency": {"decimal_places": 2, "name": "EUR"},
+        "companies": [{"name": "Acme"}],
+        "warnings": [],
+    }
+    text = _csv(data).decode()
+    assert "'=HYPERLINK" in text and "'@SUM" in text and "-12.5" in text
+    sheet = load_workbook(io.BytesIO(_xlsx(data))).active
+    cells = [cell for row in sheet.iter_rows() for cell in row if cell.value is not None]
+    assert not [cell.coordinate for cell in cells if cell.data_type == "f"]
+    assert -12.5 in [cell.value for cell in cells]
+
+
+# -- SEC-56: names in outgoing e-mails are text -------------------------------------------------------------------
+
+
+def test_sec56_invoice_email_escapes_names(env) -> None:  # type: ignore[no-untyped-def]
+    from modules.account.tests.common import invoice, partner
+
+    customer = partner(env, "<a href='https://evil.test'>Acme</a>")
+    move = invoice(env, customer, [{"price_unit": 10.0}])
+    move.action_send("ap@acme.test")
+    mail = env["core.mail_queue"].elevated().search([("model", "=", "account.move"), ("res_id", "=", move.ids[0])])
+    assert mail and "<a href='https://evil.test'>" not in mail.body_html and "&lt;a href=" in mail.body_html

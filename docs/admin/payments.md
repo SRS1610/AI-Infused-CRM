@@ -74,7 +74,11 @@ card has insufficient funds."); the customer can try again.
 ## Access
 
 Billing users see providers (not their credentials), transactions and saved methods; advisers configure
-providers and see notifications. Everything is per company.
+providers and see notifications. Everything is per company. Transactions change only through the provider's
+reports (nobody edits them by hand); a saved method can be renamed or archived, not moved to another
+customer. Refunds and charges of a saved method need write access (billing users), not read-only access.
+In production the test provider is refused and never offered to customers
+([security review](../security/asvs-phase-2.md), SEC-53/SEC-54).
 
 ## Demo
 

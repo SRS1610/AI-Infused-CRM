@@ -9,13 +9,14 @@ from __future__ import annotations
 
 from typing import Any
 
-from tessera.exceptions import ValidationError
+from tessera.exceptions import UserError, ValidationError
 from tessera.i18n import _
 from tessera.orm import Model, api, fields
 from tessera.security.crypto import decrypt, encrypt, is_encrypted
 
 SECRET_FIELDS = ("secret_key", "webhook_secret")
 SECRET_GROUPS = ("account.group_account_manager", "core.group_system")
+TOKEN_USER_FIELDS = {"display", "active"}
 
 
 def _encrypt_vals(vals: dict[str, Any], names: tuple[str, ...]) -> dict[str, Any]:
@@ -90,11 +91,18 @@ class PaymentProvider(Model):
 
     @api.model
     def _available(self, company: Model, currency: Model | None = None) -> Model:
-        """Providers customers of ``company`` can pay with (enabled, or in test mode)."""
-        return self.elevated().search(
-            [("company_id", "=", company.ids[0]), ("state", "in", ["enabled", "test"]), ("journal_id", "is_set")],
-            order="sequence, id",
-        )
+        """Providers customers of ``company`` can pay with (enabled, or in test mode; never the test provider in
+        production, see ``modules.payment.providers.adapter_for``)."""
+        from tessera.config import get_settings
+
+        domain: list[Any] = [
+            ("company_id", "=", company.ids[0]),
+            ("state", "in", ["enabled", "test"]),
+            ("journal_id", "is_set"),
+        ]
+        if get_settings().is_production:
+            domain.append(("code", "!=", "test"))
+        return self.elevated().search(domain, order="sequence, id")
 
 
 class PaymentToken(Model):
@@ -114,6 +122,11 @@ class PaymentToken(Model):
         return super().create([_encrypt_vals(v, ("provider_ref",)) for v in batch])
 
     def write(self, vals: dict[str, Any]) -> bool:
+        # a saved method stays the card of the customer who saved it: users may rename or archive it only
+        # (U-9 SEC-53; re-pointing ``partner_id`` would charge one customer's card for another's invoices)
+        locked = set(vals) - TOKEN_USER_FIELDS
+        if locked and not self.env.su:
+            raise UserError(_("A saved payment method can only be renamed or archived"), fields=sorted(locked))
         return super().write(_encrypt_vals(vals, ("provider_ref",)))
 
     @api.depends("display")
@@ -131,5 +144,6 @@ class PaymentToken(Model):
         from modules.payment.service import charge_token
 
         self.ensure_one()
+        self.check_access("write")  # charging moves the customer's money: not for read-only users (U-9 SEC-52)
         tx = charge_token(self, float(amount), reference=reference)
         return {"reference": tx.reference, "state": tx.state, "state_message": tx.state_message}

@@ -48,6 +48,14 @@ table.report tr.item td { font-size: 8pt; color: #444; }
 """
 
 
+def _cell(value: Any) -> Any:
+    """Text a spreadsheet would evaluate (``=``, ``+``, ``-``, ``@``, tab, CR first) is exported as text:
+    partner names, labels and references come from users, imported statements and e-invoices (U-9 SEC-55)."""
+    if isinstance(value, str) and value[:1] in ("=", "+", "-", "@", "\t", "\r"):
+        return "'" + value
+    return value
+
+
 def _rows(data: dict[str, Any]) -> list[dict[str, Any]]:
     return [line for line in data["lines"] if line.get("style") != "load_more"]
 
@@ -91,10 +99,13 @@ def _headers(data: dict[str, Any]) -> list[str]:
 def _csv(data: dict[str, Any]) -> bytes:
     buffer = io.StringIO()
     writer = csv.writer(buffer)
-    writer.writerow([data["report"]["name"], *_headers(data)])
+    writer.writerow([_cell(data["report"]["name"]), *map(_cell, _headers(data))])
     for line in _rows(data):
         writer.writerow(
-            ["  " * int(line["level"]) + str(line["name"]), *("" if v is None else v for v in line["values"])]
+            [
+                "  " * int(line["level"]) + str(_cell(str(line["name"]))),
+                *("" if v is None else _cell(v) for v in line["values"]),
+            ]
         )
     return ("﻿" + buffer.getvalue()).encode()
 
@@ -108,18 +119,18 @@ def _xlsx(data: dict[str, Any]) -> bytes:
     book = Workbook()
     sheet = book.active
     sheet.title = str(data["report"]["name"])[:31]
-    sheet.append([data["report"]["name"]])
+    sheet.append([_cell(data["report"]["name"])])
     sheet["A1"].font = Font(bold=True, size=14)
-    sheet.append([", ".join(c["name"] for c in data["companies"]), data["currency"]["name"]])
+    sheet.append([_cell(", ".join(c["name"] for c in data["companies"])), data["currency"]["name"]])
     for warning in data["warnings"]:
-        sheet.append([warning])
+        sheet.append([_cell(warning)])
     sheet.append([])
-    sheet.append(["", *_headers(data)])
+    sheet.append(["", *map(_cell, _headers(data))])
     for cell in sheet[sheet.max_row]:
         cell.font = Font(bold=True)
     columns = data["columns"]
     for line in _rows(data):
-        sheet.append([str(line["name"]), *line["values"]])
+        sheet.append([_cell(str(line["name"])), *map(_cell, line["values"])])
         row = sheet[sheet.max_row]
         row[0].alignment = Alignment(indent=int(line["level"]))
         bold = line.get("style") in ("total", "header")

@@ -5,7 +5,7 @@ from __future__ import annotations
 import datetime as dt
 from typing import Any
 
-from tessera.exceptions import UserError, ValidationError
+from tessera.exceptions import AccessError, UserError, ValidationError
 from tessera.i18n import _
 from tessera.orm import Model, api, fields
 
@@ -149,7 +149,12 @@ class FiscalYear(Model):
 
     @api.expose
     def action_close(self) -> bool:
-        """Close the year: lock it for everyone. Reports carry its result to equity (no closing entry)."""
+        """Close the year: lock it for everyone. Reports carry its result to equity (no closing entry).
+
+        Advisers only: closing sets the company's lock date (U-9 SEC-52; the year is readable by every user)."""
+        if not (self.env.is_system or self.env.user.has_group("account.group_account_manager")):
+            raise AccessError(_("Only accounting advisers can close a fiscal year"))
+        self.check_access("write")
         for fy in self:
             if fy.state == "closed":
                 continue

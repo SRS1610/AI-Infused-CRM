@@ -36,6 +36,12 @@ def register_adapter(code: str, adapter: type[ProviderAdapter]) -> None:
 
 
 def adapter_for(provider: Any) -> ProviderAdapter:
+    from tessera.config import get_settings
+
+    if provider.code == "test" and get_settings().is_production:
+        # the test provider settles every checkout without money and its default webhook secret is public:
+        # in production it would let any customer mark an invoice paid (U-9 SEC-54)
+        raise ProviderError("The test payment provider is not available in production")
     cls = ADAPTERS.get(provider.code)
     if cls is None:
         raise ProviderError(f"No adapter for provider code {provider.code!r}")

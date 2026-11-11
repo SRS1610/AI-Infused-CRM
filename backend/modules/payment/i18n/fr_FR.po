@@ -343,11 +343,19 @@ msgstr "Prestataire de paiement introuvable"
 msgid "Invalid signature"
 msgstr "Signature invalide"
 
-#: models/provider.py:71
+#: models/provider.py:129
+msgid "A saved payment method can only be renamed or archived"
+msgstr "Un moyen de paiement enregistré peut seulement être renommé ou archivé"
+
+#: models/provider.py:72
 msgid "The payment journal must belong to the provider's company"
 msgstr "Le journal de paiement doit appartenir à la société du prestataire"
 
-#: models/transaction.py:89
+#: models/transaction.py:91
+msgid "Payment transactions are updated by the payment provider only"
+msgstr "Les transactions de paiement ne sont mises à jour que par le prestataire de paiement"
+
+#: models/transaction.py:96
 msgid "Only draft, cancelled or failed transactions can be deleted"
 msgstr "Seules les transactions en brouillon, annulées ou échouées peuvent être supprimées"
 

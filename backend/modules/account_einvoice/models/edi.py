@@ -108,7 +108,7 @@ class MoveEdi(Model):
         from modules.account_einvoice.edi import generate_document
 
         self.ensure_one()
-        self.check_access("read")
+        self.check_access("write")  # stores a document and an attachment on the invoice (U-9 SEC-52)
         doc = generate_document(self)
         return {
             "id": doc.ids[0],
@@ -155,6 +155,7 @@ class EdiDocument(Model):
         from modules.account_einvoice.edi import send_moves
 
         self.ensure_one()
+        self.check_access("write")  # sends the invoice through the access point (U-9 SEC-52)
         if self.direction != "out" or self.state not in ("error", "rejected", "to_send") or not self.move_id:
             return self.state
         send_moves(self.move_id)

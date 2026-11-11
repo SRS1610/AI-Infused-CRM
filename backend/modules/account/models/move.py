@@ -77,6 +77,55 @@ POSTED_LINE_WRITABLE = {
     "blocked",
 }
 INTERNAL = "_account_internal"  # context key set by the ledger's own writes
+# set only by the ledger (posting, numbering, matching, hash chain): a caller's values never carry them, else a
+# billing user could create a posted entry with a number of their choice or mark an invoice paid (U-9 SEC-50).
+# Creation accepts each one at its initial value; amounts are recomputed after every create.
+SERVER_FIELDS = {
+    "state": "draft",
+    "name": "/",
+    "payment_state": "not_paid",
+    "posted_before": False,
+    "inalterable_hash": None,
+    "secure_sequence_number": 0,
+    "is_fx_revaluation": False,
+}
+SERVER_AMOUNTS = {
+    "amount_untaxed",
+    "amount_tax",
+    "amount_total",
+    "amount_residual",
+    "amount_untaxed_signed",
+    "amount_tax_signed",
+    "amount_total_signed",
+    "amount_residual_signed",
+}
+# journal-item fields set by posting and matching; residuals and ``reconciled`` are recomputed after a create
+SERVER_LINE_FIELDS = {"parent_state", "amount_residual", "amount_residual_currency", "reconciled", "full_reconcile_id"}
+
+
+def _trusted(model: Model) -> bool:
+    """The ledger's own calls (``INTERNAL``) and elevated server code; never a client's request."""
+    return bool(model.env.context.get(INTERNAL) or model.env.su)
+
+
+def _refuse_server_fields(model: Model, names: set[str]) -> None:
+    if names:
+        raise UserError(
+            _(
+                "These fields are set by the accounting engine and cannot be written: {fields}",
+                fields=", ".join(sorted(names)),
+            ),
+            fields=sorted(names),
+        )
+
+
+def _changed_server_fields(model: Model, vals: dict[str, Any], initial: dict[str, Any]) -> set[str]:
+    """Server fields that a create would set to something else than their initial value, through ``vals`` or
+    a ``default_<field>`` context key (the generic API passes those on as creation defaults)."""
+    ctx = model.env.context
+    given = {k: ctx[f"default_{k}"] for k in initial if f"default_{k}" in ctx}
+    given.update({k: vals[k] for k in initial if k in vals})
+    return {k for k, value in given.items() if (value or None) != (initial[k] or None)}
 
 
 def _company_of(model: Model) -> Model:
@@ -208,7 +257,12 @@ class Move(Model):
 
     def create(self, vals_list):  # type: ignore[no-untyped-def]
         batch = [dict(vals_list)] if isinstance(vals_list, dict) else [dict(v) for v in vals_list]
+        trusted = _trusted(self)
         for vals in batch:
+            if not trusted:
+                _refuse_server_fields(self, _changed_server_fields(self, vals, SERVER_FIELDS))
+                for key in SERVER_AMOUNTS & set(vals):
+                    del vals[key]  # recomputed below
             move_type = vals.get("move_type") or self.env.context.get("default_move_type") or "entry"
             vals["move_type"] = move_type
             company = (
@@ -245,6 +299,9 @@ class Move(Model):
     def write(self, vals: dict[str, Any]) -> bool:
         internal = self.env.context.get(INTERNAL)
         if not internal:
+            if not self.env.su:
+                # (``state`` and ``name`` are refused below with their own message)
+                _refuse_server_fields(self, (set(SERVER_FIELDS) - {"state", "name"} | SERVER_AMOUNTS) & set(vals))
             for move in self:
                 if move.state == "posted" and set(vals) - POSTED_WRITABLE:
                     raise UserError(
@@ -781,6 +838,7 @@ class Move(Model):
         """Email the invoice PDF with a link to view (and pay) it online."""
         from modules.account.sending import send_invoice
 
+        self.check_access("write")  # sending stores the PDF and posts in the chatter (U-9 SEC-52)
         return send_invoice(self, email_to)
 
 
@@ -841,9 +899,12 @@ class MoveLine(Model):
     amount_residual = fields.Monetary("Residual", currency_field="company_currency_id", readonly=True)
     amount_residual_currency = fields.Monetary("Residual in currency", currency_field="currency_id", readonly=True)
     reconciled = fields.Boolean(readonly=True, index=True)
-    full_reconcile_id = fields.Many2one("account.full_reconcile", "Matching", readonly=True, ondelete="set_null")
-    matched_debit_ids = fields.One2many("account.partial_reconcile", "credit_move_id", "Matched debits")
-    matched_credit_ids = fields.One2many("account.partial_reconcile", "debit_move_id", "Matched credits")
+    # a copied item starts unmatched (copying the matches duplicated them on the copy, e.g. "modify" reversals)
+    full_reconcile_id = fields.Many2one(
+        "account.full_reconcile", "Matching", readonly=True, ondelete="set_null", copy=False
+    )
+    matched_debit_ids = fields.One2many("account.partial_reconcile", "credit_move_id", "Matched debits", copy=False)
+    matched_credit_ids = fields.One2many("account.partial_reconcile", "debit_move_id", "Matched credits", copy=False)
     blocked = fields.Boolean("No follow-up", help="Excluded from reminders (disputed)")
     payment_id = fields.Many2one("account.payment", "Originating payment", ondelete="set_null", index=True)
 
@@ -872,6 +933,14 @@ class MoveLine(Model):
             for move in moves.browse(list({int(v["move_id"]) for v in batch if v.get("move_id")})):
                 if move.state != "draft":
                     raise UserError(_("Items can only be added to draft entries ({name})", name=move.name))
+        if not _trusted(self):
+            # (residuals and ``reconciled`` are recomputed and ``parent_state`` follows the entry below, whatever
+            # a ``default_<field>`` context key says; a match cannot be given at all)
+            _refuse_server_fields(self, _changed_server_fields(self, {}, {"full_reconcile_id": None}))
+            for vals in batch:
+                # derived from the entry and its matches (``copy`` sends them too): never the caller's
+                for key in SERVER_LINE_FIELDS:
+                    vals.pop(key, None)
         for vals in batch:
             self._normalise_amounts(vals)
             move = moves.browse([int(vals["move_id"])]) if vals.get("move_id") else None
@@ -892,6 +961,8 @@ class MoveLine(Model):
     def write(self, vals: dict[str, Any]) -> bool:
         vals = dict(vals)
         if not self.env.context.get(INTERNAL):
+            if not self.env.su:
+                _refuse_server_fields(self, SERVER_LINE_FIELDS & set(vals))
             for line in self:
                 state = line.move_id.state
                 if state != "draft" and set(vals) - POSTED_LINE_WRITABLE:

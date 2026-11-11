@@ -234,6 +234,19 @@ All notable changes are recorded here, grouped by phase. Format follows [Keep a 
   browser, an assertion replay cache, and accounts linked by administrator, by trusted e-mail or created on
   first login (off by default). Guide: [docs/admin/saml.md](docs/admin/saml.md).
 
+### Sub-phase 2.7 — Closing
+- **Security review of Phase 2 (U-9, OWASP ASVS 4.0.3 L2 delta).** [docs/security/asvs-phase-2.md](docs/security/asvs-phase-2.md):
+  68 requirements reviewed for the Phase 2 modules, payment adapters, SAML and ledger integrity; 3 high, 3
+  medium and 1 low findings fixed with regression tests (`backend/tessera/api/tests/test_security_asvs.py`),
+  6 low findings scheduled. The ledger's own fields (state, number, payment status, amounts, residuals,
+  matches, hash) and a payment's journal entry can no longer be set through the API, also not through
+  `default_*` context keys (SEC-50/51); closing a fiscal year needs *Accounting / Adviser*, and charging a
+  saved card, matching bank transactions, e-mailing an invoice or (re)sending an e-invoice need write access
+  (SEC-52); payment transactions change only through the provider and saved methods cannot change customer
+  (SEC-53); the test payment provider is refused in production (SEC-54); report CSV/XLSX exports neutralise
+  spreadsheet formulas (SEC-55); invoice and quotation e-mails escape names (SEC-56). A test checks that every
+  Phase 2 model is company-scoped or explicitly shared.
+
 ## [Unreleased] — Phase 1 complete, awaiting sign-off
 
 Summary of what works, what is stubbed and the known gaps: [docs/phase-1-summary.md](docs/phase-1-summary.md).
