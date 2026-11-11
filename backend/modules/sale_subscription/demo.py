@@ -53,7 +53,20 @@ def seed_subscriptions(env: Any) -> int:
     yearly = env.ref("sale_subscription.plan_yearly")
     if not all((seat, support, monitoring, setup)):
         return 0
-    customers = list(env["contacts.partner"].elevated().search([("is_company", "=", True)], order="id", limit=8))
+    # customers the company's users can see: shared contacts or the company's own (never another company's
+    # records, such as the contact of the other demo company)
+    customers = list(
+        env["contacts.partner"]
+        .elevated()
+        .search(
+            [
+                ("is_company", "=", True),
+                {"any": [["company_id", "=", None], ["company_id", "=", company.ids[0]]]},
+            ],
+            order="id",
+            limit=8,
+        )
+    )
     if not customers:
         return 0
     today = env.today()

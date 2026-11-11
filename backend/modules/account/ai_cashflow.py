@@ -294,7 +294,9 @@ def cash_data(env: Environment, today: dt.date | None = None, history_days: int 
     for m in moves:
         kind = "receivable" if m.move_type in ("out_invoice", "out_refund") else "payable"
         sign = 1 if m.move_type in ("out_invoice", "in_invoice") else -1
-        partner = (m.commercial_partner_id or m.partner_id).display_name or "" if m.partner_id else ""
+        # the invoice itself was read with the user's rights; its partner's name is shown even when the
+        # contact belongs to another company (a shared document must not break the forecast)
+        partner = (m.commercial_partner_id or m.partner_id).elevated().display_name or "" if m.partner_id else ""
         due = m.invoice_date_due or m.invoice_date or m.date
         total = abs(float(m.amount_total_signed or 0.0))
         residual = abs(float(m.amount_residual_signed or 0.0))

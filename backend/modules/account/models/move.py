@@ -282,6 +282,17 @@ class Move(Model):
             if move.journal_id.elevated().company_id.ids != move.company_id.ids:
                 raise ValidationError(_("The journal must belong to the entry's company"), field="journal_id")
 
+    @api.constrains("partner_id", "company_id")
+    def _check_partner_company(self) -> None:
+        """A partner restricted to one company cannot appear on another company's entries (U-4)."""
+        for move in self:
+            partner = move.partner_id.elevated() if move.partner_id else None
+            if partner is not None and partner.company_id and partner.company_id.ids != move.company_id.ids:
+                raise ValidationError(
+                    _("{partner} belongs to another company and cannot be used here", partner=partner.display_name),
+                    field="partner_id",
+                )
+
     # -- invoice lines synchronisation -----------------------------------------------------------------
 
     def _rate_date(self) -> dt.date:

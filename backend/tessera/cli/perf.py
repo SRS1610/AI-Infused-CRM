@@ -25,7 +25,12 @@ import typer
 
 app = typer.Typer(no_args_is_help=True)
 
-PRIMARY = ("contacts.partner", "crm.lead", "calendar.event", "sale.quotation", "product.product")
+PRIMARY = (
+    # Phase 1
+    "contacts.partner", "crm.lead", "calendar.event", "sale.quotation", "product.product",
+    # Phase 2 (sales orders and subscriptions are sale.quotation records)
+    "account.move", "account.move_line", "account.payment", "account.bank_statement_line", "account.asset",
+)  # fmt: skip
 
 # a first record for models the demo data leaves empty (cloning needs one)
 STARTERS: dict[str, Any] = {
@@ -142,7 +147,12 @@ def lists(
         cr = Cursor(get_engine(url))
         try:
             for model in present:
-                added = clone_rows(cr, registry.models[model]._table, rows)
+                if model == "account.move_line":
+                    # journal items are copied as whole balanced entries (the ledger guard refuses others)
+                    company = int(cr.scalar("SELECT min(id) FROM core_company"))
+                    added = clone_journal_items(cr, company, rows)
+                else:
+                    added = clone_rows(cr, registry.models[model]._table, rows)
                 typer.echo(f"{model}: +{added} rows")
             cr.commit()
         finally:

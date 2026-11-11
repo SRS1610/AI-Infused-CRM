@@ -209,3 +209,12 @@ def test_lock_dates_only_for_advisers(env):
         clerk.company.write({"fiscalyear_lock_date": D(2026, 1, 31)})
     env.company.write({"fiscalyear_lock_date": D(2026, 1, 31)})
     assert env.company.fiscalyear_lock_date == D(2026, 1, 31)
+
+
+def test_partner_of_another_company_is_refused(env):
+    e = eu_env(env)
+    restricted = env["contacts.partner"].elevated().create({"name": "EU-only customer", "company_id": e.company.ids[0]})
+    from tessera.exceptions import ValidationError
+
+    with pytest.raises(ValidationError):
+        env["account.move"].create({"move_type": "out_invoice", "partner_id": restricted.ids[0]})

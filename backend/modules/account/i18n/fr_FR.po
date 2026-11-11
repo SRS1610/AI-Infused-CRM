@@ -45,9 +45,9 @@ msgstr "Pays"
 #. field label
 #: field:account.account.company_id field:account.bank_account.company_id
 #: field:account.fiscal_position.company_id field:account.fiscal_year.company_id
-#: field:account.journal.company_id field:account.move.company_id field:account.move_line.company_id
-#: field:account.partial_reconcile.company_id field:account.payment.company_id
-#: field:account.payment_term.company_id field:account.tax.company_id
+#: field:account.journal.company_id field:account.move.company_id field:account.move_anomaly.company_id
+#: field:account.move_line.company_id field:account.partial_reconcile.company_id
+#: field:account.payment.company_id field:account.payment_term.company_id field:account.tax.company_id
 #: field:account.tax_group.company_id field:account.tax_repartition_line.company_id
 msgid "Company"
 msgstr "Société"
@@ -388,7 +388,8 @@ msgid "Currency"
 msgstr "Devise"
 
 #. field label
-#: field:account.move.partner_id field:account.move_line.partner_id field:account.payment.partner_id
+#: field:account.move.partner_id field:account.move_anomaly.partner_id
+#: field:account.move_line.partner_id field:account.payment.partner_id
 msgid "Partner"
 msgstr "Partenaire"
 
@@ -398,7 +399,8 @@ msgid "Commercial entity"
 msgstr "Entité commerciale"
 
 #. field label
-#: field:account.fiscal_year.state field:account.move.state field:account.payment.state
+#: field:account.fiscal_year.state field:account.move.state field:account.move_anomaly.state
+#: field:account.payment.state
 msgid "State"
 msgstr "Statut"
 
@@ -519,7 +521,7 @@ msgstr "Montant dû (devise de la société)"
 
 #. field label
 #: field:account.move.payment_state
-msgid "Payment State"
+msgid "Payment status"
 msgstr "Statut de paiement"
 
 #. selection value not_paid
@@ -994,6 +996,154 @@ msgstr "Les comptes obsolètes ne peuvent pas être utilisés sur de nouvelles �
 msgid "Internal notes"
 msgstr "Notes internes"
 
+#. model description
+#: model:account.move_anomaly
+msgid "Anomaly flag"
+msgstr "Alerte d'anomalie"
+
+#. field label
+#: field:account.move_anomaly.move_id
+msgid "Document"
+msgstr "Document"
+
+#. field label
+#: field:account.move_anomaly.kind
+msgid "Kind"
+msgstr "Type"
+
+#. selection value duplicate_number
+#: selection:account.move_anomaly.kind
+msgid "Same invoice number"
+msgstr "Même numéro de facture"
+
+#. selection value duplicate_amount
+#: selection:account.move_anomaly.kind
+msgid "Same amount and date"
+msgstr "Même montant et même date"
+
+#. selection value near_duplicate_text
+#: selection:account.move_anomaly.kind
+msgid "Nearly identical document"
+msgstr "Document presque identique"
+
+#. selection value unusual_amount
+#: selection:account.move_anomaly.kind
+msgid "Unusual amount for this vendor"
+msgstr "Montant inhabituel pour ce fournisseur"
+
+#. selection value new_vendor_large
+#: selection:account.move_anomaly.kind
+msgid "First bill of a new vendor, large amount"
+msgstr "Première facture d'un nouveau fournisseur, montant élevé"
+
+#. selection value bank_account_changed
+#: selection:account.move_anomaly.kind
+msgid "Bank account changed recently"
+msgstr "Compte bancaire modifié récemment"
+
+#. field label
+#: field:account.move_anomaly.severity
+msgid "Severity"
+msgstr "Gravité"
+
+#. selection value low
+#: selection:account.move_anomaly.severity
+msgid "Low"
+msgstr "Faible"
+
+#. selection value medium
+#: selection:account.move_anomaly.severity
+msgid "Medium"
+msgstr "Moyenne"
+
+#. selection value high
+#: selection:account.move_anomaly.severity
+msgid "High"
+msgstr "Élevée"
+
+#. field label
+#: field:account.move_anomaly.score
+msgid "Score"
+msgstr "Score"
+
+#. field help
+#: field:account.move_anomaly.score
+msgid "Strength of the signal (robust z-score, similarity…)"
+msgstr "Force du signal (z-score robuste, similarité…)"
+
+#. field label
+#: field:account.move_anomaly.explanation
+msgid "Explanation"
+msgstr "Explication"
+
+#. field label
+#: field:account.move_anomaly.related_move_id
+msgid "Similar document"
+msgstr "Document similaire"
+
+#. field label
+#: field:account.move_anomaly.details
+msgid "Details"
+msgstr "Détails"
+
+#. selection value open
+#: selection:account.fiscal_year.state selection:account.move_anomaly.state
+msgid "Open"
+msgstr "Ouvert"
+
+#. selection value dismissed
+#: selection:account.move_anomaly.state
+msgid "Dismissed"
+msgstr "Écartée"
+
+#. selection value confirmed
+#: selection:account.move_anomaly.state
+msgid "Confirmed"
+msgstr "Confirmée"
+
+#. field label
+#: field:account.move_anomaly.decided_by
+msgid "Decided By"
+msgstr "Décidé par"
+
+#. field label
+#: field:account.move_anomaly.decided_at
+msgid "Decided At"
+msgstr "Décidé le"
+
+#. field label
+#. view label
+#: field:account.move_anomaly.note views.json:view_invoice_form views.json:view_move_form
+msgid "Reason"
+msgstr "Motif"
+
+#. field label
+#: field:account.move_anomaly.ai_generated
+msgid "Ai Generated"
+msgstr "Généré par l'IA"
+
+#. field label
+#: field:account.move.ai_ocr_text
+msgid "Document text"
+msgstr "Texte du document"
+
+#. field help
+#: field:account.move.ai_ocr_text
+msgid "Text read from the source document"
+msgstr "Texte lu sur le document source"
+
+#. field label
+#. menu name
+#. action name
+#: actions.json:action_anomalies field:account.move.ai_anomaly_ids menus.json:menu_anomalies
+msgid "Anomaly flags"
+msgstr "Alertes d'anomalie"
+
+#. field label
+#: field:account.move.ai_anomaly_count
+msgid "Open anomaly flags"
+msgstr "Alertes d'anomalie ouvertes"
+
 #. constraint message
 #: model:account.journal
 msgid "Journal codes must be unique per company"
@@ -1095,11 +1245,6 @@ msgstr "Début"
 #: field:account.fiscal_year.date_to
 msgid "End"
 msgstr "Fin"
-
-#. selection value open
-#: selection:account.fiscal_year.state
-msgid "Open"
-msgstr "Ouvert"
 
 #. selection value closed
 #: selection:account.fiscal_year.state
@@ -1303,7 +1448,10 @@ msgstr "Les paiements attendent le rapprochement bancaire"
 msgid ""
 "Payments are booked on the outstanding receipts / payments accounts until a bank statement line "
 "matches them; otherwise they are booked straight on the bank account"
-msgstr "Les paiements sont comptabilisés sur les comptes d'encaissements / paiements en attente jusqu'à ce qu'une ligne de relevé bancaire les rapproche ; sinon ils sont comptabilisés directement sur le compte bancaire"
+msgstr ""
+"Les paiements sont comptabilisés sur les comptes d'encaissements / paiements en attente jusqu'à "
+"ce qu'une ligne de relevé bancaire les rapproche ; sinon ils sont comptabilisés directement sur "
+"le compte bancaire"
 
 #. model description
 #. field label
@@ -1601,6 +1749,199 @@ msgstr "Lettrages partiels"
 msgid "Matched items"
 msgstr "Écritures lettrées"
 
+#: ai_anomaly.py:504
+msgid "Open a bill to explain its flags"
+msgstr "Ouvrez une facture fournisseur pour expliquer ses alertes"
+
+#: ai_anomaly.py:285
+#, python-brace-format
+msgid ""
+"The vendor's bank account was added or changed {days} days ago: confirm it with the vendor "
+"through a known contact before paying."
+msgstr ""
+"Le compte bancaire du fournisseur a été ajouté ou modifié il y a {days} jours : confirmez-le "
+"auprès du fournisseur par un contact connu avant de payer."
+
+#: ai_anomaly.py:442
+#, python-brace-format
+msgid "Check bill {name}"
+msgstr "Vérifier la facture {name}"
+
+#: ai_anomaly.py:159
+#, python-brace-format
+msgid "Same invoice number {number} as {other} of {date} ({amount})."
+msgstr "Même numéro de facture {number} que {other} du {date} ({amount})."
+
+#: ai_anomaly.py:247
+#, python-brace-format
+msgid "{amount} is {ratio} times the usual amount of this vendor (median {median} over {count} bills)."
+msgstr ""
+"{amount} représente {ratio} fois le montant habituel de ce fournisseur (médiane {median} sur "
+"{count} factures)."
+
+#: ai_anomaly.py:270
+#, python-brace-format
+msgid "First bill of this vendor and above the company's usual large amount ({amount} ≥ {threshold})."
+msgstr ""
+"Première facture de ce fournisseur, au-dessus des montants élevés habituels de la société "
+"({amount} ≥ {threshold})."
+
+#: ai_anomaly.py:298
+#, python-brace-format
+msgid ""
+"The bill asks for payment to an IBAN ending in {tail}, which is not the bank account on file for "
+"this vendor."
+msgstr ""
+"La facture demande un paiement sur un IBAN se terminant par {tail}, qui n'est pas le compte "
+"bancaire enregistré pour ce fournisseur."
+
+#: ai_anomaly.py:180
+#, python-brace-format
+msgid "Invoice number {number} reads like {onumber} of {other} (characters a scan confuses)."
+msgstr "Le numéro de facture {number} se lit comme {onumber} de {other} (caractères qu'un scan confond)."
+
+#: ai_anomaly.py:200
+#, python-brace-format
+msgid "Same amount {amount} as {other}, {days} days apart."
+msgstr "Même montant {amount} que {other}, à {days} jours d'écart."
+
+#: ai_anomaly.py:225
+#, python-brace-format, python-format
+msgid "The document is {percent}% identical to {other} of {date}, same amount {amount}."
+msgstr "Le document est identique à {percent} % à {other} du {date}, même montant {amount}."
+
+#: ai_api.py:41
+msgid "No such document"
+msgstr "Document introuvable"
+
+#: ai_api.py:81 ai_bill.py:285
+msgid "The document is too large (15 MB at most)"
+msgstr "Le document est trop volumineux (15 Mo au maximum)"
+
+#: ai_api.py:85 ai_bill.py:288
+msgid "Upload a PDF or an image (PNG, JPEG, WebP)"
+msgstr "Téléversez un PDF ou une image (PNG, JPEG, WebP)"
+
+#: ai_api.py:153
+msgid "No such flag"
+msgstr "Alerte introuvable"
+
+#: ai_bill.py:231
+#, python-brace-format
+msgid "Create {kind} from {who} ({count} lines)"
+msgstr "Créer {kind} de {who} ({count} lignes)"
+
+#: ai_bill.py:233
+#, python-brace-format
+msgid "Fill {name} from the document ({count} lines)"
+msgstr "Remplir {name} depuis le document ({count} lignes)"
+
+#: ai_bill.py:91
+#, python-brace-format
+msgid "The document looks like a {detected}; it is read as a {requested} as asked."
+msgstr "Le document ressemble à un {detected} ; il est lu comme un {requested}, comme demandé."
+
+#: ai_bill.py:149
+#, python-brace-format
+msgid "Not found on the document: {field}"
+msgstr "Introuvable sur le document : {field}"
+
+#: ai_bill.py:157
+#, python-brace-format
+msgid "Amounts not found in the document's text: {amounts}"
+msgstr "Montants introuvables dans le texte du document : {amounts}"
+
+#: ai_bill.py:347
+msgid "A document becomes an invoice, a bill or a credit note"
+msgstr "Un document devient une facture client, une facture fournisseur ou un avoir"
+
+#: ai_bill.py:409
+msgid "This is not a document-reading proposal"
+msgstr "Ce n'est pas une proposition de lecture de document"
+
+#: ai_bill.py:146
+#, python-brace-format
+msgid "Unknown currency {code}: the company currency is used"
+msgstr "Devise inconnue {code} : la devise de la société est utilisée"
+
+#: ai_bill.py:154
+#, python-brace-format
+msgid "No account for {line}"
+msgstr "Aucun compte pour {line}"
+
+#: ai_bill.py:292
+msgid "Only an empty draft invoice or bill can be filled from a document"
+msgstr "Seul un brouillon de facture vide peut être rempli depuis un document"
+
+#: ai_bill.py:354
+msgid "Lines can only be created from a document"
+msgstr "Les lignes ne peuvent qu'être créées depuis un document"
+
+#: ai_bill.py:391
+msgid "The draft was changed in the meantime: read the document again"
+msgstr "Le brouillon a été modifié entre-temps : relisez le document"
+
+#: ai_bill.py:359
+#, python-brace-format
+msgid "Account {id} does not belong to this company"
+msgstr "Le compte {id} n'appartient pas à cette société"
+
+#: ai_bill.py:365
+msgid "A tax does not belong to this company"
+msgstr "Une taxe n'appartient pas à cette société"
+
+#: ai_bill.py:383
+msgid "New vendor"
+msgstr "Nouveau fournisseur"
+
+#: ai_cashflow.py:427
+#, python-brace-format
+msgid ""
+"Cash today is {opening}. The forecast reaches its lowest point, {low}, on {low_date} and ends at "
+"{closing} on {end}. Open receivables: {receivables}; open payables: {payables}."
+msgstr ""
+"La trésorerie est aujourd'hui de {opening}. La prévision atteint son point bas, {low}, le "
+"{low_date} et se termine à {closing} le {end}. Créances ouvertes : {receivables} ; dettes "
+"ouvertes : {payables}."
+
+#. action name
+#: actions.json:action_cashflow_forecast ai_cashflow.py:443
+msgid "Cash-flow forecast"
+msgstr "Prévision de trésorerie"
+
+#: ai_coding.py:278
+#, python-brace-format
+msgid "Foreign VAT at {rate}%: not deductible here, the line has no tax"
+msgstr "TVA étrangère à {rate} % : non déductible ici, la ligne n'a pas de taxe"
+
+#: ai_coding.py:287
+#, python-brace-format
+msgid "No {rate}% tax in this company"
+msgstr "Aucune taxe à {rate} % dans cette société"
+
+#: ai_coding.py:314
+#, python-brace-format
+msgid "Like \"{label}\" on {move}"
+msgstr "Comme « {label} » sur {move}"
+
+#: ai_coding.py:335
+msgid "Company default account"
+msgstr "Compte par défaut de la société"
+
+#: ai_coding.py:303
+#, python-brace-format
+msgid "Product {name}"
+msgstr "Article {name}"
+
+#: ai_coding.py:333
+#, python-brace-format
+msgid "Keyword \"{word}\""
+msgstr "Mot-clé « {word} »"
+
+#: ai_coding.py:326
+msgid "Usual account of this partner"
+msgstr "Compte habituel de ce partenaire"
+
 #: api.py:26 api.py:39
 msgid "Invoice not found"
 msgstr "Facture introuvable"
@@ -1643,7 +1984,9 @@ msgstr "Écart de change non réalisé"
 
 #: models/account.py:140
 msgid "You cannot delete an account that has journal items; deprecate it instead"
-msgstr "Vous ne pouvez pas supprimer un compte comportant des écritures comptables ; rendez-le obsolète à la place"
+msgstr ""
+"Vous ne pouvez pas supprimer un compte comportant des écritures comptables ; rendez-le obsolète à"
+" la place"
 
 #: models/account.py:100
 #, python-brace-format
@@ -1654,11 +1997,20 @@ msgstr "Les comptes clients et fournisseurs doivent autoriser le lettrage ({code
 msgid ""
 "This account has journal items: its company cannot change and its type can only change within the"
 " same group"
-msgstr "Ce compte comporte des écritures comptables : sa société ne peut pas changer et son type ne peut changer qu'au sein du même groupe"
+msgstr ""
+"Ce compte comporte des écritures comptables : sa société ne peut pas changer et son type ne peut "
+"changer qu'au sein du même groupe"
+
+#: models/ai_anomaly.py:61
+#, python-brace-format
+msgid "This flag is already {state}"
+msgstr "Cette alerte est déjà {state}"
 
 #: models/journal.py:70
 msgid "The code, type and company of a journal with posted entries cannot change"
-msgstr "Le code, le type et la société d'un journal comportant des pièces comptabilisées ne peuvent pas être modifiés"
+msgstr ""
+"Le code, le type et la société d'un journal comportant des pièces comptabilisées ne peuvent pas "
+"être modifiés"
 
 #: models/journal.py:86
 msgid "A journal with entries cannot be deleted; archive it instead"
@@ -1700,19 +2052,21 @@ msgstr "{kind} en brouillon"
 msgid "No {kind} journal: install a chart of accounts first"
 msgstr "Aucun journal de type {kind} : installez d'abord un plan comptable"
 
-#: models/move.py:470
+#: models/move.py:481
 #, python-brace-format
 msgid "The period up to {lock} is locked: you cannot {action} {name} dated {date}"
 msgstr "La période jusqu'au {lock} est verrouillée : vous ne pouvez pas {action} {name} daté du {date}"
 
-#: models/move.py:605
+#: models/move.py:616
 #, python-brace-format
 msgid "Reversal of: {name}"
 msgstr "Extourne de : {name}"
 
 #: models/move.py:257
 msgid "Use the Post, Reset to draft and Cancel actions to change an entry's state"
-msgstr "Utilisez les actions Comptabiliser, Remettre en brouillon et Annuler pour changer le statut d'une pièce"
+msgstr ""
+"Utilisez les actions Comptabiliser, Remettre en brouillon et Annuler pour changer le statut d'une"
+" pièce"
 
 #: models/move.py:272
 #, python-brace-format
@@ -1723,36 +2077,41 @@ msgstr "La pièce {name} a été comptabilisée et conserve son numéro : annule
 msgid "The journal must belong to the entry's company"
 msgstr "Le journal doit appartenir à la société de la pièce"
 
-#: models/move.py:400
+#: models/move.py:292
+#, python-brace-format
+msgid "{partner} belongs to another company and cannot be used here"
+msgstr "{partner} appartient à une autre société et ne peut pas être utilisé ici"
+
+#: models/move.py:411
 msgid "The company has no default receivable / payable account; install a chart first"
 msgstr "La société n'a pas de compte client / fournisseur par défaut ; installez d'abord un plan comptable"
 
-#: models/move.py:488
+#: models/move.py:499
 #, python-brace-format
 msgid "Entry {name} has no journal items"
 msgstr "La pièce {name} n'a aucune écriture comptable"
 
-#: models/move.py:492
+#: models/move.py:503
 #, python-brace-format
 msgid "Entry {name} is not balanced (difference {diff})"
 msgstr "La pièce {name} n'est pas équilibrée (écart {diff})"
 
-#: models/move.py:500
+#: models/move.py:511
 #, python-brace-format
 msgid "Only draft entries can be posted ({name})"
 msgstr "Seules les pièces en brouillon peuvent être comptabilisées ({name})"
 
-#: models/move.py:558
+#: models/move.py:569
 #, python-brace-format
 msgid "{name} is in a hash-locked journal and cannot be reset to draft"
 msgstr "{name} appartient à un journal verrouillé par empreinte et ne peut pas être remis en brouillon"
 
-#: models/move.py:561 models/move.py:579
+#: models/move.py:572 models/move.py:590
 #, python-brace-format
 msgid "{name} has payments or matches: unreconcile it first"
 msgstr "{name} a des paiements ou des lettrages : délettrez-la d'abord"
 
-#: models/move.py:604
+#: models/move.py:615
 msgid "Only posted entries can be reversed"
 msgstr "Seules les pièces comptabilisées peuvent être extournées"
 
@@ -1766,66 +2125,66 @@ msgstr "La pièce comptabilisée {name} ne peut pas être modifiée ; remettez-l
 msgid "Cancelled entry {name} cannot be modified"
 msgstr "La pièce annulée {name} ne peut pas être modifiée"
 
-#: models/move.py:504
+#: models/move.py:515
 msgid "Set a customer or vendor before posting"
 msgstr "Renseignez un client ou un fournisseur avant de comptabiliser"
 
-#: models/move.py:506
+#: models/move.py:517
 msgid "Add at least one invoice line"
 msgstr "Ajoutez au moins une ligne de facture"
 
-#: models/move.py:518
+#: models/move.py:529
 msgid "The total of an invoice cannot be negative: create a credit note instead"
 msgstr "Le total d'une facture ne peut pas être négatif : créez plutôt un avoir"
 
-#: models/move.py:522
+#: models/move.py:533
 #, python-brace-format
 msgid "Every journal item needs an account ({line})"
 msgstr "Chaque écriture comptable nécessite un compte ({line})"
 
-#: models/move.py:863
+#: models/move.py:874
 #, python-brace-format
 msgid "Items can only be added to draft entries ({name})"
 msgstr "Des écritures ne peuvent être ajoutées qu'à des pièces en brouillon ({name})"
 
-#: models/move.py:888
+#: models/move.py:899
 #, python-brace-format
 msgid "Items of posted entry {name} cannot be modified"
 msgstr "Les écritures de la pièce comptabilisée {name} ne peuvent pas être modifiées"
 
-#: models/move.py:902
+#: models/move.py:913
 #, python-brace-format
 msgid "Items of posted entry {name} cannot be deleted"
 msgstr "Les écritures de la pièce comptabilisée {name} ne peuvent pas être supprimées"
 
-#: models/move.py:473
+#: models/move.py:484
 msgid "post"
 msgstr "comptabiliser"
 
-#: models/move.py:474
+#: models/move.py:485
 msgid "this entry"
 msgstr "cette pièce"
 
-#: models/move.py:526
+#: models/move.py:537
 #, python-brace-format
 msgid "Account {code} is deprecated"
 msgstr "Le compte {code} est obsolète"
 
-#: models/move.py:528
+#: models/move.py:539
 #, python-brace-format
 msgid "Account {code} belongs to another company"
 msgstr "Le compte {code} appartient à une autre société"
 
-#: models/move.py:530
+#: models/move.py:541
 #, python-brace-format
 msgid "Receivable and payable items need a partner ({code})"
 msgstr "Les écritures clients et fournisseurs nécessitent un partenaire ({code})"
 
-#: models/move.py:473
+#: models/move.py:484
 msgid "cancel"
 msgstr "annuler"
 
-#: models/move.py:473
+#: models/move.py:484
 msgid "modify"
 msgstr "modifier"
 
@@ -1975,7 +2334,9 @@ msgstr "Écart de change"
 #: sending.py:43
 #, python-brace-format
 msgid "Please find our {kind} {number} for {amount}, due on {due}."
-msgstr "Veuillez trouver ci-joint notre {kind} {number} d'un montant de {amount}, à régler au plus tard le {due}."
+msgstr ""
+"Veuillez trouver ci-joint notre {kind} {number} d'un montant de {amount}, à régler au plus tard "
+"le {due}."
 
 #: sending.py:42
 msgid "credit note"
@@ -2156,11 +2517,6 @@ msgid "Payment date"
 msgstr "Date de paiement"
 
 #. view label
-#: views.json:view_invoice_form views.json:view_move_form
-msgid "Reason"
-msgstr "Motif"
-
-#. view label
 #: views.json:view_invoice_form
 msgid "Credit note date"
 msgstr "Date de l'avoir"
@@ -2290,6 +2646,26 @@ msgstr "Clôturer l'exercice"
 msgid "Closing locks every entry of the year for everyone."
 msgstr "La clôture verrouille toutes les pièces de l'exercice pour tout le monde."
 
+#. view label
+#: views.json:view_move_anomaly_form
+msgid "Not an anomaly"
+msgstr "Pas une anomalie"
+
+#. view label
+#: views.json:view_move_anomaly_form
+msgid "Why (optional)"
+msgstr "Pourquoi (facultatif)"
+
+#. view label
+#: views.json:view_move_anomaly_form
+msgid "Confirm the problem"
+msgstr "Confirmer le problème"
+
+#. view label
+#: views.json:view_move_anomaly_form
+msgid "Note (optional)"
+msgstr "Note (facultative)"
+
 #. menu name
 #: menus.json:menu_accounting menus.json:menu_root
 msgid "Accounting"
@@ -2304,6 +2680,11 @@ msgstr "Clients"
 #: menus.json:menu_refunds
 msgid "Credit notes"
 msgstr "Avoirs"
+
+#. menu name
+#: menus.json:menu_bill_import menus.json:menu_invoice_import
+msgid "Read from documents"
+msgstr "Lire depuis des documents"
 
 #. menu name
 #: menus.json:menu_payments_in menus.json:menu_payments_out
@@ -2396,301 +2777,13 @@ msgstr "Paiements clients"
 msgid "Vendor payments"
 msgstr "Paiements fournisseurs"
 
-#. field label
-msgid "Payment status"
-msgstr "Statut de paiement"
-
-#. model description
-msgid "Anomaly flag"
-msgstr "Alerte d'anomalie"
-
-#. field label
-msgid "Document"
-msgstr "Document"
-
-#. field label
-msgid "Kind"
-msgstr "Type"
-
-#. selection value duplicate_number
-msgid "Same invoice number"
-msgstr "Même numéro de facture"
-
-#. selection value duplicate_amount
-msgid "Same amount and date"
-msgstr "Même montant et même date"
-
-#. selection value near_duplicate_text
-msgid "Nearly identical document"
-msgstr "Document presque identique"
-
-#. selection value unusual_amount
-msgid "Unusual amount for this vendor"
-msgstr "Montant inhabituel pour ce fournisseur"
-
-#. selection value new_vendor_large
-msgid "First bill of a new vendor, large amount"
-msgstr "Première facture d'un nouveau fournisseur, montant élevé"
-
-#. selection value bank_account_changed
-msgid "Bank account changed recently"
-msgstr "Compte bancaire modifié récemment"
-
-#. field label
-msgid "Severity"
-msgstr "Gravité"
-
-#. selection value low
-msgid "Low"
-msgstr "Faible"
-
-#. selection value medium
-msgid "Medium"
-msgstr "Moyenne"
-
-#. selection value high
-msgid "High"
-msgstr "Élevée"
-
-#. field label
-msgid "Score"
-msgstr "Score"
-
-#. field help
-msgid "Strength of the signal (robust z-score, similarity…)"
-msgstr "Force du signal (z-score robuste, similarité…)"
-
-#. field label
-msgid "Explanation"
-msgstr "Explication"
-
-#. field label
-msgid "Similar document"
-msgstr "Document similaire"
-
-#. field label
-msgid "Details"
-msgstr "Détails"
-
-#. selection value dismissed
-msgid "Dismissed"
-msgstr "Écartée"
-
-#. selection value confirmed
-msgid "Confirmed"
-msgstr "Confirmée"
-
-#. field label
-msgid "Decided By"
-msgstr "Décidé par"
-
-#. field label
-msgid "Decided At"
-msgstr "Décidé le"
-
-#. field label
-msgid "Ai Generated"
-msgstr "Généré par l'IA"
-
-#. field label
-msgid "Document text"
-msgstr "Texte du document"
-
-#. field help
-msgid "Text read from the source document"
-msgstr "Texte lu sur le document source"
-
-#. field label
-#. menu name
 #. action name
-msgid "Anomaly flags"
-msgstr "Alertes d'anomalie"
-
-#. field label
-msgid "Open anomaly flags"
-msgstr "Alertes d'anomalie ouvertes"
-
-#: ai_anomaly.py
-msgid "Open a bill to explain its flags"
-msgstr "Ouvrez une facture fournisseur pour expliquer ses alertes"
-
-#: ai_anomaly.py
-msgid "The vendor's bank account was added or changed {days} days ago: confirm it with the vendor through a known contact before paying."
-msgstr "Le compte bancaire du fournisseur a été ajouté ou modifié il y a {days} jours : confirmez-le auprès du fournisseur par un contact connu avant de payer."
-
-#: ai_anomaly.py
-msgid "Check bill {name}"
-msgstr "Vérifier la facture {name}"
-
-#: ai_anomaly.py
-msgid "Same invoice number {number} as {other} of {date} ({amount})."
-msgstr "Même numéro de facture {number} que {other} du {date} ({amount})."
-
-#: ai_anomaly.py
-msgid "{amount} is {ratio} times the usual amount of this vendor (median {median} over {count} bills)."
-msgstr "{amount} représente {ratio} fois le montant habituel de ce fournisseur (médiane {median} sur {count} factures)."
-
-#: ai_anomaly.py
-msgid "First bill of this vendor and above the company's usual large amount ({amount} ≥ {threshold})."
-msgstr "Première facture de ce fournisseur, au-dessus des montants élevés habituels de la société ({amount} ≥ {threshold})."
-
-#: ai_anomaly.py
-msgid "The bill asks for payment to an IBAN ending in {tail}, which is not the bank account on file for this vendor."
-msgstr "La facture demande un paiement sur un IBAN se terminant par {tail}, qui n'est pas le compte bancaire enregistré pour ce fournisseur."
-
-#: ai_anomaly.py
-msgid "Invoice number {number} reads like {onumber} of {other} (characters a scan confuses)."
-msgstr "Le numéro de facture {number} se lit comme {onumber} de {other} (caractères qu'un scan confond)."
-
-#: ai_anomaly.py
-msgid "Same amount {amount} as {other}, {days} days apart."
-msgstr "Même montant {amount} que {other}, à {days} jours d'écart."
-
-#: ai_anomaly.py
-msgid "The document is {percent}% identical to {other} of {date}, same amount {amount}."
-msgstr "Le document est identique à {percent} % à {other} du {date}, même montant {amount}."
-
-#: ai_api.py
-msgid "No such document"
-msgstr "Document introuvable"
-
-#: ai_api.py ai_bill.py
-msgid "The document is too large (15 MB at most)"
-msgstr "Le document est trop volumineux (15 Mo au maximum)"
-
-#: ai_api.py ai_bill.py
-msgid "Upload a PDF or an image (PNG, JPEG, WebP)"
-msgstr "Téléversez un PDF ou une image (PNG, JPEG, WebP)"
-
-#: ai_api.py
-msgid "No such flag"
-msgstr "Alerte introuvable"
-
-#: ai_bill.py
-msgid "Create {kind} from {who} ({count} lines)"
-msgstr "Créer {kind} de {who} ({count} lignes)"
-
-#: ai_bill.py
-msgid "Fill {name} from the document ({count} lines)"
-msgstr "Remplir {name} depuis le document ({count} lignes)"
-
-#: ai_bill.py
-msgid "The document looks like a {detected}; it is read as a {requested} as asked."
-msgstr "Le document ressemble à un {detected} ; il est lu comme un {requested}, comme demandé."
-
-#: ai_bill.py
-msgid "Not found on the document: {field}"
-msgstr "Introuvable sur le document : {field}"
-
-#: ai_bill.py
-msgid "Amounts not found in the document's text: {amounts}"
-msgstr "Montants introuvables dans le texte du document : {amounts}"
-
-#: ai_bill.py
-msgid "A document becomes an invoice, a bill or a credit note"
-msgstr "Un document devient une facture client, une facture fournisseur ou un avoir"
-
-#: ai_bill.py
-msgid "This is not a document-reading proposal"
-msgstr "Ce n'est pas une proposition de lecture de document"
-
-#: ai_bill.py
-msgid "Unknown currency {code}: the company currency is used"
-msgstr "Devise inconnue {code} : la devise de la société est utilisée"
-
-#: ai_bill.py
-msgid "No account for {line}"
-msgstr "Aucun compte pour {line}"
-
-#: ai_bill.py
-msgid "Only an empty draft invoice or bill can be filled from a document"
-msgstr "Seul un brouillon de facture vide peut être rempli depuis un document"
-
-#: ai_bill.py
-msgid "Lines can only be created from a document"
-msgstr "Les lignes ne peuvent qu'être créées depuis un document"
-
-#: ai_bill.py
-msgid "The draft was changed in the meantime: read the document again"
-msgstr "Le brouillon a été modifié entre-temps : relisez le document"
-
-#: ai_bill.py
-msgid "Account {id} does not belong to this company"
-msgstr "Le compte {id} n'appartient pas à cette société"
-
-#: ai_bill.py
-msgid "A tax does not belong to this company"
-msgstr "Une taxe n'appartient pas à cette société"
-
-#: ai_bill.py
-msgid "New vendor"
-msgstr "Nouveau fournisseur"
-
-#: ai_cashflow.py
-msgid "Cash today is {opening}. The forecast reaches its lowest point, {low}, on {low_date} and ends at {closing} on {end}. Open receivables: {receivables}; open payables: {payables}."
-msgstr "La trésorerie est aujourd'hui de {opening}. La prévision atteint son point bas, {low}, le {low_date} et se termine à {closing} le {end}. Créances ouvertes : {receivables} ; dettes ouvertes : {payables}."
-
-#. action name
-#: ai_cashflow.py
-msgid "Cash-flow forecast"
-msgstr "Prévision de trésorerie"
-
-#: ai_coding.py
-msgid "Foreign VAT at {rate}%: not deductible here, the line has no tax"
-msgstr "TVA étrangère à {rate} % : non déductible ici, la ligne n'a pas de taxe"
-
-#: ai_coding.py
-msgid "No {rate}% tax in this company"
-msgstr "Aucune taxe à {rate} % dans cette société"
-
-#: ai_coding.py
-msgid "Like \"{label}\" on {move}"
-msgstr "Comme « {label} » sur {move}"
-
-#: ai_coding.py
-msgid "Company default account"
-msgstr "Compte par défaut de la société"
-
-#: ai_coding.py
-msgid "Product {name}"
-msgstr "Article {name}"
-
-#: ai_coding.py
-msgid "Keyword \"{word}\""
-msgstr "Mot-clé « {word} »"
-
-#: ai_coding.py
-msgid "Usual account of this partner"
-msgstr "Compte habituel de ce partenaire"
-
-#: models/ai_anomaly.py
-msgid "This flag is already {state}"
-msgstr "Cette alerte est déjà {state}"
-
-#. view label
-msgid "Not an anomaly"
-msgstr "Pas une anomalie"
-
-#. view label
-msgid "Why (optional)"
-msgstr "Pourquoi (facultatif)"
-
-#. view label
-msgid "Confirm the problem"
-msgstr "Confirmer le problème"
-
-#. view label
-msgid "Note (optional)"
-msgstr "Note (facultative)"
-
-#. menu name
-msgid "Read from documents"
-msgstr "Lire depuis des documents"
-
-#. action name
+#: actions.json:action_bill_import
 msgid "Read bills from documents"
 msgstr "Lire des factures fournisseurs depuis des documents"
 
 #. action name
+#: actions.json:action_invoice_import
 msgid "Read invoices from documents"
 msgstr "Lire des factures clients depuis des documents"
+
