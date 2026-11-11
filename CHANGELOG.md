@@ -122,6 +122,19 @@ All notable changes are recorded here, grouped by phase. Format follows [Keep a 
   *Send via Peppol*, a mock access point that delivers and receives, inbound documents as draft vendor
   bills, status poll every 20 minutes. Guide: [docs/admin/einvoicing.md](docs/admin/einvoicing.md).
 
+### Sub-phase 2.6 — AI features (in progress)
+- **Finance AI features, first four (partial delivery).** `account_bank.reconcile_suggest` (re-ranked
+  matching proposals for bank lines the rules leave; top-1 accuracy 1.0 on 120 replayed cases),
+  `account_reports.nl_report` (question → report parameters for review; numbers always from the report
+  engine; 58 cases), `account_dunning.message_draft` (personalised reminder drafts as proposals; amounts
+  checked against the ledger, 100 % correct on 32 cases) and `account_budget.variance_explain` (variance
+  explanations using only `variance_report` numbers; numeric consistency 1.0 on 32 cases), with a shared
+  `tessera.ai.facts` helper that checks every number in generated text against the facts given. All four
+  pass their thresholds in replay. Not yet done for these four: form buttons / panels in the client,
+  dedicated feature-flag and permission tests (beyond the evaluation's zero-mutation and injection
+  checks), governance inventory entries. Asset, tax, analytic, e-invoice and payment AI features are not
+  started (an unfinished asset classification draft is kept on branch `wip-asset-ai-partial`).
+
 ### Sub-phase 2.7 — SAML single sign-on
 - **SAML 2.0 single sign-on (`auth_saml`, D-013, D-069).** Administrators add SAML identity providers under
   Settings → Users & Companies; the login page offers them next to OIDC. Service-provider initiated login
