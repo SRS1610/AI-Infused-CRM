@@ -768,3 +768,6 @@ msgstr "Rapports financiers"
 msgid "Financial report definitions"
 msgstr "Définitions des rapports financiers"
 
+#. menu name
+msgid "Cash-flow forecast"
+msgstr "Prévision de trésorerie"
