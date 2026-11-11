@@ -29,7 +29,8 @@ PRIMARY = (
     # Phase 1
     "contacts.partner", "crm.lead", "calendar.event", "sale.quotation", "product.product",
     # Phase 2 (sales orders and subscriptions are sale.quotation records)
-    "account.move", "account.move_line", "account.payment", "account.bank_statement_line", "account.asset",
+    # journal items first: they are copied as whole balanced entries, which also adds entries
+    "account.move_line", "account.move", "account.payment", "account.bank_statement_line", "account.asset",
 )  # fmt: skip
 
 # a first record for models the demo data leaves empty (cloning needs one)
