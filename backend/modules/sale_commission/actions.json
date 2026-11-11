@@ -1,0 +1,5 @@
+[
+  {"id": "action_statements", "name": "Commission statements", "model": "sale.commission_statement", "views": ["list", "form", "pivot"], "search_view": "sale_commission.view_statement_search", "help": "Compute the statements of a period from a commission plan, check them, confirm them and pay them with a vendor bill."},
+  {"id": "action_my_statements", "name": "My commissions", "model": "sale.commission_statement", "views": ["list", "form"], "search_view": "sale_commission.view_statement_search", "domain": [["user_id", "=", "$uid"]], "help": "Your commission statements, with every invoice and credit note that counted."},
+  {"id": "action_plans", "name": "Commission plans", "model": "sale.commission_plan", "views": ["list", "form"]}
+]

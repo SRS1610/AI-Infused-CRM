@@ -18,7 +18,7 @@ PHASE_MODULES = {
 PHASE_MODULES[2] = [
     *PHASE_MODULES[1], "account", "account_analytic", "account_budget", "account_asset",
     "account_reports", "account_tax", "account_bank", "payment", "account_dunning", "account_einvoice",
-    "auth_saml",
+    "auth_saml", "sale_rental", "sale_commission",
 ]  # fmt: skip
 
 
