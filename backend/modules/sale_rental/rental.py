@@ -48,7 +48,9 @@ def mark_late_job(env: Any) -> dict[str, Any]:
     return {"late": mark_late(env)}
 
 
-def rental_history(product: Model, date_from: dt.date, date_to: dt.date, tz: str | None = None) -> list[dict[str, Any]]:
+def rental_history(
+    product: Model, date_from: dt.date, date_to: dt.date, tz: str | None = None, company_id: int | None = None
+) -> list[dict[str, Any]]:
     """Daily utilisation of ``product`` from ``date_from`` to ``date_to`` (inclusive, days of ``tz``).
 
     Per day: ``units`` (rentable units), ``booked_units`` (units with a reservation that day), ``booked_hours``
@@ -66,23 +68,21 @@ def rental_history(product: Model, date_from: dt.date, date_to: dt.date, tz: str
     env.flush()
     rows = env.cr.fetchall(
         "SELECT unit, date_start, date_end, line_id FROM sale_rental_allocation"
-        " WHERE product_id = :p AND date_end > :s AND date_start < :e",
-        {"p": p.ids[0], "s": start, "e": end},
+        " WHERE product_id = :p AND date_end > :s AND date_start < :e"
+        " AND (CAST(:c AS bigint) IS NULL OR company_id = :c)",
+        {"p": p.ids[0], "s": start, "e": end, "c": company_id},
     )
-    late = (
-        env["sale.quotation_line"]
-        .elevated()
-        .search(
-            [
-                ("product_id", "=", p.ids[0]),
-                ("is_rental", "=", True),
-                ("rental_status", "=", "returned"),
-                ("late_fee", ">", 0),
-                ("returned_datetime", ">=", start),
-                ("returned_datetime", "<", end),
-            ]
-        )
-    )
+    late_domain: list[Any] = [
+        ("product_id", "=", p.ids[0]),
+        ("is_rental", "=", True),
+        ("rental_status", "=", "returned"),
+        ("late_fee", ">", 0),
+        ("returned_datetime", ">=", start),
+        ("returned_datetime", "<", end),
+    ]
+    if company_id:
+        late_domain.append(("company_id", "=", company_id))
+    late = env["sale.quotation_line"].elevated().search(late_domain)
     late_days = [line.returned_datetime.astimezone(z).date() for line in late]
     out: list[dict[str, Any]] = []
     day = date_from

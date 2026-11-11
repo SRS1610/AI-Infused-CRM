@@ -155,6 +155,37 @@ document (type, date, untaxed, total, period), the final status, the dates, the 
 | 19 | 2 × 100 −25 %, then −10 % on Feb 15 | 150 (discount 25 % on the line); change 15.00 (14/28); March 180 | upsell +30 |
 | 20 | end date Mar 15 | Jan, Feb 100; Mar 1–15 48.39 (15/31) | churned Mar 16 |
 
+## AI: churn prediction and renewal outreach
+
+Both features are switched per company in *Settings > AI* (on by default) and disappear from the form when off.
+
+**Churn prediction** (`sale_subscription.churn_predict`). Every running subscription gets a churn score (0–100), a risk
+level (*Low*, *Medium* from 35 %, *High* from 60 %) and its five main factors, computed by the daily job *Subscriptions:
+churn prediction (AI, daily)* or with **Score now** in the *Churn and renewal (AI)* panel of the subscription form.
+**Why this score?** lists the factors that raise or lower the risk, with the subscription's own values (*4 failed
+payments*, *Customer for 30 months*…). The *At risk (AI)* filter of the subscription list shows medium and high risks;
+the *Churn risk* column can be added to the list.
+
+- *Model.* A logistic regression on the churn features above (tenure, MRR and its 90-day change, products, discount,
+  fixed term, renewals, upgrades and downgrades, pauses, failed payments, saved card, unpaid and overdue invoices,
+  customer e-mails, reactivations). A factor's weight is its exact contribution to the log-odds against the
+  average subscription. The subscription's state, close reason and the customer's identity are never inputs.
+- *Training.* Each night the company's own model is trained on its churned subscriptions and on those that were
+  renewed or ran for at least 180 days, once there are 40 of them with at least 10 of each kind (the hold-out AUC is
+  stored with the model in *sale.subscription_churn_model*). Until then documented starting weights are used (the
+  panel says which).
+- *Quality.* On a held-out synthetic history of 120 subscriptions (created as records and scored through the
+  production extraction) the AUC is 0.86, with explanations for every score.
+- *What it writes.* Only the score fields of the subscription. When the feature is switched off the job clears them.
+
+**Personalised renewal outreach** (`sale_subscription.renewal_draft`). **Draft renewal** (running subscriptions) asks the
+model for a renewal e-mail built from the subscription's plan, products, tenure, MRR history, end date, renewal
+quotation and churn risk: appreciative when the risk is low, reassuring when medium, retention-minded when high.
+Every number of the draft must be one of the records' (amounts, dates, counts): a sentence with another figure — a
+recomputed yearly total, an invented discount, anything a customer name tries to slip in — is removed and listed
+under the draft. The draft is a **message proposal**: nothing is posted or e-mailed until you edit it if needed and
+click **Send**; only the person who asked can send it. The run is in the AI audit trail.
+
 ## Limits
 
 - One plan per subscription; its billing period cannot change once started (close and create another).

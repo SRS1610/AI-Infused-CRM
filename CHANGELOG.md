@@ -134,6 +134,19 @@ All notable changes are recorded here, grouped by phase. Format follows [Keep a 
   dedicated feature-flag and permission tests (beyond the evaluation's zero-mutation and injection
   checks), governance inventory entries. Asset, tax, analytic, e-invoice and payment AI features are not
   started (an unfinished asset classification draft is kept on branch `wip-asset-ai-partial`).
+- **Subscription, rental and commission AI features.** `sale_subscription.churn_predict` (per-company logistic
+  regression on `churn_features` with prior weights at cold start; score, risk and top-5 factors stored by a daily job
+  and *Score now*; *Churn and renewal (AI)* panel and *At risk (AI)* filter; AUC 0.86 on 120 held-out synthetic
+  subscriptions, explanations for every score), `sale_subscription.renewal_draft` (renewal e-mail whose tone follows
+  the churn risk, every figure checked against the records, message proposal — nothing posted or queued before
+  *Send*; judge 4.3/5), `sale_rental.demand_forecast` (weekly-profile x damped robust trend forecast of units out with
+  an 80 % range beside what is booked, company-scoped history; weekly MAPE 9.5 % on 120 generated histories),
+  `sale_rental.usage_anomaly` (daily alerts for repeated late returns, unusually long bookings and utilisation
+  spikes / drops, stored in *Rentals > Usage alerts* and notified; precision 0.96 on 150 labelled cases) and
+  `sale_commission.explain` (statement explanations citing only `statement_facts` numbers, 2-k second half; numeric
+  consistency 1.0, clarity 4.6/5). New `sale.subscription_churn_model` and `sale.rental_anomaly` models,
+  `rental_history(company_id=…)`, client panels on the subscription, rental product, rental order and commission
+  statement forms, French catalogues, guides and the governance inventory.
 ### Sub-phase 2.5 — Subscriptions, rentals, commissions
 - **Rentals (`sale_rental` 1.0.0, 2-f rental half).** Rentable products with a number of units, rental prices
   per hours / days / weeks / months (optionally per pricelist and company), late fees per hour and per day and a

@@ -34,7 +34,7 @@ msgid "This unit is already rented out for an overlapping period"
 msgstr ""
 
 #. field label
-#: field:sale.rental_allocation.name
+#: field:sale.rental_allocation.name field:sale.rental_anomaly.name
 msgid "Name"
 msgstr ""
 
@@ -44,22 +44,24 @@ msgid "Rental line"
 msgstr ""
 
 #. field label
-#: field:sale.rental_allocation.order_id
+#: field:sale.rental_allocation.order_id field:sale.rental_anomaly.order_id
 msgid "Order"
 msgstr ""
 
 #. field label
-#: field:sale.rental_allocation.partner_id
+#: field:sale.rental_allocation.partner_id field:sale.rental_anomaly.partner_id
 msgid "Customer"
 msgstr ""
 
 #. field label
-#: field:sale.rental_allocation.company_id field:sale.rental_pricing.company_id
+#: field:sale.rental_allocation.company_id field:sale.rental_anomaly.company_id
+#: field:sale.rental_pricing.company_id
 msgid "Company"
 msgstr ""
 
 #. field label
-#: field:sale.rental_allocation.product_id field:sale.rental_pricing.product_id
+#: field:sale.rental_allocation.product_id field:sale.rental_anomaly.product_id
+#: field:sale.rental_pricing.product_id
 msgid "Product"
 msgstr ""
 
@@ -81,6 +83,105 @@ msgstr ""
 #. field label
 #: field:sale.rental_allocation.rental_status
 msgid "Status"
+msgstr ""
+
+#. model description
+#: model:sale.rental_anomaly
+msgid "Rental usage alert (AI)"
+msgstr ""
+
+#. field label
+#: field:sale.rental_anomaly.summary
+msgid "Alert"
+msgstr ""
+
+#. field label
+#: field:sale.rental_anomaly.kind
+msgid "Kind"
+msgstr ""
+
+#. selection value late_returns
+#: selection:sale.rental_anomaly.kind
+msgid "Repeated late returns"
+msgstr ""
+
+#. selection value long_booking
+#: selection:sale.rental_anomaly.kind
+msgid "Unusually long booking"
+msgstr ""
+
+#. selection value utilisation_spike
+#: selection:sale.rental_anomaly.kind
+msgid "Utilisation spike"
+msgstr ""
+
+#. selection value utilisation_drop
+#: selection:sale.rental_anomaly.kind
+msgid "Utilisation drop"
+msgstr ""
+
+#. field label
+#: field:sale.rental_anomaly.key
+msgid "Key"
+msgstr ""
+
+#. field help
+#: field:sale.rental_anomaly.key
+msgid "What the alert is about (one open alert per key)"
+msgstr ""
+
+#. field label
+#. view title
+#: field:sale.quotation_line.is_rental field:sale.quotation_line.rental_origin_line_id
+#: field:sale.rental_anomaly.line_id views.json:view_product_form_rental
+#: views.json:view_quotation_line_form_rental
+msgid "Rental"
+msgstr ""
+
+#. field label
+#: field:sale.rental_anomaly.user_id
+msgid "Notified"
+msgstr ""
+
+#. field label
+#: field:sale.rental_anomaly.score
+msgid "Score"
+msgstr ""
+
+#. field help
+#: field:sale.rental_anomaly.score
+msgid "How unusual: the late share, the z-score or the relative gap"
+msgstr ""
+
+#. field label
+#: field:sale.rental_anomaly.details
+msgid "Details"
+msgstr ""
+
+#. field help
+#: field:sale.rental_anomaly.details
+msgid "The figures behind the alert"
+msgstr ""
+
+#. field label
+#: field:sale.rental_anomaly.detected_on
+msgid "Detected On"
+msgstr ""
+
+#. field label
+#: field:sale.rental_anomaly.state
+msgid "State"
+msgstr ""
+
+#. selection value open
+#. view label
+#: selection:sale.rental_anomaly.state views.json:view_rental_anomaly_search
+msgid "Open"
+msgstr ""
+
+#. selection value dismissed
+#: selection:sale.rental_anomaly.state
+msgid "Dismissed"
 msgstr ""
 
 #. constraint message
@@ -222,13 +323,6 @@ msgstr ""
 msgid "Active"
 msgstr ""
 
-#. field label
-#. view title
-#: field:sale.quotation_line.is_rental field:sale.quotation_line.rental_origin_line_id
-#: views.json:view_product_form_rental views.json:view_quotation_line_form_rental
-msgid "Rental"
-msgstr ""
-
 #. field help
 #: field:sale.quotation_line.is_rental
 msgid "Rent the product for a period instead of selling it"
@@ -328,6 +422,36 @@ msgstr ""
 msgid "Rentals"
 msgstr ""
 
+#: ai_api.py:34
+msgid "Product not found"
+msgstr ""
+
+#: ai_api.py:60
+msgid "Alert not found"
+msgstr ""
+
+#: ai_features.py:51
+msgid "Choose a rental product"
+msgstr ""
+
+#: ai_features.py:54
+#, python-brace-format
+msgid "{product} is not rented"
+msgstr ""
+
+#: ai_features.py:310
+msgid "Choose a rental alert"
+msgstr ""
+
+#: ai_features.py:239
+#, python-brace-format
+msgid "Rental alert: {alert}"
+msgstr ""
+
+#: ai_features.py:240
+msgid "Flagged by the rental usage check (AI). Review it in Rentals > Usage alerts."
+msgstr ""
+
 #: api.py:55
 msgid "Ask for at most one year"
 msgstr ""
@@ -364,6 +488,30 @@ msgstr ""
 
 #: models/allocation.py:198
 msgid "Use ISO 8601 dates"
+msgstr ""
+
+#: models/anomaly.py:51
+#, python-brace-format
+msgid "{customer} returned {late} of their last {rentals} rentals late (up to {hours} h)"
+msgstr ""
+
+#: models/anomaly.py:56
+#, python-brace-format
+msgid "{product} booked for {days} days by {customer}; usually {usual} days"
+msgstr ""
+
+#: models/anomaly.py:77
+msgid "Only salespeople can dismiss rental alerts"
+msgstr ""
+
+#: models/anomaly.py:61
+#, python-brace-format
+msgid "{product}: {actual} unit-days out in the last 7 days, {expected} expected"
+msgstr ""
+
+#: models/anomaly.py:66
+#, python-brace-format
+msgid "{product}: only {actual} unit-days out in the last 7 days, {expected} expected"
 msgstr ""
 
 #: models/product.py:84
@@ -583,6 +731,26 @@ msgstr ""
 msgid "Current and upcoming"
 msgstr ""
 
+#. view label
+#: views.json:view_rental_anomaly_form
+msgid "Dismiss"
+msgstr ""
+
+#. view label
+#: views.json:view_rental_anomaly_search
+msgid "Late returns"
+msgstr ""
+
+#. view label
+#: views.json:view_rental_anomaly_search
+msgid "Long bookings"
+msgstr ""
+
+#. view label
+#: views.json:view_rental_anomaly_search
+msgid "Utilisation"
+msgstr ""
+
 #. menu name
 #. action name
 #: actions.json:action_rental_orders menus.json:menu_rental_orders
@@ -606,6 +774,12 @@ msgstr ""
 msgid "Rental products"
 msgstr ""
 
+#. menu name
+#. action name
+#: actions.json:action_rental_anomalies menus.json:menu_rental_anomalies
+msgid "Usage alerts"
+msgstr ""
+
 #. action help
 #: actions.json:action_rental_orders
 msgid "Orders with rental lines: add a line for a rentable product with its pickup and return dates."
@@ -619,5 +793,12 @@ msgstr ""
 #. action help
 #: actions.json:action_rental_calendar
 msgid "Every reserved unit, per product and day. A unit cannot be reserved twice for overlapping periods."
+msgstr ""
+
+#. action help
+#: actions.json:action_rental_anomalies
+msgid ""
+"Raised every day by the rental usage check (AI): customers who keep returning late, unusually "
+"long bookings, utilisation far from the forecast."
 msgstr ""
 

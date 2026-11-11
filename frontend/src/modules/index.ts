@@ -15,3 +15,6 @@ import "./product/ProductAi";
 import "./account/BillImport";
 import "./account/BillAnomalies";
 import "./account/CashflowForecast";
+import "./sale_subscription/SubscriptionAi";
+import "./sale_rental/RentalAi";
+import "./sale_commission/CommissionAi";

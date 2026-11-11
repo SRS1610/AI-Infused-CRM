@@ -94,6 +94,33 @@ Rental lines are invoiced on the **ordered** quantity (whatever the product's in
 income account), the deposit on **Customer deposits**. After the return the deposit line counts as returned:
 *Credit note for returns* refunds it. Late fees are invoiced with *Create invoice* after the return.
 
+## AI: demand forecast and usage alerts
+
+Both features are switched per company in *Settings > AI* (on by default).
+
+**Demand forecast** (`sale_rental.demand_forecast`). The *Rental demand (AI)* panel of a rental product shows, for the
+next 2 to 12 weeks, the expected units out per day, the unit-days per week with an 80 % range, the unit-days
+**already booked** and the utilisation. The forecast is computed from the last 26 weeks of the company's own
+reservations (`rental_history`, other companies' rentals of a shared product are left out): a weekly profile (the
+median share of each weekday), a robust trend through the weekly means (Theil-Sen, damped), capped by the number of
+units. On a back-test of 120 generated six-month histories with weekly seasonality, the weekly units-out MAPE is
+9.5 % (the day-by-day MAPE, 26 %, is mostly day-to-day noise) and 85 % of the actual weeks fall inside the range. An
+optional narrative (`/api/v1/ai/features/sale_rental.demand_forecast/run`) may only state the forecast's numbers.
+
+**Usage alerts** (`sale_rental.usage_anomaly`). Every morning *Rental usage alerts (AI, daily)* checks the last 180 days
+of rentals and raises an alert in *Rentals > Usage alerts* (with a notification to the order's salesperson, or to the
+sales administrators for product-wide alerts) for:
+
+- a customer with at least 2 late returns (or rentals overdue now) making up at least 40 % of their rentals;
+- a booking started in the last 30 days whose duration is far above the product's usual ones (robust z-score of the
+  log-duration ≥ 3 and more than 2.5 × the median, with at least 6 other bookings to compare with);
+- a product whose last 7 days of units out are far above or below what the forecast made from the weeks before
+  expected (beyond 3 weekly standard deviations, 35 % and 3 unit-days).
+
+Alerts are notifications only: nothing else changes. They also show on the product and on the rental order (alerts
+about its rentals and its customer); **Dismiss** marks one as dealt with, and the same subject is not raised again
+for 30 days. On a labelled set of 150 cases the precision is 0.96 (recall 0.90).
+
 ## Limits
 
 - Units are counted, not tracked by serial number, and no stock moves are made (Phase 3).

@@ -61,7 +61,9 @@ msgstr "Assiette"
 msgid ""
 "Invoiced: invoices and credit notes count in the period they are posted. Paid: invoices count in "
 "the period they become fully paid"
-msgstr "Facturé : factures et avoirs comptent dans la période où ils sont comptabilisés. Payé : les factures comptent dans la période où elles sont entièrement payées"
+msgstr ""
+"Facturé : factures et avoirs comptent dans la période où ils sont comptabilisés. Payé : les "
+"factures comptent dans la période où elles sont entièrement payées"
 
 #. selection value invoiced
 #: selection:sale.commission_plan.basis selection:sale.commission_statement.basis
@@ -127,7 +129,9 @@ msgstr "Compte de charges de commissions"
 #. field help
 #: field:sale.commission_plan.expense_account_id
 msgid "Account of the commission bills (default: the chart's sales commissions account)"
-msgstr "Compte des factures de commissions (par défaut : le compte de commissions sur ventes du plan comptable)"
+msgstr ""
+"Compte des factures de commissions (par défaut : le compte de commissions sur ventes du plan "
+"comptable)"
 
 #. field label
 #. menu name
@@ -467,6 +471,10 @@ msgstr "HT, en devise de la société"
 msgid "Before accelerator"
 msgstr "Avant accélérateur"
 
+#: ai_features.py:112
+msgid "Choose a commission statement"
+msgstr "Choisissez un relevé de commissions"
+
 #: models/plan.py:156
 msgid "Assign either a salesperson or a sales team"
 msgstr "Affectez soit un commercial, soit une équipe commerciale"
@@ -628,7 +636,9 @@ msgstr "Relevés de commissions"
 msgid ""
 "Compute the statements of a period from a commission plan, check them, confirm them and pay them "
 "with a vendor bill."
-msgstr "Calculez les relevés d'une période depuis un plan de commissionnement, vérifiez-les, confirmez-les et payez-les par une facture fournisseur."
+msgstr ""
+"Calculez les relevés d'une période depuis un plan de commissionnement, vérifiez-les, confirmez-"
+"les et payez-les par une facture fournisseur."
 
 #. action help
 #: actions.json:action_my_statements

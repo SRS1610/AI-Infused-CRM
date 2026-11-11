@@ -1,3 +1,4 @@
 [
-  {"id": "sched_rental_late", "model": "core.scheduled_job", "noupdate": true, "values": {"name": "Late rentals (hourly)", "job_name": "sale_rental.mark_late", "cron": "17 * * * *"}}
+  {"id": "sched_rental_late", "model": "core.scheduled_job", "noupdate": true, "values": {"name": "Late rentals (hourly)", "job_name": "sale_rental.mark_late", "cron": "17 * * * *"}},
+  {"id": "sched_ai_usage_anomaly", "model": "core.scheduled_job", "noupdate": true, "values": {"name": "Rental usage alerts (AI, daily)", "job_name": "sale_rental.ai_usage_anomaly", "cron": "43 5 * * *"}}
 ]
