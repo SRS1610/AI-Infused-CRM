@@ -288,6 +288,34 @@ msgstr ""
 msgid "Total"
 msgstr ""
 
+#: ai_features.py:221
+#, python-brace-format
+msgid "Not found among the companies you work in: {names}"
+msgstr ""
+
+#: ai_features.py:222
+#, python-brace-format
+msgid "Not found among the partners you can access: {names}"
+msgstr ""
+
+#: ai_features.py:223
+#, python-brace-format
+msgid "Not found among the journals you can access: {names}"
+msgstr ""
+
+#: ai_features.py:194 engine.py:442
+msgid "This report has no comparison columns"
+msgstr ""
+
+#: ai_features.py:164
+#, python-brace-format
+msgid "Unknown or unavailable report '{report}'"
+msgstr ""
+
+#: ai_features.py:186
+msgid "The period's dates are not in the question; the report's default period is used"
+msgstr ""
+
 #: api.py:33
 msgid "Ids are comma-separated numbers"
 msgstr ""
@@ -344,10 +372,6 @@ msgstr ""
 #: engine.py:423
 #, python-brace-format
 msgid "Unknown currency '{code}'"
-msgstr ""
-
-#: engine.py:442
-msgid "This report has no comparison columns"
 msgstr ""
 
 #: engine.py:674
@@ -757,6 +781,11 @@ msgid "Reporting"
 msgstr ""
 
 #. menu name
+#: menus.json:menu_cashflow_forecast
+msgid "Cash-flow forecast"
+msgstr ""
+
+#. menu name
 #: menus.json:menu_report_definitions
 msgid "Financial reports"
 msgstr ""
@@ -766,6 +795,3 @@ msgstr ""
 msgid "Financial report definitions"
 msgstr ""
 
-#. menu name
-msgid "Cash-flow forecast"
-msgstr ""

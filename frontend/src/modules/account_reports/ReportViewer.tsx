@@ -14,6 +14,7 @@ import {
   type ReportFilters,
   type ReportLine,
 } from "./api";
+import { ReportAsk, type ScopeLabels } from "./ReportAsk";
 
 const ITEM_FIELDS = ["date", "move_id", "account_id", "partner_id", "name", "debit", "credit", "balance"];
 
@@ -102,8 +103,20 @@ function defaultFilters(): ReportFilters {
 }
 
 /** Any financial report: filters, comparison columns, expandable lines, drill-down, exports. */
-export function ReportViewer({ code }: { code: string }) {
-  const [filters, setFilters] = useState<ReportFilters>(defaultFilters);
+export function ReportViewer({
+  code,
+  initialFilters,
+  initialScope,
+  onSwitch,
+}: {
+  code: string;
+  initialFilters?: ReportFilters;
+  initialScope?: ScopeLabels;
+  /** Open another report with filters (an "Ask" answer about a different report). */
+  onSwitch?: (code: string, filters: ReportFilters, scope: ScopeLabels) => void;
+}) {
+  const [filters, setFilters] = useState<ReportFilters>(() => ({ ...defaultFilters(), ...initialFilters }));
+  const [scope, setScope] = useState<ScopeLabels>(initialScope ?? { partners: [], journals: [] });
   const [unfolded, setUnfolded] = useState<string[]>([]);
   const [extra, setExtra] = useState<Record<string, ReportLine[]>>({});
   const [drill, setDrill] = useState<{ title: string; domain: Domain } | null>(null);
@@ -155,6 +168,29 @@ export function ReportViewer({ code }: { code: string }) {
   return (
     <div className="account-report">
       <h1 className="page-title">{data?.report.name ?? t("Financial report")}</h1>
+      <ReportAsk
+        onApply={(target, next, labels) => {
+          if (target === code) {
+            setFilters({ ...defaultFilters(), ...next });
+            setScope(labels);
+          } else onSwitch?.(target, next, labels);
+        }}
+      />
+      {((filters.partner_ids?.length ?? 0) > 0 || (filters.journal_ids?.length ?? 0) > 0) && (
+        <p className="report-scope">
+          {t("Only: {names}", { names: [...scope.partners, ...scope.journals].join(", ") })}{" "}
+          <button
+            type="button"
+            className="btn ghost small"
+            onClick={() => {
+              set({ partner_ids: [], journal_ids: [] });
+              setScope({ partners: [], journals: [] });
+            }}
+          >
+            {t("Remove")}
+          </button>
+        </p>
+      )}
       <form
         className="report-filters control-panel"
         aria-label={t("Report filters")}
@@ -408,9 +444,21 @@ export function ReportAction() {
         {t("This action does not name a report.")}
       </div>
     );
+  return <SwitchableReport code={code} />;
+}
+
+/** The action's report, or another one the user opened from an "Ask" answer (with its filters). */
+function SwitchableReport({ code }: { code: string }) {
+  const [target, setTarget] = useState<{ code: string; filters: ReportFilters; scope: ScopeLabels } | null>(null);
+  const current = target?.code ?? code;
   return (
-    <Fragment key={code}>
-      <ReportViewer code={code} />
+    <Fragment key={`${current}-${JSON.stringify(target?.filters ?? {})}`}>
+      <ReportViewer
+        code={current}
+        initialFilters={target?.filters}
+        initialScope={target?.scope}
+        onSwitch={(next, filters, scope) => setTarget({ code: next, filters, scope })}
+      />
     </Fragment>
   );
 }

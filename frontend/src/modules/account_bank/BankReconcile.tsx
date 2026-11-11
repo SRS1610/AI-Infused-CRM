@@ -4,6 +4,7 @@ import { api, request } from "../../kernel/api/client";
 import { registerClientAction } from "../../kernel/extensions";
 import { formatMonetary } from "../../kernel/format";
 import { t } from "../../kernel/i18n";
+import { AiLineSuggestions, AiSuggestOpenButton } from "./BankAi";
 
 const LINE_MODEL = "account.bank_statement_line";
 
@@ -199,6 +200,10 @@ export function BankReconcile() {
         <button type="button" className="btn" onClick={() => void autoReconcile()}>
           {t("Auto-reconcile")}
         </button>
+        <AiSuggestOpenButton
+          journalId={journalId || null}
+          onDone={(text, error) => setMessage({ kind: error ? "error" : "info", text })}
+        />
         <label className="btn ghost">
           {importing ? t("Importing…") : t("Import a statement")}
           <input
@@ -345,6 +350,10 @@ function LinePanel({
       )}
       {line.state !== "reconciled" && (
         <>
+          <AiLineSuggestions
+            lineId={lineId}
+            onDecided={() => void run(async () => undefined, t("Match proposal decided"))}
+          />
           <h3>{t("Suggestions")}</h3>
           {suggestions.data && suggestions.data.length === 0 && <p className="muted">{t("No suggestion.")}</p>}
           <ul className="bank-suggestions">

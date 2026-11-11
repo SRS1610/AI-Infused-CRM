@@ -21,3 +21,7 @@ import "./sale_commission/CommissionAi";
 import "./account_asset/AssetAi";
 import "./payment/PaymentAi";
 import "./account_tax/TaxAi";
+import "./account_analytic/AnalyticAi";
+import "./account_einvoice/EinvoiceAi";
+import "./account_dunning/DunningAi";
+import "./account_budget/BudgetAi";
