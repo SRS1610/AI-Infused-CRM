@@ -41,7 +41,7 @@ class DataLoader:
     def __init__(self, env: Environment, module: str, *, mode: str = "install") -> None:
         self.env = env
         self.module = module
-        self.mode = mode  # install | upgrade
+        self.mode = mode  # install | upgrade | missing (create absent records only: new demo data on upgrade)
         self.stats = {"created": 0, "updated": 0, "skipped": 0, "deleted": 0}
 
     # -- entry points -----------------------------------------------------------------------
@@ -71,6 +71,15 @@ class DataLoader:
                 existing.unlink()
                 self.stats["deleted"] += 1
             return None
+        if self.mode == "missing":
+            # only records the database does not have yet; entries without an id cannot be told apart
+            if not external_id:
+                self.stats["skipped"] += 1
+                return None
+            found = self.env.ref(qualify(external_id, self.module), raise_if_not_found=False)
+            if found is not None and found.exists():
+                self.stats["skipped"] += 1
+                return found
         model_name = entry.get("model")
         if not model_name:
             raise ModuleError("Data entry has no model")

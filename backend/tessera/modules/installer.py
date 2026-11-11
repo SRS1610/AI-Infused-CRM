@@ -128,6 +128,30 @@ def _load_records(env: Environment, registry: Registry, manifest: Manifest, *, m
     env.flush()
 
 
+def _has_demo_data(env: Environment | Cursor, manifest: Manifest) -> bool:
+    """Whether the module's demo data was loaded in this database (one of its demo records exists)."""
+    import json
+
+    names: list[str] = []
+    for path in manifest.files("demo"):
+        try:
+            entries = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            continue
+        names += [
+            e["id"] for e in entries if isinstance(e, dict) and isinstance(e.get("id"), str) and "." not in e["id"]
+        ]
+    if not names:
+        return False
+    cr = env if isinstance(env, Cursor) else env.cr
+    return bool(
+        cr.scalar(
+            "SELECT 1 FROM core_module_record WHERE module = :m AND name = ANY(:n) LIMIT 1",
+            {"m": manifest.name, "n": names},
+        )
+    )
+
+
 def _upsert_module_rows(env: Environment, manifests: dict[str, Manifest]) -> None:
     """Make sure every available module has a ``core.module`` row."""
     modules = env["core.module"]
@@ -293,6 +317,12 @@ def upgrade_modules(names: Sequence[str], *, database_url: str | None = None) ->
             manifest = manifests[name]
             from_version = installed[name]
             _load_records(env, registry, manifest, mode="upgrade", demo=False)
+            if _has_demo_data(env, manifest):
+                # a database installed with demo data gets the new version's new demo records too (U-3);
+                # demo records it already has are left as the users changed them
+                loader = DataLoader(env, manifest.name, mode="missing")
+                for path in manifest.files("demo"):
+                    loader.load_file(path)
             apply_module_translations(env, name, modules=registry.module_order)
             logs = env["core.module_migration_log"]
             for ver, folder in _migration_scripts(manifest, from_version, manifest.version):
@@ -334,6 +364,8 @@ def upgrade_pending(*, database_url: str | None = None) -> InstallResult:
     cr = Cursor(get_engine(url))
     try:
         installed = _installed_modules(cr)
+        # a database installed with demo data gets demo data in the modules installed on the way
+        demo = any(_has_demo_data(cr, manifests[n]) for n in installed if n in manifests)
     finally:
         cr.close()
     pending = [n for n, v in installed.items() if n in manifests and Version(manifests[n].version) > Version(v)]
@@ -343,7 +375,7 @@ def upgrade_pending(*, database_url: str | None = None) -> InstallResult:
     # those first, then upgrade
     known = [n for n in installed if n in manifests]
     missing = sorted(closure(manifests, known) - set(known))
-    before = install_modules(missing, database_url=url) if missing else InstallResult()
+    before = install_modules(missing, database_url=url, demo=demo) if missing else InstallResult()
     result = upgrade_modules(pending, database_url=url)
     result.installed = before.installed + result.installed
     result.seconds += before.seconds

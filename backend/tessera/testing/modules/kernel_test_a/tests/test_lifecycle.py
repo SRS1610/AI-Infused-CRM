@@ -193,6 +193,21 @@ def test_data_loader_edge_cases(env):  # type: ignore[no-untyped-def]
         loader.load_entry({"id": "x", "values": {}})
 
 
+def test_missing_mode_only_creates_absent_records(env):  # type: ignore[no-untyped-def]
+    """New demo records reach upgraded databases; records users changed stay as they are (U-3)."""
+    from tessera.modules.data import DataLoader
+
+    loader = DataLoader(env, "kernel_test_a", mode="missing")
+    tag = env.ref("kernel_test_a.tag_classic")
+    tag.write({"color": 42})
+    loader.load_entry({"id": "tag_classic", "model": "ktest.tag", "values": {"color": 7}})
+    assert tag.color == 42
+    created = loader.load_entry({"id": "tag_brand_new", "model": "ktest.tag", "values": {"name": "Brand new"}})
+    assert created is not None and env.ref("kernel_test_a.tag_brand_new") == created
+    assert loader.load_entry({"model": "ktest.tag", "values": {"name": "No id"}}) is None
+    assert loader.stats == {"created": 1, "updated": 0, "skipped": 2, "deleted": 0}
+
+
 def test_uninstall_keeping_data_then_reinstall_leaves_no_drift(registry, database_url: str, temp_module_path: Path):  # type: ignore[no-untyped-def]
     """Renamed tables take their indexes and many2many join tables with them, so the module installs again."""
     name = "ktest_reinstall"
