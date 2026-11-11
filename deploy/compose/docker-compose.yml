@@ -57,7 +57,7 @@ services:
   objectstore:
     image: chrislusf/seaweedfs:latest
     command: >
-      server -dir=/data -s3 -s3.config=/etc/seaweedfs/s3.json -master.volumeSizeLimitMB=1024
+      server -dir=/data -s3 -s3.config=/etc/seaweedfs/s3.json -master.volumeSizeLimitMB=1024 -volume.max=100
     volumes:
       - objectstore-data:/data
       - ./seaweedfs-s3.json:/etc/seaweedfs/s3.json:ro
