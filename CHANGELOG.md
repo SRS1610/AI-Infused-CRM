@@ -122,6 +122,26 @@ All notable changes are recorded here, grouped by phase. Format follows [Keep a 
   *Send via Peppol*, a mock access point that delivers and receives, inbound documents as draft vendor
   bills, status poll every 20 minutes. Guide: [docs/admin/einvoicing.md](docs/admin/einvoicing.md).
 
+### Sub-phase 2.5 — Subscriptions, rentals, commissions
+- **Subscriptions (`sale_subscription` 1.0.0, acceptance 2-f subscription half).** Plans (every N weeks /
+  months / years, auto-close after N days unpaid, payment retry interval, customer closing, renewal
+  quotation lead time) and close reasons; subscriptions are sales orders with a plan and subscription
+  products (`is_subscription`, status not started / in progress / paused / renewed / churned, start, next
+  invoice and end dates, MRR, saved payment method). A daily job (also *Invoice due periods*) invoices each
+  started period once (unique key per period; catch-up; periods anchored on the start date, so the 31st
+  bills on month ends), posts it and charges the saved card; declined charges are retried and, past the
+  plan's limit, the subscription churns with *Payment failure*. Change orders (*Upsell*) prorate the
+  invoiced period per line (`(new − old) × remaining days / period days`, change day included) on an
+  invoice or a credit note; *Close now* credits the unused days, *at period end* ends with the period;
+  pause skips periods; reactivation restarts billing; fixed terms invoice a prorated last period, send a
+  renewal quotation before the end and continue without a gap into the accepted renewal, else churn. MRR
+  history (new, upsell, downsell, churn, reactivation, renewal; order and company currency), *Subscription
+  analysis* and *MRR by plan* pivots, `subscription_metrics(company, date_from, date_to)` (MRR movements,
+  churn and retention rates, per month) and `churn_features(subscription)` for the 2.6 churn prediction.
+  Portal: subscriptions on *My documents* with status, next invoice, invoices and closing when the plan
+  allows it. A 20-scenario fixture asserts every amount and date; demo with eight subscriptions. Guide:
+  [docs/user/subscriptions.md](docs/user/subscriptions.md).
+
 ### Sub-phase 2.7 — SAML single sign-on
 - **SAML 2.0 single sign-on (`auth_saml`, D-013, D-069).** Administrators add SAML identity providers under
   Settings → Users & Companies; the login page offers them next to OIDC. Service-provider initiated login
