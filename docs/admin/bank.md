@@ -122,6 +122,26 @@ open items by number, reference, partner or amount with an optional partial amou
 selected items**), a write-off to any account with an optional tax (**Write off the rest**), and **Undo** for
 matched transactions.
 
+## AI: reconciliation suggestions (`account_bank.reconcile_suggest`)
+
+Sub-phase 2.6. For the transactions the rules leave open (acceptance 2-d, "the remainder are proposed by AI"):
+
+- in the reconciliation screen, **Suggest a match** (section *AI suggestions* of the selected transaction) ranks
+  candidates: the rules' own, plus open items whose reference *looks like* the label (typos, missing separators,
+  the bare serial number), whose partner the label names or the counterparty's history designates, whose amount is
+  close (bank fees deducted), and groups of one partner's items adding up to the amount. A fixed logistic score
+  combines amount, reference similarity, partner, date and the rules' score; each candidate shows its confidence
+  and reasons. Only when the two best candidates are within 0.05 and the label has text is the small-tier model
+  asked which of them the label means — it can only choose among those, never promote another;
+- the best candidate (confidence ≥ 0.5) becomes a **match proposal**: nothing is reconciled before *Accept*, which
+  runs the ledger's matching as the accepting user; read-only users see the suggestions without a proposal;
+- **AI: propose matches** in the toolbar makes one proposal per open transaction of the journal (up to 100).
+
+Every request is an `ai_core.run`. The feature has a per-company switch (*AI → Features*): switched off, the buttons
+disappear and `POST /api/v1/account_bank/ai/lines/{id}/suggest` and `/account_bank/ai/suggest` answer
+`404 feature_disabled` without calling the gateway. Candidates are read as the user (company rules apply); the
+counterparty history reads the company's reconciled transactions with elevated rights, as partner ids only.
+
 ## Access
 
 | Group | Can |

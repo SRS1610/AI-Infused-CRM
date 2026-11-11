@@ -153,7 +153,7 @@ def rank(env: Environment, line: Model) -> dict[str, Any]:
         support[key] += 1
         why[key].update(reasons)
     total = sum(votes.values())
-    candidates = [
+    candidates: list[dict[str, Any]] = [
         {
             "distribution": dists[k],
             "votes": round(v, 3),

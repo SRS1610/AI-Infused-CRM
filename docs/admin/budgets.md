@@ -49,6 +49,15 @@ budget-vs-actual of a budget, recomputed live: per line the planned, actual, the
 variance %, achievement %, elapsed share and whether it is favourable; totals per line type and the net
 result. The plain-language variance explanations of sub-phase 2.6 must use only these numbers.
 
+## AI: variance explanations (`account_budget.variance_explain`)
+
+Sub-phase 2.6. *Explain variance (AI)* beside a budget → **Explain variance** (with an optional focus such as
+"travel") asks the mid-tier model for at most five sentences: revenue and costs separately, the lines that matter
+and whether each is ahead of or behind the time elapsed. The model only sees `variance_report` (recomputed live,
+as the user); **every figure it writes must be one of the report's** — a sentence with another number is removed
+and listed. Nothing is written. Per-company switch: switched off, the panel disappears and the endpoint answers
+`404 feature_disabled` without calling the gateway.
+
 ## Access
 
 Accountants manage budgets; read-only users see them. Budgets belong to one company and are visible only to

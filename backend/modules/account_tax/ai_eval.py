@@ -71,8 +71,8 @@ def build(env: Any, scenario: dict[str, Any]) -> tuple[Any, list[int]]:
     e = env.elevated("ai eval scenario")
     company = e.company
     rng = random.Random(scenario["seed"])  # noqa: S311 - reproducible synthetic data
-    tax = {k: chart_ref(company, k) for k in ("sale_vat_20", "sale_vat_10", "sale_vat_0_export", "sale_vat_0_eu",
-                                               "purchase_vat_20", "purchase_vat_0_import")}  # fmt: skip
+    tax: dict[str, Any] = {k: chart_ref(company, k) for k in ("sale_vat_20", "sale_vat_10", "sale_vat_0_export",
+                           "sale_vat_0_eu", "purchase_vat_20", "purchase_vat_0_import", "fp_eu_b2b")}  # fmt: skip
     label = scenario.get("name_suffix", "")
     fr = [_partner(e, f"Client Lyon{label}", "fr"), _partner(e, f"Client Lille{label}", "fr")]
     de_b2b = _partner(e, f"Kunde Berlin GmbH{label}", "de", "DE123456789")
@@ -86,7 +86,7 @@ def build(env: Any, scenario: dict[str, Any]) -> tuple[Any, list[int]]:
         current = start == CURRENT[0]
         day = start + dt.timedelta(days=rng.randint(5, 50))
         level = scenario.get("level", 1.0) * rng.uniform(0.85, 1.15)
-        sales_factor = {"swing_up": 4.0, "swing_down": 0.15}.get(anomaly, 1.0) if current else 1.0
+        sales_factor = {"swing_up": 4.0, "swing_down": 0.15}.get(str(anomaly), 1.0) if current else 1.0
         for p in fr:
             _doc(e, p, day, rng.uniform(1800, 2600) * level * sales_factor, tax["sale_vat_20"])
         _doc(e, de_b2b, day, rng.uniform(900, 1300) * level, tax["sale_vat_20"])
@@ -111,9 +111,7 @@ def build(env: Any, scenario: dict[str, Any]) -> tuple[Any, list[int]]:
         importer = _partner(e, f"Supplier Austin{label}", "us")
         seeded.append(_doc(e, importer, day, 6000.0, tax["purchase_vat_20"], kind="in_invoice").ids[0])
     elif anomaly == "rc_without_vat":
-        no_vat = _partner(
-            e, f"Lieferant ohne USt{label}", "de", property_account_position_id=chart_ref(company, "fp_eu_b2b").ids[0]
-        )
+        no_vat = _partner(e, f"Lieferant ohne USt{label}", "de", property_account_position_id=tax["fp_eu_b2b"].ids[0])
         seeded.append(_doc(e, no_vat, day, 900.0, tax["purchase_vat_20"], kind="in_invoice").ids[0])
     elif anomaly == "draft":
         seeded.append(_doc(e, fr[0], day, 1100.0, tax["sale_vat_20"], post=False).ids[0])

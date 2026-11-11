@@ -122,18 +122,23 @@ All notable changes are recorded here, grouped by phase. Format follows [Keep a 
   *Send via Peppol*, a mock access point that delivers and receives, inbound documents as draft vendor
   bills, status poll every 20 minutes. Guide: [docs/admin/einvoicing.md](docs/admin/einvoicing.md).
 
-### Sub-phase 2.6 — AI features (in progress)
-- **Finance AI features, first four (partial delivery).** `account_bank.reconcile_suggest` (re-ranked
-  matching proposals for bank lines the rules leave; top-1 accuracy 1.0 on 120 replayed cases),
-  `account_reports.nl_report` (question → report parameters for review; numbers always from the report
-  engine; 58 cases), `account_dunning.message_draft` (personalised reminder drafts as proposals; amounts
-  checked against the ledger, 100 % correct on 32 cases) and `account_budget.variance_explain` (variance
-  explanations using only `variance_report` numbers; numeric consistency 1.0 on 32 cases), with a shared
-  `tessera.ai.facts` helper that checks every number in generated text against the facts given. All four
-  pass their thresholds in replay. Not yet done for these four: form buttons / panels in the client,
-  dedicated feature-flag and permission tests (beyond the evaluation's zero-mutation and injection
-  checks), governance inventory entries. Asset, tax, analytic, e-invoice and payment AI features are not
-  started (an unfinished asset classification draft is kept on branch `wip-asset-ai-partial`).
+### Sub-phase 2.6 — AI features
+- **Finance AI features.** Ten features, each with a per-company switch, gate tests (switch off → `404
+  feature_disabled` without gateway call; scoping and company isolation; `ai_core.run` rows; nothing written before a
+  proposal is accepted), a client affordance with vitest tests, French, guide sections and governance rows; all pass
+  in replay (`tessera ai eval run`). `account_bank.reconcile_suggest` (AI suggestions and *AI: propose matches* in the
+  reconciliation screen; top-1 1.0 on 120 cases), `account_reports.nl_report` (*Ask* box filling the report filters
+  for review; parameter accuracy 0.948), `account_dunning.message_draft` (*Draft personalised message* on a reminder,
+  write proposal; amounts 1.0, judge 0.86), `account_budget.variance_explain` (*Explain variance* panel; numeric
+  consistency 1.0), `account_asset.classify` (asset model per vendor bill line, action proposal creating the asset;
+  accuracy 0.965 on 114 lines) and `account_asset.depreciation_check` (life out of range for the type, declining
+  buildings / software, missing or duplicated postings, salvage, model and peer checks; precision 1.0 on 61 assets),
+  `account_tax.prefiling` (ranked and explained pre-filing findings plus rate-per-country outliers and grid swings
+  against four previous periods; recall 1.0 on 64 scenarios), `account_analytic.allocation_suggest` (models first,
+  nearest-neighbour history vote; exact-distribution accuracy 0.944 on 54 scenarios),
+  `account_einvoice.error_explain` (field to fix decided from rule id and location with a link, the model writes the
+  explanation and fix; attribution 1.0 on 75 real validator findings, judge 0.955) and `payment.failure_summary`
+  (decline codes and seven-language phrases, per customer / provider; category accuracy 0.921 on 63 messages).
 - **Subscription, rental and commission AI features.** `sale_subscription.churn_predict` (per-company logistic
   regression on `churn_features` with prior weights at cold start; score, risk and top-5 factors stored by a daily job
   and *Score now*; *Churn and renewal (AI)* panel and *At risk (AI)* filter; AUC 0.86 on 120 held-out synthetic

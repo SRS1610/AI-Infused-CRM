@@ -128,6 +128,21 @@ The web client's report page (client action `account_reports.viewer`, `context: 
 the filters bar, comparison columns, expandable lines, drill-down to journal items with links to their
 entries, and export buttons.
 
+## AI: natural-language reports (`account_reports.nl_report`)
+
+Sub-phase 2.6. The **Ask** box at the top of every report turns a question ("P&L last quarter vs the same quarter
+last year for Acme") into report parameters that the user **reviews before applying**: the report, the period,
+the comparison, companies, partners and journals, with warnings for anything that could not be resolved. *Apply
+these filters* fills the filters (opening the other report when the question is about another one); the figures
+then come from the report engine — never from the model.
+
+The model (small tier, `nl_query`) only reads the question: it picks a report code among those the user may open,
+a period **keyword** (`last_quarter`, `ytd`…), a comparison and the names it mentions. Code computes the dates
+from the reference day and the fiscal year (a date the model writes is kept only when it is typed in the
+question), resolves names only among the partners and journals **the user can read** and the companies they work
+in, and validates the result as `ReportParams`. Nothing is written. The feature has a per-company switch; switched
+off, the box disappears and `POST /api/v1/ai/features/account_reports.nl_report/run` answers `404 feature_disabled`.
+
 ## Access
 
 Running a report needs *Accounting / Read-only* (accountants and advisers have it) and is limited to the
