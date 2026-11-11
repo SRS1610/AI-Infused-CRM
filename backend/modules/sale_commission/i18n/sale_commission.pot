@@ -465,6 +465,10 @@ msgstr ""
 msgid "Before accelerator"
 msgstr ""
 
+#: ai_features.py:112
+msgid "Choose a commission statement"
+msgstr ""
+
 #: models/plan.py:156
 msgid "Assign either a salesperson or a sales team"
 msgstr ""
