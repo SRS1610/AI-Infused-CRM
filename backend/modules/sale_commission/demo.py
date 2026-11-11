@@ -1,6 +1,6 @@
 """Commission demo scenario (``tessera seed demo --phase 2``) and the 2-k cross-check data.
 
-For a month, Sam Seller and Rita Rep (the demo plan's salespeople) get invoices — two from sales orders — and credit
+For a month, Hugo Lambert and Nadia Keller (the demo plan's salespeople) get invoices — two from sales orders — and credit
 notes, plus documents that must not count: an invoice of the month before, a draft invoice and another salesperson's
 invoice. ``tests/data/commission_crosscheck.csv`` holds the statements expected for that month, computed separately
 (``tests/data/make_crosscheck.py``). The seeding step uses the last complete month and computes its statements.
@@ -19,13 +19,13 @@ REF = "DEMO-COM"
 
 # document key → (salesperson, day of the month, how, lines: (product xmlid, quantity, unit price, discount %))
 DOCUMENTS: list[tuple[str, str, int, str, list[tuple[str, float, float, float]]]] = [
-    ("A1", "sam", 5, "order", [("product_robot_arm", 2, 18900, 5), ("product_onboarding", 1, 2500, 0)]),
-    ("A2", "sam", 12, "invoice", [("product_consulting", 10, 1200, 0), ("product_gripper", 3, 1450, 12.5)]),
-    ("B1", "rita", 8, "invoice", [("product_support", 1, 4800, 0), ("product_sensor", 3, 3200, 7.5)]),
-    ("B2", "rita", 18, "order", [("product_robot_arm", 1, 18900, 0)]),
-    ("B3", "rita", 26, "refund", [("product_sensor", 1, 3200, 0)]),
+    ("A1", "hugo", 5, "order", [("product_robot_arm", 2, 18900, 5), ("product_onboarding", 1, 2500, 0)]),
+    ("A2", "hugo", 12, "invoice", [("product_consulting", 10, 1200, 0), ("product_gripper", 3, 1450, 12.5)]),
+    ("B1", "nadia", 8, "invoice", [("product_support", 1, 4800, 0), ("product_sensor", 3, 3200, 7.5)]),
+    ("B2", "nadia", 18, "order", [("product_robot_arm", 1, 18900, 0)]),
+    ("B3", "nadia", 26, "refund", [("product_sensor", 1, 3200, 0)]),
     # not counted: a draft, and another salesperson's invoice
-    ("X1", "sam", 27, "draft", [("product_sensor", 1, 3200, 0)]),
+    ("X1", "hugo", 27, "draft", [("product_sensor", 1, 3200, 0)]),
     ("X2", "admin", 14, "invoice", [("product_consulting", 4, 1200, 0)]),
 ]
 # A3: credit note of A2 on the 22nd for 2 of the 10 consulting days (made by reversing A2)
@@ -37,8 +37,8 @@ def _ref(env: Any, xmlid: str) -> Any:
 
 def _users(env: Any) -> dict[str, Any]:
     return {
-        "sam": _ref(env, "sale_commission.user_sam"),
-        "rita": _ref(env, "sale_commission.user_rita"),
+        "hugo": _ref(env, "sale_commission.user_hugo"),
+        "nadia": _ref(env, "sale_commission.user_nadia"),
         "admin": _ref(env, "core.user_admin"),
     }
 
@@ -72,7 +72,7 @@ def seed_month(env: Any, month_start: dt.date) -> int:
     created: dict[str, Any] = {}
     # the month before: does not count
     previous = month_start - dt.timedelta(days=3)
-    docs = [("X0", "sam", previous, "invoice", [("product_consulting", 1, 1200, 0)])]
+    docs = [("X0", "hugo", previous, "invoice", [("product_consulting", 1, 1200, 0)])]
     docs += [(k, who, month_start.replace(day=day), how, spec) for k, who, day, how, spec in DOCUMENTS]
     for key, who, day, how, spec in docs:
         user = users[who]

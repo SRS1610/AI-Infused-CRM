@@ -375,4 +375,4 @@ def test_demo_hook(system_env: Any) -> None:
     sts = system_env["sale.commission_statement"].search(
         [("plan_id", "=", system_env.ref("sale_commission.plan_demo").ids[0])]
     )
-    assert {s.user_id.login for s in sts} == {"sam", "rita"}
+    assert {s.user_id.login for s in sts} == {"hugo", "nadia"}

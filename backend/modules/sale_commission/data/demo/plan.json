@@ -1,9 +1,9 @@
 [
-  {"id": "user_sam", "model": "core.user", "noupdate": true,
-   "values": {"login": "sam", "name": "Sam Seller", "email": "sam@example.com", "password": "demo1234", "lang": "en_US", "tz": "America/New_York",
+  {"id": "user_hugo", "model": "core.user", "noupdate": true,
+   "values": {"login": "hugo", "name": "Hugo Lambert", "email": "hugo@example.com", "password": "demo1234", "lang": "en_US", "tz": "America/New_York",
               "company_id": "core.main_company", "company_ids": ["core.main_company"], "group_ids": ["sale.group_sale_user"]}},
-  {"id": "user_rita", "model": "core.user", "noupdate": true,
-   "values": {"login": "rita", "name": "Rita Rep", "email": "rita@example.com", "password": "demo1234", "lang": "fr_FR", "tz": "Europe/Paris",
+  {"id": "user_nadia", "model": "core.user", "noupdate": true,
+   "values": {"login": "nadia", "name": "Nadia Keller", "email": "nadia@example.com", "password": "demo1234", "lang": "fr_FR", "tz": "Europe/Paris",
               "company_id": "core.main_company", "company_ids": ["core.main_company"], "group_ids": ["sale.group_sale_user"]}},
   {"id": "plan_demo", "model": "sale.commission_plan", "noupdate": true,
    "values": {"name": {"en_US": "Sales commissions (demo)", "fr_FR": "Commissions commerciales (démo)"}, "period": "monthly", "basis": "invoiced",
@@ -20,8 +20,8 @@
    "values": {"plan_id": "sale_commission.plan_demo", "min_achievement": 80, "multiplier": 1.0}},
   {"id": "plan_demo_band_high", "model": "sale.commission_target", "noupdate": true,
    "values": {"plan_id": "sale_commission.plan_demo", "min_achievement": 100, "multiplier": 1.2}},
-  {"id": "plan_demo_sam", "model": "sale.commission_plan_user", "noupdate": true,
-   "values": {"plan_id": "sale_commission.plan_demo", "user_id": "sale_commission.user_sam", "date_from": "2026-01-01"}},
-  {"id": "plan_demo_rita", "model": "sale.commission_plan_user", "noupdate": true,
-   "values": {"plan_id": "sale_commission.plan_demo", "user_id": "sale_commission.user_rita", "date_from": "2026-01-01"}}
+  {"id": "plan_demo_hugo", "model": "sale.commission_plan_user", "noupdate": true,
+   "values": {"plan_id": "sale_commission.plan_demo", "user_id": "sale_commission.user_hugo", "date_from": "2026-01-01"}},
+  {"id": "plan_demo_nadia", "model": "sale.commission_plan_user", "noupdate": true,
+   "values": {"plan_id": "sale_commission.plan_demo", "user_id": "sale_commission.user_nadia", "date_from": "2026-01-01"}}
 ]

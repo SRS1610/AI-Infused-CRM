@@ -56,7 +56,7 @@ For a salesperson, a plan and a period:
    decimal arithmetic); the statement's commission is the sum of its lines; **Total** = commission + manual
    **adjustments**.
 
-Example (the demo plan, 50,000 target): Sam invoices 51,816.25 net of a credit note → 103.63 % → × 1.2; a gripper
+Example (the demo plan, 50,000 target): Hugo invoices 51,816.25 net of a credit note → 103.63 % → × 1.2; a gripper
 line of 3,806.25 at 3 % earns 114.1875 → × 1.2 = 137.025 → **137.03**.
 
 ## Statements
@@ -78,7 +78,7 @@ explanation of a later release may only cite these numbers.
 
 ## Cross-check (acceptance criterion 2-k)
 
-The demo plan (*Sales commissions (demo)*) pays Sam Seller and Rita Rep (logins `sam` and `rita`, password
+The demo plan (*Sales commissions (demo)*) pays Hugo Lambert and Nadia Keller (logins `hugo` and `nadia`, password
 `demo1234`). `tessera seed demo --phase 2` creates last month's invoices — two of them from sales orders —, a credit
 note made by reversing an invoice, a separate credit note, and documents that must not count (an invoice of the
 month before, a draft, another salesperson's invoice), then computes the statements. The expected statements are in

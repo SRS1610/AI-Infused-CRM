@@ -37,7 +37,7 @@ def test_demo_statements_equal_the_crosscheck(system_env: Any) -> None:
     assert seed_month(system_env, MONTH) == 0  # idempotent
     assert len(statements) == 2
     by_login = {s.user_id.login: s for s in statements}
-    assert set(by_login) == {"sam", "rita"}
+    assert set(by_login) == {"hugo", "nadia"}
     expected = _expected()
     for login, statement in by_login.items():
         assert (statement.date_from, statement.date_to) == (MONTH, dt.date(2026, 10, 31))

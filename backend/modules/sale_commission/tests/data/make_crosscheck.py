@@ -42,15 +42,15 @@ def rate(code: str) -> tuple[Decimal, Decimal]:
 
 # (salesperson, document, sign, product code, quantity, unit price, discount %) — the documents that count
 LINES = [
-    ("sam", "A1", 1, "HW-ARM6", D(2), D(18900), D(5)),
-    ("sam", "A1", 1, "SRV-ONB", D(1), D(2500), D(0)),
-    ("sam", "A2", 1, "SRV-CONS", D(10), D(1200), D(0)),
-    ("sam", "A2", 1, "HW-GRIP", D(3), D(1450), D("12.5")),
-    ("sam", "A3", -1, "SRV-CONS", D(2), D(1200), D(0)),
-    ("rita", "B1", 1, "SRV-SUP", D(1), D(4800), D(0)),
-    ("rita", "B1", 1, "HW-FTS", D(3), D(3200), D("7.5")),
-    ("rita", "B2", 1, "HW-ARM6", D(1), D(18900), D(0)),
-    ("rita", "B3", -1, "HW-FTS", D(1), D(3200), D(0)),
+    ("hugo", "A1", 1, "HW-ARM6", D(2), D(18900), D(5)),
+    ("hugo", "A1", 1, "SRV-ONB", D(1), D(2500), D(0)),
+    ("hugo", "A2", 1, "SRV-CONS", D(10), D(1200), D(0)),
+    ("hugo", "A2", 1, "HW-GRIP", D(3), D(1450), D("12.5")),
+    ("hugo", "A3", -1, "SRV-CONS", D(2), D(1200), D(0)),
+    ("nadia", "B1", 1, "SRV-SUP", D(1), D(4800), D(0)),
+    ("nadia", "B1", 1, "HW-FTS", D(3), D(3200), D("7.5")),
+    ("nadia", "B2", 1, "HW-ARM6", D(1), D(18900), D(0)),
+    ("nadia", "B3", -1, "HW-FTS", D(1), D(3200), D(0)),
 ]
 HEADER = [
     "salesperson",
@@ -72,7 +72,7 @@ def half_up(value: Decimal) -> Decimal:
 
 def rows() -> list[list[str]]:
     out: list[list[str]] = []
-    for person in ("rita", "sam"):
+    for person in ("nadia", "hugo"):
         mine = [line for line in LINES if line[0] == person]
         bases = [sign * half_up(qty * price * (1 - disc / 100)) for _p, _d, sign, _c, qty, price, disc in mine]
         achievement = sum(bases, D(0)) / TARGET * 100
