@@ -1,0 +1,97 @@
+{
+ "gold": {
+  "amount_tax": 312.0,
+  "amount_total": 1872.0,
+  "amount_untaxed": 1560.0,
+  "currency": "EUR",
+  "due_date": "2026-08-03",
+  "iban": "FR4030006048284543168771698",
+  "invoice_date": "2026-06-19",
+  "invoice_number": "004810/26",
+  "lines": [
+   {
+    "account": "commissions",
+    "amount": 1560.0,
+    "description": "Commission d'agent commercial",
+    "quantity": 1.0,
+    "tax": "purchase_vat_20",
+    "tax_rate": 20.0,
+    "unit_price": 1560.0
+   }
+  ],
+  "move_type": "in_invoice",
+  "needs_review": false,
+  "partner_name": "Agence Commerciale Roux SARL",
+  "partner_vat": "FR42133800191"
+ },
+ "spec": {
+  "amount_tax": 312.0,
+  "amount_total": 1872.0,
+  "amount_untaxed": 1560.0,
+  "buyer": {
+   "city": "75001 Paris",
+   "country": "France",
+   "name": "My Company (Europe)",
+   "street": "8 avenue de l'Opéra",
+   "vat": "FR32123456789"
+  },
+  "credit_note": false,
+  "currency": "EUR",
+  "due_date": "2026-08-03",
+  "id": "b059",
+  "invoice_date": "2026-06-19",
+  "invoice_number": "004810/26",
+  "kind": "digital",
+  "lang": "fr",
+  "layout": "compact",
+  "lines": [
+   {
+    "amount": 1560.0,
+    "description": "Commission d'agent commercial",
+    "quantity": 1.0,
+    "tax_rate": 20.0,
+    "unit_price": 1560.0
+   }
+  ],
+  "move_type": "in_invoice",
+  "notes": "",
+  "reverse_charge": false,
+  "seed": 259364,
+  "seller": {
+   "address": "4 boulevard Voltaire, 75011 Paris",
+   "country": "FR",
+   "iban": "FR40 3000 6048 2845 4316 8771 698",
+   "name": "Agence Commerciale Roux SARL",
+   "vat": "FR42133800191"
+  },
+  "tax_lines": [
+   {
+    "amount": 312.0,
+    "base": 1560.0,
+    "rate": 20.0
+   }
+  ]
+ },
+ "world": {
+  "history": [
+   {
+    "date": "2026-05-15",
+    "lines": [
+     {
+      "account": "commissions",
+      "description": "Commission d'agent commercial",
+      "quantity": 1.0,
+      "tax": "purchase_vat_20",
+      "unit_price": 1050.0
+     }
+    ]
+   }
+  ],
+  "vendor": {
+   "iban": "FR40 3000 6048 2845 4316 8771 698",
+   "known": true,
+   "name": "Agence Commerciale Roux SARL",
+   "vat": "FR42133800191"
+  }
+ }
+}

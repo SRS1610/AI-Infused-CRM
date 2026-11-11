@@ -421,3 +421,60 @@ async def test_health_snapshot() -> None:
     gw, _, _ = make([mock_provider(1, "p")], [route("classify", 1, "mock-small")])
     h = gw.health()
     assert h["providers"][0]["name"] == "p" and h["status"] == "ok"
+
+
+def _image_req(
+    policy: str = "minimal", task: TaskClass = TaskClass.vision, media: str = "image/png"
+) -> CompleteRequest:
+    from gateway.envelope import Block
+
+    blocks = [Block(type="image", media_type=media, data="iVBORw0KGgo="), Block(type="text", text="Read this bill")]
+    return CompleteRequest(
+        task_class=task,
+        messages=[Message(role="user", content=blocks)],
+        redaction_policy=policy,  # type: ignore[arg-type]
+        metadata=Meta(feature="account.bill_ocr", prompt_version="account.bill_ocr@1"),
+    )
+
+
+async def test_image_blocks_reach_a_vision_route_unredacted() -> None:
+    gw, _, _ = make([mock_provider(1, "approved")], [route("vision", 1, "mock-mid")])
+    out = await gw.complete(CallContext(1), _image_req())
+    assert out.provider == "approved"
+    sent = MockAdapter.captured[-1]["messages"][0]["content"]
+    assert sent[0]["type"] == "image" and sent[0]["media_type"] == "image/png"
+
+
+async def test_image_blocks_refused_when_the_feature_redacts_or_is_not_vision() -> None:
+    gw, _, _ = make([mock_provider(1, "approved")], [route("vision", 1, "mock-mid"), route("extract", 1, "m")])
+    with pytest.raises(PolicyRefused, match="cannot be redacted"):
+        await gw.complete(CallContext(1), _image_req(policy="redact"))
+    with pytest.raises(PolicyRefused, match="vision"):
+        await gw.complete(CallContext(1), _image_req(task=TaskClass.extract))
+    with pytest.raises(PolicyRefused, match="vision"):
+        await gw.complete(CallContext(1), _image_req(media="text/html"))
+    assert not MockAdapter.captured
+
+
+def test_adapters_translate_image_blocks() -> None:
+    from gateway.adapters.anthropic import to_anthropic_messages
+    from gateway.adapters.google import to_gemini_contents
+    from gateway.adapters.openai import to_openai_messages
+    from gateway.envelope import Block
+
+    msg = Message(
+        role="user",
+        content=[
+            Block(type="image", media_type="image/jpeg", data="AAA"),
+            Block(type="image", media_type="application/pdf", data="BBB"),
+            Block(type="text", text="Read"),
+        ],
+    )
+    a = to_anthropic_messages([msg])[0]["content"]
+    assert a[0] == {"type": "image", "source": {"type": "base64", "media_type": "image/jpeg", "data": "AAA"}}
+    assert a[1]["type"] == "document" and a[2] == {"type": "text", "text": "Read"}
+    o = to_openai_messages("", [msg])[0]["content"]
+    assert o[0] == {"type": "image_url", "image_url": {"url": "data:image/jpeg;base64,AAA"}}
+    assert o[1]["type"] == "file" and o[2] == {"type": "text", "text": "Read"}
+    g = to_gemini_contents([msg])[0]["parts"]
+    assert g[0] == {"inlineData": {"mimeType": "image/jpeg", "data": "AAA"}} and g[2] == {"text": "Read"}

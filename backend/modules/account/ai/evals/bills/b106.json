@@ -1,0 +1,129 @@
+{
+ "gold": {
+  "amount_tax": 0.0,
+  "amount_total": 991.25,
+  "amount_untaxed": 991.25,
+  "currency": "EUR",
+  "due_date": null,
+  "iban": "DE67370400444597800212",
+  "invoice_date": "2026-06-25",
+  "invoice_number": "R202608738",
+  "lines": [
+   {
+    "account": "cogs",
+    "amount": 351.18,
+    "description": "Versandkartons",
+    "quantity": 2.0,
+    "tax": "purchase_vat_20_rc",
+    "tax_rate": 0.0,
+    "unit_price": 175.59
+   },
+   {
+    "account": "cogs",
+    "amount": 130.83,
+    "description": "Leiterplatten Rev. B",
+    "quantity": 3.0,
+    "tax": "purchase_vat_20_rc",
+    "tax_rate": 0.0,
+    "unit_price": 43.61
+   },
+   {
+    "account": "cogs",
+    "amount": 509.24,
+    "description": "Aluminiumprofile 2 m",
+    "quantity": 2.0,
+    "tax": "purchase_vat_20_rc",
+    "tax_rate": 0.0,
+    "unit_price": 254.62
+   }
+  ],
+  "move_type": "in_invoice",
+  "needs_review": false,
+  "partner_name": "Schmidt Metallbau GmbH",
+  "partner_vat": "DE451709865"
+ },
+ "spec": {
+  "amount_tax": 0.0,
+  "amount_total": 991.25,
+  "amount_untaxed": 991.25,
+  "buyer": {
+   "city": "75001 Paris",
+   "country": "France",
+   "name": "My Company (Europe)",
+   "street": "8 avenue de l'Opéra",
+   "vat": "FR32123456789"
+  },
+  "credit_note": false,
+  "currency": "EUR",
+  "due_date": null,
+  "id": "b106",
+  "invoice_date": "2026-06-25",
+  "invoice_number": "R202608738",
+  "kind": "image_pdf",
+  "lang": "de",
+  "layout": "letter",
+  "lines": [
+   {
+    "amount": 351.18,
+    "description": "Versandkartons",
+    "quantity": 2.0,
+    "tax_rate": 0.0,
+    "unit_price": 175.59
+   },
+   {
+    "amount": 130.83,
+    "description": "Leiterplatten Rev. B",
+    "quantity": 3.0,
+    "tax_rate": 0.0,
+    "unit_price": 43.61
+   },
+   {
+    "amount": 509.24,
+    "description": "Aluminiumprofile 2 m",
+    "quantity": 2.0,
+    "tax_rate": 0.0,
+    "unit_price": 254.62
+   }
+  ],
+  "move_type": "in_invoice",
+  "notes": "",
+  "reverse_charge": true,
+  "seed": 966071,
+  "seller": {
+   "address": "Leopoldstraße 40, 80802 München",
+   "country": "DE",
+   "iban": "DE67 3704 0044 4597 8002 12",
+   "name": "Schmidt Metallbau GmbH",
+   "vat": "DE451709865"
+  },
+  "tax_lines": [
+   {
+    "amount": 0.0,
+    "base": 991.25,
+    "rate": 0.0
+   }
+  ]
+ },
+ "world": {
+  "history": [
+   {
+    "date": "2026-05-21",
+    "lines": [
+     {
+      "account": "cogs",
+      "description": "Edelstahlschrauben M8",
+      "quantity": 2.0,
+      "tax": "purchase_vat_20_rc",
+      "unit_price": 211.56
+     }
+    ]
+   }
+  ],
+  "vendor": {
+   "iban": "DE67 3704 0044 4597 8002 12",
+   "known": true,
+   "name": "Schmidt Metallbau GmbH",
+   "vat": "DE451709865"
+  }
+ }
+}

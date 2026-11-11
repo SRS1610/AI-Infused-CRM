@@ -1,0 +1,145 @@
+{
+ "gold": {
+  "amount_tax": 0.0,
+  "amount_total": 1062.54,
+  "amount_untaxed": 1062.54,
+  "currency": "EUR",
+  "due_date": "2026-07-19",
+  "iban": "ES1421006647091372538507",
+  "invoice_date": "2026-07-19",
+  "invoice_number": "SO985-3704",
+  "lines": [
+   {
+    "account": "expense",
+    "amount": 437.76,
+    "description": "Material de oficina",
+    "quantity": 3.0,
+    "tax": "purchase_vat_20_rc",
+    "tax_rate": 0.0,
+    "unit_price": 145.92
+   },
+   {
+    "account": "expense",
+    "amount": 100.96,
+    "description": "Cápsulas de café",
+    "quantity": 4.0,
+    "tax": "purchase_vat_20_rc",
+    "tax_rate": 0.0,
+    "unit_price": 25.24
+   },
+   {
+    "account": "expense",
+    "amount": 409.11,
+    "description": "Cartucho de tóner negro",
+    "quantity": 3.0,
+    "tax": "purchase_vat_20_rc",
+    "tax_rate": 0.0,
+    "unit_price": 136.37
+   },
+   {
+    "account": "expense",
+    "amount": 114.71,
+    "description": "Papel de impresora A4",
+    "quantity": 1.0,
+    "tax": "purchase_vat_20_rc",
+    "tax_rate": 0.0,
+    "unit_price": 114.71
+   }
+  ],
+  "move_type": "in_invoice",
+  "needs_review": false,
+  "partner_name": "Suministros Oficina Norte SL",
+  "partner_vat": "ESA41532726"
+ },
+ "spec": {
+  "amount_tax": 0.0,
+  "amount_total": 1062.54,
+  "amount_untaxed": 1062.54,
+  "buyer": {
+   "city": "75001 Paris",
+   "country": "France",
+   "name": "My Company (Europe)",
+   "street": "8 avenue de l'Opéra",
+   "vat": "FR32123456789"
+  },
+  "credit_note": false,
+  "currency": "EUR",
+  "due_date": "2026-07-19",
+  "id": "b101",
+  "invoice_date": "2026-07-19",
+  "invoice_number": "SO985-3704",
+  "kind": "scan",
+  "lang": "es",
+  "layout": "modern",
+  "lines": [
+   {
+    "amount": 437.76,
+    "description": "Material de oficina",
+    "quantity": 3.0,
+    "tax_rate": 0.0,
+    "unit_price": 145.92
+   },
+   {
+    "amount": 100.96,
+    "description": "Cápsulas de café",
+    "quantity": 4.0,
+    "tax_rate": 0.0,
+    "unit_price": 25.24
+   },
+   {
+    "amount": 409.11,
+    "description": "Cartucho de tóner negro",
+    "quantity": 3.0,
+    "tax_rate": 0.0,
+    "unit_price": 136.37
+   },
+   {
+    "amount": 114.71,
+    "description": "Papel de impresora A4",
+    "quantity": 1.0,
+    "tax_rate": 0.0,
+    "unit_price": 114.71
+   }
+  ],
+  "move_type": "in_invoice",
+  "notes": "",
+  "reverse_charge": true,
+  "seed": 121419,
+  "seller": {
+   "address": "Calle de Alcalá 85, 28009 Madrid",
+   "country": "ES",
+   "iban": "ES14 2100 6647 0913 7253 8507",
+   "name": "Suministros Oficina Norte SL",
+   "vat": "ESA41532726"
+  },
+  "tax_lines": [
+   {
+    "amount": 0.0,
+    "base": 1062.54,
+    "rate": 0.0
+   }
+  ]
+ },
+ "world": {
+  "history": [
+   {
+    "date": "2026-06-14",
+    "lines": [
+     {
+      "account": "expense",
+      "description": "Cápsulas de café",
+      "quantity": 1.0,
+      "tax": "purchase_vat_20_rc",
+      "unit_price": 191.68
+     }
+    ]
+   }
+  ],
+  "vendor": {
+   "iban": "ES14 2100 6647 0913 7253 8507",
+   "known": true,
+   "name": "Suministros Oficina Norte SL",
+   "vat": "ESA41532726"
+  }
+ }
+}

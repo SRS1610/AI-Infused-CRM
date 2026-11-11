@@ -332,18 +332,31 @@ def run_feature(
     sources: list[Source] | None = None,
     on_output: OnOutput | None = None,
     raise_errors: bool = True,
+    attachments: list[dict[str, Any]] | None = None,
 ) -> RunResult:
+    """``attachments`` (``{"name", "media_type", "data"}`` with base64 ``data``) are sent as image blocks
+    before the task text, for ``vision`` features (the gateway refuses them for features that redact)."""
     inputs = inputs or {}
     sources = list(sources or [])
     feature = get_feature(env, name)
     check_enabled(env, feature)
     version, system, task = _prepare(env, feature, inputs, record, sources)
-    run = _new_run(env, feature, version, inputs, record, sources, system, task)
+    attached = [
+        f"[attached: {a.get('name') or 'document'} ({a.get('media_type')}, {len(a.get('data') or '') * 3 // 4} bytes)]"
+        for a in attachments or []
+    ]
+    run = _new_run(env, feature, version, inputs, record, sources, system, "\n".join([*attached, task]))
     ctx = ToolContext(env=env, feature=feature, run=run, sources={s.id: s for s in sources})
     allowed = list(feature.tools or [])
     tools = [REGISTRY[t].spec() for t in allowed if t in REGISTRY]
     call = CallContext(env.company.ids[0] if env.company else 0, env.uid, feature.name)
-    messages: list[dict[str, Any]] = [{"role": "user", "content": task}]
+    content: Any = task
+    if attachments:
+        content = [
+            *({"type": "image", "media_type": a["media_type"], "data": a["data"]} for a in attachments),
+            {"type": "text", "text": task},
+        ]
+    messages: list[dict[str, Any]] = [{"role": "user", "content": content}]
     usage: dict[str, Any] = {}
     client = get_client(env)
     names = _names_for(env, record, sources)

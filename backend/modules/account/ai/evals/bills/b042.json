@@ -1,0 +1,97 @@
+{
+ "gold": {
+  "amount_tax": 0.0,
+  "amount_total": 169.84,
+  "amount_untaxed": 169.84,
+  "currency": "EUR",
+  "due_date": "2026-08-12",
+  "iban": "DE67370400444597800212",
+  "invoice_date": "2026-08-12",
+  "invoice_number": "R202607774",
+  "lines": [
+   {
+    "account": "cogs",
+    "amount": 169.84,
+    "description": "Aluminiumprofile 2 m",
+    "quantity": 4.0,
+    "tax": "purchase_vat_20_rc",
+    "tax_rate": 0.0,
+    "unit_price": 42.46
+   }
+  ],
+  "move_type": "in_refund",
+  "needs_review": false,
+  "partner_name": "Schmidt Metallbau GmbH",
+  "partner_vat": "DE451709865"
+ },
+ "spec": {
+  "amount_tax": 0.0,
+  "amount_total": 169.84,
+  "amount_untaxed": 169.84,
+  "buyer": {
+   "city": "75001 Paris",
+   "country": "France",
+   "name": "My Company (Europe)",
+   "street": "8 avenue de l'Opéra",
+   "vat": "FR32123456789"
+  },
+  "credit_note": true,
+  "currency": "EUR",
+  "due_date": "2026-08-12",
+  "id": "b042",
+  "invoice_date": "2026-08-12",
+  "invoice_number": "R202607774",
+  "kind": "digital",
+  "lang": "de",
+  "layout": "modern",
+  "lines": [
+   {
+    "amount": 169.84,
+    "description": "Aluminiumprofile 2 m",
+    "quantity": 4.0,
+    "tax_rate": 0.0,
+    "unit_price": 42.46
+   }
+  ],
+  "move_type": "in_refund",
+  "notes": "",
+  "reverse_charge": true,
+  "seed": 331260,
+  "seller": {
+   "address": "Leopoldstraße 40, 80802 München",
+   "country": "DE",
+   "iban": "DE67 3704 0044 4597 8002 12",
+   "name": "Schmidt Metallbau GmbH",
+   "vat": "DE451709865"
+  },
+  "tax_lines": [
+   {
+    "amount": 0.0,
+    "base": 169.84,
+    "rate": 0.0
+   }
+  ]
+ },
+ "world": {
+  "history": [
+   {
+    "date": "2026-07-08",
+    "lines": [
+     {
+      "account": "cogs",
+      "description": "Leiterplatten Rev. B",
+      "quantity": 2.0,
+      "tax": "purchase_vat_20_rc",
+      "unit_price": 164.47
+     }
+    ]
+   }
+  ],
+  "vendor": {
+   "iban": "DE67 3704 0044 4597 8002 12",
+   "known": true,
+   "name": "Schmidt Metallbau GmbH",
+   "vat": "DE451709865"
+  }
+ }
+}

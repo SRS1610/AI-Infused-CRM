@@ -30,6 +30,13 @@
   "action": "account.action_refunds"
  },
  {
+  "id": "menu_invoice_import",
+  "name": "Read from documents",
+  "parent": "account.menu_customers",
+  "sequence": 15,
+  "action": "account.action_invoice_import"
+ },
+ {
   "id": "menu_payments_in",
   "name": "Payments",
   "parent": "account.menu_customers",
@@ -55,6 +62,20 @@
   "parent": "account.menu_vendors",
   "sequence": 20,
   "action": "account.action_vendor_refunds"
+ },
+ {
+  "id": "menu_bill_import",
+  "name": "Read from documents",
+  "parent": "account.menu_vendors",
+  "sequence": 15,
+  "action": "account.action_bill_import"
+ },
+ {
+  "id": "menu_anomalies",
+  "name": "Anomaly flags",
+  "parent": "account.menu_vendors",
+  "sequence": 40,
+  "action": "account.action_anomalies"
  },
  {
   "id": "menu_payments_out",

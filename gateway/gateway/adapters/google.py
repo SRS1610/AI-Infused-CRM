@@ -50,6 +50,8 @@ def to_gemini_contents(messages: list[Message]) -> list[dict[str, Any]]:
             elif b.type == "tool_use":
                 names[b.id or ""] = b.name or ""
                 parts.append({"functionCall": {"name": b.name, "args": b.input or {}}})
+            elif b.type == "image":
+                parts.append({"inlineData": {"mimeType": b.media_type, "data": b.data or ""}})
             else:
                 parts.append(
                     {

@@ -1,0 +1,23 @@
+name: account.anomaly
+task_class: classify
+description: >-
+  Optional plain-words explanation of the anomaly flags the deterministic detector raised on a bill. The
+  detector decides; the model only explains, and a narrative quoting a number that is not in the flags is
+  replaced by the flags themselves.
+system: |
+  You help {{ user.name }} at {{ company.name }} review vendor bills before payment. You are shown a bill and the
+  checks an anomaly detector raised on it, with the similar documents it compared it with.
+template: |
+  {{ sources | envelopes }}
+
+  In at most three sentences, say what the person should verify before paying this bill and why, using only the
+  facts above. Quote amounts and dates exactly as written; do not add any other number. Cite the documents you
+  mention.
+input_schema: {type: object, properties: {}, additionalProperties: false}
+output_schema:
+  type: object
+  additionalProperties: false
+  required: [narrative]
+  properties:
+    narrative: {type: string}
+model_hints: {max_output_tokens: 300}

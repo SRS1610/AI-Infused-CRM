@@ -1,0 +1,97 @@
+{
+ "gold": {
+  "amount_tax": 13.22,
+  "amount_total": 253.62,
+  "amount_untaxed": 240.4,
+  "currency": "EUR",
+  "due_date": "2026-04-19",
+  "iban": "FR1330006100763506620997333",
+  "invoice_date": "2026-04-19",
+  "invoice_number": "BV319-1821",
+  "lines": [
+   {
+    "account": "expense",
+    "amount": 240.4,
+    "description": "Toner cartridge black",
+    "quantity": 1.0,
+    "tax": "purchase_vat_5",
+    "tax_rate": 5.5,
+    "unit_price": 240.4
+   }
+  ],
+  "move_type": "in_invoice",
+  "needs_review": false,
+  "partner_name": "Bureau Vallée Paris SAS",
+  "partner_vat": "FR80591834724"
+ },
+ "spec": {
+  "amount_tax": 13.22,
+  "amount_total": 253.62,
+  "amount_untaxed": 240.4,
+  "buyer": {
+   "city": "75001 Paris",
+   "country": "France",
+   "name": "My Company (Europe)",
+   "street": "8 avenue de l'Opéra",
+   "vat": "FR32123456789"
+  },
+  "credit_note": false,
+  "currency": "EUR",
+  "due_date": "2026-04-19",
+  "id": "b035",
+  "invoice_date": "2026-04-19",
+  "invoice_number": "BV319-1821",
+  "kind": "digital",
+  "lang": "en",
+  "layout": "compact",
+  "lines": [
+   {
+    "amount": 240.4,
+    "description": "Toner cartridge black",
+    "quantity": 1.0,
+    "tax_rate": 5.5,
+    "unit_price": 240.4
+   }
+  ],
+  "move_type": "in_invoice",
+  "notes": "",
+  "reverse_charge": false,
+  "seed": 26689,
+  "seller": {
+   "address": "4 boulevard Voltaire, 75011 Paris",
+   "country": "FR",
+   "iban": "FR13 3000 6100 7635 0662 0997 333",
+   "name": "Bureau Vallée Paris SAS",
+   "vat": "FR80591834724"
+  },
+  "tax_lines": [
+   {
+    "amount": 13.22,
+    "base": 240.4,
+    "rate": 5.5
+   }
+  ]
+ },
+ "world": {
+  "history": [
+   {
+    "date": "2026-03-15",
+    "lines": [
+     {
+      "account": "expense",
+      "description": "Coffee capsules",
+      "quantity": 2.0,
+      "tax": "purchase_vat_5",
+      "unit_price": 235.2
+     }
+    ]
+   }
+  ],
+  "vendor": {
+   "iban": "FR13 3000 6100 7635 0662 0997 333",
+   "known": true,
+   "name": "Bureau Vallée Paris SAS",
+   "vat": "FR80591834724"
+  }
+ }
+}

@@ -1,0 +1,97 @@
+{
+ "gold": {
+  "amount_tax": 0.0,
+  "amount_total": 220.33,
+  "amount_untaxed": 220.33,
+  "currency": "EUR",
+  "due_date": "2026-03-24",
+  "iban": "DE67370400444597800212",
+  "invoice_date": "2026-01-23",
+  "invoice_number": "SM756-8960",
+  "lines": [
+   {
+    "account": "cogs",
+    "amount": 220.33,
+    "description": "Versandkartons",
+    "quantity": 1.0,
+    "tax": "purchase_vat_20_rc",
+    "tax_rate": 0.0,
+    "unit_price": 220.33
+   }
+  ],
+  "move_type": "in_invoice",
+  "needs_review": false,
+  "partner_name": "Schmidt Metallbau GmbH",
+  "partner_vat": "DE451709865"
+ },
+ "spec": {
+  "amount_tax": 0.0,
+  "amount_total": 220.33,
+  "amount_untaxed": 220.33,
+  "buyer": {
+   "city": "75001 Paris",
+   "country": "France",
+   "name": "My Company (Europe)",
+   "street": "8 avenue de l'Opéra",
+   "vat": "FR32123456789"
+  },
+  "credit_note": false,
+  "currency": "EUR",
+  "due_date": "2026-03-24",
+  "id": "b017",
+  "invoice_date": "2026-01-23",
+  "invoice_number": "SM756-8960",
+  "kind": "digital",
+  "lang": "de",
+  "layout": "classic",
+  "lines": [
+   {
+    "amount": 220.33,
+    "description": "Versandkartons",
+    "quantity": 1.0,
+    "tax_rate": 0.0,
+    "unit_price": 220.33
+   }
+  ],
+  "move_type": "in_invoice",
+  "notes": "",
+  "reverse_charge": true,
+  "seed": 313132,
+  "seller": {
+   "address": "Leopoldstraße 40, 80802 München",
+   "country": "DE",
+   "iban": "DE67 3704 0044 4597 8002 12",
+   "name": "Schmidt Metallbau GmbH",
+   "vat": "DE451709865"
+  },
+  "tax_lines": [
+   {
+    "amount": 0.0,
+    "base": 220.33,
+    "rate": 0.0
+   }
+  ]
+ },
+ "world": {
+  "history": [
+   {
+    "date": "2025-12-19",
+    "lines": [
+     {
+      "account": "cogs",
+      "description": "Versandkartons",
+      "quantity": 2.0,
+      "tax": "purchase_vat_20_rc",
+      "unit_price": 47.93
+     }
+    ]
+   }
+  ],
+  "vendor": {
+   "iban": "DE67 3704 0044 4597 8002 12",
+   "known": true,
+   "name": "Schmidt Metallbau GmbH",
+   "vat": "DE451709865"
+  }
+ }
+}

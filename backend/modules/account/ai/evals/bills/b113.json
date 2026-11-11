@@ -1,0 +1,122 @@
+{
+ "gold": {
+  "amount_tax": 498.0,
+  "amount_total": 2988.0,
+  "amount_untaxed": 2490.0,
+  "currency": "EUR",
+  "due_date": "2026-10-16",
+  "iban": null,
+  "invoice_date": "2026-09-16",
+  "invoice_number": "RA-2026-6485",
+  "lines": [
+   {
+    "account": "income",
+    "amount": 870.0,
+    "description": "Bras robotisé RA-5",
+    "quantity": 1.0,
+    "tax": "sale_vat_20",
+    "tax_rate": 20.0,
+    "unit_price": 870.0
+   },
+   {
+    "account": "income_services",
+    "amount": 1620.0,
+    "description": "Contrat de maintenance - trimestre",
+    "quantity": 1.0,
+    "tax": "sale_vat_20",
+    "tax_rate": 20.0,
+    "unit_price": 1620.0
+   }
+  ],
+  "move_type": "out_invoice",
+  "needs_review": false,
+  "partner_name": "Robotique Atlantique SAS",
+  "partner_vat": "FR68878365325"
+ },
+ "spec": {
+  "amount_tax": 498.0,
+  "amount_total": 2988.0,
+  "amount_untaxed": 2490.0,
+  "buyer": {
+   "address": "27 quai de la Fosse, 44000 Nantes",
+   "city": "",
+   "country": "FR",
+   "name": "Robotique Atlantique SAS",
+   "street": "",
+   "vat": "FR68878365325"
+  },
+  "credit_note": false,
+  "currency": "EUR",
+  "due_date": "2026-10-16",
+  "id": "b113",
+  "invoice_date": "2026-09-16",
+  "invoice_number": "RA-2026-6485",
+  "kind": "digital",
+  "lang": "fr",
+  "layout": "classic",
+  "lines": [
+   {
+    "amount": 870.0,
+    "description": "Bras robotisé RA-5",
+    "quantity": 1.0,
+    "tax_rate": 20.0,
+    "unit_price": 870.0
+   },
+   {
+    "amount": 1620.0,
+    "description": "Contrat de maintenance - trimestre",
+    "quantity": 1.0,
+    "tax_rate": 20.0,
+    "unit_price": 1620.0
+   }
+  ],
+  "move_type": "out_invoice",
+  "notes": "",
+  "reverse_charge": false,
+  "seed": 279436,
+  "seller": {
+   "address": "8 avenue de l'Opéra, 75001 Paris",
+   "country": "FR",
+   "iban": "FR76 3000 4000 0312 3456 7890 143",
+   "name": "My Company (Europe)",
+   "vat": "FR32123456789"
+  },
+  "tax_lines": [
+   {
+    "amount": 498.0,
+    "base": 2490.0,
+    "rate": 20.0
+   }
+  ]
+ },
+ "world": {
+  "history": [
+   {
+    "date": "2026-08-12",
+    "lines": [
+     {
+      "account": "income",
+      "description": "Bras robotisé RA-5",
+      "quantity": 1.0,
+      "tax": "sale_vat_20",
+      "unit_price": 470.0
+     },
+     {
+      "account": "income_services",
+      "description": "Contrat de maintenance - trimestre",
+      "quantity": 1.0,
+      "tax": "sale_vat_20",
+      "unit_price": 2900.0
+     }
+    ]
+   }
+  ],
+  "vendor": {
+   "customer": true,
+   "iban": null,
+   "known": true,
+   "name": "Robotique Atlantique SAS",
+   "vat": "FR68878365325"
+  }
+ }
+}

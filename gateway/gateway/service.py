@@ -24,6 +24,7 @@ from gateway.cache import ResponseCache, cache_key
 from gateway.config import ConfigStore, GatewayConfig, ProviderConfig, Target
 from gateway.envelope import (
     EMBEDDING_DIMENSIONS,
+    IMAGE_TYPES,
     Block,
     CompleteRequest,
     CompleteResponse,
@@ -197,6 +198,16 @@ class Gateway:
             "*", ctx.company_id
         ):
             raise FeatureDisabled(f"AI feature '{ctx.feature}' is disabled", feature=ctx.feature)
+        images = [b for m in req.messages for b in m.blocks() if b.type == "image"]
+        if images:
+            # a page image cannot be redacted: only features that declare ``minimal`` (PII-approved
+            # providers) or ``none`` may send one, and only as the vision task class
+            if req.redaction_policy == "redact":
+                raise PolicyRefused(
+                    "Images and documents cannot be redacted; the feature must declare minimal redaction"
+                )
+            if req.task_class != TaskClass.vision or any(b.media_type not in IMAGE_TYPES for b in images):
+                raise PolicyRefused("Images are only accepted for the vision task class (PNG, JPEG, WebP, GIF or PDF)")
         targets = self._targets(cfg, ctx, req.task_class.value, needs_pii=req.redaction_policy != "redact")
         provider, target = targets[0]
         text_len = len(req.system) + sum(len(b.text or b.content or "") for m in req.messages for b in m.blocks())
