@@ -14,6 +14,7 @@ import datetime as dt
 from typing import Any
 from xml.sax.saxutils import escape
 
+from modules.account.demo import BILL_REFS, INVOICE_REFS
 from tessera.logging import get_logger
 from tessera.orm.hooks import hook
 
@@ -62,8 +63,8 @@ def build_demo_camt(env: Any, company: Any, *, register_payments: bool = True) -
         [
             ("company_id", "=", company.ids[0]),
             ("state", "=", "posted"),
-            ("ref", "like", "DEMO-"),
-            ("ref", "not_like", "DEMO-LATE-"),  # the dunning demo keeps its late invoices unpaid
+            # the accounting demo's open invoices and bills (the dunning demo keeps its late ones unpaid)
+            ("ref", "in", [*INVOICE_REFS, *BILL_REFS]),
             ("move_type", "in", ["out_invoice", "in_invoice"]),
             ("payment_state", "in", ["not_paid", "partial"]),
         ],

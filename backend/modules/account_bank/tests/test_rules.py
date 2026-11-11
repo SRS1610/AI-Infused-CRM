@@ -188,6 +188,7 @@ def test_reconcile_screen_endpoints(env):
 
 def test_demo_statement_reconciles_90_percent(env, system_env):
     """2-d: the demo CAMT.053 statement is reconciled for at least 90 % by the shipped rules."""
+    from modules.account.demo import INVOICE_REFS
     from modules.account.demo import seed_company as seed_accounting
     from modules.account_bank.demo import seed_company as seed_bank
 
@@ -205,9 +206,8 @@ def test_demo_statement_reconciles_90_percent(env, system_env):
         demo_invoices = env["account.move"].search(
             [
                 ("company_id", "=", company.ids[0]),
-                ("ref", "like", "DEMO-"),
+                ("ref", "in", [r for r in INVOICE_REFS if r != "DEMO-04"]),
                 ("move_type", "=", "out_invoice"),
-                ("ref", "!=", "DEMO-04"),
             ]
         )
         assert set(demo_invoices.mapped("payment_state")) == {"paid"}

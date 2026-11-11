@@ -193,7 +193,9 @@ def test_demo_scenario_and_integrity_cli(env, system_env):
     created = seed_company(system_env, company)
     assert created >= 10
     assert seed_company(system_env, company) == 0  # idempotent
-    moves = env["account.move"].search([("ref", "like", "DEMO-"), ("company_id", "=", company.ids[0])])
+    from modules.account.demo import DEMO_REFS
+
+    moves = env["account.move"].search([("ref", "in", list(DEMO_REFS)), ("company_id", "=", company.ids[0])])
     states = set(moves.mapped("payment_state"))
     assert {"paid", "partial", "not_paid"} <= states
     assert all(r["ok"] for r in check_company(env, company))

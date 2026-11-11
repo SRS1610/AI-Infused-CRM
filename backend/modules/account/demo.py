@@ -12,6 +12,10 @@ from tessera.orm.hooks import hook
 
 log = get_logger(__name__)
 DEMO_REF = "DEMO"
+# the references this scenario gives its documents (other modules' demos use other DEMO-… references)
+INVOICE_REFS = tuple(f"{DEMO_REF}-{i:02d}" for i in range(1, 11))
+BILL_REFS = tuple(f"{DEMO_REF}-BILL-{i:02d}" for i in range(1, 5))
+DEMO_REFS = (*INVOICE_REFS, f"{DEMO_REF}-CN", *BILL_REFS)
 
 
 def _ref(env: Any, xmlid: str) -> Any:
@@ -26,7 +30,7 @@ def _customers(env: Any) -> list[Any]:
 def seed_company(env: Any, company: Any) -> int:
     env = env.with_company(company)
     moves = env["account.move"]
-    if moves.search_count([("company_id", "=", company.ids[0]), ("ref", "like", f"{DEMO_REF}-")]):
+    if moves.search_count([("company_id", "=", company.ids[0]), ("ref", "in", list(DEMO_REFS))]):
         return 0
     today = env.today()
     products = [
