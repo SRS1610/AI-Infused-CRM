@@ -4,21 +4,38 @@ Acceptance criterion U-6: the standard list view of each primary model returns i
 95th percentile with 100,000 rows.
 
 ```bash
-tessera seed demo --phase 1
+tessera seed demo --phase 2
 ```
 
 ```bash
 tessera perf lists --rows 100000 --json perf.json
 ```
 
-`tessera perf lists` brings contacts, leads, meetings, quotations and products up to `--rows` records by
-copying the existing rows in SQL (no per-record hooks, jobs or messages run), then times the request each
+`tessera perf lists` brings contacts, leads, meetings, quotations (and sales orders), products, journal
+entries, journal items, payments, bank transactions and fixed assets up to `--rows` records by copying the
+existing rows in SQL (no per-record hooks, jobs or messages run; journal items are copied as whole balanced
+entries, since the ledger refuses anything else), then times the request each
 model's list view sends — the view's visible columns, its default order, the first page of 80 and the
 total count — as an administrator and as a salesperson whose record rules apply (`--users`). It exits
 with an error when a p95 exceeds `--budget-ms`. Run it on a scratch database: it adds rows.
 
-The nightly workflow runs it on a fresh demo database and keeps `perf.json` as an artifact. Last result
-(2026-11-10, PostgreSQL 16, one API process): p95 between 17 and 108 ms for every model and user.
+The nightly workflow runs it on a fresh demo database and keeps `perf.json` as an artifact. Models a user
+cannot open are skipped for that user.
+
+Last result (2026-11-11, Phase 2 demo, PostgreSQL 16, one API process), p95 in ms:
+
+| Model | Administrator | Salesperson (`demo`) |
+|---|---|---|
+| Contacts | 104.7 | 96.5 |
+| Leads | 118.0 | 118.2 |
+| Meetings | 68.9 | 85.3 |
+| Quotations and orders | 96.6 | 17.8 (sees only their own) |
+| Products | 90.1 | 84.1 |
+| Journal items | 64.5 | no access |
+| Journal entries and invoices | 48.6 | no access |
+| Payments | 65.9 | no access |
+| Bank transactions | 75.8 | no access |
+| Fixed assets | 81.2 | no access |
 
 ## Financial reports
 

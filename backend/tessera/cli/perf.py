@@ -88,8 +88,12 @@ def _p(values: list[float], q: float) -> float:
     return ordered[min(len(ordered) - 1, round(q * (len(ordered) - 1)))]
 
 
-def measure(client: Any, model: str, runs: int) -> dict[str, Any]:
-    views = client.get("/api/v1/web/views", params={"model": model, "types": "list"}).json()
+def measure(client: Any, model: str, runs: int) -> dict[str, Any] | None:
+    """Timings of ``model``'s list view, or None when the user cannot open it."""
+    resp = client.get("/api/v1/web/views", params={"model": model, "types": "list"})
+    if resp.status_code != 200 or "views" not in resp.json():
+        return None
+    views = resp.json()
     listing = views["views"]["list"]
     # the client requests every column except the optional ones hidden by default
     names = [c["field"] for c in listing.get("columns", []) if c.get("field") and c.get("optional") != "hide"]
@@ -169,7 +173,11 @@ def lists(
                 typer.echo(f"skipping user {login}: login failed ({resp.status_code})")
                 continue
             for model in present:
-                result = {"model": model, "user": login, **measure(client, model, runs)}
+                timings = measure(client, model, runs)
+                if timings is None:
+                    typer.echo(f"skip {model:<18} {login:<6} (no access)")
+                    continue
+                result = {"model": model, "user": login, **timings}
                 result["ok"] = result["p95_ms"] < budget_ms
                 failed |= not result["ok"]
                 report.append(result)
