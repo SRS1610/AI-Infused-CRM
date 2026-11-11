@@ -410,3 +410,154 @@ msgstr "Valider la facture électronique (UBL / Peppol BIS 3) et l'envoyer à l'
 msgid "Peppol network (mock)"
 msgstr "Réseau Peppol (simulé)"
 
+#: ai_explain.py:133
+msgid "Customer: Peppol address"
+msgstr "Client : adresse Peppol"
+
+#: ai_explain.py:134
+msgid "Customer: Peppol scheme"
+msgstr "Client : schéma Peppol"
+
+#: ai_explain.py:135
+msgid "Customer: tax ID"
+msgstr "Client : numéro de TVA"
+
+#: ai_explain.py:136
+msgid "Customer: country"
+msgstr "Client : pays"
+
+#: ai_explain.py:137
+msgid "Customer: name"
+msgstr "Client : nom"
+
+#: ai_explain.py:138
+msgid "Customer: address"
+msgstr "Client : adresse"
+
+#: ai_explain.py:139
+msgid "Customer: city"
+msgstr "Client : ville"
+
+#: ai_explain.py:140
+msgid "Customer: postal code"
+msgstr "Client : code postal"
+
+#: ai_explain.py:141
+msgid "Customer: registration number"
+msgstr "Client : numéro d'immatriculation"
+
+#: ai_explain.py:142
+msgid "Company: Peppol address"
+msgstr "Société : adresse Peppol"
+
+#: ai_explain.py:143
+msgid "Company: Peppol scheme"
+msgstr "Société : schéma Peppol"
+
+#: ai_explain.py:144
+msgid "Company: tax ID"
+msgstr "Société : numéro de TVA"
+
+#: ai_explain.py:145
+msgid "Company: country"
+msgstr "Société : pays"
+
+#: ai_explain.py:146
+msgid "Company: name"
+msgstr "Société : nom"
+
+#: ai_explain.py:147
+msgid "Company: address"
+msgstr "Société : adresse"
+
+#: ai_explain.py:148
+msgid "Company: registration number"
+msgstr "Société : numéro d'immatriculation"
+
+#: ai_explain.py:149
+msgid "Invoice: customer reference"
+msgstr "Facture : référence client"
+
+#: ai_explain.py:150
+msgid "Invoice: date"
+msgstr "Facture : date"
+
+#: ai_explain.py:151
+msgid "Invoice: due date or payment terms"
+msgstr "Facture : échéance ou conditions de paiement"
+
+#: ai_explain.py:152
+msgid "Invoice: currency"
+msgstr "Facture : devise"
+
+#: ai_explain.py:153
+msgid "Invoice: document type"
+msgstr "Facture : type de document"
+
+#: ai_explain.py:154
+msgid "Invoice: lines and totals"
+msgstr "Facture : lignes et totaux"
+
+#: ai_explain.py:155
+msgid "Invoice: number"
+msgstr "Facture : numéro"
+
+#: ai_explain.py:156
+msgid "Invoice line: description"
+msgstr "Ligne de facture : description"
+
+#: ai_explain.py:157
+msgid "Invoice line: taxes"
+msgstr "Ligne de facture : taxes"
+
+#: ai_explain.py:158
+msgid "Invoice line: unit of measure"
+msgstr "Ligne de facture : unité de mesure"
+
+#: ai_explain.py:159
+msgid "Invoice line: price"
+msgstr "Ligne de facture : prix"
+
+#: ai_explain.py:160
+msgid "Tax: e-invoice tax category"
+msgstr "Taxe : catégorie de taxe de facture électronique"
+
+#: ai_explain.py:161
+msgid "Tax: exemption reason"
+msgstr "Taxe : motif d'exonération"
+
+#: ai_explain.py:162
+msgid "Company: bank account for payments"
+msgstr "Société : compte bancaire pour les paiements"
+
+#: ai_explain.py:170
+msgid "Open the customer and complete this field, then generate the e-invoice again."
+msgstr "Ouvrez le client et complétez ce champ, puis générez à nouveau la facture électronique."
+
+#: ai_explain.py:171
+msgid "Complete this field in the company settings, then generate the e-invoice again."
+msgstr "Complétez ce champ dans les paramètres de la société, puis générez à nouveau la facture électronique."
+
+#: ai_explain.py:172
+msgid "Correct the invoice (reset it to draft if needed), then generate the e-invoice again."
+msgstr "Corrigez la facture (remettez-la en brouillon si nécessaire), puis générez à nouveau la facture électronique."
+
+#: ai_explain.py:173
+msgid "Correct the invoice line, then generate the e-invoice again."
+msgstr "Corrigez la ligne de facture, puis générez à nouveau la facture électronique."
+
+#: ai_explain.py:174
+msgid "Complete the e-invoice settings of the tax, then generate the e-invoice again."
+msgstr "Complétez les paramètres de facture électronique de la taxe, puis générez à nouveau la facture électronique."
+
+#: ai_explain.py:175
+msgid "Set the bank account on the company's bank journal, then generate the e-invoice again."
+msgstr "Renseignez le compte bancaire sur le journal de banque de la société, puis générez à nouveau la facture électronique."
+
+#: ai_explain.py:244
+msgid "Choose an e-invoice"
+msgstr "Choisissez une facture électronique"
+
+#: ai_explain.py:325
+msgid "No such e-invoice"
+msgstr "Facture électronique introuvable"
