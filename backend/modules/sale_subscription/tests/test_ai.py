@@ -16,6 +16,7 @@ import pytest
 from fastapi.testclient import TestClient
 from gateway.adapters.mock import MockAdapter
 
+from modules.sale.models.quotation import INTERNAL
 from modules.sale_subscription import ai_churn as ML
 from modules.sale_subscription import ai_features as A
 from modules.sale_subscription.tests.common import D, at, customer, plan, recurring, subscription
@@ -67,6 +68,13 @@ def _sub(env: Any, start: dt.date = D(2025, 6, 1), **vals: Any) -> Any:
     support = recurring(env, "AI support", 40.0)
     lines = [{"product_id": seat.ids[0], "quantity": 3}, {"product_id": support.ids[0], "quantity": 1}]
     return subscription(env, customer(env, vals.pop("partner_name", "Churn Test Co")), plan(env), lines, start, **vals)
+
+
+def _retire(env: Any, sub_id: int) -> None:
+    """A subscription committed for an API test stops running, so other tests' daily jobs leave it alone."""
+    sub = env["sale.quotation"].elevated().browse([sub_id])
+    sub.with_context(**{INTERNAL: True}).write({"subscription_state": "churned", "closed_on": DAY})
+    env.cr.commit()
 
 
 def _counts(env: Any) -> dict[str, int]:
@@ -221,7 +229,7 @@ def test_churn_api_access_flag_and_audit(admin: Session, app: Any) -> None:
     finally:
         with environment_for() as e:
             e["core.user"].elevated().search([("login", "=", "churn-rep@test")]).write({"active": False})
-            e.cr.commit()
+            _retire(e, sid)
 
 
 def test_churn_narration_is_grounded(env: Any) -> None:
@@ -338,6 +346,8 @@ def test_renewal_draft_api_and_flag(admin: Session) -> None:
         assert off.status_code == 404 and off.json()["code"] == "feature_disabled"
     finally:
         admin.client.put(flag, json={"company_id": company, "enabled": True}, headers=admin.headers)
+        with environment_for() as e:
+            _retire(e, sid)
 
 
 # -- evaluation gate -----------------------------------------------------------------------------------------

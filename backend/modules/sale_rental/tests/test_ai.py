@@ -231,6 +231,39 @@ def test_usage_check_raises_alerts_once_and_notifies(env: Any) -> None:
     assert all(rental_line(o).rental_status == "returned" for o in orders)
 
 
+def test_alert_texts_and_company_isolation(env: Any) -> None:
+    kit = rental_product(env, "Text kit", units=5)
+    alerts = env["sale.rental_anomaly"].elevated()
+    company = env.ref("core.main_company").ids[0]
+    base = {"company_id": company, "product_id": kit.ids[0], "detected_on": NOW.date(), "score": 1.0}
+    spike = alerts.create(
+        {**base, "kind": "utilisation_spike", "key": "s", "details": {"actual": 30.0, "expected": 14.0}}
+    )
+    drop = alerts.create({**base, "kind": "utilisation_drop", "key": "d", "details": {"actual": 2.0, "expected": 14.0}})
+    assert spike.summary == "Text kit: 30.0 unit-days out in the last 7 days, 14.0 expected"
+    assert spike.name == spike.summary
+    assert drop.describe() == "Text kit: only 2.0 unit-days out in the last 7 days, 14.0 expected"
+    assert A.alert_dict(spike)["kind_label"] == "Utilisation spike"
+    # another company's user sees none of them
+    eu = env.ref("core.demo_company_eu")
+    eu_user = (
+        env["core.user"]
+        .elevated()
+        .create(
+            {
+                "name": "EU rental rep",
+                "login": "rental-eu-ai@test",
+                "company_id": eu.ids[0],
+                "company_ids": [("set", eu.ids)],
+                "group_ids": [("set", [env.ref("sale.group_sale_all").ids[0]])],
+            }
+        )
+    )
+    as_eu = env.with_user(eu_user.ids[0]).with_company(eu.ids[0])
+    assert not as_eu["sale.rental_anomaly"].search([("id", "in", [spike.ids[0], drop.ids[0]])])
+    assert all(r["product_id"] != kit.ids[0] for r in A.usage_facts(env, eu.ids[0], NOW)["rentals"])
+
+
 def test_alert_narration_and_job_kill_switch(env: Any, system_env: Any) -> None:
     company = env.ref("core.main_company").ids[0]
     kit = rental_product(env, "Job kit", units=2, extra_hourly=5.0)
@@ -263,9 +296,19 @@ def test_rental_ai_api(admin: Session) -> None:
 
     with environment_for() as e:
         kit = rental_product(e, "API forecast kit", units=2)
-        rental_order(e, kit, NOW - _days(9), NOW - _days(7)).action_confirm()
+        order = rental_order(e, kit, NOW - _days(9), NOW - _days(7))
+        order.action_confirm()
         e.cr.commit()
-        pid, company = kit.ids[0], e.ref("core.main_company").ids[0]
+        pid, oid, company = kit.ids[0], order.ids[0], e.ref("core.main_company").ids[0]
+    try:
+        _rental_api_checks(admin, pid, company)
+    finally:
+        with environment_for() as e:  # committed for the API: released again for the other tests
+            e["sale.quotation"].browse([oid]).write({"state": "cancelled"})
+            e.cr.commit()
+
+
+def _rental_api_checks(admin: Session, pid: int, company: int) -> None:
     ok = admin.get(f"/api/v1/sale_rental/ai/products/{pid}/forecast", params={"weeks": 3})
     assert ok.status_code == 200, ok.text
     assert len(ok.json()["weeks"]) == 3 and ok.json()["run_id"]
