@@ -1,0 +1,9 @@
+[
+  {"id": "menu_subscriptions_root", "name": "Subscriptions", "parent": "sale.menu_root", "sequence": 15},
+  {"id": "menu_subscriptions", "name": "Subscriptions", "parent": "sale_subscription.menu_subscriptions_root", "sequence": 10, "action": "sale_subscription.action_subscriptions"},
+  {"id": "menu_subscriptions_to_renew", "name": "Fixed-term subscriptions", "parent": "sale_subscription.menu_subscriptions_root", "sequence": 20, "action": "sale_subscription.action_subscriptions_to_renew"},
+  {"id": "menu_subscription_analysis", "name": "Subscription analysis", "parent": "sale.menu_reporting", "sequence": 20, "action": "sale_subscription.action_subscription_analysis"},
+  {"id": "menu_mrr_by_plan", "name": "MRR by plan", "parent": "sale.menu_reporting", "sequence": 25, "action": "sale_subscription.action_mrr_by_plan"},
+  {"id": "menu_plans", "name": "Subscription plans", "parent": "sale.menu_config", "sequence": 30, "action": "sale_subscription.action_plans"},
+  {"id": "menu_close_reasons", "name": "Subscription close reasons", "parent": "sale.menu_config", "sequence": 35, "action": "sale_subscription.action_close_reasons"}
+]

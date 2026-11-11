@@ -1,0 +1,8 @@
+[
+  {"id": "close_reason_price", "model": "sale.subscription_close_reason", "noupdate": true, "values": {"name": "Too expensive", "sequence": 10}},
+  {"id": "close_reason_quality", "model": "sale.subscription_close_reason", "noupdate": true, "values": {"name": "Not satisfied with the quality", "sequence": 20}},
+  {"id": "close_reason_competitor", "model": "sale.subscription_close_reason", "noupdate": true, "values": {"name": "Moved to a competitor", "sequence": 30}},
+  {"id": "close_reason_not_needed", "model": "sale.subscription_close_reason", "noupdate": true, "values": {"name": "No longer needed", "sequence": 40}},
+  {"id": "close_reason_payment_failure", "model": "sale.subscription_close_reason", "noupdate": true, "values": {"name": "Payment failure", "sequence": 50, "customer_visible": false}},
+  {"id": "close_reason_not_renewed", "model": "sale.subscription_close_reason", "noupdate": true, "values": {"name": "Term ended without renewal", "sequence": 60, "customer_visible": false}}
+]

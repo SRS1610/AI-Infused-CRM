@@ -1,0 +1,102 @@
+[
+  {"id": "view_subscription_form", "model": "sale.quotation", "type": "form", "name": "sale.quotation.subscription.form", "chatter": true,
+   "root": {"kind": "sheet", "children": [
+     {"kind": "buttons", "children": [
+       {"kind": "button", "method": "action_send", "label": "Send by email", "invisible": ["state", "not_in", ["draft", "sent"]]},
+       {"kind": "button", "method": "action_start", "label": "Start", "invisible": {"any": [["subscription_state", "!=", "draft"], ["state", "not_in", ["draft", "sent", "accepted"]]]}},
+       {"kind": "button", "method": "action_create_recurring_invoices", "label": "Invoice due periods", "invisible": ["subscription_state", "!=", "progress"]},
+       {"kind": "button", "method": "action_upsell", "label": "Upsell", "confirm": "Prepare a change order with the current lines? Edit it, then confirm it: the rest of the current period is invoiced or credited.", "invisible": ["subscription_state", "!=", "progress"]},
+       {"kind": "button", "method": "action_renew", "label": "Renew", "invisible": {"any": [["subscription_state", "not_in", ["progress", "paused"]], ["end_date", "=", null]]}},
+       {"kind": "button", "method": "action_pause", "label": "Pause", "confirm": "Pause the subscription? Periods starting while it is paused are not invoiced.", "invisible": ["subscription_state", "!=", "progress"]},
+       {"kind": "button", "method": "action_resume", "label": "Resume", "invisible": ["subscription_state", "!=", "paused"]},
+       {"kind": "button", "method": "action_close", "label": "Close", "dialog_title": "Close the subscription", "submit_label": "Close",
+        "params": [
+          {"name": "reason", "label": "Reason", "type": "select", "required": true, "options": [["price", "Too expensive"], ["quality", "Not satisfied with the quality"], ["competitor", "Moved to a competitor"], ["not_needed", "No longer needed"], ["payment_failure", "Payment failure"]]},
+          {"name": "when", "label": "When", "type": "select", "options": [["period_end", "At the end of the invoiced period (nothing credited)"], ["now", "Now (the unused days are credited)"]]},
+          {"name": "note", "label": "Comment", "type": "textarea"}
+        ],
+        "invisible": ["subscription_state", "not_in", ["progress", "paused"]]},
+       {"kind": "button", "method": "action_reactivate", "label": "Reactivate", "confirm": "Restart this subscription today? A new billing period starts now.", "invisible": ["subscription_state", "!=", "churned"]}
+     ]},
+     {"kind": "field", "name": "name", "widget": "title", "readonly": true},
+     {"kind": "group", "name": "main", "columns": 2, "children": [
+       {"kind": "field", "name": "partner_id"}, {"kind": "field", "name": "plan_id"},
+       {"kind": "field", "name": "subscription_state", "readonly": true}, {"kind": "field", "name": "state", "readonly": true},
+       {"kind": "field", "name": "start_date"}, {"kind": "field", "name": "end_date"},
+       {"kind": "field", "name": "next_invoice_date"}, {"kind": "field", "name": "payment_token_id"},
+       {"kind": "field", "name": "recurring_total", "readonly": true}, {"kind": "field", "name": "recurring_monthly", "readonly": true},
+       {"kind": "field", "name": "pricelist_id"}, {"kind": "field", "name": "currency_id"},
+       {"kind": "field", "name": "user_id"}, {"kind": "field", "name": "payment_term_id"},
+       {"kind": "field", "name": "renewal_of_id", "invisible": ["renewal_of_id", "=", null]},
+       {"kind": "field", "name": "close_reason_id", "invisible": ["close_reason_id", "=", null]},
+       {"kind": "field", "name": "closed_on", "invisible": ["closed_on", "=", null]},
+       {"kind": "field", "name": "payment_failure_count", "readonly": true, "invisible": ["payment_failure_count", "=", 0]}
+     ]},
+     {"kind": "notebook", "pages": [
+       {"kind": "page", "name": "page_lines", "title": "Lines", "children": [
+         {"kind": "field", "name": "line_ids", "columns": [{"field": "product_id"}, {"field": "name"}, {"field": "quantity"}, {"field": "price_unit"}, {"field": "discount"}, {"field": "tax_ids"}, {"field": "price_subtotal"}, {"field": "is_recurring"}]},
+         {"kind": "group", "name": "totals", "columns": 1, "children": [{"kind": "field", "name": "amount_untaxed"}, {"kind": "field", "name": "amount_total"}]}
+       ]},
+       {"kind": "page", "name": "page_subscription_invoices", "title": "Invoices", "children": [
+         {"kind": "field", "name": "subscription_move_ids", "readonly": true, "columns": [{"field": "name"}, {"field": "move_type"}, {"field": "subscription_kind"}, {"field": "subscription_period_start"}, {"field": "subscription_period_end"}, {"field": "amount_total"}, {"field": "state"}, {"field": "payment_state"}]}
+       ]},
+       {"kind": "page", "name": "page_history", "title": "MRR history", "children": [
+         {"kind": "field", "name": "subscription_log_ids", "readonly": true, "columns": [{"field": "event_date"}, {"field": "event_type"}, {"field": "amount_signed"}, {"field": "recurring_monthly"}, {"field": "reason_id"}, {"field": "note"}]}
+       ]},
+       {"kind": "page", "name": "page_changes", "title": "Changes and renewals", "children": [
+         {"kind": "field", "name": "upsell_ids", "readonly": true, "columns": [{"field": "name"}, {"field": "date_order"}, {"field": "state"}, {"field": "amount_untaxed"}]},
+         {"kind": "field", "name": "renewal_ids", "readonly": true, "columns": [{"field": "name"}, {"field": "start_date"}, {"field": "end_date"}, {"field": "state"}, {"field": "subscription_state"}]}
+       ]},
+       {"kind": "page", "name": "page_close", "title": "Closing", "children": [
+         {"kind": "field", "name": "close_note"}, {"kind": "field", "name": "pause_count", "readonly": true}, {"kind": "field", "name": "paused_on", "readonly": true}, {"kind": "field", "name": "last_charge_date", "readonly": true}
+       ]}
+     ]}
+   ]}},
+  {"id": "view_subscription_list", "model": "sale.quotation", "type": "list", "name": "sale.quotation.subscription.list", "columns": [{"field": "name"}, {"field": "partner_id"}, {"field": "plan_id"}, {"field": "start_date"}, {"field": "next_invoice_date"}, {"field": "end_date", "optional": "show"}, {"field": "recurring_total"}, {"field": "recurring_monthly", "sum": true}, {"field": "user_id", "optional": "hide"}, {"field": "subscription_state", "widget": "badge"}]},
+  {"id": "view_subscription_kanban", "model": "sale.quotation", "type": "kanban", "name": "sale.quotation.subscription.kanban", "default_group_by": "subscription_state", "root": {"kind": "card", "children": [{"kind": "field", "name": "name", "widget": "title"}, {"kind": "field", "name": "partner_id"}, {"kind": "field", "name": "plan_id"}, {"kind": "field", "name": "recurring_monthly"}, {"kind": "field", "name": "next_invoice_date"}]}},
+  {"id": "view_subscription_search", "model": "sale.quotation", "type": "search", "name": "sale.quotation.subscription.search", "fields": ["name", "partner_id", "plan_id"],
+   "filters": [
+     {"name": "mine", "label": "My subscriptions", "domain": [["user_id", "=", "$uid"]]},
+     {"name": "progress", "label": "In progress", "domain": [["subscription_state", "=", "progress"]]},
+     {"name": "paused", "label": "Paused", "domain": [["subscription_state", "=", "paused"]]},
+     {"name": "churned", "label": "Churned", "domain": [["subscription_state", "=", "churned"]]},
+     {"name": "fixed_term", "label": "Fixed term", "domain": [["end_date", "!=", null]]},
+     {"name": "failures", "label": "Payment failures", "domain": [["payment_failure_count", ">", 0]]}
+   ],
+   "group_bys": [{"field": "subscription_state"}, {"field": "plan_id"}, {"field": "user_id"}, {"field": "partner_id"}, {"field": "close_reason_id"}, {"field": "start_date:month"}]},
+  {"id": "view_subscription_pivot", "model": "sale.quotation", "type": "pivot", "name": "sale.quotation.subscription.pivot", "row": "plan_id", "col": "subscription_state", "measures": ["recurring_monthly_company"]},
+  {"id": "view_subscription_graph", "model": "sale.quotation", "type": "graph", "name": "sale.quotation.subscription.graph", "row": "plan_id", "measures": ["recurring_monthly_company"]},
+  {"id": "view_log_list", "model": "sale.subscription_log", "type": "list", "name": "sale.subscription_log.list", "columns": [{"field": "event_date"}, {"field": "subscription_id"}, {"field": "partner_id"}, {"field": "plan_id"}, {"field": "event_type", "widget": "badge"}, {"field": "amount_signed"}, {"field": "recurring_monthly"}, {"field": "amount_company", "sum": true}, {"field": "reason_id", "optional": "show"}]},
+  {"id": "view_log_search", "model": "sale.subscription_log", "type": "search", "name": "sale.subscription_log.search", "fields": ["subscription_id", "partner_id", "plan_id"],
+   "filters": [
+     {"name": "new", "label": "New", "domain": [["event_type", "=", "new"]]},
+     {"name": "expansion", "label": "Expansion", "domain": [["event_type", "in", ["upsell", "reactivation"]]]},
+     {"name": "contraction", "label": "Contraction", "domain": [["event_type", "=", "downsell"]]},
+     {"name": "churn", "label": "Churn", "domain": [["event_type", "=", "churn"]]}
+   ],
+   "group_bys": [{"field": "event_type"}, {"field": "event_date:month"}, {"field": "plan_id"}, {"field": "reason_id"}, {"field": "user_id"}]},
+  {"id": "view_log_pivot", "model": "sale.subscription_log", "type": "pivot", "name": "sale.subscription_log.pivot", "row": "event_date:month", "col": "event_type", "measures": ["amount_company"]},
+  {"id": "view_log_graph", "model": "sale.subscription_log", "type": "graph", "name": "sale.subscription_log.graph", "row": "event_date:month", "measures": ["amount_company"]},
+  {"id": "view_plan_list", "model": "sale.subscription_plan", "type": "list", "name": "sale.subscription_plan.list", "columns": [{"field": "name"}, {"field": "billing_period_value"}, {"field": "billing_period_unit"}, {"field": "auto_close_limit"}, {"field": "user_closable"}, {"field": "company_id", "optional": "hide"}]},
+  {"id": "view_plan_form", "model": "sale.subscription_plan", "type": "form", "name": "sale.subscription_plan.form",
+   "root": {"kind": "sheet", "children": [
+     {"kind": "field", "name": "name", "widget": "title"},
+     {"kind": "group", "name": "main", "columns": 2, "children": [
+       {"kind": "field", "name": "billing_period_value"}, {"kind": "field", "name": "billing_period_unit"},
+       {"kind": "field", "name": "auto_close_limit"}, {"kind": "field", "name": "payment_retry_days"},
+       {"kind": "field", "name": "renewal_reminder_days"}, {"kind": "field", "name": "user_closable"},
+       {"kind": "field", "name": "company_id"}, {"kind": "field", "name": "subscription_count", "readonly": true}
+     ]},
+     {"kind": "field", "name": "note"}
+   ]}},
+  {"id": "view_close_reason_list", "model": "sale.subscription_close_reason", "type": "list", "name": "sale.subscription_close_reason.list", "editable": true, "columns": [{"field": "name"}, {"field": "customer_visible"}]},
+  {"id": "view_quotation_form_subscription", "inherit": "sale.view_quotation_form", "name": "sale.quotation.form.subscription", "operations": [
+    {"op": "insert_after", "anchor": {"field": "template_id"}, "node": {"kind": "field", "name": "plan_id"}},
+    {"op": "insert_after", "anchor": {"field": "plan_id"}, "node": {"kind": "field", "name": "start_date", "invisible": ["plan_id", "=", null]}},
+    {"op": "insert_after", "anchor": {"field": "start_date"}, "node": {"kind": "field", "name": "end_date", "invisible": ["plan_id", "=", null]}},
+    {"op": "insert_after", "anchor": {"field": "end_date"}, "node": {"kind": "field", "name": "upsell_of_id", "readonly": true, "invisible": ["upsell_of_id", "=", null]}}
+  ]},
+  {"id": "view_product_form_subscription", "inherit": "product.view_product_form", "name": "product.product.form.subscription", "operations": [
+    {"op": "insert_after", "anchor": {"field": "invoice_policy"}, "node": {"kind": "field", "name": "recurring_invoice", "readonly_if": ["template_id", "!=", null]}}
+  ]}
+]

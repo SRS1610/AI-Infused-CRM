@@ -1,0 +1,3 @@
+[
+  {"id": "sched_recurring", "model": "core.scheduled_job", "noupdate": true, "values": {"name": "Subscriptions: invoices, charges, renewals (daily)", "job_name": "sale_subscription.run", "cron": "17 3 * * *"}}
+]
