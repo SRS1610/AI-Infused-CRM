@@ -228,6 +228,14 @@ msgstr "Pas d'adresse e-mail"
 msgid "Fee invoice"
 msgstr "Facture de frais"
 
+#: ai_features.py:215
+msgid "Choose a payment reminder"
+msgstr "Choisissez une relance de paiement"
+
+#: ai_features.py:225
+msgid "Only reminders that are still to send can be redrafted"
+msgstr "Seules les relances qui restent à envoyer peuvent être reformulées"
+
 #: dunning.py:252
 #, python-brace-format
 msgid "Reminder fee ({level})"

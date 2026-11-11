@@ -235,7 +235,8 @@ def prepare(env: Environment, record: Any, inputs: dict[str, Any]) -> dict[str, 
     reports = list_reports(env)
     catalogue = "\n".join(
         f"- {r['code']}: {r['name']} ({'period' if r['date_mode'] == 'range' else 'as of a date'}"
-        f"{', comparison columns' if r['allow_comparison'] else ''}){' — ' + r['description'] if r['description'] else ''}"
+        f"{', comparison columns' if r['allow_comparison'] else ''})"
+        f"{' — ' + r['description'] if r['description'] else ''}"
         for r in reports
     )
     companies = "\n".join(f"- {c.name}" for c in _companies(env))

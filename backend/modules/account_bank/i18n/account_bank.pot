@@ -593,6 +593,14 @@ msgstr ""
 msgid "Message"
 msgstr ""
 
+#: ai_features.py:507
+msgid "The transaction no longer exists"
+msgstr ""
+
+#: ai_features.py:543
+msgid "No such bank transaction"
+msgstr ""
+
 #: api.py:33
 msgid "Journal or file not found"
 msgstr ""

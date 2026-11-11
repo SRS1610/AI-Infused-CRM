@@ -44,7 +44,20 @@ PARTNERS = {"acme": "Acme Robotics Ltd", "northwind": "Northwind Traders", "glob
 CONSOL_USER = "nlr_consolidation"
 
 
-def reading(report: str, period: str = "default", *, date_from: str | None = None, date_to: str | None = None, comparison: str = "none", periods: int = 1, partners: list[str] | None = None, journals: list[str] | None = None, companies: list[str] | None = None, account_type: str = "all", include_draft: bool = False) -> dict[str, Any]:
+def reading(
+    report: str,
+    period: str = "default",
+    *,
+    date_from: str | None = None,
+    date_to: str | None = None,
+    comparison: str = "none",
+    periods: int = 1,
+    partners: list[str] | None = None,
+    journals: list[str] | None = None,
+    companies: list[str] | None = None,
+    account_type: str = "all",
+    include_draft: bool = False,
+) -> dict[str, Any]:
     return {
         "report": report, "period": period, "date_from": date_from, "date_to": date_to, "comparison": comparison,
         "periods": periods, "partners": partners or [], "journals": journals or [], "companies": companies or [],
@@ -158,7 +171,12 @@ def main() -> None:
             "login": CONSOL_USER,
             "company_id": MAIN,
             "company_ids": [["set", [MAIN, EU]]],
-            "group_ids": [["set", ["$xml:core.group_user", "$xml:core.group_multi_company", "$xml:account.group_account_readonly"]]],
+            "group_ids": [
+                [
+                    "set",
+                    ["$xml:core.group_user", "$xml:core.group_multi_company", "$xml:account.group_account_readonly"],
+                ]
+            ],
         },
     }
     for i, (question, intent, answer, tags, user) in enumerate(CASES, 1):

@@ -67,15 +67,19 @@ def history(line: Model) -> dict[str, Any]:
     sys_line = line.elevated("dunning history")
     partner = sys_line.partner_id
     since = sys_line.date - dt.timedelta(days=365)
-    earlier = env["account.dunning_run_line"].elevated().search(
-        [
-            ("partner_id", "=", partner.ids[0]),
-            ("company_id", "=", sys_line.company_id.ids[0]),
-            ("state", "in", ["sent", "letter"]),
-            ("date", ">=", since),
-            ("id", "!=", sys_line.ids[0]),
-        ],
-        order="date desc",
+    earlier = (
+        env["account.dunning_run_line"]
+        .elevated()
+        .search(
+            [
+                ("partner_id", "=", partner.ids[0]),
+                ("company_id", "=", sys_line.company_id.ids[0]),
+                ("state", "in", ["sent", "letter"]),
+                ("date", ">=", since),
+                ("id", "!=", sys_line.ids[0]),
+            ],
+            order="date desc",
+        )
     )
     moves = env["account.move"].elevated()
     paid = moves.search(
@@ -100,14 +104,18 @@ def history(line: Model) -> dict[str, Any]:
         due = move.invoice_date_due or move.invoice_date
         if dates and due:
             delays.append((max(dates) - due).days)
-    disputed = env["account.move_line"].elevated().search_count(
-        [
-            ("partner_id", "child_of", partner.ids[0]),
-            ("company_id", "=", sys_line.company_id.ids[0]),
-            ("blocked", "=", True),
-            ("reconciled", "=", False),
-            ("account_id.account_type", "=", "asset_receivable"),
-        ]
+    disputed = (
+        env["account.move_line"]
+        .elevated()
+        .search_count(
+            [
+                ("partner_id", "child_of", partner.ids[0]),
+                ("company_id", "=", sys_line.company_id.ids[0]),
+                ("blocked", "=", True),
+                ("reconciled", "=", False),
+                ("account_id.account_type", "=", "asset_receivable"),
+            ]
+        )
     )
     return {
         "reminders_last_12_months": len(earlier),
@@ -122,8 +130,10 @@ def history(line: Model) -> dict[str, Any]:
 def facts(line: Model) -> dict[str, Any]:
     ctx = _context(line)
     sys_line = line.elevated()
-    levels = sys_line.env["account.dunning_level"].elevated().search(
-        [("company_id", "=", sys_line.company_id.ids[0])], order="delay_days"
+    levels = (
+        sys_line.env["account.dunning_level"]
+        .elevated()
+        .search([("company_id", "=", sys_line.company_id.ids[0])], order="delay_days")
     )
     position = list(levels.ids).index(sys_line.level_id.ids[0]) if sys_line.level_id.ids[0] in levels.ids else 0
     last = position == len(levels) - 1 and len(levels) > 1
@@ -179,7 +189,8 @@ def _facts_text(f: dict[str, Any]) -> str:
             f"Tone: {lv['tone']}",
             f"Reminder fee of this level: {lv['fee'] or 'none'}",
             f"The level's standard message: {lv['template']}",
-            f"Total overdue: {f['amount_due']} on {f['invoice_count']} invoice(s), up to {f['max_days_overdue']} days late",
+            f"Total overdue: {f['amount_due']} on {f['invoice_count']} invoice(s), "
+            f"up to {f['max_days_overdue']} days late",
             f"Overdue invoices:\n{rows}",
             f"Reminders sent in the last 12 months: {h['reminders_last_12_months']}"
             + (f" (last on {h['last_reminder']}, {h['last_reminder_level']})" if h["last_reminder"] else ""),
@@ -282,7 +293,9 @@ def eval_entry(env: Environment, inputs: dict[str, Any], record: Any) -> Any:
         "left_ungrounded": ungrounded(final + " " + str(data.get("subject", "")), data.get("facts") or {}),
         "tone": data.get("tone"),
         "amount_due": (data.get("facts") or {}).get("amount_due"),
-        "mail_queued": int(env.cr.scalar("SELECT count(*) FROM core_mail_queue WHERE model = 'account.dunning_run'") or 0),
+        "mail_queued": int(
+            env.cr.scalar("SELECT count(*) FROM core_mail_queue WHERE model = 'account.dunning_run'") or 0
+        ),
     }
     return result
 

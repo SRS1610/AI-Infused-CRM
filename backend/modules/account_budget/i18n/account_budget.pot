@@ -265,6 +265,10 @@ msgstr ""
 msgid "Budget state"
 msgstr ""
 
+#: ai_features.py:77
+msgid "Choose a budget"
+msgstr ""
+
 #: models/budget.py:109
 msgid "A budget ends after it starts"
 msgstr ""

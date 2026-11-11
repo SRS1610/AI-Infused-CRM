@@ -39,7 +39,9 @@ def build(env: Any, spec: dict[str, Any]) -> Any:
     partner = sys_env["contacts.partner"].browse([int(spec["partner"])])
     levels = install_levels(company).sorted(lambda lv: lv.delay_days)
     for i, inv in enumerate(spec.get("invoices") or []):
-        move = _invoice(sys_env, partner, company, inv["amount"], day - dt.timedelta(days=inv["days_late"]), f"Order {i + 1}")
+        move = _invoice(
+            sys_env, partner, company, inv["amount"], day - dt.timedelta(days=inv["days_late"]), f"Order {i + 1}"
+        )
         if inv.get("blocked"):
             move.line_ids.filtered(lambda r: r.account_id.account_type == "asset_receivable").write({"blocked": True})
     for i, paid in enumerate(spec.get("paid") or []):

@@ -99,7 +99,7 @@ def audit_run(
 # ----------------------------------------------------------------------------------------- numbers
 
 # a number as people write it: 1,234.56 / 1.234,56 / 1 234,56 / 1234 / 12.5 / -3 (not glued to letters)
-_NUM = r"\d{1,3}(?:[,.  ' ]\d{3})+(?:[.,]\d{1,2})?|\d+(?:[.,]\d+)?"
+_NUM = r"\d{1,3}(?:[,.\u00a0\u202f' ]\d{3})+(?:[.,]\d{1,2})?|\d+(?:[.,]\d+)?"
 NUMBER = re.compile(
     rf"(?<![\w.,/:])(?P<num>{_NUM})(?P<scale>\s?(?:k|m|mn|million|thousand)\b)?(?![\w/:]|[.,]\d)",
     re.IGNORECASE,
@@ -112,7 +112,7 @@ TOLERANCE = 0.005
 
 def parse_number(raw: str) -> float | None:
     """``18,900.00`` / ``18.900,00`` / ``18 900`` / ``113.4`` → float."""
-    s = re.sub(r"[  ' ]", "", raw)
+    s = re.sub(r"[\u00a0\u202f' ]", "", raw)
     if "," in s and "." in s:
         dec = "," if s.rfind(",") > s.rfind(".") else "."
         s = s.replace("." if dec == "," else ",", "").replace(dec, ".")
@@ -149,7 +149,7 @@ def numbers_in(text: str) -> list[tuple[str, float]]:
         out += [(m.group(0), float(g)) for g in m.groups()]
     spans += [m.span() for m in TIME.finditer(text)]
     for m in NUMBER.finditer(text):
-        start, end = m.span("num")
+        start, _end = m.span("num")
         if any(s <= start < e for s, e in spans):
             continue
         value = parse_number(m.group("num"))

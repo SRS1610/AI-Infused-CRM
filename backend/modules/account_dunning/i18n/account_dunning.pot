@@ -224,6 +224,14 @@ msgstr ""
 msgid "Fee invoice"
 msgstr ""
 
+#: ai_features.py:215
+msgid "Choose a payment reminder"
+msgstr ""
+
+#: ai_features.py:225
+msgid "Only reminders that are still to send can be redrafted"
+msgstr ""
+
 #: dunning.py:252
 #, python-brace-format
 msgid "Reminder fee ({level})"

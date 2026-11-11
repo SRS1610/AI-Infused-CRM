@@ -100,7 +100,15 @@ def build(env: Any, inputs: dict[str, Any]) -> Any:
                 "company_id": company_id,
                 "invoice_date": dt.date.fromisoformat(past["date"]) - dt.timedelta(days=30),
                 "invoice_line_ids": [
-                    ("create", {"name": "Earlier order", "quantity": 1, "price_unit": past["amount"], "tax_ids": [("set", [])]})
+                    (
+                        "create",
+                        {
+                            "name": "Earlier order",
+                            "quantity": 1,
+                            "price_unit": past["amount"],
+                            "tax_ids": [("set", [])],
+                        },
+                    )
                 ],
             }
         )

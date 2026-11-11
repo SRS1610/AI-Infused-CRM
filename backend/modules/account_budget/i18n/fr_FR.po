@@ -267,6 +267,10 @@ msgstr "Réalisé - prévu"
 msgid "Budget state"
 msgstr "État du budget"
 
+#: ai_features.py:77
+msgid "Choose a budget"
+msgstr "Choisissez un budget"
+
 #: models/budget.py:109
 msgid "A budget ends after it starts"
 msgstr "Un budget se termine après son début"
@@ -372,5 +376,7 @@ msgstr "Budgets"
 msgid ""
 "Planned and actual amounts are positive: costs on expense lines, income on revenue lines. "
 "Variance = actual - planned."
-msgstr "Les montants prévus et réalisés sont positifs : charges sur les lignes de charges, produits sur les lignes de produits. Écart = réalisé - prévu."
+msgstr ""
+"Les montants prévus et réalisés sont positifs : charges sur les lignes de charges, produits sur "
+"les lignes de produits. Écart = réalisé - prévu."
 

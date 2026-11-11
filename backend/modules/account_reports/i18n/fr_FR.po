@@ -268,7 +268,9 @@ msgstr "Consolidation uniquement"
 #. field help
 #: field:account.report_line.consolidation_only
 msgid "Only computed when the report converts companies into another currency (translation differences)"
-msgstr "Calculé uniquement quand le rapport convertit les sociétés dans une autre devise (écarts de conversion)"
+msgstr ""
+"Calculé uniquement quand le rapport convertit les sociétés dans une autre devise (écarts de "
+"conversion)"
 
 #. field label
 #: field:account.report_line.style
@@ -517,7 +519,9 @@ msgstr "Bilan"
 msgid ""
 "Assets, liabilities and equity as of a date. Equity includes the current year's earnings "
 "(computed) and the retained earnings of earlier years."
-msgstr "Actif, passif et capitaux propres à une date. Les capitaux propres comprennent le résultat de l'exercice (calculé) et les résultats reportés des exercices antérieurs."
+msgstr ""
+"Actif, passif et capitaux propres à une date. Les capitaux propres comprennent le résultat de "
+"l'exercice (calculé) et les résultats reportés des exercices antérieurs."
 
 #. account.report_line.name
 #: data/reports.json:bs_assets
@@ -666,7 +670,9 @@ msgstr "Tableau des flux de trésorerie"
 #. account.report.description
 #: data/reports.json:report_cash_flow
 msgid "Direct method: the counterparts of the bank and cash movements of the period, by kind of account."
-msgstr "Méthode directe : les contreparties des mouvements de banque et de caisse de la période, par nature de compte."
+msgstr ""
+"Méthode directe : les contreparties des mouvements de banque et de caisse de la période, par "
+"nature de compte."
 
 #. account.report_line.name
 #: data/reports.json:cf_opening_cash
