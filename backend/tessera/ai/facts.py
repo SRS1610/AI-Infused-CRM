@@ -225,3 +225,46 @@ def ground_text(text: str, facts: Any, *, allow: Iterable[float] = ()) -> tuple[
         kept.append(" ".join(good))
     out = re.sub(r"\n{3,}", "\n\n", "".join(kept)).strip()
     return out, removed
+
+
+# ----------------------------------------------------------------------------------------- cassettes
+
+JUDGE_PROMPT = "eval.judge@1"
+
+
+def replay_response(
+    parsed: Any = None, text: str | None = None, *, tokens: tuple[int, int] = (900, 160)
+) -> dict[str, Any]:
+    """A gateway response as the replay client returns it (hand-authored answers of the build scripts)."""
+    body = text if text is not None else json.dumps(parsed, ensure_ascii=False)
+    inp, out = tokens
+    return {
+        "id": "replay",
+        "provider": "replay",
+        "model": "replay-model",
+        "content": [{"type": "text", "text": body}],
+        "stop": "end",
+        "usage": {"input_tokens": inp, "output_tokens": out, "cache_read_tokens": 0, "cache_write_tokens": 0},
+        "cost": f"{(inp * 0.8 + out * 4) / 1_000_000:.6f}",
+        "latency_ms": 500 + out * 3,
+        "parsed": parsed,
+        "safety_flags": [],
+    }
+
+
+def cassette_entry(prompt_version: str, case: str, index: int, response: dict[str, Any]) -> dict[str, Any]:
+    return {"prompt_version": prompt_version, "case": case, "index": index, "response": response}
+
+
+def judge_entry(case: str, index: int, score: int, reason: str) -> dict[str, Any]:
+    """The replayed LLM-as-judge grade of a case (D-058)."""
+    response = replay_response({"score": score, "reason": reason}, tokens=(1100, 60))
+    return cassette_entry(JUDGE_PROMPT, case, index, response)
+
+
+def write_jsonl(path: Any, rows: list[dict[str, Any]]) -> None:
+    from pathlib import Path
+
+    p = Path(path)
+    p.parent.mkdir(parents=True, exist_ok=True)
+    p.write_text("".join(json.dumps(r, sort_keys=True, ensure_ascii=False) + "\n" for r in rows))

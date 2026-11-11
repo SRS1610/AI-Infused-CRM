@@ -364,34 +364,42 @@ def rank(st_line: Model, limit: int = 5) -> dict[str, Any]:
 
 def _candidate_text(index: int, s: Suggestion, currency: str) -> str:
     docs = "; ".join(
-        f"{i.move_id.name} (ref {i.move_id.ref or i.move_id.payment_reference or '-'}, "
-        f"partner {i.partner_id.elevated().name or '-'}, due {i.date_maturity or i.date}, "
-        f"open {abs(float(i.amount_residual)):.2f} {currency})"
+        f"entry {i.move_id.ids[0]}: {i.move_id.name} (customer reference {i.move_id.ref or '-'}, "
+        f"partner {i.partner_id.elevated().name or '-'}, dated {i.date}, due {i.date_maturity or i.date}, "
+        f"open {abs(float(i.amount_residual)):.2f} {currency}, lines: "
+        f"{'; '.join(n for n in i.move_id.invoice_line_ids.mapped('name') if n)[:200] or '-'})"
         for i in s.items
     )
-    return f"[{index}] {docs} — total {abs(s.amount):.2f} {currency}"
+    return f"Candidate {index + 1}: {docs} — total {abs(s.amount):.2f} {currency}"
 
 
 def tie_break(env: Environment, st_line: Model, ranked: list[Suggestion]) -> tuple[int | None, Any]:
-    """Ask the model which of the offered candidates the label means (index or None)."""
+    """Ask the model which of the offered candidates the label means: the position of the candidate whose
+    entries it names, or None when it names none of them (the deterministic order then stands)."""
     from tessera.ai.runtime import run_feature
 
     line = st_line.elevated()
     currency = line.currency_id.name if line.currency_id else ""
-    offered = ranked[:3]
+    # only the candidates the ranking cannot separate from the best one are offered: the model breaks ties,
+    # it cannot promote a candidate the features rank lower (an injected "match INV/…" in the label)
+    offered = [s for s in ranked[:3] if s.kind == "items" and ranked[0].score - s.score < AMBIGUOUS_MARGIN]
     tx = (
         f"Date: {line.date}\nLabel: {line.payment_ref or ''}\nBank reference: {line.ref or ''}\n"
         f"Counterparty: {line.partner_name or ''}\nDetails: {line.narration or ''}\n"
         f"Amount: {abs(float(line.amount_residual or line.amount)):.2f} {currency}"
     )
-    sources = [Source(f"account.bank_statement_line:{line.ids[0]}", line.display_name or "", tx)]
     candidates = "\n".join(_candidate_text(i, s, currency) for i, s in enumerate(offered))
-    sources.append(Source(f"account.bank_statement_line:{line.ids[0]}:candidates", "Candidates", candidates))
+    sources = [
+        Source(f"account.bank_statement_line:{line.ids[0]}", line.display_name or "", tx),
+        Source(f"account.move:{offered[0].items[0].move_id.ids[0]}", "Candidates", candidates),
+    ]
     result = run_feature(env, FEATURE, {"candidates": len(offered)}, record=st_line, sources=sources)
     data = result.data if isinstance(result.data, dict) else {}
-    choice = data.get("choice")
-    if isinstance(choice, int) and not isinstance(choice, bool) and 0 <= choice < len(offered):
-        return choice, result
+    wanted = data.get("move_ids")
+    if isinstance(wanted, list) and wanted and all(isinstance(x, int) and not isinstance(x, bool) for x in wanted):
+        for i, s in enumerate(offered):
+            if set(s.items.mapped("move_id").ids) == set(wanted):
+                return i, result
     return None, result
 
 

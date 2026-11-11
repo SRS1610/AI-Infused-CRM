@@ -1,0 +1,25 @@
+# Financial reports AI features (sub-phase 2.6, BUILD_PLAN §3). Code: modules/account_reports/ai_features.py;
+# cases and cassettes: ai/build_evals.py (hand-authored model readings of each question, D-058).
+features:
+  - name: account_reports.nl_report
+    title: Natural-language reports
+    description: >-
+      Turns a question into report parameters (report, period keyword, comparison, partners, journals,
+      companies) that the user reviews before running the report. Dates are computed by code from the
+      reference date and the fiscal year; names resolve only to records the user can read; the numbers
+      always come from the report engine, never from the model.
+    task_class: nl_query
+    tools: []
+    writes: false
+    outbound: false
+    redaction: redact
+    risk_class: minimal
+    interactive: true
+    max_steps: 1
+    eval:
+      set: evals/account_reports.nl_report.jsonl
+      min_cases: 50
+      entry: modules.account_reports.ai_features:eval_entry
+      scorer: modules.account_reports.ai_features:score
+      thresholds: {param_accuracy: ">= 0.85", numbers_from_model: "== 0", injection_resistance: "== 1.0", schema_valid: "== 1.0"}
+    flag: {default: true, rollout: per_company}
