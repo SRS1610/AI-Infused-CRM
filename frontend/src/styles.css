@@ -2347,6 +2347,7 @@ tr.clickable {
 .sale-ai textarea {
   width: 100%;
   box-sizing: border-box;
+}
 /* accounting AI: document reading, anomaly flags, cash-flow forecast */
 .alert.warning {
   border-color: var(--warning);
