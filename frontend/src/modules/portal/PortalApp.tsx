@@ -7,6 +7,7 @@ import { t, tx } from "../../kernel/i18n";
 import { useSession } from "../../kernel/session";
 import { InvoicePage } from "./InvoicePage";
 import { QuotePage, quoteStateLabel } from "./QuotePage";
+import { SubscriptionPage, subscriptionStateLabel, type SubscriptionSummary } from "./SubscriptionPage";
 
 interface Doc {
   id: number;
@@ -51,6 +52,7 @@ export function PortalApp() {
           <Route path="/portal/profile" element={<Profile />} />
           <Route path="/portal/quotes/:id" element={<QuotePage />} />
           <Route path="/portal/invoices/:id" element={<InvoicePage />} />
+          <Route path="/portal/subscriptions/:id" element={<SubscriptionPage />} />
           <Route path="*" element={<Navigate to="/portal" replace />} />
         </Routes>
       </main>
@@ -60,9 +62,17 @@ export function PortalApp() {
 
 function Documents() {
   const navigate = useNavigate();
+  const { session } = useSession();
   const docs = useQuery({
     queryKey: ["portal-docs"],
     queryFn: () => request<{ quotations: Doc[] }>("GET", "/portal/documents"),
+  });
+  const withSubscriptions = !!session?.modules?.includes("sale_subscription");
+  const subs = useQuery({
+    queryKey: ["portal-subscriptions"],
+    queryFn: () => request<{ subscriptions: SubscriptionSummary[] }>("GET", "/sale/subscriptions"),
+    enabled: withSubscriptions,
+    retry: false,
   });
   return (
     <div className="portal-page">
@@ -99,6 +109,39 @@ function Documents() {
             ))}
           </tbody>
         </table>
+      )}
+      {subs.data && subs.data.subscriptions.length > 0 && (
+        <>
+          <h2>{t("Subscriptions")}</h2>
+          <table className="pivot-table">
+            <thead>
+              <tr>
+                <th scope="col">{t("Number")}</th>
+                <th scope="col">{t("Plan")}</th>
+                <th scope="col">{t("Next invoice")}</th>
+                <th scope="col" className="num">
+                  {t("Amount per period")}
+                </th>
+                <th scope="col">{t("Status")}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {subs.data.subscriptions.map((s) => (
+                <tr key={s.id} className="clickable" onClick={() => navigate(`/portal/subscriptions/${s.id}`)}>
+                  <th scope="row">
+                    <Link to={`/portal/subscriptions/${s.id}`}>{s.name}</Link>
+                  </th>
+                  <td>{s.plan}</td>
+                  <td>{s.next_invoice_date ?? "—"}</td>
+                  <td className="num">{formatMonetary(s.recurring_total_taxed, s.currency)}</td>
+                  <td>
+                    <span className={`badge state-${s.state}`}>{subscriptionStateLabel(s.state)}</span>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </>
       )}
     </div>
   );

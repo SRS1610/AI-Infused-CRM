@@ -79,7 +79,8 @@ def subscription_payload(sub: Any) -> dict[str, Any]:
         "start_date": sub.start_date.isoformat() if sub.start_date else None,
         "next_invoice_date": (
             sub.next_invoice_date.isoformat()
-            if sub.next_invoice_date and sub.subscription_state == "progress"
+            if sub.next_invoice_date
+            and sub.subscription_state == "progress"
             and (not sub.end_date or sub.next_invoice_date <= sub.end_date)
             else None
         ),
@@ -147,9 +148,12 @@ def list_subscriptions(ctx: RequestContext = Depends(authenticated_any)) -> dict
                 "plan": s.plan_id.name if s.plan_id else None,
                 "state": s.subscription_state,
                 "next_invoice_date": (
-                    s.next_invoice_date.isoformat() if s.next_invoice_date and s.subscription_state == "progress" else None
+                    s.next_invoice_date.isoformat()
+                    if s.next_invoice_date and s.subscription_state == "progress"
+                    else None
                 ),
                 "recurring_total": s.recurring_total,
+                "recurring_total_taxed": round(sum(float(line.price_total or 0) for line in s._recurring_lines()), 2),
                 "currency": s.currency_id.name,
             }
             for s in subs

@@ -4,10 +4,10 @@ Each scenario is a table row: the plan, the lines, the start (and end) date, a l
 expected document (kind, date, untaxed, total, period), the final state, the next invoice date, the end date,
 the MRR and the MRR history. Amounts follow the rules of ``periods.py`` / ``billing.py``:
 
-* periods start on ``anchor + k × period`` (Jan 31 → Feb 28 → Mar 31 …) and end the day before the next start;
-* a change or closure effective on day C prorates ``(period end − C + 1) / period days``, rounded per line to
+* periods start on ``anchor + k x period`` (Jan 31 → Feb 28 → Mar 31 …) and end the day before the next start;
+* a change or closure effective on day C prorates ``(period end - C + 1) / period days``, rounded per line to
   the cent; a fixed term ending inside a period invoices ``covered days / period days`` of it;
-* MRR is the untaxed recurring amount per month (yearly ÷ 12, weekly × 52 / 12).
+* MRR is the untaxed recurring amount per month (yearly ÷ 12, weekly x 52 / 12).
 
 Document kinds: ``inv`` period invoice, ``pro`` mid-period change invoice, ``pcn`` mid-period change credit
 note, ``cn`` unused days credit note (immediate close).
@@ -98,7 +98,7 @@ SCENARIOS: list[dict[str, Any]] = [
         "steps": [("2026-03-01", "run"), ("2026-03-16", "upsell", {"set": {0: {"quantity": 2}}}), ("2026-04-01", "run")],
         "invoices": [
             ("inv", "2026-03-01", 100.0, 100.0, "2026-03-01", "2026-03-31"),
-            ("pro", "2026-03-16", 51.61, 51.61, "2026-03-16", "2026-03-31"),  # 100 × 16/31
+            ("pro", "2026-03-16", 51.61, 51.61, "2026-03-16", "2026-03-31"),  # 100 x 16/31
             ("inv", "2026-04-01", 200.0, 200.0, "2026-04-01", "2026-04-30"),
         ],
         "state": "progress", "next": "2026-05-01", "mrr": 200.0,
@@ -113,7 +113,7 @@ SCENARIOS: list[dict[str, Any]] = [
         "steps": [("2026-04-01", "run"), ("2026-04-21", "upsell", {"set": {0: {"quantity": 1}}}), ("2026-05-01", "run")],
         "invoices": [
             ("inv", "2026-04-01", 300.0, 300.0, "2026-04-01", "2026-04-30"),
-            ("pcn", "2026-04-21", 66.67, 66.67, "2026-04-21", "2026-04-30"),  # 200 × 10/30
+            ("pcn", "2026-04-21", 66.67, 66.67, "2026-04-21", "2026-04-30"),  # 200 x 10/30
             ("inv", "2026-05-01", 100.0, 100.0, "2026-05-01", "2026-05-31"),
         ],
         "state": "progress", "next": "2026-06-01", "mrr": 100.0,
@@ -134,8 +134,8 @@ SCENARIOS: list[dict[str, Any]] = [
         ],
         "invoices": [
             ("inv", "2026-05-01", 100.0, 100.0, "2026-05-01", "2026-05-31"),
-            ("pro", "2026-05-11", 33.87, 33.87, "2026-05-11", "2026-05-31"),  # 50 × 21/31
-            ("pcn", "2026-05-21", 7.10, 7.10, "2026-05-21", "2026-05-31"),  # 20 × 11/31
+            ("pro", "2026-05-11", 33.87, 33.87, "2026-05-11", "2026-05-31"),  # 50 x 21/31
+            ("pcn", "2026-05-21", 7.10, 7.10, "2026-05-21", "2026-05-31"),  # 20 x 11/31
             ("inv", "2026-06-01", 130.0, 130.0, "2026-06-01", "2026-06-30"),
         ],
         "state": "progress", "next": "2026-07-01", "mrr": 130.0,
@@ -169,7 +169,7 @@ SCENARIOS: list[dict[str, Any]] = [
         "steps": [("2026-06-01", "run"), ("2026-06-21", "close", {"reason": "price", "when": "now"}), ("2026-07-01", "run")],
         "invoices": [
             ("inv", "2026-06-01", 100.0, 100.0, "2026-06-01", "2026-06-30"),
-            ("cn", "2026-06-21", 33.33, 33.33, "2026-06-21", "2026-06-30"),  # 100 × 10/30
+            ("cn", "2026-06-21", 33.33, 33.33, "2026-06-21", "2026-06-30"),  # 100 x 10/30
         ],
         "state": "churned", "next": None, "end": "2026-06-20", "mrr": 0.0, "reason": "price",
         "log": [("2026-06-01", "new", 100.0), ("2026-06-21", "churn", -100.0)],
@@ -287,7 +287,7 @@ SCENARIOS: list[dict[str, Any]] = [
                   ("2026-02-15", "reactivate"), ("2026-02-15", "run")],
         "invoices": [
             ("inv", "2026-01-01", 100.0, 100.0, "2026-01-01", "2026-01-31"),
-            ("cn", "2026-01-11", 67.74, 67.74, "2026-01-11", "2026-01-31"),  # 100 × 21/31
+            ("cn", "2026-01-11", 67.74, 67.74, "2026-01-11", "2026-01-31"),  # 100 x 21/31
             ("inv", "2026-02-15", 100.0, 100.0, "2026-02-15", "2026-03-14"),
         ],
         "state": "progress", "next": "2026-03-15", "mrr": 100.0,
@@ -314,7 +314,7 @@ SCENARIOS: list[dict[str, Any]] = [
         "steps": [("2026-05-01", "run"), ("2026-05-16", "upsell", {"set": {0: {"quantity": 2}}}), ("2026-06-01", "run")],
         "invoices": [
             ("inv", "2026-05-01", 100.0, 120.0, "2026-05-01", "2026-05-31"),
-            ("pro", "2026-05-16", 51.62, 61.94, "2026-05-16", "2026-05-31"),  # 120 TTC × 16/31 = 61.94
+            ("pro", "2026-05-16", 51.62, 61.94, "2026-05-16", "2026-05-31"),  # 120 TTC x 16/31 = 61.94
             ("inv", "2026-06-01", 200.0, 240.0, "2026-06-01", "2026-06-30"),
         ],
         "state": "progress", "next": "2026-07-01", "mrr": 200.0,
@@ -329,7 +329,7 @@ SCENARIOS: list[dict[str, Any]] = [
         "steps": [("2026-01-01", "run"), ("2026-07-02", "upsell", {"set": {0: {"quantity": 8}}}), ("2027-01-01", "run")],
         "invoices": [
             ("inv", "2026-01-01", 6000.0, 6000.0, "2026-01-01", "2026-12-31"),
-            ("pro", "2026-07-02", 1804.93, 1804.93, "2026-07-02", "2026-12-31"),  # 3600 × 183/365
+            ("pro", "2026-07-02", 1804.93, 1804.93, "2026-07-02", "2026-12-31"),  # 3600 x 183/365
             ("inv", "2027-01-01", 9600.0, 9600.0, "2027-01-01", "2027-12-31"),
         ],
         "state": "progress", "next": "2028-01-01", "mrr": 800.0,
@@ -344,7 +344,7 @@ SCENARIOS: list[dict[str, Any]] = [
         "steps": [("2026-02-01", "run"), ("2026-02-15", "upsell", {"set": {0: {"discount": 10.0}}}), ("2026-03-01", "run")],
         "invoices": [
             ("inv", "2026-02-01", 150.0, 150.0, "2026-02-01", "2026-02-28"),
-            ("pro", "2026-02-15", 15.0, 15.0, "2026-02-15", "2026-02-28"),  # (180 − 150) × 14/28
+            ("pro", "2026-02-15", 15.0, 15.0, "2026-02-15", "2026-02-28"),  # (180 - 150) x 14/28
             ("inv", "2026-03-01", 180.0, 180.0, "2026-03-01", "2026-03-31"),
         ],
         "state": "progress", "next": "2026-04-01", "mrr": 180.0, "first_discount": 25.0,
@@ -361,7 +361,7 @@ SCENARIOS: list[dict[str, Any]] = [
         "invoices": [
             ("inv", "2026-01-01", 100.0, 100.0, "2026-01-01", "2026-01-31"),
             ("inv", "2026-02-01", 100.0, 100.0, "2026-02-01", "2026-02-28"),
-            ("inv", "2026-03-01", 48.39, 48.39, "2026-03-01", "2026-03-15"),  # 100 × 15/31
+            ("inv", "2026-03-01", 48.39, 48.39, "2026-03-01", "2026-03-15"),  # 100 x 15/31
         ],
         "state": "churned", "next": None, "end": "2026-03-15", "mrr": 0.0, "reason": "not_renewed",
         "log": [("2026-01-01", "new", 100.0), ("2026-03-16", "churn", -100.0)],
@@ -374,9 +374,12 @@ def _setup(env: Any, sc: dict[str, Any]) -> tuple[Any, dict[str, Any]]:
     if sc.get("tax_included"):
         taxes = make_tax(env, f"Test VAT {sc['tax_included']:g}% incl", sc["tax_included"], price_include=True)
     products = {key: recurring(env, f"{sc['id']} {key}", price, taxes=taxes) for key, price in sc["products"].items()}
-    the_plan = plan(env, sc["plan"]["unit"], sc["plan"].get("value", 1), **{
-        k: v for k, v in sc["plan"].items() if k not in ("unit", "value")
-    })
+    the_plan = plan(
+        env,
+        sc["plan"]["unit"],
+        sc["plan"].get("value", 1),
+        **{k: v for k, v in sc["plan"].items() if k not in ("unit", "value")},
+    )
     vals: dict[str, Any] = {}
     if sc.get("french"):
         eur = env["core.currency"].search([("name", "=", "EUR")], limit=1)

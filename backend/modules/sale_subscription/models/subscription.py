@@ -55,7 +55,13 @@ class QuotationSubscription(Model):
         "Subscription", compute="_compute_is_subscription", store=True, index=True, copy=False
     )
     subscription_state = fields.Selection(
-        SUBSCRIPTION_STATES, "Subscription status", default="draft", readonly=True, tracking=True, copy=False, index=True
+        SUBSCRIPTION_STATES,
+        "Subscription status",
+        default="draft",
+        readonly=True,
+        tracking=True,
+        copy=False,
+        index=True,
     )
     is_churned = fields.Boolean("Churned", compute="_compute_is_churned", store=True, index=True)
     start_date = fields.Date("Start date", tracking=True, copy=False, help="Default: the confirmation date")
@@ -202,7 +208,9 @@ class QuotationSubscription(Model):
             vals.setdefault("billing_anchor_date", vals["next_invoice_date"])
         if not internal and "plan_id" in vals:
             for q in self:
-                if q.subscription_state != "draft" and q.plan_id.ids != ([int(vals["plan_id"])] if vals["plan_id"] else []):
+                if q.subscription_state != "draft" and q.plan_id.ids != (
+                    [int(vals["plan_id"])] if vals["plan_id"] else []
+                ):
                     raise UserError(_("The plan of a started subscription cannot change ({name})", name=q.name))
         confirming = vals.get("state") == "accepted"
         before = {q.ids[0]: q.state for q in self} if confirming else {}

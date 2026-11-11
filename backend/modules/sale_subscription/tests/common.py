@@ -29,7 +29,9 @@ def plan(env: Any, unit: str = "month", value: int = 1, **vals: Any) -> Model:
     )
 
 
-def recurring(env: Any, name: str = "Cloud seat", price: float = 100.0, taxes: Model | None = None, **vals: Any) -> Model:
+def recurring(
+    env: Any, name: str = "Cloud seat", price: float = 100.0, taxes: Model | None = None, **vals: Any
+) -> Model:
     return env["product.product"].create(
         {
             "name": name,
@@ -101,9 +103,7 @@ def token(env: Any, partner: Model, ref: str = "good-card") -> Model:
 
 def docs(sub: Model) -> list[Model]:
     """The subscription's posted documents in creation order."""
-    moves = sub.env["account.move"].search(
-        [("subscription_id", "=", sub.ids[0]), ("state", "=", "posted")], order="id"
-    )
+    moves = sub.env["account.move"].search([("subscription_id", "=", sub.ids[0]), ("state", "=", "posted")], order="id")
     return list(moves)
 
 

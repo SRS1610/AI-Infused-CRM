@@ -1,17 +1,17 @@
 """Billing periods and proration arithmetic (pure functions, no database).
 
-Billing grid. A subscription's periods start on ``anchor + k × period`` (k = 0, 1, 2 …), computed from the
+Billing grid. A subscription's periods start on ``anchor + k x period`` (k = 0, 1, 2 …), computed from the
 anchor each time rather than chained, so a monthly subscription anchored on the 31st bills on the 31st, or on
 the last day of shorter months, and comes back to the 31st (Jan 31 → Feb 28 → Mar 31 → Apr 30 …). A period
 runs from its start to the day before the next start, both included.
 
 Day-count rule. Prorations count calendar days, both ends included: a change effective on day ``C`` applies
-to the days ``C … period end``, so ``remaining = period_end − C + 1`` and ``ratio = remaining / period_days``
+to the days ``C … period end``, so ``remaining = period_end - C + 1`` and ``ratio = remaining / period_days``
 where ``period_days`` is the length of the whole period (28 to 31 days for a month, 365 or 366 for a year, 7
 for a week). The prorated amount of a line is rounded to the currency's precision.
 
-Monthly normalisation (MRR). A period amount is converted to a monthly amount with: monthly × 1/value,
-yearly × 1/(12 × value), weekly × 52/(12 × value).
+Monthly normalisation (MRR). A period amount is converted to a monthly amount with: monthly x 1/value,
+yearly x 1/(12 x value), weekly x 52/(12 x value).
 """
 
 from __future__ import annotations
@@ -93,7 +93,7 @@ def remaining_ratio(effective: dt.date, period_end: dt.date, period_days: int) -
 def renewal_term(start: dt.date, end: dt.date) -> tuple[dt.date, dt.date]:
     """(start, end) of the term that follows ``start … end``, with the same length.
 
-    Whole months or years are kept as such (Jan 1 – Dec 31 renews as Jan 1 – Dec 31); other terms keep their
+    Whole months or years are kept as such (Jan 1 - Dec 31 renews as Jan 1 - Dec 31); other terms keep their
     number of days.
     """
     new_start = end + ONE_DAY

@@ -7,8 +7,8 @@
   MRR, payment failures, downgrades, pauses, customer messages…). No score is computed here.
 
 Classification: *new* and *reactivation* events are their own movements; *upsell* is expansion and
-*downsell* contraction; a renewal closes the old subscription (−old MRR) and starts the new one (+new MRR),
-so the renewal movements of a range net to (new − old) and count as expansion when positive, contraction
+*downsell* contraction; a renewal closes the old subscription (-old MRR) and starts the new one (+new MRR),
+so the renewal movements of a range net to (new - old) and count as expansion when positive, contraction
 when negative. *Churn* events are churn. Customer churn rate = subscriptions churned in the range /
 subscriptions active at its start; revenue churn rate = churned MRR / MRR at the start.
 """
@@ -134,7 +134,9 @@ def churn_features(subscription: Model, day: dt.date | None = None) -> dict[str,
     sub.ensure_one()
     env = sub.env
     day = day or env.today()
-    logs = env["sale.subscription_log"].elevated().search([("subscription_id", "=", sub.ids[0])], order="event_date, id")
+    logs = (
+        env["sale.subscription_log"].elevated().search([("subscription_id", "=", sub.ids[0])], order="event_date, id")
+    )
     moves = env["account.move"].elevated().search([("subscription_id", "=", sub.ids[0]), ("state", "=", "posted")])
     invoices = moves.filtered(lambda m: m.move_type == "out_invoice")
     unpaid = invoices.filtered(lambda m: m.payment_state in ("not_paid", "partial") and m.amount_residual > 0)
@@ -144,8 +146,10 @@ def churn_features(subscription: Model, day: dt.date | None = None) -> dict[str,
     start = sub.start_date
     end = sub.closed_on if sub.subscription_state in ("churned", "closed") and sub.closed_on else day
     tenure = (end - start).days if start else 0
-    messages = env["chatter.message"].elevated().search_count(
-        [("model", "=", "sale.quotation"), ("res_id", "=", sub.ids[0]), ("message_type", "=", "email")]
+    messages = (
+        env["chatter.message"]
+        .elevated()
+        .search_count([("model", "=", "sale.quotation"), ("res_id", "=", sub.ids[0]), ("message_type", "=", "email")])
     )
     chain = 0
     previous = sub.renewal_of_id
@@ -192,8 +196,6 @@ def churn_features(subscription: Model, day: dt.date | None = None) -> dict[str,
         "credit_note_count": len(moves) - len(invoices),
         "unpaid_invoice_count": len(unpaid),
         "overdue_amount": round(sum(float(m.amount_residual) for m in overdue), 2),
-        "days_since_last_payment": (
-            (day - max(m.invoice_date for m in paid)).days if paid else None
-        ),
+        "days_since_last_payment": ((day - max(m.invoice_date for m in paid)).days if paid else None),
         "customer_messages": messages,
     }

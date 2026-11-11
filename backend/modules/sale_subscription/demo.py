@@ -53,9 +53,7 @@ def seed_subscriptions(env: Any) -> int:
     yearly = env.ref("sale_subscription.plan_yearly")
     if not all((seat, support, monitoring, setup)):
         return 0
-    customers = list(
-        env["contacts.partner"].elevated().search([("is_company", "=", True)], order="id", limit=8)
-    )
+    customers = list(env["contacts.partner"].elevated().search([("is_company", "=", True)], order="id", limit=8))
     if not customers:
         return 0
     today = env.today()
@@ -67,6 +65,15 @@ def seed_subscriptions(env: Any) -> int:
         return env.with_context(**{billing.TODAY_KEY: when.isoformat()})
 
     created = 0
+
+    def bill(sub: Any, when: dt.date) -> None:
+        """Invoice what is due, and record the customer's bank transfers for it (a few days later)."""
+        from modules.account.payments import register_payments
+
+        billing.invoice_due_periods(sub.elevated(), when)
+        for invoice in billing.unpaid_invoices(sub):
+            register_payments(invoice, date=min(invoice.invoice_date + dt.timedelta(days=5), today))
+
     def upsell(qty: float) -> Callable[[Any, dt.date], None]:
         def run(sub: Any, when: dt.date) -> None:
             info = sub.with_context(**{billing.TODAY_KEY: when.isoformat()}).action_upsell()
@@ -77,7 +84,9 @@ def seed_subscriptions(env: Any) -> int:
         return run
 
     def churn(sub: Any, when: dt.date) -> None:
-        sub.with_context(**{billing.TODAY_KEY: when.isoformat()}).action_close(reason="competitor", when="now", note="Demo: moved away")
+        sub.with_context(**{billing.TODAY_KEY: when.isoformat()}).action_close(
+            reason="competitor", when="now", note="Demo: moved away"
+        )
 
     def pause(sub: Any, when: dt.date) -> None:
         sub.with_context(**{billing.TODAY_KEY: when.isoformat()}).action_pause()
@@ -117,10 +126,10 @@ def seed_subscriptions(env: Any) -> int:
                 sub.action_confirm()
                 for offset, action in sorted(events, key=lambda ev: ev[0]):
                     when = day(offset)
-                    billing.invoice_due_periods(sub.elevated(), when)
+                    bill(sub, when)
                     action(sub, when)
                 if sub.subscription_state == "progress":
-                    billing.invoice_due_periods(sub.elevated(), today)
+                    bill(sub, today)
                 created += 1
         except Exception as exc:  # the demo must not stop on one scenario
             log.warning("subscription demo skipped", ref=ref, error=str(exc))

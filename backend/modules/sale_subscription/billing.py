@@ -16,12 +16,12 @@ Payment failures. A declined charge leaves the invoice unpaid, counts a failure 
 subscription is closed with the reason *Payment failure* (churn), without credit (dunning collects the debt).
 
 Mid-period changes (upsell / downgrade). The change order's lines replace the subscription's lines; for the
-period already invoiced, each changed line is billed ``(new − old line amount) × remaining days / period
+period already invoiced, each changed line is billed ``(new - old line amount) x remaining days / period
 days`` (``periods.remaining_ratio``, the change day included), on one invoice when the total is positive or
 one credit note when it is negative. The new lines apply to the next periods.
 
 Closing. *At period end*: the end date becomes the last day of the invoiced period; nothing is credited.
-*Now*: service stops today, and today until the period end is credited (current lines × remaining days /
+*Now*: service stops today, and today until the period end is credited (current lines x remaining days /
 period days) on a credit note matched with the period's invoice when it is still open. Paused subscriptions
 are closed without credit.
 """
@@ -382,7 +382,9 @@ def start_subscription(order: Model, start: dt.date) -> None:
 
 
 def pause(order: Model, day: dt.date) -> None:
-    _internal(order).write({"subscription_state": "paused", "paused_on": day, "pause_count": (order.pause_count or 0) + 1})
+    _internal(order).write(
+        {"subscription_state": "paused", "paused_on": day, "pause_count": (order.pause_count or 0) + 1}
+    )
     _post(order, str(_("Subscription paused on {date}", date=day.isoformat())))
 
 
@@ -397,7 +399,13 @@ def resume(order: Model, day: dt.date) -> None:
     _internal(order).write(vals)
     _post(
         order,
-        str(_("Subscription resumed on {date}; next invoice on {next}", date=day.isoformat(), next=str(order.next_invoice_date))),
+        str(
+            _(
+                "Subscription resumed on {date}; next invoice on {next}",
+                date=day.isoformat(),
+                next=str(order.next_invoice_date),
+            )
+        ),
     )
 
 
@@ -450,14 +458,14 @@ def terminate(
 ) -> Model | None:
     """Churn the subscription from ``effective`` (its first day without service)."""
     move = credit_unused(order, effective) if credit and order.subscription_state == "progress" else None
-    end = effective - ONE_DAY
+    end = min(order.end_date, effective - ONE_DAY) if order.end_date else effective - ONE_DAY
     if order.start_date and end < order.start_date:
         end = order.start_date
     vals: dict[str, Any] = {
         "subscription_state": "churned",
         "closed_on": effective,
         "close_reason_id": reason.ids[0] if reason else None,
-        "end_date": min(order.end_date, end) if order.end_date else end,
+        "end_date": end,
         "next_invoice_date": None,
         "paused_on": None,
     }
@@ -467,12 +475,20 @@ def terminate(
     add_log(order, effective, "churn", -logged_mrr(order), reason=reason, note=note)
     _post(
         order,
-        str(_("Subscription closed on {date}: {reason}", date=effective.isoformat(), reason=reason.name if reason else "")),
+        str(
+            _(
+                "Subscription closed on {date}: {reason}",
+                date=effective.isoformat(),
+                reason=reason.name if reason else "",
+            )
+        ),
     )
     return move
 
 
-def close(order: Model, day: dt.date, reason: Model, *, when: str = "period_end", note: str | None = None) -> Model | None:
+def close(
+    order: Model, day: dt.date, reason: Model, *, when: str = "period_end", note: str | None = None
+) -> Model | None:
     """Close at the end of the invoiced period (nothing credited) or now (unused days credited)."""
     if when == "period_end":
         invoice = invoiced_period(order, day)
@@ -484,7 +500,10 @@ def close(order: Model, day: dt.date, reason: Model, *, when: str = "period_end"
             if note:
                 vals["close_note"] = note
             _internal(order).write(vals)
-            _post(order, str(_("The subscription will close on {date}: {reason}", date=end.isoformat(), reason=reason.name)))
+            _post(
+                order,
+                str(_("The subscription will close on {date}: {reason}", date=end.isoformat(), reason=reason.name)),
+            )
             return None
     return terminate(order, day, reason, credit=when == "now", note=note)
 
@@ -590,7 +609,12 @@ def apply_upsell(upsell: Model, day: dt.date) -> Model | None:
         old = target._amount() if target else 0.0
         new = line._amount()
         same_taxes = bool(target) and set(target.tax_ids.ids) == set(line.tax_ids.ids)
-        if target and abs(new - old) < 1e-9 and same_taxes and abs((target.quantity or 0) - (line.quantity or 0)) < 1e-9:
+        if (
+            target
+            and abs(new - old) < 1e-9
+            and same_taxes
+            and abs((target.quantity or 0) - (line.quantity or 0)) < 1e-9
+        ):
             continue
         if not target and not line.quantity:
             continue
@@ -615,8 +639,8 @@ def apply_upsell(upsell: Model, day: dt.date) -> Model | None:
                     what = _(
                         "{name}: {old} → {new}",
                         name=line.name,
-                        old=f"{target.quantity:g} × {target._price_reduced():,.2f}",
-                        new=f"{line.quantity:g} × {line._price_reduced():,.2f}",
+                        old=f"{target.quantity:g} x {target._price_reduced():,.2f}",
+                        new=f"{line.quantity:g} x {line._price_reduced():,.2f}",
                     )
                 else:
                     what = _("{name}: added", name=line.name)
@@ -782,7 +806,10 @@ def run_recurring(env: Any, day: dt.date, company: Model | None = None) -> dict[
 
     each([("subscription_state", "=", "draft"), ("start_date", "<=", day)], do_start)
     each([("subscription_state", "=", "progress"), ("next_invoice_date", "<=", day)], do_invoice)
-    each([("subscription_state", "=", "progress"), ("subscription_move_ids.payment_state", "in", list(UNPAID))], do_collect)
+    each(
+        [("subscription_state", "=", "progress"), ("subscription_move_ids.payment_state", "in", list(UNPAID))],
+        do_collect,
+    )
     each([("subscription_state", "in", ["progress", "paused"]), ("end_date", "<", day)], do_expire)
     each([("subscription_state", "in", ["progress", "paused"]), ("end_date", ">=", day)], do_remind)
     return summary
