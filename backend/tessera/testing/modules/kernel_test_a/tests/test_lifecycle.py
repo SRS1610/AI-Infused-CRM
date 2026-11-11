@@ -84,7 +84,8 @@ def test_scaffold_install_upgrade_uninstall(registry, database_url: str, temp_mo
     item_py.write_text(
         item_py.read_text().replace(
             "    description = fields.Text()\n",
-            "    description = fields.Text()\n    rating = fields.Integer(default=0)\n",
+            "    description = fields.Text()\n    rating = fields.Integer(default=0)\n"
+            "    grade = fields.Selection([('a', 'A'), ('b', 'B')], default='b')\n",
         )
     )
     _bump_version(module_dir, "0.2.0")
@@ -115,6 +116,7 @@ def test_scaffold_install_upgrade_uninstall(registry, database_url: str, temp_mo
         items = env[f"{name}.item"].search([])
         assert items.mapped("name") == ["First (migrated)"]
         assert items.rating == 5
+        assert items.grade == "b"  # an added column gets its default on existing rows
         logs = env["core.module_migration_log"].search([("module", "=", name)], order="id")
         assert [(entry.step, entry.status) for entry in logs] == [("pre", "done"), ("post", "done")]
         assert env["core.module"].search([("name", "=", name)]).installed_version == "0.2.0"

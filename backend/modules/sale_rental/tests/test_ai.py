@@ -305,6 +305,8 @@ def test_rental_ai_api(admin: Session) -> None:
     finally:
         with environment_for() as e:  # committed for the API: released again for the other tests
             e["sale.quotation"].browse([oid]).write({"state": "cancelled"})
+            # rental_product() archives the demo promotions, and that was committed too: restore them
+            e["sale.promotion"].elevated().with_context(active_test=False).search([]).write({"active": True})
             e.cr.commit()
 
 

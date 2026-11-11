@@ -165,6 +165,19 @@ class SchemaSync:
         self.existing_tables().add(fld.relation)
         log.debug("m2m table created", table=fld.relation)
 
+    def _backfill_default(self, cls: type[Model], fld: Any) -> None:
+        """Existing rows of a column added by an upgrade get the field's static default (a new ``active``
+        flag must not hide every existing record, a new selection must not be empty on old rows)."""
+        if fld.computed or fld.translate or fld.company_dependent or fld.relational or not fld.has_default:
+            return
+        value = fld.default
+        if callable(value) or not isinstance(value, bool | int | float | str):
+            return
+        self.cr.execute(
+            f'UPDATE "{cls._table}" SET "{fld.column_name}" = :v WHERE "{fld.column_name}" IS NULL',  # noqa: S608
+            {"v": value},
+        )
+
     def _sync_columns(self, cls: type[Model]) -> None:
         existing = self.existing_columns(cls._table)
         for fld in cls._fields.values():
@@ -174,6 +187,7 @@ class SchemaSync:
             if col is None:
                 self.cr.execute(f'ALTER TABLE "{cls._table}" ADD COLUMN "{fld.column_name}" {fld.sql_type}')
                 log.debug("column added", table=cls._table, column=fld.column_name, type=fld.sql_type)
+                self._backfill_default(cls, fld)
                 continue
             declared = _declared_pg_type(fld.sql_type)
             if col["data_type"] != declared:
