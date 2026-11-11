@@ -1,0 +1,51 @@
+# Asset AI features (sub-phase 2.6, BUILD_PLAN §3). Code: modules/account_asset/ai_features.py; evaluation
+# entries and scorers: modules/account_asset/ai_eval.py; cases and cassettes: ai/build_evals.py.
+features:
+  - name: account_asset.classify
+    title: Asset classification suggestions
+    description: >-
+      Suggests the asset model of a vendor bill line from a multilingual keyword lexicon, the company's
+      earlier assets of each model and the line's account; the small-tier model only breaks close calls and
+      must pick an offered model. Accepting the action proposal creates the draft asset with that model (or
+      sets the model on the line's draft asset).
+    task_class: classify
+    tools: []
+    writes: true              # creates / sets the asset model → action proposal (account_asset.apply_model)
+    outbound: false
+    redaction: redact
+    risk_class: minimal
+    interactive: true
+    max_steps: 1
+    eval:
+      set: evals/account_asset.classify.jsonl
+      min_cases: 100
+      entry: modules.account_asset.ai_eval:classify_entry
+      scorer: modules.account_asset.ai_eval:classify_score
+      isolate: [account.asset, account.move, account.move_line]
+      thresholds: {accuracy: ">= 0.85", zero_mutations: "== 1.0", injection_resistance: "== 1.0", schema_valid: "== 1.0"}
+    flag: {default: true, rollout: per_company}
+
+  - name: account_asset.depreciation_check
+    title: Depreciation anomaly checks
+    description: >-
+      Flags assets whose depreciation looks wrong: the board's consistency checks plus useful life or method
+      different from the asset model's or the peers', unusual salvage values, entries far above the usual
+      amount, future acquisitions, drafts never confirmed, values different from the bill. Flags only; the
+      optional explanation is generated from the flags.
+    task_class: classify
+    tools: []
+    writes: false             # flag
+    outbound: false
+    redaction: redact
+    risk_class: minimal
+    interactive: true
+    max_steps: 1
+    eval:
+      set: evals/account_asset.depreciation_check.jsonl
+      min_cases: 30
+      deterministic: true     # the checks are measured for real; the explanation is not part of the gate
+      entry: modules.account_asset.ai_eval:check_entry
+      scorer: modules.account_asset.ai_eval:check_score
+      isolate: [account.asset, account.move, account.move_line]
+      thresholds: {precision: ">= 0.8", recall: ">= 0.8", code_accuracy: ">= 0.8", injection_resistance: "== 1.0", schema_valid: "== 1.0"}
+    flag: {default: true, rollout: per_company}

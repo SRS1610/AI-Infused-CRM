@@ -85,6 +85,44 @@ board), `board_checks(asset)` (deterministic consistency checks: total, negative
 drafts left behind posted entries, book value below salvage) and `asset_model_candidates(env, company)` (the models a bill line can be
 classified into) — the inputs of the sub-phase 2.6 asset classification and depreciation anomaly features.
 
+## AI features
+
+Two AI features ship with `account_asset` (sub-phase 2.6). Each has a per-company switch (*AI → Features*);
+switched off, its panel disappears and its API answers `404 feature_disabled` without calling the AI gateway.
+Everything is read **as the user** (access rights, record rules, companies); every run is audited in
+`ai_core.run`. Evaluations: [docs/ai/governance.md](../ai/governance.md#finance-sub-phase-26).
+
+### Asset classification suggestions (`account_asset.classify`)
+
+The *Asset classification (AI)* panel of a vendor bill → **Suggest asset models** ranks the company's asset
+models for each line without an asset (`asset_model_candidates`). The ranking is deterministic: a keyword
+lexicon in English, French and German (computers, vehicles, furniture, machinery, software, buildings — each
+model is mapped to a category by its own name), words of the company's earlier assets of each model, and the
+line's account. Only when the two best models are within 0.15 of each other is the small-tier model asked; its
+answer must be one of the offered models, otherwise it is ignored (`model_choice_rejected`).
+
+The best model becomes a proposal. **Accept** creates the draft asset from the (posted) bill line with that
+model, or sets the model on the line's existing draft asset; nothing is created before. Read-only accountants
+see the suggestion without a proposal.
+
+### Depreciation anomaly checks (`account_asset.depreciation_check`)
+
+The *Depreciation checks (AI)* panel of an asset lists findings (flags; nothing is changed):
+
+| Finding | When |
+|---|---|
+| Board total, negative entry, overdue or out-of-order draft, book value below salvage | the board's own consistency checks (`board_checks`) |
+| Useful life out of range for the type | outside 2–6 years (computers), 3–10 (vehicles), 5–15 (furniture), 3–20 (machinery), 1–10 (software), 10–50 (buildings); the type comes from the asset model's name, else the asset's |
+| Declining method unusual for the type | a declining board for buildings or software |
+| Life or method different from the model / from peers | life ≥ 1.5× or ≤ 1/1.5 of the model's (or the median of ≥ 3 assets of the model); another method than the model's |
+| Salvage value high | above half the original value |
+| Missing / duplicated posting | a gap of more than one period between two entries; two entries in the same month (same year for yearly boards) |
+| Others | acquisition in the future, a draft left unconfirmed for 90 days, a value different from the bill line, an entry 2.5× the board's usual amount (straight line) |
+
+Errors (board total, negative entry, missing or duplicated posting, below salvage, spikes) are listed first.
+**Explain** asks the model for a short explanation of the findings; a sentence quoting a figure that is not
+the asset's is removed. `GET /api/v1/account_asset/ai/scan` lists the company's assets with findings.
+
 ## Access
 
 Accountants manage assets; read-only users and billing users can read them. Assets belong to one company.

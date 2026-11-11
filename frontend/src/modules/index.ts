@@ -18,3 +18,4 @@ import "./account/CashflowForecast";
 import "./sale_subscription/SubscriptionAi";
 import "./sale_rental/RentalAi";
 import "./sale_commission/CommissionAi";
+import "./account_asset/AssetAi";
