@@ -224,7 +224,16 @@ def clone_journal_items(cr: Any, company_id: int, lines: int) -> int:
     if current == 0 or current >= lines:
         return 0
     copies = -(-(lines - current) // current)  # ceil
-    move_cols = _columns(cr, "account_move", ("id", "name", "date", "inalterable_hash", "secure_sequence_number"))
+    # unique keys of other modules (e.g. a subscription's billing period) stay empty on copies
+    move_skip = (
+        "id",
+        "name",
+        "date",
+        "inalterable_hash",
+        "secure_sequence_number",
+        *_unique_text_columns(cr, "account_move"),
+    )
+    move_cols = _columns(cr, "account_move", move_skip)
     line_cols = _columns(cr, "account_move_line", ("id", "move_id", "date", "move_name", "full_reconcile_id"))
     cr.execute("DROP TABLE IF EXISTS perf_move_map")
     cr.execute(
