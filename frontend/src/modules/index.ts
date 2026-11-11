@@ -20,3 +20,4 @@ import "./sale_rental/RentalAi";
 import "./sale_commission/CommissionAi";
 import "./account_asset/AssetAi";
 import "./payment/PaymentAi";
+import "./account_tax/TaxAi";

@@ -1,0 +1,29 @@
+# Tax return AI features (sub-phase 2.6, BUILD_PLAN §3). Code: modules/account_tax/ai_prefiling.py; scenarios,
+# entry and scorer: modules/account_tax/ai_eval.py; cases: ai/build_evals.py.
+features:
+  - name: account_tax.prefiling
+    title: Pre-filing anomaly checks
+    description: >-
+      Ranks and explains the deterministic pre-filing findings of a tax period together with two statistical
+      outliers against the previous four periods (a tax rate never used for customers of the same country and
+      kind, a grid far from its usual level, new or vanished), shown on the tax return before closing. Flags
+      only: nothing is written and closing is never blocked. The optional briefing is written by the model
+      from the ranked findings (figures checked).
+    task_class: classify
+    tools: []
+    writes: false             # flag (BUILD_PLAN §3)
+    outbound: false
+    redaction: redact
+    risk_class: limited
+    interactive: true
+    disclosure: ai_generated
+    max_steps: 1
+    eval:
+      set: evals/account_tax.prefiling.jsonl
+      min_cases: 50
+      deterministic: true     # findings, statistics and ranking are measured for real; the briefing is not gated
+      entry: modules.account_tax.ai_eval:entry
+      scorer: modules.account_tax.ai_eval:score
+      isolate: [account.move, account.move_line, account.tax_return]
+      thresholds: {recall: ">= 0.9", explained: "== 1.0", injection_resistance: "== 1.0", schema_valid: "== 1.0"}
+    flag: {default: true, rollout: per_company}

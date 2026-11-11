@@ -79,6 +79,27 @@ returns findings with a stable `code`, a `severity`, a message, the records conc
 | `draft_entries` | warning | draft entries dated in the period (they would be locked out) |
 | `period_locked` | info | taxes are already locked for the period |
 
+### AI: ranked and explained pre-filing checks (`account_tax.prefiling`)
+
+The *Pre-filing checks (AI)* panel of an open tax return (sub-phase 2.6) lists the findings above together with
+two statistical outliers computed against the company's **previous four periods**:
+
+| Code | Finding |
+|---|---|
+| `rate_outlier_for_country` | customer invoice lines whose tax rate was used by fewer than 10 % of the lines of customers of the same country and kind (with / without tax ID) in the previous periods (at least 4 such lines) |
+| `grid_swing` | grids whose amount moved by more than 60 % of their median **and** 3.5 robust deviations (and at least 200), grids that appear from nothing or vanish; not computed for a company with fewer than two active previous periods |
+
+Each item is ranked — severity first, then the amount at stake against the net tax (ledger difference, largest
+grid change), then the number of documents — and comes with why it matters and what to do; the first five
+documents are linked. **Brief me** asks the small-tier model for a five-sentence briefing from the ranked items;
+a sentence quoting a figure that is not in them is removed. Nothing is written and closing is never blocked
+(flags only). The feature has a per-company switch (*AI → Features*): switched off, the panel disappears and
+`GET /api/v1/account_tax/ai/returns/{id}/prefiling` answers `404 feature_disabled`. Everything is read as the user
+(tax returns: accountants of the return's company) and every review is an `ai_core.run`.
+
+Limits: the rate check compares rates, not tax codes (two different 20 % taxes look alike); refunds count like
+invoices; grid swings ignore seasonality beyond the four previous quarters (or months).
+
 ## Access
 
 Tax returns: read for *Accounting / Read-only*, create and edit for accountants, delete for advisers;

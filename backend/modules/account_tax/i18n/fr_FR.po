@@ -478,3 +478,144 @@ msgstr "Rapport de taxes"
 msgid "Tax returns"
 msgstr "Déclarations de taxes"
 
+#: ai_prefiling.py:180
+msgid "Taxes without tax grids"
+msgstr "Taxes sans grilles de déclaration"
+
+#: ai_prefiling.py:181
+msgid "Tax amounts outside every grid"
+msgstr "Montants de taxe hors de toute grille"
+
+#: ai_prefiling.py:182
+msgid "Reverse charge for a partner without tax ID"
+msgstr "Autoliquidation pour un partenaire sans numéro de TVA"
+
+#: ai_prefiling.py:183
+msgid "Unusual tax for the customer's country"
+msgstr "Taxe inhabituelle pour le pays du client"
+
+#: ai_prefiling.py:184
+msgid "Fiscal position different from the partner's"
+msgstr "Position fiscale différente de celle du partenaire"
+
+#: ai_prefiling.py:185
+msgid "Draft entries in the period"
+msgstr "Écritures en brouillon dans la période"
+
+#: ai_prefiling.py:186
+msgid "Return does not tie to the tax accounts"
+msgstr "La déclaration ne concorde pas avec les comptes de taxe"
+
+#: ai_prefiling.py:187
+msgid "Period already locked"
+msgstr "Période déjà verrouillée"
+
+#: ai_prefiling.py:188
+msgid "Tax rate never used for this country before"
+msgstr "Taux de taxe jamais utilisé pour ce pays auparavant"
+
+#: ai_prefiling.py:189
+msgid "Grid far from previous periods"
+msgstr "Grille très éloignée des périodes précédentes"
+
+#: ai_prefiling.py:196
+msgid "Amounts of these taxes never reach the return; the declared figures are too low."
+msgstr "Les montants de ces taxes n'arrivent jamais dans la déclaration ; les chiffres déclarés sont trop bas."
+
+#: ai_prefiling.py:197
+msgid "Tax amounts were booked outside the return's grids, so the return will not tie."
+msgstr "Des montants de taxe ont été comptabilisés hors des grilles de la déclaration, qui ne concordera donc pas."
+
+#: ai_prefiling.py:198
+msgid "Reverse charge and intra-EU treatment require the partner's tax ID; without it the exemption can be refused in an audit."
+msgstr "L'autoliquidation et le régime intracommunautaire exigent le numéro de TVA du partenaire ; sans lui, l'exonération peut être refusée lors d'un contrôle."
+
+#: ai_prefiling.py:202
+msgid "Most invoices to this country use another tax: the odd ones may be wrong."
+msgstr "La plupart des factures vers ce pays utilisent une autre taxe : les factures atypiques sont peut-être erronées."
+
+#: ai_prefiling.py:203
+msgid "The tax treatment differs from what the partner's country and tax ID call for (for example domestic VAT charged to an EU business)."
+msgstr "Le traitement fiscal diffère de celui qu'imposent le pays et le numéro de TVA du partenaire (par exemple une TVA nationale facturée à une entreprise de l'UE)."
+
+#: ai_prefiling.py:207
+msgid "Drafts dated in the period are left out of the return and locked out by the closing."
+msgstr "Les brouillons datés dans la période sont exclus de la déclaration et bloqués par la clôture."
+
+#: ai_prefiling.py:208
+msgid "The return and the tax accounts disagree: a manual entry or a grid is missing."
+msgstr "La déclaration et les comptes de taxe divergent : il manque une écriture manuelle ou une grille."
+
+#: ai_prefiling.py:209
+msgid "The period is closed: corrections go in the next return."
+msgstr "La période est clôturée : les corrections vont dans la prochaine déclaration."
+
+#: ai_prefiling.py:210
+msgid "Customers of this country and kind were never charged this rate in the previous periods."
+msgstr "Ce taux n'a jamais été facturé aux clients de ce pays et de ce type au cours des périodes précédentes."
+
+#: ai_prefiling.py:213
+msgid "The grid moved far from its usual level in the previous periods; check it is a real change in business and not a coding error."
+msgstr "La grille s'est fortement écartée de son niveau habituel des périodes précédentes ; vérifiez qu'il s'agit d'un vrai changement d'activité et non d'une erreur d'imputation."
+
+#: ai_prefiling.py:223
+msgid "Add tax grids to the base and tax distribution of these taxes."
+msgstr "Ajoutez des grilles à la répartition de la base et de la taxe de ces taxes."
+
+#: ai_prefiling.py:224
+msgid "Fix the taxes of these entries, or add the grids and reset them to draft."
+msgstr "Corrigez les taxes de ces écritures, ou ajoutez les grilles et remettez-les en brouillon."
+
+#: ai_prefiling.py:225
+msgid "Add the partner's tax ID, or correct the fiscal position of the documents."
+msgstr "Ajoutez le numéro de TVA du partenaire, ou corrigez la position fiscale des pièces."
+
+#: ai_prefiling.py:226
+msgid "Open the listed invoices and check their taxes."
+msgstr "Ouvrez les factures listées et vérifiez leurs taxes."
+
+#: ai_prefiling.py:227
+msgid "Correct the fiscal position (credit note and new invoice if posted)."
+msgstr "Corrigez la position fiscale (avoir et nouvelle facture si elle est comptabilisée)."
+
+#: ai_prefiling.py:228
+msgid "Post or delete the drafts before closing."
+msgstr "Comptabilisez ou supprimez les brouillons avant la clôture."
+
+#: ai_prefiling.py:229
+msgid "Find the manual entries on tax accounts and correct them before closing."
+msgstr "Retrouvez les écritures manuelles sur les comptes de taxe et corrigez-les avant la clôture."
+
+#: ai_prefiling.py:230
+msgid "Prepare the correction in the next period."
+msgstr "Préparez la correction dans la période suivante."
+
+#: ai_prefiling.py:231
+msgid "Open the listed invoices and confirm the rate or correct the tax."
+msgstr "Ouvrez les factures listées et confirmez le taux ou corrigez la taxe."
+
+#: ai_prefiling.py:232
+msgid "Compare the grid's documents with the previous period's before filing."
+msgstr "Comparez les pièces de la grille avec celles de la période précédente avant de déclarer."
+
+#: ai_prefiling.py:324
+msgid "Choose a tax return"
+msgstr "Choisissez une déclaration de taxes"
+
+#: ai_prefiling.py:393
+msgid "No such tax return"
+msgstr "Déclaration de taxes introuvable"
+
+#: ai_prefiling.py:111
+msgid "no country"
+msgstr "aucun pays"
+
+#: ai_prefiling.py:272
+#, python-brace-format
+msgid "{count} customer invoices use a tax rate never used for their country before"
+msgstr "{count} factures clients utilisent un taux de taxe jamais utilisé auparavant pour leur pays"
+
+#: ai_prefiling.py:290
+#, python-brace-format
+msgid "{count} grids moved far from the previous periods: {grids}"
+msgstr "{count} grilles se sont fortement écartées des périodes précédentes : {grids}"
