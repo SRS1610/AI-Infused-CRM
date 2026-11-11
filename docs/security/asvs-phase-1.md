@@ -151,6 +151,8 @@ Severity scale: **high** — an authenticated user of a lower role, or an anonym
 
 None is high severity. Each states why it is not high and when it is planned.
 
+*Follow-up (Phase 2 review, [asvs-phase-2.md](asvs-phase-2.md) §2.3):* none of these was closed during Phase 2; they are carried to Phase 3. SEC-20 is narrowed for the ledger (SEC-50 makes the engine-managed fields of journal entries, items, matches and payments unwritable by users); SEC-30 and SEC-31 are extended by Phase 2 findings SEC-61 and SEC-59.
+
 | ID | Severity | Planned | Finding | Why not high / decision |
 |---|---|---|---|---|
 | SEC-20 | medium | Phase 2 | **Business models check write rules before the write only.** On models such as `crm.lead`, `sale.quotation`, `calendar.event`, `chatter.activity` a user who may write a record can move it out of their own rule scope (e.g. reassign it to a colleague). No privilege is gained (the user already controls the record), moving it to a foreign company is refused since SEC-02, and reassignment is an intended flow on several of these models. | Decision: keep before-write semantics for business models in Phase 1; decide per model in Phase 2 using the existing `_rule_check_after_write` flag. |

@@ -97,10 +97,13 @@ foreign bank accounts at the month-end rate, and reverses the entry the next day
 | Tax lock date | entries with taxes cannot be posted on or before it |
 
 Only advisers change lock dates; every change is in the audit log. Closing a fiscal year
-(*Configuration → Fiscal years → Close the year*) sets the lock date to its last day. Fiscal years may run
+(*Configuration → Fiscal years → Close the year*, advisers only) sets the lock date to its last day. Fiscal years may run
 across calendar years: a July-June year ending in 2027 numbers entries `…/2027/…`.
 
-The database itself refuses to commit a posted entry that does not balance. Entries in the sales and
+The database itself refuses to commit a posted entry that does not balance. The fields the ledger manages
+(state, number, payment status, amounts and residuals, matching, hash) are set by the posting, payment and
+reconciliation actions only: the API refuses them in a user's values (security review SEC-50,
+[asvs-phase-2.md](../security/asvs-phase-2.md)). Entries in the sales and
 purchase journals are chained with SHA-256; to verify every chain:
 
 ```bash

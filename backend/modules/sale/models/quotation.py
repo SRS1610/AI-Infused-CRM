@@ -18,6 +18,7 @@ what is already invoiced (negative: a credit is due).
 from __future__ import annotations
 
 import datetime as dt
+import html
 import secrets
 from collections import defaultdict
 from typing import Any
@@ -409,10 +410,11 @@ class Quotation(Model):
             attachment_ids = att.ids
         base = get_settings().public_url.rstrip("/")
         link = f"{base}{self.portal_url()}"
+        esc = html.escape  # names are user data: no markup reaches the e-mail (U-9 SEC-56)
         body = (
-            f"<p>Hello {self.partner_id.name},</p><p>Please find our quotation <b>{self.name}</b> "
+            f"<p>Hello {esc(self.partner_id.name or '')},</p><p>Please find our quotation <b>{esc(self.name)}</b> "
             f"for {self.amount_total:,.2f} {self.currency_id.name}, valid until {self.validity_date}.</p>"
-            f'<p><a href="{link}">View and accept it online</a></p><p>{self.user_id.name or ""}</p>'
+            f'<p><a href="{esc(link)}">View and accept it online</a></p><p>{esc(self.user_id.name or "")}</p>'
         )
         from modules.chatter.thread import reply_address
 
@@ -436,7 +438,7 @@ class Quotation(Model):
             self.env,
             self._name,
             self.ids[0],
-            f"<p>Quotation sent to {recipient}.</p>",
+            f"<p>Quotation sent to {html.escape(recipient)}.</p>",
             message_type="notification",
             attachment_ids=attachment_ids,
             notify=False,

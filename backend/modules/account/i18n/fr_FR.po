@@ -1455,8 +1455,8 @@ msgstr ""
 
 #. model description
 #. field label
-#: field:account.payment_term_line.payment_id model:account.payment models/payment.py:142
-#: models/payment.py:188
+#: field:account.payment_term_line.payment_id model:account.payment models/payment.py:154
+#: models/payment.py:200
 msgid "Payment"
 msgstr "Paiement"
 
@@ -2016,7 +2016,11 @@ msgstr ""
 msgid "A journal with entries cannot be deleted; archive it instead"
 msgstr "Un journal comportant des pièces ne peut pas être supprimé ; archivez-le à la place"
 
-#: models/journal.py:210
+#: models/journal.py:156
+msgid "Only accounting advisers can close a fiscal year"
+msgstr "Seuls les conseillers comptables peuvent clôturer un exercice"
+
+#: models/journal.py:215
 msgid "Only accounting advisers can change lock dates"
 msgstr "Seuls les conseillers comptables peuvent modifier les dates de verrouillage"
 
@@ -2028,12 +2032,12 @@ msgstr "Un exercice fiscal se termine après son début"
 msgid "Fiscal years of a company cannot overlap"
 msgstr "Les exercices fiscaux d'une société ne peuvent pas se chevaucher"
 
-#: models/journal.py:171
+#: models/journal.py:176
 #, python-brace-format
 msgid "Post or delete the {count} draft entries of {name} first"
 msgstr "Comptabilisez ou supprimez d'abord les {count} pièces en brouillon de {name}"
 
-#: models/journal.py:296
+#: models/journal.py:301
 #, python-brace-format
 msgid "{number} is not a valid IBAN"
 msgstr "{number} n'est pas un IBAN valide"
@@ -2042,182 +2046,191 @@ msgstr "{number} n'est pas un IBAN valide"
 msgid "The journal's accounts must belong to its company"
 msgstr "Les comptes du journal doivent appartenir à sa société"
 
-#: models/move.py:181
+#: models/move.py:114
+#, python-brace-format
+msgid "These fields are set by the accounting engine and cannot be written: {fields}"
+msgstr "Ces champs sont gérés par le moteur comptable et ne peuvent pas être modifiés : {fields}"
+
+#: models/move.py:230
 #, python-brace-format
 msgid "Draft {kind}"
 msgstr "{kind} en brouillon"
 
-#: models/move.py:206
+#: models/move.py:255
 #, python-brace-format
 msgid "No {kind} journal: install a chart of accounts first"
 msgstr "Aucun journal de type {kind} : installez d'abord un plan comptable"
 
-#: models/move.py:481
+#: models/move.py:538
 #, python-brace-format
 msgid "The period up to {lock} is locked: you cannot {action} {name} dated {date}"
 msgstr "La période jusqu'au {lock} est verrouillée : vous ne pouvez pas {action} {name} daté du {date}"
 
-#: models/move.py:616
+#: models/move.py:673
 #, python-brace-format
 msgid "Reversal of: {name}"
 msgstr "Extourne de : {name}"
 
-#: models/move.py:257
+#: models/move.py:314
 msgid "Use the Post, Reset to draft and Cancel actions to change an entry's state"
 msgstr ""
 "Utilisez les actions Comptabiliser, Remettre en brouillon et Annuler pour changer le statut d'une"
 " pièce"
 
-#: models/move.py:272
+#: models/move.py:329
 #, python-brace-format
 msgid "Entry {name} has been posted and keeps its number: cancel or reverse it instead"
 msgstr "La pièce {name} a été comptabilisée et conserve son numéro : annulez-la ou extournez-la à la place"
 
-#: models/move.py:283
+#: models/move.py:340
 msgid "The journal must belong to the entry's company"
 msgstr "Le journal doit appartenir à la société de la pièce"
 
-#: models/move.py:292
+#: models/move.py:349
 #, python-brace-format
 msgid "{partner} belongs to another company and cannot be used here"
 msgstr "{partner} appartient à une autre société et ne peut pas être utilisé ici"
 
-#: models/move.py:411
+#: models/move.py:468
 msgid "The company has no default receivable / payable account; install a chart first"
 msgstr "La société n'a pas de compte client / fournisseur par défaut ; installez d'abord un plan comptable"
 
-#: models/move.py:499
+#: models/move.py:556
 #, python-brace-format
 msgid "Entry {name} has no journal items"
 msgstr "La pièce {name} n'a aucune écriture comptable"
 
-#: models/move.py:503
+#: models/move.py:560
 #, python-brace-format
 msgid "Entry {name} is not balanced (difference {diff})"
 msgstr "La pièce {name} n'est pas équilibrée (écart {diff})"
 
-#: models/move.py:511
+#: models/move.py:568
 #, python-brace-format
 msgid "Only draft entries can be posted ({name})"
 msgstr "Seules les pièces en brouillon peuvent être comptabilisées ({name})"
 
-#: models/move.py:569
+#: models/move.py:626
 #, python-brace-format
 msgid "{name} is in a hash-locked journal and cannot be reset to draft"
 msgstr "{name} appartient à un journal verrouillé par empreinte et ne peut pas être remis en brouillon"
 
-#: models/move.py:572 models/move.py:590
+#: models/move.py:629 models/move.py:647
 #, python-brace-format
 msgid "{name} has payments or matches: unreconcile it first"
 msgstr "{name} a des paiements ou des lettrages : délettrez-la d'abord"
 
-#: models/move.py:615
+#: models/move.py:672
 msgid "Only posted entries can be reversed"
 msgstr "Seules les pièces comptabilisées peuvent être extournées"
 
-#: models/move.py:251
+#: models/move.py:308
 #, python-brace-format
 msgid "Posted entry {name} cannot be modified; reset it to draft first"
 msgstr "La pièce comptabilisée {name} ne peut pas être modifiée ; remettez-la d'abord en brouillon"
 
-#: models/move.py:255
+#: models/move.py:312
 #, python-brace-format
 msgid "Cancelled entry {name} cannot be modified"
 msgstr "La pièce annulée {name} ne peut pas être modifiée"
 
-#: models/move.py:515
+#: models/move.py:572
 msgid "Set a customer or vendor before posting"
 msgstr "Renseignez un client ou un fournisseur avant de comptabiliser"
 
-#: models/move.py:517
+#: models/move.py:574
 msgid "Add at least one invoice line"
 msgstr "Ajoutez au moins une ligne de facture"
 
-#: models/move.py:529
+#: models/move.py:586
 msgid "The total of an invoice cannot be negative: create a credit note instead"
 msgstr "Le total d'une facture ne peut pas être négatif : créez plutôt un avoir"
 
-#: models/move.py:533
+#: models/move.py:590
 #, python-brace-format
 msgid "Every journal item needs an account ({line})"
 msgstr "Chaque écriture comptable nécessite un compte ({line})"
 
-#: models/move.py:874
+#: models/move.py:932
 #, python-brace-format
 msgid "Items can only be added to draft entries ({name})"
 msgstr "Des écritures ne peuvent être ajoutées qu'à des pièces en brouillon ({name})"
 
-#: models/move.py:899
+#: models/move.py:967
 #, python-brace-format
 msgid "Items of posted entry {name} cannot be modified"
 msgstr "Les écritures de la pièce comptabilisée {name} ne peuvent pas être modifiées"
 
-#: models/move.py:913
+#: models/move.py:981
 #, python-brace-format
 msgid "Items of posted entry {name} cannot be deleted"
 msgstr "Les écritures de la pièce comptabilisée {name} ne peuvent pas être supprimées"
 
-#: models/move.py:484
+#: models/move.py:541
 msgid "post"
 msgstr "comptabiliser"
 
-#: models/move.py:485
+#: models/move.py:542
 msgid "this entry"
 msgstr "cette pièce"
 
-#: models/move.py:537
+#: models/move.py:594
 #, python-brace-format
 msgid "Account {code} is deprecated"
 msgstr "Le compte {code} est obsolète"
 
-#: models/move.py:539
+#: models/move.py:596
 #, python-brace-format
 msgid "Account {code} belongs to another company"
 msgstr "Le compte {code} appartient à une autre société"
 
-#: models/move.py:541
+#: models/move.py:598
 #, python-brace-format
 msgid "Receivable and payable items need a partner ({code})"
 msgstr "Les écritures clients et fournisseurs nécessitent un partenaire ({code})"
 
-#: models/move.py:484
+#: models/move.py:541
 msgid "cancel"
 msgstr "annuler"
 
-#: models/move.py:484
+#: models/move.py:541
 msgid "modify"
 msgstr "modifier"
 
-#: models/payment.py:101
+#: models/payment.py:113
 #, python-brace-format
 msgid "Journal {name} has no bank / cash account"
 msgstr "Le journal {name} n'a pas de compte de banque / caisse"
 
-#: models/payment.py:242
+#: models/payment.py:265
 msgid "Posted payments cannot be deleted; cancel them instead"
 msgstr "Les paiements comptabilisés ne peuvent pas être supprimés ; annulez-les à la place"
 
-#: models/payment.py:87
+#: models/payment.py:99
 msgid "A payment amount cannot be negative"
 msgstr "Le montant d'un paiement ne peut pas être négatif"
 
-#: models/payment.py:123
+#: models/payment.py:135
 msgid "Only draft payments can be posted"
 msgstr "Seuls les paiements en brouillon peuvent être comptabilisés"
 
-#: models/payment.py:125
+#: models/payment.py:137
 msgid "A payment needs an amount"
 msgstr "Un paiement nécessite un montant"
 
-#: models/payment.py:183
+#: models/payment.py:195
 msgid "No receivable / payable account for this payment"
 msgstr "Aucun compte client / fournisseur pour ce paiement"
 
-#: models/payment.py:237
+#: models/payment.py:239
+msgid "This payment's journal entry was not booked by it"
+msgstr "Cette pièce comptable n'a pas été passée par ce paiement"
+
+#: models/payment.py:260
 msgid "Posted payments cannot be modified; cancel them instead"
 msgstr "Les paiements comptabilisés ne peuvent pas être modifiés ; annulez-les à la place"
 
-#: models/payment.py:164 payments.py:174
+#: models/payment.py:176 payments.py:174
 msgid "Write-off"
 msgstr "Écart de règlement"
 
@@ -2232,6 +2245,10 @@ msgstr "Les pourcentages des échéances dépassent 100 %"
 #: models/payment_term.py:50
 msgid "The discount must be between 0 and 100 %"
 msgstr "L'escompte doit être compris entre 0 et 100 %"
+
+#: models/reconcile.py:19
+msgid "Matches are made with the Reconcile and Unreconcile actions"
+msgstr "Les lettrages se font avec les actions Lettrer et Délettrer"
 
 #: models/tax.py:110
 msgid "A tax-included percentage must be between 0 and 100"
@@ -2331,44 +2348,44 @@ msgstr "Écart de change : {name}"
 msgid "Exchange difference"
 msgstr "Écart de change"
 
-#: sending.py:43
+#: sending.py:44
 #, python-brace-format
 msgid "Please find our {kind} {number} for {amount}, due on {due}."
 msgstr ""
 "Veuillez trouver ci-joint notre {kind} {number} d'un montant de {amount}, à régler au plus tard "
 "le {due}."
 
-#: sending.py:42
+#: sending.py:43
 msgid "credit note"
 msgstr "avoir"
 
-#: sending.py:42
+#: sending.py:43
 msgid "invoice"
 msgstr "facture"
 
-#: sending.py:19
+#: sending.py:20
 msgid "Only posted customer invoices and credit notes can be sent"
 msgstr "Seuls les factures et avoirs clients comptabilisés peuvent être envoyés"
 
-#: sending.py:22
+#: sending.py:23
 msgid "The customer has no email address"
 msgstr "Le client n'a pas d'adresse e-mail"
 
-#: sending.py:51
-#, python-brace-format
-msgid "Hello {name},"
-msgstr "Bonjour {name},"
-
-#: sending.py:53
-msgid "View it online"
-msgstr "Consulter en ligne"
-
-#: sending.py:58
+#: sending.py:60
 #, python-brace-format
 msgid "{company} {kind} {number}"
 msgstr "{kind} {number} de {company}"
 
-#: sending.py:70
+#: sending.py:53
+#, python-brace-format
+msgid "Hello {name},"
+msgstr "Bonjour {name},"
+
+#: sending.py:55
+msgid "View it online"
+msgstr "Consulter en ligne"
+
+#: sending.py:72
 #, python-brace-format
 msgid "Sent to {recipient}."
 msgstr "Envoyé à {recipient}."

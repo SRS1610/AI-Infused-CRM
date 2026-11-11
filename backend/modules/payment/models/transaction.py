@@ -84,6 +84,13 @@ class PaymentTransaction(Model):
         self.ensure_one()
         return sync_transaction(self).state
 
+    def write(self, vals: dict[str, Any]) -> bool:
+        # every field is the provider's report or the checkout's own data: amount, state, invoices and references
+        # change through ``modules.payment.service`` (elevated) only, never through the generic API (U-9 SEC-53)
+        if not self.env.su:
+            raise UserError(_("Payment transactions are updated by the payment provider only"))
+        return super().write(vals)
+
     def unlink(self) -> bool:
         if self.filtered(lambda tx: tx.state not in ("draft", "cancel", "error")):
             raise UserError(_("Only draft, cancelled or failed transactions can be deleted"))

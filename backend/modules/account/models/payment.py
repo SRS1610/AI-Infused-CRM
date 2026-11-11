@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from modules.account.models.move import INTERNAL
+from modules.account.models.move import INTERNAL, _changed_server_fields, _refuse_server_fields, _trusted
 from tessera.exceptions import UserError, ValidationError
 from tessera.i18n import _
 from tessera.orm import Model, api, fields
@@ -18,6 +18,18 @@ class JournalPayments(Model):
         help="Payments are booked on the outstanding receipts / payments accounts until a bank statement line "
         "matches them; otherwise they are booked straight on the bank account",
     )
+
+
+# set by posting and matching only (U-9 SEC-50/SEC-51): a ``move_id`` in a caller's values would let
+# ``action_cancel`` cancel any journal entry, a ``state`` would make a posted payment without an entry
+PAYMENT_SERVER_FIELDS = {
+    "state": "draft",
+    "name": "/",
+    "move_id": None,
+    "is_matched": False,
+    "is_reconciled": False,
+    "reconciled_invoice_ids": None,
+}
 
 
 class Payment(Model):
@@ -223,6 +235,8 @@ class Payment(Model):
     def action_cancel(self) -> bool:
         for pay in self:
             if pay.move_id:
+                if pay.ids[0] not in pay.move_id.elevated().line_ids.mapped("payment_id").ids:
+                    raise UserError(_("This payment's journal entry was not booked by it"))
                 lines = pay.move_id.line_ids
                 if lines.filtered(lambda line: line.matched_debit_ids or line.matched_credit_ids):
                     lines.remove_move_reconcile()
@@ -230,8 +244,17 @@ class Payment(Model):
             pay.with_context(**{INTERNAL: True}).write({"state": "cancel"})
         return True
 
+    def create(self, vals_list):  # type: ignore[no-untyped-def]
+        batch = [dict(vals_list)] if isinstance(vals_list, dict) else [dict(v) for v in vals_list]
+        if not _trusted(self):
+            for vals in batch:
+                _refuse_server_fields(self, _changed_server_fields(self, vals, PAYMENT_SERVER_FIELDS))
+        return super().create(batch)
+
     def write(self, vals: dict[str, Any]) -> bool:
         if not self.env.context.get(INTERNAL):
+            if not self.env.su:
+                _refuse_server_fields(self, set(PAYMENT_SERVER_FIELDS) & set(vals))
             for pay in self:
                 if pay.state != "draft" and set(vals) - {"ref"}:
                     raise UserError(_("Posted payments cannot be modified; cancel them instead"))

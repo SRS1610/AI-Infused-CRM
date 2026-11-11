@@ -1450,8 +1450,8 @@ msgstr ""
 
 #. model description
 #. field label
-#: field:account.payment_term_line.payment_id model:account.payment models/payment.py:142
-#: models/payment.py:188
+#: field:account.payment_term_line.payment_id model:account.payment models/payment.py:154
+#: models/payment.py:200
 msgid "Payment"
 msgstr ""
 
@@ -1994,7 +1994,11 @@ msgstr ""
 msgid "A journal with entries cannot be deleted; archive it instead"
 msgstr ""
 
-#: models/journal.py:210
+#: models/journal.py:156
+msgid "Only accounting advisers can close a fiscal year"
+msgstr ""
+
+#: models/journal.py:215
 msgid "Only accounting advisers can change lock dates"
 msgstr ""
 
@@ -2006,12 +2010,12 @@ msgstr ""
 msgid "Fiscal years of a company cannot overlap"
 msgstr ""
 
-#: models/journal.py:171
+#: models/journal.py:176
 #, python-brace-format
 msgid "Post or delete the {count} draft entries of {name} first"
 msgstr ""
 
-#: models/journal.py:296
+#: models/journal.py:301
 #, python-brace-format
 msgid "{number} is not a valid IBAN"
 msgstr ""
@@ -2020,180 +2024,189 @@ msgstr ""
 msgid "The journal's accounts must belong to its company"
 msgstr ""
 
-#: models/move.py:181
+#: models/move.py:114
+#, python-brace-format
+msgid "These fields are set by the accounting engine and cannot be written: {fields}"
+msgstr ""
+
+#: models/move.py:230
 #, python-brace-format
 msgid "Draft {kind}"
 msgstr ""
 
-#: models/move.py:206
+#: models/move.py:255
 #, python-brace-format
 msgid "No {kind} journal: install a chart of accounts first"
 msgstr ""
 
-#: models/move.py:481
+#: models/move.py:538
 #, python-brace-format
 msgid "The period up to {lock} is locked: you cannot {action} {name} dated {date}"
 msgstr ""
 
-#: models/move.py:616
+#: models/move.py:673
 #, python-brace-format
 msgid "Reversal of: {name}"
 msgstr ""
 
-#: models/move.py:257
+#: models/move.py:314
 msgid "Use the Post, Reset to draft and Cancel actions to change an entry's state"
 msgstr ""
 
-#: models/move.py:272
+#: models/move.py:329
 #, python-brace-format
 msgid "Entry {name} has been posted and keeps its number: cancel or reverse it instead"
 msgstr ""
 
-#: models/move.py:283
+#: models/move.py:340
 msgid "The journal must belong to the entry's company"
 msgstr ""
 
-#: models/move.py:292
+#: models/move.py:349
 #, python-brace-format
 msgid "{partner} belongs to another company and cannot be used here"
 msgstr ""
 
-#: models/move.py:411
+#: models/move.py:468
 msgid "The company has no default receivable / payable account; install a chart first"
 msgstr ""
 
-#: models/move.py:499
+#: models/move.py:556
 #, python-brace-format
 msgid "Entry {name} has no journal items"
 msgstr ""
 
-#: models/move.py:503
+#: models/move.py:560
 #, python-brace-format
 msgid "Entry {name} is not balanced (difference {diff})"
 msgstr ""
 
-#: models/move.py:511
+#: models/move.py:568
 #, python-brace-format
 msgid "Only draft entries can be posted ({name})"
 msgstr ""
 
-#: models/move.py:569
+#: models/move.py:626
 #, python-brace-format
 msgid "{name} is in a hash-locked journal and cannot be reset to draft"
 msgstr ""
 
-#: models/move.py:572 models/move.py:590
+#: models/move.py:629 models/move.py:647
 #, python-brace-format
 msgid "{name} has payments or matches: unreconcile it first"
 msgstr ""
 
-#: models/move.py:615
+#: models/move.py:672
 msgid "Only posted entries can be reversed"
 msgstr ""
 
-#: models/move.py:251
+#: models/move.py:308
 #, python-brace-format
 msgid "Posted entry {name} cannot be modified; reset it to draft first"
 msgstr ""
 
-#: models/move.py:255
+#: models/move.py:312
 #, python-brace-format
 msgid "Cancelled entry {name} cannot be modified"
 msgstr ""
 
-#: models/move.py:515
+#: models/move.py:572
 msgid "Set a customer or vendor before posting"
 msgstr ""
 
-#: models/move.py:517
+#: models/move.py:574
 msgid "Add at least one invoice line"
 msgstr ""
 
-#: models/move.py:529
+#: models/move.py:586
 msgid "The total of an invoice cannot be negative: create a credit note instead"
 msgstr ""
 
-#: models/move.py:533
+#: models/move.py:590
 #, python-brace-format
 msgid "Every journal item needs an account ({line})"
 msgstr ""
 
-#: models/move.py:874
+#: models/move.py:932
 #, python-brace-format
 msgid "Items can only be added to draft entries ({name})"
 msgstr ""
 
-#: models/move.py:899
+#: models/move.py:967
 #, python-brace-format
 msgid "Items of posted entry {name} cannot be modified"
 msgstr ""
 
-#: models/move.py:913
+#: models/move.py:981
 #, python-brace-format
 msgid "Items of posted entry {name} cannot be deleted"
 msgstr ""
 
-#: models/move.py:484
+#: models/move.py:541
 msgid "post"
 msgstr ""
 
-#: models/move.py:485
+#: models/move.py:542
 msgid "this entry"
 msgstr ""
 
-#: models/move.py:537
+#: models/move.py:594
 #, python-brace-format
 msgid "Account {code} is deprecated"
 msgstr ""
 
-#: models/move.py:539
+#: models/move.py:596
 #, python-brace-format
 msgid "Account {code} belongs to another company"
 msgstr ""
 
-#: models/move.py:541
+#: models/move.py:598
 #, python-brace-format
 msgid "Receivable and payable items need a partner ({code})"
 msgstr ""
 
-#: models/move.py:484
+#: models/move.py:541
 msgid "cancel"
 msgstr ""
 
-#: models/move.py:484
+#: models/move.py:541
 msgid "modify"
 msgstr ""
 
-#: models/payment.py:101
+#: models/payment.py:113
 #, python-brace-format
 msgid "Journal {name} has no bank / cash account"
 msgstr ""
 
-#: models/payment.py:242
+#: models/payment.py:265
 msgid "Posted payments cannot be deleted; cancel them instead"
 msgstr ""
 
-#: models/payment.py:87
+#: models/payment.py:99
 msgid "A payment amount cannot be negative"
 msgstr ""
 
-#: models/payment.py:123
+#: models/payment.py:135
 msgid "Only draft payments can be posted"
 msgstr ""
 
-#: models/payment.py:125
+#: models/payment.py:137
 msgid "A payment needs an amount"
 msgstr ""
 
-#: models/payment.py:183
+#: models/payment.py:195
 msgid "No receivable / payable account for this payment"
 msgstr ""
 
-#: models/payment.py:237
+#: models/payment.py:239
+msgid "This payment's journal entry was not booked by it"
+msgstr ""
+
+#: models/payment.py:260
 msgid "Posted payments cannot be modified; cancel them instead"
 msgstr ""
 
-#: models/payment.py:164 payments.py:174
+#: models/payment.py:176 payments.py:174
 msgid "Write-off"
 msgstr ""
 
@@ -2207,6 +2220,10 @@ msgstr ""
 
 #: models/payment_term.py:50
 msgid "The discount must be between 0 and 100 %"
+msgstr ""
+
+#: models/reconcile.py:19
+msgid "Matches are made with the Reconcile and Unreconcile actions"
 msgstr ""
 
 #: models/tax.py:110
@@ -2307,42 +2324,42 @@ msgstr ""
 msgid "Exchange difference"
 msgstr ""
 
-#: sending.py:43
+#: sending.py:44
 #, python-brace-format
 msgid "Please find our {kind} {number} for {amount}, due on {due}."
 msgstr ""
 
-#: sending.py:42
+#: sending.py:43
 msgid "credit note"
 msgstr ""
 
-#: sending.py:42
+#: sending.py:43
 msgid "invoice"
 msgstr ""
 
-#: sending.py:19
+#: sending.py:20
 msgid "Only posted customer invoices and credit notes can be sent"
 msgstr ""
 
-#: sending.py:22
+#: sending.py:23
 msgid "The customer has no email address"
 msgstr ""
 
-#: sending.py:51
-#, python-brace-format
-msgid "Hello {name},"
-msgstr ""
-
-#: sending.py:53
-msgid "View it online"
-msgstr ""
-
-#: sending.py:58
+#: sending.py:60
 #, python-brace-format
 msgid "{company} {kind} {number}"
 msgstr ""
 
-#: sending.py:70
+#: sending.py:53
+#, python-brace-format
+msgid "Hello {name},"
+msgstr ""
+
+#: sending.py:55
+msgid "View it online"
+msgstr ""
+
+#: sending.py:72
 #, python-brace-format
 msgid "Sent to {recipient}."
 msgstr ""

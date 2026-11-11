@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import html
 from typing import Any
 
 from tessera.exceptions import UserError
@@ -47,10 +48,11 @@ def send_invoice(moves: Model, email_to: str | None = None) -> dict[str, Any]:
         amount=move.currency_id.format(move.amount_total),
         due=move.invoice_date_due,
     )
+    # names and numbers are user data: no markup reaches the e-mail (U-9 SEC-56)
     body = (
-        f"<p>{_('Hello {name},', name=move.partner_id.name)}</p>"
-        f"<p>{intro}</p>"
-        f'<p><a href="{link}">{_("View it online")}</a></p>'
+        f"<p>{html.escape(str(_('Hello {name},', name=move.partner_id.name)))}</p>"
+        f"<p>{html.escape(str(intro))}</p>"
+        f'<p><a href="{html.escape(link)}">{html.escape(str(_("View it online")))}</a></p>'
     )
     move.env["core.mail_queue"].queue(
         {
@@ -67,7 +69,7 @@ def send_invoice(moves: Model, email_to: str | None = None) -> dict[str, Any]:
         move.env,
         move._name,
         move.ids[0],
-        f"<p>{_('Sent to {recipient}.', recipient=recipient)}</p>",
+        f"<p>{html.escape(str(_('Sent to {recipient}.', recipient=recipient)))}</p>",
         message_type="notification",
         attachment_ids=attachment_ids,
         notify=False,
