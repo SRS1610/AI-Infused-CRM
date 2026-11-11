@@ -2103,6 +2103,10 @@ msgstr ""
 msgid "Eval case {case} watches unknown models: {unknown}"
 msgstr ""
 
+#: tessera/ai/facts.py:54
+msgid "AI is not installed"
+msgstr ""
+
 #: tessera/ai/prompts.py:65
 #, python-brace-format
 msgid "Invalid AI feature input: {message}"
@@ -2177,40 +2181,40 @@ msgstr ""
 msgid "AI feature '{name}' has no prompt"
 msgstr ""
 
-#: tessera/ai/runtime.py:373
+#: tessera/ai/runtime.py:391
 #, python-brace-format
 msgid "The model declined this request ({category})"
 msgstr ""
 
-#: tessera/ai/runtime.py:457
+#: tessera/ai/runtime.py:475
 msgid "The model declined this request"
 msgstr ""
 
-#: tessera/api/deps.py:174 tessera/api/deps.py:184 tessera/api/routers/attachments.py:92
+#: tessera/api/deps.py:190 tessera/api/deps.py:200 tessera/api/routers/attachments.py:92
 msgid "Authentication required"
 msgstr ""
 
-#: tessera/api/deps.py:177
+#: tessera/api/deps.py:193
 msgid "Portal users cannot use the back-office API"
 msgstr ""
 
-#: tessera/api/deps.py:190
+#: tessera/api/deps.py:206
 msgid "Administrator rights required"
 msgstr ""
 
-#: tessera/api/deps.py:97
+#: tessera/api/deps.py:113
 msgid "None of the requested companies is allowed for this user"
 msgstr ""
 
-#: tessera/api/deps.py:120
+#: tessera/api/deps.py:136
 msgid "Invalid or expired API key"
 msgstr ""
 
-#: tessera/api/deps.py:94
+#: tessera/api/deps.py:110
 msgid "Invalid X-Tessera-Companies header"
 msgstr ""
 
-#: tessera/api/deps.py:132
+#: tessera/api/deps.py:148
 msgid "Missing or invalid CSRF token"
 msgstr ""
 
@@ -2226,11 +2230,11 @@ msgstr ""
 msgid "Database unavailable"
 msgstr ""
 
-#: tessera/api/middleware.py:168
+#: tessera/api/middleware.py:191
 msgid "Too many attempts"
 msgstr ""
 
-#: tessera/api/middleware.py:183
+#: tessera/api/middleware.py:206
 msgid "Rate limit exceeded"
 msgstr ""
 

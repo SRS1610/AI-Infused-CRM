@@ -2107,6 +2107,10 @@ msgstr "Passerelle IA injoignable : {exc}"
 msgid "Eval case {case} watches unknown models: {unknown}"
 msgstr "Le cas d'évaluation {case} surveille des modèles inconnus : {unknown}"
 
+#: tessera/ai/facts.py:54
+msgid "AI is not installed"
+msgstr "L'IA n'est pas installée"
+
 #: tessera/ai/prompts.py:65
 #, python-brace-format
 msgid "Invalid AI feature input: {message}"
@@ -2181,40 +2185,40 @@ msgstr "Les fonctionnalités IA sont réservées aux utilisateurs internes"
 msgid "AI feature '{name}' has no prompt"
 msgstr "La fonctionnalité IA « {name} » n'a pas de prompt"
 
-#: tessera/ai/runtime.py:373
+#: tessera/ai/runtime.py:391
 #, python-brace-format
 msgid "The model declined this request ({category})"
 msgstr "Le modèle a refusé cette demande ({category})"
 
-#: tessera/ai/runtime.py:457
+#: tessera/ai/runtime.py:475
 msgid "The model declined this request"
 msgstr "Le modèle a refusé cette demande"
 
-#: tessera/api/deps.py:174 tessera/api/deps.py:184 tessera/api/routers/attachments.py:92
+#: tessera/api/deps.py:190 tessera/api/deps.py:200 tessera/api/routers/attachments.py:92
 msgid "Authentication required"
 msgstr "Authentification requise"
 
-#: tessera/api/deps.py:177
+#: tessera/api/deps.py:193
 msgid "Portal users cannot use the back-office API"
 msgstr "Les utilisateurs du portail ne peuvent pas utiliser l'API du back-office"
 
-#: tessera/api/deps.py:190
+#: tessera/api/deps.py:206
 msgid "Administrator rights required"
 msgstr "Droits d'administrateur requis"
 
-#: tessera/api/deps.py:97
+#: tessera/api/deps.py:113
 msgid "None of the requested companies is allowed for this user"
 msgstr "Aucune des sociétés demandées n'est autorisée pour cet utilisateur"
 
-#: tessera/api/deps.py:120
+#: tessera/api/deps.py:136
 msgid "Invalid or expired API key"
 msgstr "Clé d'API invalide ou expirée"
 
-#: tessera/api/deps.py:94
+#: tessera/api/deps.py:110
 msgid "Invalid X-Tessera-Companies header"
 msgstr "En-tête X-Tessera-Companies invalide"
 
-#: tessera/api/deps.py:132
+#: tessera/api/deps.py:148
 msgid "Missing or invalid CSRF token"
 msgstr "Jeton CSRF manquant ou invalide"
 
@@ -2230,11 +2234,11 @@ msgstr "Requête invalide"
 msgid "Database unavailable"
 msgstr "Base de données indisponible"
 
-#: tessera/api/middleware.py:168
+#: tessera/api/middleware.py:191
 msgid "Too many attempts"
 msgstr "Trop de tentatives"
 
-#: tessera/api/middleware.py:183
+#: tessera/api/middleware.py:206
 msgid "Rate limit exceeded"
 msgstr "Limite de requêtes dépassée"
 
@@ -2736,7 +2740,9 @@ msgstr "L'enregistrement {name}({ids}) n'existe pas ou a été supprimé"
 
 #: tessera/orm/model.py:894
 msgid "You cannot move records to a company you do not work in"
-msgstr "Vous ne pouvez pas déplacer des enregistrements vers une société dans laquelle vous ne travaillez pas"
+msgstr ""
+"Vous ne pouvez pas déplacer des enregistrements vers une société dans laquelle vous ne travaillez"
+" pas"
 
 #: tessera/orm/model.py:984
 #, python-brace-format
@@ -2914,8 +2920,8 @@ msgid ""
 "The identity provider did not confirm this e-mail address; ask an administrator to link your "
 "account"
 msgstr ""
-"Le fournisseur d'identité n'a pas confirmé cette adresse e-mail ; demandez à un administrateur de "
-"lier votre compte"
+"Le fournisseur d'identité n'a pas confirmé cette adresse e-mail ; demandez à un administrateur de"
+" lier votre compte"
 
 #: tessera/security/auth.py:328
 msgid "This account is disabled"
