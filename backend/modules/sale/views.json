@@ -161,5 +161,37 @@
   {"id": "view_partner_form_sale", "inherit": "contacts.view_partner_form", "name": "contacts.partner.form.sale",
    "operations": [
      {"op": "append", "anchor": {"name": "page_sales"}, "node": {"kind": "field", "name": "pricelist_id"}}
-   ]}
+   ]},
+  {"id": "view_discount_band_list", "model": "sale.discount_band", "type": "list", "name": "sale.discount_band.list",
+   "columns": [{"field": "sequence", "widget": "handle"}, {"field": "name"}, {"field": "category_id"}, {"field": "partner_tag_ids", "widget": "many2many_tags"}, {"field": "min_quantity"}, {"field": "min_discount"}, {"field": "max_discount"}, {"field": "min_margin"}, {"field": "approver_group_id"}, {"field": "company_id"}]},
+  {"id": "view_discount_band_form", "model": "sale.discount_band", "type": "form", "name": "sale.discount_band.form",
+   "root": {"kind": "sheet", "children": [
+     {"kind": "field", "name": "name", "widget": "title"},
+     {"kind": "group", "name": "applies", "title": "Applies to", "columns": 2, "children": [
+       {"kind": "field", "name": "category_id"}, {"kind": "field", "name": "partner_tag_ids", "widget": "many2many_tags"},
+       {"kind": "field", "name": "min_quantity"}, {"kind": "field", "name": "company_id"},
+       {"kind": "field", "name": "sequence"}, {"kind": "field", "name": "active"}]},
+     {"kind": "group", "name": "limits", "title": "Approved range", "columns": 2, "children": [
+       {"kind": "field", "name": "min_discount"}, {"kind": "field", "name": "max_discount"},
+       {"kind": "field", "name": "min_margin"}, {"kind": "field", "name": "approver_group_id"}]},
+     {"kind": "field", "name": "note"}
+   ]}},
+  {"id": "view_pricing_flag_list", "model": "sale.pricing_flag", "type": "list", "name": "sale.pricing_flag.list",
+   "columns": [{"field": "quotation_id"}, {"field": "line_id"}, {"field": "code"}, {"field": "severity", "widget": "badge"}, {"field": "message"}, {"field": "band_id"}, {"field": "state", "widget": "badge"}, {"field": "approved_by"}]},
+  {"id": "view_pricing_flag_form", "model": "sale.pricing_flag", "type": "form", "name": "sale.pricing_flag.form",
+   "root": {"kind": "sheet", "children": [
+     {"kind": "buttons", "children": [
+       {"kind": "button", "method": "action_approve", "label": "Approve the price", "confirm": "Approve this price for the quotation?", "invisible": ["state", "!=", "open"]}]},
+     {"kind": "field", "name": "message", "widget": "title", "readonly": true},
+     {"kind": "group", "name": "main", "columns": 2, "children": [
+       {"kind": "field", "name": "quotation_id", "readonly": true}, {"kind": "field", "name": "line_id", "readonly": true},
+       {"kind": "field", "name": "code", "readonly": true}, {"kind": "field", "name": "severity", "readonly": true},
+       {"kind": "field", "name": "band_id", "readonly": true}, {"kind": "field", "name": "value", "readonly": true},
+       {"kind": "field", "name": "state", "readonly": true}, {"kind": "field", "name": "approved_by"},
+       {"kind": "field", "name": "approved_at"}]}
+   ]}},
+  {"id": "view_pricing_flag_search", "model": "sale.pricing_flag", "type": "search", "name": "sale.pricing_flag.search",
+   "fields": ["quotation_id", "message"],
+   "filters": [{"name": "open", "label": "To review", "domain": [["state", "=", "open"]]}, {"name": "breaches", "label": "Breaches", "domain": [["severity", "=", "breach"]]}],
+   "group_bys": [{"field": "code"}, {"field": "state"}]}
 ]

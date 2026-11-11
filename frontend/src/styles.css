@@ -2330,3 +2330,21 @@ tr.clickable {
   align-items: center;
   margin: 12px 0;
 }
+/* ---- 2.6 Sales & product AI (modules/sale/SaleAi.tsx, modules/product/ProductAi.tsx) ---- */
+.sale-ai {
+  display: grid;
+  gap: 0.5rem;
+  min-width: 0;
+}
+.sale-ai-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 6px;
+  overflow-wrap: anywhere;
+}
+.sale-ai textarea {
+  width: 100%;
+  box-sizing: border-box;
+}

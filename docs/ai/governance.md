@@ -84,6 +84,18 @@ cases. Evaluation runs only see their own corpus (the case records and the modul
 the target database's business data is hidden for the duration of the run, which is rolled back, so the
 scores do not depend on the database they run against.
 
+## Feature inventory
+
+### Sales and products (sub-phase 2.6)
+
+| Feature | Risk class | Model tier | Writes / outbound | Data used | Limitations |
+|---|---|---|---|---|---|
+| `sale.upsell` — upsell / cross-sell suggestions | minimal | none (co-purchase association rules in-process; optional small-tier explanation) | add line → write proposal | the company's confirmed orders of the last two years (aggregate counts only), the catalogue's optional products and accessories; products filtered by the user's access | learns only from Tessera orders; cold start falls back to catalogue options and popularity; back-test on synthetic history (top-3 precision 0.78, popularity baseline 0.30) |
+| `sale.discount_suggest` — discounts within approved bands | limited | none (logistic win model per category, quantity ramp; optional small-tier explanation) | write proposal per line, never outside the band (clamp + re-check) | discount bands, won/lost quotations of the category (aggregate), product cost (computation only, never shown) | needs ≥ 8 decided lines with both outcomes per category for the history model; acceptance rate is reported from proposal decisions |
+| `sale.quote_from_text` — quote lines from pasted text | minimal | small (extract) | write proposal (draft lines) | the pasted text only; catalogue matching runs in Tessera as the user (code, name trigrams, gateway embeddings) | unmatched or ambiguous items are flagged, never invented; a planted instruction that the model turns into a real catalogue item still becomes a proposed line the user must reject; replay scores measure the pipeline (hand-authored extractions) |
+| `sale.pricing_breach` — pricing-policy flags | limited | none (rules + customer statistics; optional small-tier summary) | notification / flag (no proposal) | quotation lines, bands, pricelist prices, product cost (computation only), the customer's confirmed orders (aggregate) | "unusual for the customer" ignores volume deals (the two labelled false positives of the eval set); flags are stored only when a quotation is sent, confirmed or checked on request |
+| `product.description_draft` — sales description drafts | minimal | mid (draft) | write proposal (`description_sale`, user's language) | the product's catalogue facts read as the user | the spec check covers numbers and a list of common claims in English, French and German; judge scores in replay are hand-authored (D-058) |
+
 ## Known limitations (Phase 1.5)
 
 - **No live model has been evaluated yet.** The cassettes are hand-authored responses in each

@@ -64,7 +64,7 @@ def _basket(rng: random.Random, when: dt.date) -> list[str]:
 @lru_cache(maxsize=1)
 def history() -> tuple[tuple[dt.date, tuple[str, ...]], ...]:
     """(order date, products) for every order of the 24 months, in date order."""
-    rng = random.Random(SEED)
+    rng = random.Random(SEED)  # noqa: S311 - synthetic data, not security
     out: list[tuple[dt.date, tuple[str, ...]]] = []
     for m in range(MONTHS):
         first = _month(m)
@@ -82,7 +82,7 @@ def training_baskets(cutoff: dt.date = CUTOFF) -> list[tuple[str, ...]]:
 
 def test_cases(count: int = 120, cutoff: dt.date = CUTOFF) -> list[dict[str, object]]:
     """Orders after the cut-off with at least two products: one product hidden, the rest is the basket."""
-    rng = random.Random(SEED + 1)
+    rng = random.Random(SEED + 1)  # noqa: S311 - synthetic data, not security
     cases: list[dict[str, object]] = []
     for when, items in history():
         if when < cutoff or len(items) < 2:

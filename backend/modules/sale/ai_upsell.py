@@ -15,7 +15,7 @@ from __future__ import annotations
 
 import time
 from collections import defaultdict
-from collections.abc import Hashable, Iterable
+from collections.abc import Iterable
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any
 
@@ -27,6 +27,7 @@ if TYPE_CHECKING:
     from tessera.orm.environment import Environment
     from tessera.orm.model import Model
 
+Key = Any  # a product id in production, a product code in the back-test
 FEATURE = "sale.upsell"
 MIN_SUPPORT = 2  # an antecedent must appear in at least this many orders
 MIN_PAIR = 2  # a rule needs at least this many orders with both products
@@ -37,7 +38,7 @@ DEFAULT_LIMIT = 5
 
 @dataclass
 class Evidence:
-    antecedent: Hashable
+    antecedent: Key
     both: int
     antecedent_orders: int
 
@@ -48,7 +49,7 @@ class Evidence:
 
 @dataclass
 class Ranked:
-    key: Hashable
+    key: Key
     score: float
     evidence: list[Evidence] = field(default_factory=list)
     prior: str | None = None
@@ -60,14 +61,14 @@ class CoPurchase:
     """Item counts and pair counts over a set of baskets (each basket counts an item once)."""
 
     orders: int = 0
-    count: dict[Hashable, int] = field(default_factory=dict)
-    pair: dict[Hashable, dict[Hashable, int]] = field(default_factory=dict)
+    count: dict[Key, int] = field(default_factory=dict)
+    pair: dict[Key, dict[Key, int]] = field(default_factory=dict)
 
     @classmethod
-    def fit(cls, baskets: Iterable[Iterable[Hashable]]) -> CoPurchase:
+    def fit(cls, baskets: Iterable[Iterable[Key]]) -> CoPurchase:
         model = cls()
-        count: dict[Hashable, int] = defaultdict(int)
-        pair: dict[Hashable, dict[Hashable, int]] = defaultdict(lambda: defaultdict(int))
+        count: dict[Key, int] = defaultdict(int)
+        pair: dict[Key, dict[Key, int]] = defaultdict(lambda: defaultdict(int))
         for basket in baskets:
             items = list(dict.fromkeys(basket))
             if not items:
@@ -84,17 +85,17 @@ class CoPurchase:
 
     def rank(
         self,
-        basket: Iterable[Hashable],
+        basket: Iterable[Key],
         *,
-        exclude: Iterable[Hashable] = (),
-        prior: dict[Hashable, str] | None = None,
-        allowed: set[Hashable] | None = None,
+        exclude: Iterable[Key] = (),
+        prior: dict[Key, str] | None = None,
+        allowed: set[Key] | None = None,
         limit: int = DEFAULT_LIMIT,
     ) -> list[Ranked]:
         """Candidates ranked by noisy-or of rule confidences, catalogue prior and popularity."""
         basket = list(dict.fromkeys(basket))
         skip = set(basket) | set(exclude)
-        evidence: dict[Hashable, list[Evidence]] = defaultdict(list)
+        evidence: dict[Key, list[Evidence]] = defaultdict(list)
         for a in basket:
             n_a = self.count.get(a, 0)
             if n_a < MIN_SUPPORT:
@@ -209,10 +210,10 @@ def suggest_products(order: Model, limit: int = DEFAULT_LIMIT, *, audit: bool = 
     by_id = {p.ids[0]: p for p in products}
     rows: list[dict[str, Any]] = []
     for r in ranked:
-        p = by_id[int(r.key)]  # type: ignore[call-overload]
+        p = by_id[int(r.key)]
         reasons: list[str] = []
         for ev in r.evidence[:2]:
-            name = env["product.product"].browse([int(ev.antecedent)]).elevated().display_name  # type: ignore[call-overload]
+            name = env["product.product"].browse([int(ev.antecedent)]).elevated().display_name
             reasons.append(
                 _(
                     "Bought with {product} in {both} of {orders} orders",
@@ -227,12 +228,13 @@ def suggest_products(order: Model, limit: int = DEFAULT_LIMIT, *, audit: bool = 
             reasons.append(
                 _("Popular: in {count} of {orders} orders", count=model.count.get(r.key, 0), orders=model.orders)
             )
+        price = AC.safe_price(rec, p, 1.0)  # None without an exchange rate today: it can still be added
         rows.append(
             {
                 "product_id": p.ids[0],
                 "display_name": p.display_name,
                 "score": round(r.score, 4),
-                "price_unit": rec._price_for(p, 1.0),
+                "price_unit": price,
                 "currency": rec.currency_id.name,
                 "source": "history" if r.evidence else ("catalogue" if r.prior else "popular"),
                 "reasons": reasons,
@@ -285,7 +287,7 @@ def propose_line(order: Model, product_id: int, quantity: float = 1.0, run_id: i
 # ----------------------------------------------------------------------------- optional explanation
 
 
-def explain_context(env: Environment, record: Model, inputs: dict[str, Any]) -> dict[str, Any]:
+def explain_context(env: Environment, record: Model | None, inputs: dict[str, Any]) -> dict[str, Any]:
     """Sources for the optional one-line explanation of each suggestion (the ranking never comes from it)."""
     from tessera.ai import Source
 

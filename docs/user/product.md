@@ -52,3 +52,20 @@ returns the unit price and `_get_product_rule(...)` the rule used; `env["product
 partner, company)` picks the pricelist. Templates must not be put on sales lines: choose line products
 with the stored flag `is_sellable` (`[("is_sellable", "=", True)]`, i.e. *Can be sold* and not a
 template). `name_search` and the default product searches are unchanged and still list templates.
+
+## AI: sales description drafts
+
+The **Sales description draft** panel on the product form (`product.description_draft`, hidden when the
+feature is switched off) writes two to four sentences from what the catalogue says about the product: its
+name, reference, type, category, unit, attributes and their values, variants and current sales description.
+It writes in your language (a French user gets French; accepting writes the French translation of the
+description and leaves the other languages alone). Before anything is proposed, Tessera checks the draft
+against those facts: a sentence that states a number (size, weight, duration, rating such as IP67) or a
+specification claim (waterproof, warranty, certified, materials, battery, recycled…) the catalogue does not
+contain is removed, and the panel shows what was removed and why. Product managers get the result as a
+proposal on the product (on its template for a variant); other users see the text only. Nothing is written
+until you accept.
+
+Limits: the check knows numbers and a list of common specification claims in English, French and German; a
+new kind of claim the list does not know (say, a brand name of a material) is not caught, so read the draft
+before accepting it.

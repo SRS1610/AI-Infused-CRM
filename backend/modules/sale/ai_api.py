@@ -68,8 +68,14 @@ def discount_acceptance(ctx: RequestContext = Depends(authenticated)) -> dict[st
 def pricing(order_id: int, ctx: RequestContext = Depends(authenticated)) -> dict[str, Any]:
     """Live pricing findings of the quotation and its stored flags (with their decisions)."""
     order = _order(ctx, order_id, ai_pricing.FEATURE)
-    flags = ctx.env["sale.pricing_flag"].search([("quotation_id", "=", order_id), ("state", "in", ["open", "approved"])])
-    return {"findings": ai_pricing.check(order), "flags": [ai_pricing.flag_dict(f) for f in flags], "ai_generated": True}
+    flags = ctx.env["sale.pricing_flag"].search(
+        [("quotation_id", "=", order_id), ("state", "in", ["open", "approved"])]
+    )
+    return {
+        "findings": ai_pricing.check(order),
+        "flags": [ai_pricing.flag_dict(f) for f in flags],
+        "ai_generated": True,
+    }
 
 
 @router.post("/quotations/{order_id}/pricing/check")

@@ -57,7 +57,7 @@ def fit_win_model(rows: list[tuple[float, float, int]], iterations: int = 400) -
     mean_q = sum(x[1] for x in xs) / len(xs)
     a = b = c = 0.0
     lr, l2 = 0.5, 0.01
-    for _ in range(iterations):
+    for _step in range(iterations):
         ga = gb = gc = 0.0
         for (x1, x2), (_d, _q, y) in zip(xs, rows, strict=True):
             z = a + b * x1 + c * (x2 - mean_q)
@@ -110,7 +110,9 @@ def choose_discount(
 # ----------------------------------------------------------------------------- production path
 
 
-def category_history(env: Environment, company_id: int, category_id: int | None, exclude: int) -> list[tuple]:
+def category_history(
+    env: Environment, company_id: int, category_id: int | None, exclude: int
+) -> list[tuple[float, float, int]]:
     """(discount %, quantity, won) of the decided lines of the category (all products when none)."""
     extra = [("product_id.category_id", "=", category_id)] if category_id else []
     out: list[tuple[float, float, int]] = []
@@ -169,7 +171,7 @@ def suggest(order: Model, *, propose: bool = True) -> dict[str, Any]:
         if cat not in models:
             models[cat] = fit_win_model(category_history(env, rec.company_id.ids[0], cat, rec.ids[0]))
         model = models[cat]
-        price = rec._price_for(product, qty, line.uom_id or None)
+        price = AC.safe_price(rec, product, qty, line.uom_id or None) or float(line.price_unit or 0.0)
         value, method = choose_discount(low, high, qty, price, _cost_in_order(rec, line), model)
         if not within_band(value, low, high):  # cannot happen: the clamp above is the guarantee
             raise ValidationError(_("A discount suggestion left its band"))
@@ -214,15 +216,13 @@ def suggest(order: Model, *, propose: bool = True) -> dict[str, Any]:
         if row["status"] != "suggested":
             continue
         line = env["sale.quotation_line"].browse([row["line_id"]])
-        try:
-            line.check_access("write")
-        except Exception:  # noqa: BLE001 - the user may read but not change the line: no proposal
+        if not _can_write(line):  # the user may read but not change the line: no proposal
             continue
         band = row["band"]
         if not within_band(row["suggested_discount"], band["min"], band["max"]):
             raise ValidationError(_("A discount suggestion left its band"))
         title = _(
-            "Discount {discount} % on {product} (band {low}–{high} %)",
+            "Discount {discount} % on {product} (band {low}–{high} %)",  # noqa: RUF001
             discount=f"{row['suggested_discount']:g}",
             product=row["product"],
             low=f"{band['min']:g}",
@@ -238,6 +238,16 @@ def suggest(order: Model, *, propose: bool = True) -> dict[str, Any]:
     return out
 
 
+def _can_write(line: Model) -> bool:
+    from tessera.exceptions import AccessError
+
+    try:
+        line.check_access("write")
+    except AccessError:
+        return False
+    return True
+
+
 def acceptance(env: Environment, company_id: int | None = None) -> dict[str, Any]:
     """Outcomes of the discount proposals of a company: the acceptance rate counts accepted and edited
     proposals over decided ones (pending excluded)."""
@@ -247,7 +257,7 @@ def acceptance(env: Environment, company_id: int | None = None) -> dict[str, Any
         raise AccessError(_("Only sales managers see the acceptance of discount suggestions"))
     company_id = company_id or (env.company.ids[0] if env.company else None)
     proposals = env["ai_core.proposal"].elevated()
-    counts = {s: 0 for s in ("pending", "accepted", "edited", "rejected", "expired", "failed")}
+    counts = dict.fromkeys(("pending", "accepted", "edited", "rejected", "expired", "failed"), 0)
     for row in proposals.read_group([("feature", "=", FEATURE), ("company_id", "=", company_id)], [], ["state"]):
         counts[str(row["state"])] = int(row.get("__count") or 0)
     decided = counts["accepted"] + counts["edited"] + counts["rejected"] + counts["expired"]

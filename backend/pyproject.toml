@@ -126,6 +126,8 @@ ignore = [
 "modules/crm/services.py" = ["S608"]
 # generated evaluation data: long literal adversarial texts
 "tessera/testing/modules/ai_test/ai/build_corpus.py" = ["E501"]
+"modules/sale/ai/*.py" = ["E501"]
+"modules/product/ai/build_evals.py" = ["E501"]
 
 [tool.ruff.format]
 quote-style = "double"

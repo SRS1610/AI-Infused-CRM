@@ -42,7 +42,7 @@ EMBED_TOP = 8
 MAX_ITEMS = 60
 MAX_TEXT = 50000
 CODE_TOKEN = re.compile(r"[A-Za-z0-9][A-Za-z0-9\-_./]{2,}")
-NUMBER = re.compile(r"(?<![\w.])(\d{1,3}(?:[ ,.'’]\d{3})+|\d+)(?:[.,](\d+))?(?![\w])")
+NUMBER = re.compile(r"(?<![\w.])(\d{1,3}(?:[ ,.'\u2019]\d{3})+|\d+)(?:[.,](\d+))?(?![\w])")
 NUMBER_WORDS = {
     "one": 1, "two": 2, "three": 3, "four": 4, "five": 5, "six": 6, "seven": 7, "eight": 8, "nine": 9, "ten": 10,
     "eleven": 11, "twelve": 12, "fifteen": 15, "twenty": 20, "thirty": 30, "forty": 40, "fifty": 50,
@@ -110,9 +110,9 @@ def cosine(u: list[float], v: list[float]) -> float:
 def numbers_in(text: str) -> set[float]:
     """Every quantity the text states (digits with thousands separators or decimals, number words)."""
     found: set[float] = set()
-    text = re.sub(r"(?<=\d)[xX×]|[xX×](?=\d)", " ", text or "")  # "4x", "x4", "4×"
+    text = re.sub(r"(?<=\d)[xX\u00d7]|[xX\u00d7](?=\d)", " ", text or "")  # "4x", "x4", "4\u00d7"
     for m in NUMBER.finditer(text):
-        whole = re.sub(r"[ ,.'’]", "", m.group(1))
+        whole = re.sub(r"[ ,.'\u2019]", "", m.group(1))
         try:
             found.add(float(f"{whole}.{m.group(2)}" if m.group(2) else whole))
         except ValueError:  # pragma: no cover - the pattern only matches digits
@@ -289,7 +289,8 @@ def prepare(env: Environment, record: Model | None, inputs: dict[str, Any]) -> d
     def on_output(ctx: ToolContext, _text: str, data: Any) -> None:
         if not isinstance(data, dict):
             return
-        items = data.get("items") if isinstance(data.get("items"), list) else []
+        raw = data.get("items")
+        items: list[dict[str, Any]] = raw if isinstance(raw, list) else []
         mapped = map_items(env, order, items, text)
         data.update(mapped, extracted=len(items))
         if not mapped["lines"] or rec.state not in ("draft", "sent") or rec.locked:

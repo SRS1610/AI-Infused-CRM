@@ -83,9 +83,18 @@ def findings(order: Model) -> list[dict[str, Any]]:
         band = bands._for_line(rec.company_id, product, rec.partner_id, qty)
         discount = float(line.discount or 0.0)
         net = line._price_reduced()
-        list_price = rec._price_for(product, qty, line.uom_id or None)
+        list_price = AC.safe_price(rec, product, qty, line.uom_id or None) or 0.0
 
-        def add(code: str, severity: str, message: str, value: float, line: Model = line, band: Model = band) -> None:
+        def add(
+            code: str,
+            severity: str,
+            message: str,
+            value: float,
+            line: Model = line,
+            band: Model = band,
+            net: float = net,
+            qty: float = qty,
+        ) -> None:
             out.append(
                 {
                     "line_id": line.ids[0],
@@ -254,7 +263,7 @@ def check_on_send_or_confirm(records: Model, vals: dict[str, Any], old_values: A
         try:
             with env.cr.savepoint():
                 sync_flags(order)
-        except Exception as exc:  # noqa: BLE001 - the sale goes on without the check
+        except Exception as exc:
             log.warning("pricing check failed", order=order.ids[0], error=str(exc))
 
 

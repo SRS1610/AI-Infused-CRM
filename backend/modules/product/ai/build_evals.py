@@ -178,7 +178,7 @@ def build() -> None:
     tape: list[dict[str, Any]] = []
     for spec in SPECS:
         cid = spec["id"]
-        clean, removed = check_specs(spec["draft"], _facts(spec))
+        _clean, removed = check_specs(spec["draft"], _facts(spec))
         found = sorted(u for r in removed for u in r["unsupported"])
         assert found == sorted(spec.get("unsupported", [])), (cid, found)
         setup: list[dict[str, Any]] = [{"ref": "cat", "model": "product.category", "values": {"name": spec["cat"]}}]

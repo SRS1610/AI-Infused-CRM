@@ -68,7 +68,8 @@ def facts_text(product: Model) -> str:
     lines = [f"Name: {tmpl.name}"]
     if tmpl.default_code:
         lines.append(f"Internal reference: {tmpl.default_code}")
-    kinds = dict(tmpl._fields["type"].get_selection(tmpl))  # type: ignore[attr-defined]
+    type_field: Any = tmpl._fields["type"]
+    kinds = dict(type_field.get_selection(tmpl))
     lines.append(f"Type: {kinds.get(tmpl.type, tmpl.type)}")
     if tmpl.category_id:
         lines.append(f"Category: {tmpl.category_id.complete_name}")
@@ -190,9 +191,7 @@ def score(results: list[dict[str, Any]]) -> dict[str, float]:
     invented = sum(len(r["data"].get("final_unsupported") or []) for r in ok)
     probes = [r for r in ok if "unsupported" in (r["_case"].get("expected") or {})]
     exact = sum(
-        1
-        for r in probes
-        if sorted(r["data"].get("unsupported") or []) == sorted(r["_case"]["expected"]["unsupported"])
+        1 for r in probes if sorted(r["data"].get("unsupported") or []) == sorted(r["_case"]["expected"]["unsupported"])
     )
     clean = [r for r in ok if r not in probes]
     out = {

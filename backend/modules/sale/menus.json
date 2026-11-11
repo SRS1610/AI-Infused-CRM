@@ -13,9 +13,11 @@
   {"id": "menu_promotions", "name": "Promotions", "parent": "sale.menu_products_root", "sequence": 40, "action": "sale.action_promotions"},
   {"id": "menu_reporting", "name": "Reporting", "parent": "sale.menu_root", "sequence": 40},
   {"id": "menu_sales_analysis", "name": "Sales analysis", "parent": "sale.menu_reporting", "sequence": 10, "action": "sale.action_sales_analysis"},
+  {"id": "menu_pricing_flags", "name": "Pricing flags", "parent": "sale.menu_reporting", "sequence": 20, "action": "sale.action_pricing_flags"},
   {"id": "menu_config", "name": "Configuration", "parent": "sale.menu_root", "sequence": 90, "groups": ["sale.group_sale_manager"]},
   {"id": "menu_templates", "name": "Quotation templates", "parent": "sale.menu_config", "sequence": 5, "action": "sale.action_templates"},
   {"id": "menu_categories", "name": "Product categories", "parent": "sale.menu_config", "sequence": 10, "action": "product.action_categories"},
   {"id": "menu_attributes", "name": "Product attributes", "parent": "sale.menu_config", "sequence": 15, "action": "product.action_attributes"},
-  {"id": "menu_uoms", "name": "Units of measure", "parent": "sale.menu_config", "sequence": 20, "action": "product.action_uoms"}
+  {"id": "menu_uoms", "name": "Units of measure", "parent": "sale.menu_config", "sequence": 20, "action": "product.action_uoms"},
+  {"id": "menu_discount_bands", "name": "Discount bands", "parent": "sale.menu_config", "sequence": 8, "action": "sale.action_discount_bands"}
 ]

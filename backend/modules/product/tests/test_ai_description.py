@@ -91,9 +91,13 @@ def test_draft_is_a_proposal_on_the_template_in_the_users_language(env: Any) -> 
     # in another language the accepted text goes to that language only
     _script(env, "Un mug en céramique, blanc ou bleu marine.")
     marie_like = env.with_context(lang="fr_FR")
-    res_fr = run_feature(marie_like, A.FEATURE, {}, record=mug.with_env(marie_like), **HANDLERS[A.FEATURE](marie_like, mug, {}))
+    res_fr = run_feature(
+        marie_like, A.FEATURE, {}, record=mug.with_env(marie_like), **HANDLERS[A.FEATURE](marie_like, mug, {})
+    )
     P.accept(marie_like, res_fr.proposals)
-    assert marie_like["product.product"].browse(mug.ids).description_sale == "Un mug en céramique, blanc ou bleu marine."
+    assert (
+        marie_like["product.product"].browse(mug.ids).description_sale == "Un mug en céramique, blanc ou bleu marine."
+    )
     assert env["product.product"].browse(mug.ids).description_sale == "A ceramic mug for the office, in white or navy."
 
 
@@ -101,7 +105,9 @@ def test_users_without_write_access_get_text_but_no_proposal(env: Any, env_for: 
     mug = _mug(env)
     demo = env_for("demo")
     _script(env, "A ceramic mug in white or navy.")
-    result = run_feature(demo, A.FEATURE, {}, record=mug.with_env(demo), **HANDLERS[A.FEATURE](demo, mug.with_env(demo), {}))
+    result = run_feature(
+        demo, A.FEATURE, {}, record=mug.with_env(demo), **HANDLERS[A.FEATURE](demo, mug.with_env(demo), {})
+    )
     assert result.data["description"] == "A ceramic mug in white or navy." and not result.proposals
 
 

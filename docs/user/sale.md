@@ -100,6 +100,53 @@ Sales administrators create promotions under Sales → Products → Promotions:
 Promotions apply when you press **Apply promotions**; press it again after changing the lines. Rewards
 already invoiced cannot be recomputed.
 
+## AI assistance on quotations
+
+Four panels beside the quotation form help with pricing and lines. Each one disappears when an
+administrator switches its feature off for the company (*Settings → AI*); none of them changes the quotation
+by itself: every change is a proposal you accept, edit or reject.
+
+**Suggested products** (`sale.upsell`). Products often bought with the ones on the quotation, learnt from the
+company's confirmed orders of the last two years (co-purchase rules: *bought with Robot arm in 12 of 20
+orders*), plus the optional products and accessories of the catalogue, and popular products when the history
+says nothing. Only products you can read and sell in the quotation's company appear. **Add** prepares a
+proposal for a new line; accept it and the line takes the pricelist's price. Statistics count orders of the
+whole company, but only as numbers: no other order's content is shown.
+
+**Discount suggestions** (`sale.discount_suggest`). Sales administrators set **discount bands** under
+*Sales → Configuration → Discount bands*: for a product category (and its sub-categories), optionally a
+customer segment (contact tags) and a minimum quantity, the minimum and maximum discount, the minimum margin
+and the group that approves more (default: sales administrators). A line uses its most specific band
+(deepest category, then segment, then the larger minimum quantity, then the band order). **Suggest
+discounts** proposes one discount per line: the best expected margin from the won (sales orders) and lost
+(rejected or expired) quotations of the category, or, with too little history, a position in the band that
+grows with the quantity. The suggestion is always inside the band — it is clamped to it and checked again
+before the proposal is made; lines without a band get no suggestion. Accepting, editing or rejecting each
+suggestion is recorded, so managers see the acceptance rate (`GET /api/v1/sale/ai/discounts/acceptance`;
+the target on the demo is at least 50 %).
+
+**Lines from a request** (`sale.quote_from_text`). Paste a customer's e-mail, RFP or list and press **Find the
+products**. The AI reads which items are asked for (description, quantity, unit, product code, conditions);
+the catalogue matching is done by Tessera, not the AI: a quoted product code first, then name similarity,
+then semantic similarity, among the products you can sell. An item that matches nothing, or several products
+equally (*monitors* when you sell 24 and 27 inch), is listed as **not matched** and never added; a quantity
+that does not appear in the text becomes 1 with a note. The matched items are one proposal adding draft
+lines; prices always come from the pricelist.
+
+**Pricing check** (`sale.pricing_breach`). Lines are checked against the pricing policy: net price below cost
+plus the band's minimum margin (no band: below cost), discount above the band, a typed price below the
+pricelist by more than the band allows, and a discount far above what the customer usually gets on that
+product or category (at least three earlier lines: more than three standard deviations and ten points above
+their mean — a warning). The panel shows the findings live; when the quotation is sent or confirmed, or when
+you press **Record and notify managers**, they are recorded as **pricing flags** (*Sales → Reporting →
+Pricing flags*) and sales administrators are notified of new breaches. Members of the band's approver group
+(and sales administrators) approve a flag; a changed line is checked again. Messages never show the cost.
+
+Limits: suggestions learn only from orders in Tessera (a new company starts with the catalogue's options and
+popular products); the "unusual for the customer" rule does not know about volume deals and may flag a
+large order that was negotiated on purpose; matching a pasted request depends on product names and codes
+being written the way customers write them.
+
 ## Customers and the portal
 
 The customer's link (or their portal account) shows the quotation with the taxes of each line, the

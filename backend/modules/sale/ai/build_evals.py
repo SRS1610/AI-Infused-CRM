@@ -44,9 +44,7 @@ def _write(name: str, cases: list[dict[str, Any]], tape: list[dict[str, Any]] | 
     if tape is not None:
         (HERE / "cassettes").mkdir(exist_ok=True)
         tape = sorted(tape, key=lambda t: (t["case"], t["index"]))
-        (HERE / "cassettes" / f"{name}.jsonl").write_text(
-            "\n".join(json.dumps(t, sort_keys=True) for t in tape) + "\n"
-        )
+        (HERE / "cassettes" / f"{name}.jsonl").write_text("\n".join(json.dumps(t, sort_keys=True) for t in tape) + "\n")
 
 
 def _partner(ref: str = "cust", name: str = "Eval Customer", **vals: Any) -> dict[str, Any]:
@@ -233,10 +231,8 @@ def discounts() -> list[dict[str, Any]]:
             _line("l2", "q", "ps", qty),
             _line("l3", "q", "px", qty),
         ]  # fmt: skip
-        if tagged:
-            band_p = "$id:b_seg"  # category + segment outranks the quantity tier
-        else:
-            band_p = "$id:b_qty" if qty >= 10 else "$id:b_cat"
+        # category + segment outranks the quantity tier
+        band_p = "$id:b_seg" if tagged else ("$id:b_qty" if qty >= 10 else "$id:b_cat")
         cases.append(
             {
                 "id": cid,
@@ -317,63 +313,63 @@ def _pricing_case(
 
 
 def pricing() -> list[dict[str, Any]]:
-    P = _pricing_case
+    case = _pricing_case
     cases = [
         # clean quotations (true negatives)
-        P("p01", [{"qty": 2}], [], tags=["clean"]),
-        P("p02", [{"qty": 1, "discount": 10}], [], tags=["clean", "edge"]),  # exactly at the band maximum
-        P("p03", [{"product": "p2", "qty": 3, "discount": 5}, {"qty": 1}], [], tags=["clean"]),
-        P("p04", [{"product": "p3", "qty": 5, "discount": 8}], [], tags=["clean", "no-cost"]),
-        P("p05", [{"qty": 1, "price_unit": 120}], [], tags=["clean", "typed-above"]),
-        P("p06", [{"qty": 1, "price_unit": 92}], [], tags=["clean", "typed-within"]),
-        P("p07", [{"qty": 4, "discount": 30}], [], band=None, tags=["clean", "no-band"]),  # still above cost
-        P("p08", [{"qty": 2, "discount": 6}], [], history=[5, 6, 4, 5], tags=["clean", "usual"]),
-        P("p09", [{"qty": 2, "discount": 9}], [], history=[8, 10, 9], tags=["clean", "usual"]),
-        P("p10", [{"qty": 1, "discount": 15}], [], band=(0, 20, 10), history=[14, 16, 15, 15], tags=["clean"]),
-        P("p11", [{"qty": 1, "discount": 0}], [], history=[0, 0, 0, 0, 0], tags=["clean"]),
-        P("p12", [{"product": "p2", "qty": 1, "price_unit": 230}], [], tags=["clean", "typed-within"]),
+        case("p01", [{"qty": 2}], [], tags=["clean"]),
+        case("p02", [{"qty": 1, "discount": 10}], [], tags=["clean", "edge"]),  # exactly at the band maximum
+        case("p03", [{"product": "p2", "qty": 3, "discount": 5}, {"qty": 1}], [], tags=["clean"]),
+        case("p04", [{"product": "p3", "qty": 5, "discount": 8}], [], tags=["clean", "no-cost"]),
+        case("p05", [{"qty": 1, "price_unit": 120}], [], tags=["clean", "typed-above"]),
+        case("p06", [{"qty": 1, "price_unit": 92}], [], tags=["clean", "typed-within"]),
+        case("p07", [{"qty": 4, "discount": 30}], [], band=None, tags=["clean", "no-band"]),  # still above cost
+        case("p08", [{"qty": 2, "discount": 6}], [], history=[5, 6, 4, 5], tags=["clean", "usual"]),
+        case("p09", [{"qty": 2, "discount": 9}], [], history=[8, 10, 9], tags=["clean", "usual"]),
+        case("p10", [{"qty": 1, "discount": 15}], [], band=(0, 20, 10), history=[14, 16, 15, 15], tags=["clean"]),
+        case("p11", [{"qty": 1, "discount": 0}], [], history=[0, 0, 0, 0, 0], tags=["clean"]),
+        case("p12", [{"product": "p2", "qty": 1, "price_unit": 230}], [], tags=["clean", "typed-within"]),
         # below cost plus the minimum margin
-        P("p13", [{"qty": 1, "price_unit": 70}], [("l1", "below_margin"), ("l1", "below_pricelist")]),
-        P("p14", [{"qty": 1, "discount": 30}], [("l1", "below_margin"), ("l1", "discount_above_band")]),
-        P("p15", [{"qty": 1, "discount": 26}], [("l1", "below_margin")], band=(0, 30, 25)),
-        P("p16", [{"qty": 1, "discount": 45}], [("l1", "below_margin")], band=None),
-        P("p17", [{"product": "p2", "qty": 1, "price_unit": 110}], [("l1", "below_margin"), ("l1", "below_pricelist")],
+        case("p13", [{"qty": 1, "price_unit": 70}], [("l1", "below_margin"), ("l1", "below_pricelist")]),
+        case("p14", [{"qty": 1, "discount": 30}], [("l1", "below_margin"), ("l1", "discount_above_band")]),
+        case("p15", [{"qty": 1, "discount": 26}], [("l1", "below_margin")], band=(0, 30, 25)),
+        case("p16", [{"qty": 1, "discount": 45}], [("l1", "below_margin")], band=None),
+        case("p17", [{"product": "p2", "qty": 1, "price_unit": 110}], [("l1", "below_margin"), ("l1", "below_pricelist")],
           band=(0, 50, 20)),
-        P("p18", [{"qty": 2, "discount": 8}, {"product": "p2", "qty": 1, "discount": 59}],
+        case("p18", [{"qty": 2, "discount": 8}, {"product": "p2", "qty": 1, "discount": 59}],
           [("l2", "below_margin"), ("l2", "discount_above_band")]),
         # discounts above the band
-        P("p19", [{"qty": 1, "discount": 12}], [("l1", "discount_above_band")], band=(0, 10, 5)),
-        P("p20", [{"product": "p2", "qty": 5, "discount": 15}], [("l1", "discount_above_band")]),
-        P("p21", [{"qty": 1, "discount": 6}], [("l1", "discount_above_band")], band=(0, 5, 0)),
-        P("p22", [{"product": "p3", "qty": 2, "discount": 20}], [("l1", "discount_above_band")]),
-        P("p23", [{"qty": 1, "discount": 4}, {"product": "p3", "qty": 1, "discount": 14}],
+        case("p19", [{"qty": 1, "discount": 12}], [("l1", "discount_above_band")], band=(0, 10, 5)),
+        case("p20", [{"product": "p2", "qty": 5, "discount": 15}], [("l1", "discount_above_band")]),
+        case("p21", [{"qty": 1, "discount": 6}], [("l1", "discount_above_band")], band=(0, 5, 0)),
+        case("p22", [{"product": "p3", "qty": 2, "discount": 20}], [("l1", "discount_above_band")]),
+        case("p23", [{"qty": 1, "discount": 4}, {"product": "p3", "qty": 1, "discount": 14}],
           [("l2", "discount_above_band")]),
         # typed prices below the pricelist beyond the band
-        P("p24", [{"product": "p2", "qty": 1, "price_unit": 200}], [("l1", "below_pricelist")]),
-        P("p25", [{"product": "p3", "qty": 3, "price_unit": 60}], [("l1", "below_pricelist")]),
-        P("p26", [{"qty": 1, "price_unit": 95, "discount": 8}], [("l1", "below_pricelist")]),
-        P("p27", [{"product": "p2", "qty": 1, "price_unit": 215}], [("l1", "below_pricelist")], band=(0, 12, 20)),
+        case("p24", [{"product": "p2", "qty": 1, "price_unit": 200}], [("l1", "below_pricelist")]),
+        case("p25", [{"product": "p3", "qty": 3, "price_unit": 60}], [("l1", "below_pricelist")]),
+        case("p26", [{"qty": 1, "price_unit": 95, "discount": 8}], [("l1", "below_pricelist")]),
+        case("p27", [{"product": "p2", "qty": 1, "price_unit": 215}], [("l1", "below_pricelist")], band=(0, 12, 20)),
         # unusual for the customer
-        P("p28", [{"qty": 1, "discount": 12}], [("l1", "unusual_for_customer")], band=(0, 30, 0),
+        case("p28", [{"qty": 1, "discount": 12}], [("l1", "unusual_for_customer")], band=(0, 30, 0),
           history=[0, 0, 0, 0]),
-        P("p29", [{"qty": 1, "discount": 25}], [("l1", "unusual_for_customer")], band=(0, 30, 0),
+        case("p29", [{"qty": 1, "discount": 25}], [("l1", "unusual_for_customer")], band=(0, 30, 0),
           history=[5, 4, 6, 5, 5]),
-        P("p30", [{"product": "p2", "qty": 1, "discount": 28}], [("l1", "unusual_for_customer")],
+        case("p30", [{"product": "p2", "qty": 1, "discount": 28}], [("l1", "unusual_for_customer")],
           band=(0, 30, 0), history=[3, 2, 4]),
-        P("p31", [{"qty": 1, "discount": 35}], [("l1", "unusual_for_customer"), ("l1", "discount_above_band")],
+        case("p31", [{"qty": 1, "discount": 35}], [("l1", "unusual_for_customer"), ("l1", "discount_above_band")],
           band=(0, 30, 0), history=[10, 12, 9, 11]),
-        P("p32", [{"qty": 1, "discount": 18}], [], band=(0, 30, 0), history=[5, 25, 10, 20]),  # varied history
-        P("p33", [{"qty": 1, "discount": 20}], [], band=(0, 30, 0), history=[18, 22]),  # too little history
+        case("p32", [{"qty": 1, "discount": 18}], [], band=(0, 30, 0), history=[5, 25, 10, 20]),  # varied history
+        case("p33", [{"qty": 1, "discount": 20}], [], band=(0, 30, 0), history=[18, 22]),  # too little history
         # several rules at once, several lines
-        P("p34", [{"qty": 1, "discount": 15}, {"product": "p2", "qty": 2, "price_unit": 180}, {"product": "p3"}],
+        case("p34", [{"qty": 1, "discount": 15}, {"product": "p2", "qty": 2, "price_unit": 180}, {"product": "p3"}],
           [("l1", "discount_above_band"), ("l2", "below_pricelist")]),
-        P("p35", [{"qty": 10, "discount": 2}, {"product": "p2", "qty": 1, "discount": 3}], [], tags=["clean"]),
-        P("p36", [{"qty": 1, "discount": 50}], [("l1", "below_margin"), ("l1", "discount_above_band"),
+        case("p35", [{"qty": 10, "discount": 2}, {"product": "p2", "qty": 1, "discount": 3}], [], tags=["clean"]),
+        case("p36", [{"qty": 1, "discount": 50}], [("l1", "below_margin"), ("l1", "discount_above_band"),
                                                ("l1", "unusual_for_customer")], history=[2, 3, 2]),
         # volume deals: the customer's earlier orders were single units; an analyst accepts the larger
         # discount on a 50-unit order (labelled clean), the statistics still find it unusual
-        P("p37", [{"qty": 50, "discount": 18}], [], band=(0, 30, 0), history=[3, 4, 3, 2], tags=["hard"]),
-        P("p38", [{"product": "p1", "qty": 80, "discount": 20}], [], band=(0, 30, 10), history=[2, 3, 5],
+        case("p37", [{"qty": 50, "discount": 18}], [], band=(0, 30, 0), history=[3, 4, 3, 2], tags=["hard"]),
+        case("p38", [{"product": "p1", "qty": 80, "discount": 20}], [], band=(0, 30, 10), history=[2, 3, 5],
           tags=["hard"]),
     ]  # fmt: skip
     # planted instructions: the same quotations must get the same flags

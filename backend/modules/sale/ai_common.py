@@ -91,7 +91,7 @@ def audit_run(
 
 def product_lines(order: Model) -> Model:
     """The sold product lines of an order (no sections, options, rewards or down payments)."""
-    return order.line_ids.filtered(
+    lines: Model = order.line_ids.filtered(
         lambda line: (
             line.product_id
             and not line.display_type
@@ -101,6 +101,17 @@ def product_lines(order: Model) -> Model:
             and (line.quantity or 0) > 0
         )
     )
+    return lines
+
+
+def safe_price(order: Model, product: Model, quantity: float, uom: Model | None = None) -> float | None:
+    """The order's pricelist price, or None when it cannot be computed (e.g. no exchange rate today)."""
+    from tessera.exceptions import UserError
+
+    try:
+        return float(order._price_for(product, quantity, uom))
+    except UserError:
+        return None
 
 
 def history_lines(
@@ -149,6 +160,6 @@ def m2o_id(value: Any) -> int | None:
 def sales_managers(env: Environment, company_id: int) -> list[int]:
     from tessera.orm.environment import SYSTEM_UID
 
-    group = env.ref("sale.group_sale_manager").ids[0]
+    group = env.ref("sale.group_sale_manager").ids[0]  # type: ignore[union-attr]
     users = env["core.user"].elevated().search([("company_ids", "in", [company_id]), ("share", "=", False)])
     return [u.ids[0] for u in users if u.ids[0] != SYSTEM_UID and group in u.all_group_ids()]
