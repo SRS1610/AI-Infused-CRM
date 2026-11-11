@@ -84,6 +84,18 @@ cases. Evaluation runs only see their own corpus (the case records and the modul
 the target database's business data is hidden for the duration of the run, which is rolled back, so the
 scores do not depend on the database they run against.
 
+## Feature inventory
+
+### Subscriptions, rentals and commissions (sub-phase 2.6)
+
+| Feature | What it does | Risk class | Model tier | Data used | Writes / outbound | Evaluation (replay) | Limitations |
+|---|---|---|---|---|---|---|---|
+| `sale_subscription.churn_predict` | Churn score, risk level and top-5 factors per running subscription; *At risk* filter | limited | in-process logistic regression (per company, prior weights at cold start); optional mid-tier narration | `churn_features` of the subscription (tenure, MRR and changes, pauses, failed payments, invoices, customer e-mail count); never its state, close reason or customer identity | Score fields only (daily job / *Score now*); no proposals | AUC 0.86 on 120 held-out synthetic subscriptions; explanations 100 %; factor validity 1.0 | Trained on ended vs surviving subscriptions with lifetime counters (no point-in-time snapshots); the synthetic back-test and the prior share the same domain assumptions |
+| `sale_subscription.renewal_draft` | Renewal e-mail from plan, products, tenure, MRR history, renewal quotation and churn risk | limited | mid (draft) | The subscription's records as the requesting user; contact name (redaction `minimal`) | Message proposal; nothing posted or queued before *Send* | Judge 4.3/5, numeric consistency 1.0, guard accuracy 1.0, tone match 1.0, 0 messages / mails before acceptance (32 cases) | Cassettes are hand-authored (no live model evaluated); numbers in names are not facts |
+| `sale_rental.demand_forecast` | Units out per day / week for the next weeks with an 80 % range, beside what is booked | minimal | in-process statistics; optional mid-tier narrative | The company's own reservations of the product (26 weeks) | None | Weekly MAPE 9.5 % on 120 generated histories (daily 26 %), range coverage 85 % | No holidays or events calendar; new products forecast their short-history average |
+| `sale_rental.usage_anomaly` | Alerts: repeated late returns, unusually long bookings, utilisation spikes / drops vs forecast | limited | in-process rules; optional small-tier narration | The company's rentals of the last 180 days and daily utilisation | Alerts and notifications only (notification feature) | Precision 0.96, recall 0.90 on 150 labelled cases | Fixed thresholds per company; one alert per subject per 30 days |
+| `sale_commission.explain` | Plain-language explanation of a commission statement | limited | mid (summarize) | `statement_facts` of a statement the user can read (salespeople: their own) | None | Numeric consistency 1.0, guard accuracy 1.0, judged clarity 4.6/5 (32 cases); demo statements checked in the test suite | Cassettes are hand-authored; names and the adjustment note are never counted as numbers |
+
 ## Known limitations (Phase 1.5)
 
 - **No live model has been evaluated yet.** The cassettes are hand-authored responses in each

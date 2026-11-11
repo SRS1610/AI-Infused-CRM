@@ -10,3 +10,6 @@ import "./crm/AiInsights";
 import "./crm/AiAssist";
 import "./discuss/DiscussApp";
 import "./account_bank/BankReconcile";
+import "./sale_subscription/SubscriptionAi";
+import "./sale_rental/RentalAi";
+import "./sale_commission/CommissionAi";

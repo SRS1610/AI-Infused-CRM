@@ -74,7 +74,7 @@ line of 3,806.25 at 3 % earns 114.1875 → × 1.2 = 137.025 → **137.03**.
 
 `statement_facts(statement)` (in `modules.sale_commission.engine`) returns the statement's numbers — base per
 category, rates, target, achievement, band and multiplier, credit notes, totals — as structured data: the AI
-explanation of a later release may only cite these numbers.
+explanation (below) may only cite these numbers.
 
 ## Cross-check (acceptance criterion 2-k)
 
@@ -85,6 +85,18 @@ month before, a draft, another salesperson's invoice), then computes the stateme
 `backend/modules/sale_commission/tests/data/commission_crosscheck.csv`, produced by a separate script
 (`make_crosscheck.py`, plain decimal arithmetic from the agreed quantities, prices and discounts, without the
 module); the test suite checks the module's statements against it line by line and in total.
+
+## AI: statement explanation
+
+**Explain this statement (AI)** (`sale_commission.explain`, on the statement form; switched per company in *Settings >
+AI*) writes a plain-language explanation of the statement for its salesperson: what was counted, the rates by
+category, credit notes, how the target and the accelerator applied, adjustments and the total. It reads only
+`statement_facts`, as you: a salesperson can only have their own statements explained. **Every number in the
+explanation is one of the statement's numbers** (acceptance 2-k, second half): a sentence stating any other figure —
+a comparison with last month, a yearly projection, a figure hidden in a plan name — is removed and listed under the
+explanation. Names and the adjustment note are text: digits inside them never count as statement numbers. Nothing is
+written. The test suite checks this on the demo statements, and the replayed evaluation (32 statements) scores 100 %
+numeric consistency and a judged clarity of 4.6 / 5.
 
 ## Limits
 
