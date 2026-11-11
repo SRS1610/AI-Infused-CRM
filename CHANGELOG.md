@@ -122,6 +122,35 @@ All notable changes are recorded here, grouped by phase. Format follows [Keep a 
   *Send via Peppol*, a mock access point that delivers and receives, inbound documents as draft vendor
   bills, status poll every 20 minutes. Guide: [docs/admin/einvoicing.md](docs/admin/einvoicing.md).
 
+### Sub-phase 2.6 — AI features
+- **Accounting: reading bills and invoices from documents (`account.bill_ocr`, 2-i).** Upload a PDF or a
+  scan from the bills / invoices lists, an empty draft or *Read from documents*: digital PDFs are read from
+  their text layer without a model (EN/FR/DE/ES, `pypdf`, new dependency; Pillow now declared), scans and
+  image-only PDFs go to the vision route through the gateway; the partner is matched by VAT ID, IBAN or name
+  among the partners the user can read, every line is coded to an account and a tax that exists in the
+  company (product, the partner's posted history, chart keywords, default; reverse charge; foreign VAT left
+  without tax), totals are re-checked (*Needs review* with each difference) and the whole draft — every
+  auto-coded line, and a new vendor if needed — is **one proposal**; nothing is written before acceptance.
+  Evaluation: 125 synthetic bills (four layouts, four languages; 84 digital, 35 scans, 6 image-only PDFs,
+  customer invoices, credit notes, prompt injections, company isolation) generated from seeds at evaluation
+  time (`modules/account/ai/build_evals.py`).
+- **Accounting: anomaly flags on bills (`account.anomaly`).** Possible duplicates (same number, also written
+  differently or misread; same amount within days; nearly identical document), unusual amounts for the
+  vendor (robust z-score), first bill of a new vendor above the usual large amount, bank account changed
+  recently or IBAN not on file — stored as `account.move_anomaly` flags with explanations, a notification and
+  a panel on the bill; never blocks posting; dismiss / confirm; optional model explanation with a numbers
+  guard. Background job after a bill is created or posted.
+- **Accounting: cash-flow forecast (`account.cashflow_forecast`).** *Accounting → Reporting → Cash-flow
+  forecast*: weekly cash position for 4–26 weeks from the bank balance, open items shifted by each partner's
+  payment delay, documents not issued yet, recurring bank movements and the trailing rest, with a range;
+  the model only narrates, and a narrative with a number that is not among the engine's figures is
+  replaced by a summary of the figures. Back-test on 120 simulated histories.
+- **AI platform.** The gateway envelope accepts image blocks (PNG, JPEG, WebP, GIF, PDF) for the `vision`
+  task class, translated by the Anthropic, OpenAI and Google adapters and refused for features that redact;
+  `run_feature(..., attachments=[...])` sends them.
+- Guide: [docs/admin/accounting.md](docs/admin/accounting.md#ai-features); governance inventory in
+  [docs/ai/governance.md](docs/ai/governance.md#accounting-account).
+
 ### Sub-phase 2.7 — SAML single sign-on
 - **SAML 2.0 single sign-on (`auth_saml`, D-013, D-069).** Administrators add SAML identity providers under
   Settings → Users & Companies; the login page offers them next to OIDC. Service-provider initiated login

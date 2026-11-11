@@ -266,3 +266,14 @@ def test_api_flags_check_and_decide(admin: Any) -> None:
     finally:
         admin.client.put(flag, json={"company_id": company, "enabled": True}, headers=admin.headers)
         admin.delete(f"/api/v1/models/account.move/{move_id}")
+
+
+def test_demo_step_flags_a_bill_entered_twice(env: Any) -> None:
+    from modules.account import ai_demo, demo
+
+    eu = env.ref("core.demo_company_eu")
+    env.user.elevated().write({"company_ids": [("add", eu.ids[0])]})
+    demo.seed_company(env, eu)
+    assert ai_demo.seed_company(env, eu) >= 1
+    assert ai_demo.seed_company(env, eu) == 0  # idempotent
+    ai_demo.seed_ai_demo(env)

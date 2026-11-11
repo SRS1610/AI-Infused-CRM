@@ -153,7 +153,10 @@ def decide(
         raise MissingError(_("No such flag"))
     flag.check_access("read")
     note = data.note if data else None
-    flag.action_dismiss(note) if decision == "dismiss" else flag.action_confirm(note)
+    if decision == "dismiss":
+        flag.action_dismiss(note)
+    else:
+        flag.action_confirm(note)
     return {"id": flag_id, "state": flag.state}
 
 

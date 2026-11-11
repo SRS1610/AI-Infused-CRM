@@ -276,6 +276,18 @@ def test_api_read_reject_and_flag(admin: Session, app: Any, bills: list[dict[str
     assert body["ai_generated"] and len(body["proposals"]) == 1 and body["data"]["lines"]
     pid = body["proposals"][0]["id"]
     assert admin.post(f"/api/v1/ai/proposals/{pid}/reject", json={"reason": "test"}).status_code == 200
+    again = admin.post("/api/v1/account/ai/bills/read", files={"file": (name, content, media)}).json()
+    accepted = admin.post(f"/api/v1/account/ai/bills/proposals/{again['proposals'][0]['id']}/accept", json={})
+    assert accepted.status_code == 200 and accepted.json()["move_id"]
+    move_id = accepted.json()["move_id"]
+    att = admin.get(
+        "/api/v1/models/core.attachment",
+        params={"domain": f'[["model", "=", "account.move"], ["res_id", "=", {move_id}]]'},
+    )
+    assert att.status_code == 200 and att.json()["items"]
+    assert admin.delete(f"/api/v1/models/account.move/{move_id}").status_code in (200, 204)
+    bad = admin.post("/api/v1/account/ai/bills/read", files={"file": ("x.html", b"<html></html>", "text/html")})
+    assert bad.status_code in (400, 422)
     with environment_for() as e:
         company = e.ref("core.main_company").ids[0]
     flag = f"/api/v1/ai/admin/features/{B.FEATURE}/flag"
