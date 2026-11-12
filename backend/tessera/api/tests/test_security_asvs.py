@@ -557,6 +557,47 @@ def test_sec_phase2_every_company_model_is_isolated(env) -> None:  # type: ignor
     assert expected <= set(checked), checked
 
 
+# -- U-5: Phase 2 fields restricted by groups -------------------------------------------------------------------
+
+# (model, field, groups of a user who reads the model but is outside the field's groups)
+PHASE2_RESTRICTED_FIELDS = [
+    ("payment.provider", "secret_key", ["account.group_account_invoice"]),
+    ("payment.provider", "webhook_secret", ["account.group_account_invoice"]),
+    ("account.move", "access_token", ["account.group_account_readonly"]),
+    ("sale.quotation", "invoice_ids", ["sale.group_sale_user"]),
+]
+
+
+def _u5_record(env: Any, outsider: Any, model: str) -> Any:
+    """A record of ``model`` the outsider can read."""
+    if model == "account.move":
+        from modules.account.tests.common import invoice, partner
+
+        return invoice(env, partner(env, "U-5 customer"), [{"price_unit": 10.0}])
+    if model == "sale.quotation":  # salespeople read their own quotations
+        customer = env["contacts.partner"].create({"name": "U-5 prospect"})
+        return outsider[model].create({"partner_id": customer.ids[0]})
+    return env[model].elevated().search([], limit=1)
+
+
+@pytest.mark.parametrize(("model", "field", "groups"), PHASE2_RESTRICTED_FIELDS)
+def test_u5_phase2_restricted_fields_are_absent(env, model: str, field: str, groups: list[str]) -> None:  # type: ignore[no-untyped-def]
+    """U-5: outside the field's groups, the field is absent from the model's fields (forms, API ``/fields``,
+    export field list), refused by ``read`` and dropped from exports — the paths AI tools read through too."""
+    from tessera.dataio.exporter import export_rows
+
+    outsider = _p2_user(env, f"u5-{field}", groups)
+    assert env[model]._fields[field].groups, f"{model}.{field} is no longer restricted"
+    records = outsider[model].browse(_u5_record(env, outsider, model).ids)
+    assert records.ids and outsider[model].search([("id", "in", records.ids)]), "the outsider cannot read the record"
+    assert field not in outsider[model].fields_get()
+    assert field in env[model].fields_get()  # administrators still see it
+    with pytest.raises(AccessError):
+        outsider[model].browse(records.ids).read([field])
+    kept, _headers, _rows = export_rows(outsider[model].browse(records.ids), ["display_name", field])
+    assert kept == ["display_name"]
+
+
 # -- SEC-50: the ledger's own fields cannot be written through the generic API ----------------------------------
 
 
