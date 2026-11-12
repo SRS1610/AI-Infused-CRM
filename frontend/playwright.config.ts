@@ -1,6 +1,9 @@
 import { defineConfig, devices } from "@playwright/test";
 
 // Smoke suite against a running stack: `make up` (or `tessera serve` + `npm run dev`), then `npm run e2e`.
+// The suite signs in more than ten times a minute and waits for background jobs: start the API with
+// TESSERA_LOGIN_RATE_LIMIT_PER_MINUTE=200 (as CI does) and with a jobs backend that runs (a worker, or the
+// default `inline`, not `manual`).
 const chromium = process.env.PW_CHROMIUM_PATH;
 
 export default defineConfig({

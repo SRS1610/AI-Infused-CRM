@@ -2,7 +2,7 @@
 
 Template: [Build plan §2.9](architecture/BUILD_PLAN.md). State on 2026-11-12, branch
 `claude/tender-wozniak-pnrg36`. The walkthrough is [docs/demos/phase-2.md](demos/phase-2.md); the data model
-is [ERD_PHASE_2.md](architecture/ERD_PHASE_2.md); decisions D-069 – D-101.
+is [ERD_PHASE_2.md](architecture/ERD_PHASE_2.md); decisions D-069 – D-102.
 
 Modules: `product` 2.0, `sale` 2.0, `sale_subscription`, `sale_rental`, `sale_commission`, `account`,
 `account_bank`, `account_tax`, `account_analytic`, `account_budget`, `account_asset`, `account_reports`,
@@ -50,7 +50,7 @@ Modules: `product` 2.0, `sale` 2.0, `sale_subscription`, `sale_rental`, `sale_co
 | Backend tests (`uv run pytest --cov`, PostgreSQL 16 + pgvector) | 1,378 passed, coverage 91 % |
 | AI gateway tests (`gateway/`) | 121 passed, 5 skipped (live provider tests without keys), coverage 94 % |
 | Frontend unit tests (`npx vitest run --coverage`) | 221 passed, coverage 92 % |
-| Playwright, desktop and mobile, against `tessera seed demo --phase 2` | {{PLAYWRIGHT}} |
+| Playwright, desktop and mobile, against `tessera seed demo --phase 2` | 46 passed, 14 skipped (desktop-only scenarios on mobile); API started as in CI (login rate limit 200 per minute, background jobs running) |
 | U-3: Phase 1 database (commit `1a1fada`) → `tessera db migrate` → current suite | {{U3_EVIDENCE}} |
 | AI evaluation sets in replay | all 44 features (21 from Phase 1, 23 from Phase 2) meet every threshold: 2,842 cases, 1,766 of them for Phase 2 |
 | `tessera ai eval report --strict` | nothing missing ("every declared AI feature is complete") |

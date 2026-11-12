@@ -210,6 +210,30 @@ def test_missing_mode_only_creates_absent_records(env):  # type: ignore[no-untyp
     assert loader.stats == {"created": 1, "updated": 0, "skipped": 2, "deleted": 0}
 
 
+def test_missing_mode_fills_untouched_fields_of_other_modules_records(env):  # type: ignore[no-untyped-def]
+    """Another module's demo data extending an existing record (``sale`` setting the invoicing policy of
+    ``product``'s demo products) fills fields still empty or at their default, never changed ones (U-3)."""
+    from tessera.modules.data import DataLoader
+
+    loader = DataLoader(env, "ktest_extension", mode="missing")
+    classic = env.ref("kernel_test_a.tag_classic")
+    classic.write({"color": 0, "book_ids": [("set", [])]})  # still at the default: filled
+    book = env["ktest.book"].create({"name": "Extension book"})
+    loader.load_entry(
+        {
+            "id": "kernel_test_a.tag_classic",
+            "model": "ktest.tag",
+            "values": {"color": 7, "book_ids": book.ids, "name": "Renamed"},
+        }
+    )
+    assert classic.color == 7 and classic.book_ids.ids == book.ids
+    assert classic.name != "Renamed"  # a value someone may have chosen is kept
+    classic.write({"color": 42})
+    loader.load_entry({"id": "kernel_test_a.tag_classic", "model": "ktest.tag", "values": {"color": 7}})
+    assert classic.color == 42
+    assert loader.stats == {"created": 0, "updated": 1, "skipped": 1, "deleted": 0}
+
+
 def test_uninstall_keeping_data_then_reinstall_leaves_no_drift(registry, database_url: str, temp_module_path: Path):  # type: ignore[no-untyped-def]
     """Renamed tables take their indexes and many2many join tables with them, so the module installs again."""
     name = "ktest_reinstall"

@@ -256,8 +256,9 @@ Summary of what works, what is stubbed and the known gaps: [docs/phase-2-summary
   Phase 2 model is company-scoped or explicitly shared.
 - **Upgrade path (U-3).** `tessera db migrate` installs the new dependencies of upgraded modules, loads the new
   demo records on databases that have demo data (data loader mode `missing`: create absent records only), fills
-  static defaults on added columns, and classifies every Phase 1 unit of measure; a Phase 1 database upgraded
-  this way passes the full current suite.
+  static defaults on added columns, fills the untouched fields of other modules' records that new demo data
+  extends (D-102), and classifies every Phase 1 unit of measure; a Phase 1 database upgraded this way passes
+  the full current suite.
 - **Acceptance.** U-5 test for the Phase 2 fields restricted by groups; ledger refuses partners of another
   company on entries; demo customers of subscriptions taken from the right company; performance tables for the
   Phase 2 list views and reports; object store volume limit raised for the demo stack.

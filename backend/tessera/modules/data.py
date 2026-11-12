@@ -76,8 +76,11 @@ class DataLoader:
             if not external_id:
                 self.stats["skipped"] += 1
                 return None
-            found = self.env.ref(qualify(external_id, self.module), raise_if_not_found=False)
+            xmlid = qualify(external_id, self.module)
+            found = self.env.ref(xmlid, raise_if_not_found=False)
             if found is not None and found.exists():
+                if xmlid.partition(".")[0] != self.module and entry.get("values"):
+                    return self._fill_untouched(found, entry)
                 self.stats["skipped"] += 1
                 return found
         model_name = entry.get("model")
@@ -115,6 +118,32 @@ class DataLoader:
             for lang, text in per_lang.items():
                 record.with_context(lang=lang).write({fname: text})
         return record
+
+    def _fill_untouched(self, record: Model, entry: dict[str, Any]) -> Model:
+        """``missing`` mode, for an entry that extends another module's record (``product.x`` in ``sale``'s
+        data): write only the fields still empty or at their static default — the module's own fields, added
+        by this upgrade — and leave every value someone may have changed."""
+        model = record.browse(record.ids)
+        values = self.resolve_values(model, dict(entry.get("values", {})))
+        todo: dict[str, Any] = {}
+        for name, value in values.items():
+            field = model._fields[name]
+            if field.translate:
+                continue
+            current = model[name]
+            if field.relational:
+                untouched = not current
+            else:
+                static = field.default if field.has_default and not callable(field.default) else None
+                untouched = current in (None, False, "") or (static is not None and current == static)
+            if untouched:
+                todo[name] = value
+        if todo:
+            model.write(todo)
+            self.stats["updated"] += 1
+        else:
+            self.stats["skipped"] += 1
+        return model
 
     def _is_noupdate(self, xmlid: str) -> bool:
         module, _, name = xmlid.partition(".")
