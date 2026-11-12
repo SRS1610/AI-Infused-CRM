@@ -16,7 +16,7 @@ Modules: `product` 2.0, `sale` 2.0, `sale_subscription`, `sale_rental`, `sale_co
 |---|---|---|---|
 | U-1 | Fresh clone → `docker compose up` → demo admin → every menu opens without console errors | **Met** | Docker Compose stack, `tessera seed demo --phase 2`, then a browser opened all 163 Phase 1 + 2 menus: no console error, no server error, no error banner, no serious / critical axe violation (same check on the development server) |
 | U-2 | Every module installs on an empty database; leaf modules uninstall; `tessera db check` clean | **Met** | install of every Phase 2 module on an empty database, uninstall of each leaf (`sale_rental`, `sale_commission`, `account_dunning`, `account_einvoice`, `account_budget`, `account_asset`, `auth_saml`, …), `tessera db check`: no drift |
-| U-3 | A database seeded at Phase 1, after `tessera db migrate`, passes the current suite | **{{U3_STATUS}}** | {{U3_EVIDENCE}} |
+| U-3 | A database seeded at Phase 1, after `tessera db migrate`, passes the current suite | **Met** | Phase 1 schema and demo (commit `1a1fada`) → `tessera db migrate` (installs `account`, upgrades `product` and `sale`, loads the new demo data, D-102) → `tessera db check`: no drift → full current suite on that database: 1,383 passed, 0 failed |
 | U-4 | A user of company A sees no company-B record anywhere, AI retrieval included | **Met** | `test_sec_phase2_every_company_model_is_isolated` (every Phase 2 model has a stored `company_id` or is listed as shared, an outsider with the widest roles sees nothing), cross-company references refused by the ledger (journal, partner, accounts, bank matches, reports), AI gate tests per feature (`isolation` metric 1.0) |
 | U-5 | Restricted fields absent from read, export, API, OpenAPI and AI tool results | **Met** | `test_u5_phase2_restricted_fields_are_absent` (payment provider secrets, invoice access token, a quotation's invoices), on the Phase 1 field-group mechanism (`kernel_test_a` tests, API `/fields`, export); the OpenAPI schema is generic and lists no model fields |
 | U-6 | List views of each primary model at 100k rows: p95 < 300 ms | **Met** | `tessera perf lists`: p95 ≤ 118 ms for contacts, leads, meetings, orders, products, journal items, journal entries, payments, bank transactions, fixed assets (`docs/admin/performance.md`) |
@@ -41,17 +41,17 @@ Modules: `product` 2.0, `sale` 2.0, `sale_subscription`, `sale_rental`, `sale_co
 | 2-i | OCR eval set ≥ 100 bills, multi-language, scans and digital, meets thresholds; every auto-coded line is a proposal | **Met in replay** | `account.bill_ocr` evaluation (scores below), `backend/modules/account/tests/test_ai_bill.py`; synthetic documents (no real supplier documents in the corpus) |
 | 2-j | Stripe test adapter payment reconciles the invoice; webhook replay idempotent | **Met** | `backend/modules/payment/tests/test_flow.py`, `test_api.py` (signed webhooks, replay is a no-op) |
 | 2-k | Commission statement equals the spreadsheet cross-check; AI explanation cites only statement numbers | **Met** | `backend/modules/sale_commission/tests/test_crosscheck.py` (independent computation), `test_ai.py` (numeric consistency 1.0) |
-| 2-l | Phase 1 database upgraded passes the suite (U-3); reports on 100k lines < 2 s p95 | **{{U3_STATUS}}** | U-3 above; `tessera perf reports --lines 100000`: p95 between 55 ms (partner ledger) and 432 ms (general ledger, first page) |
+| 2-l | Phase 1 database upgraded passes the suite (U-3); reports on 100k lines < 2 s p95 | **Met** | U-3 above; `tessera perf reports --lines 100000`: p95 between 55 ms (partner ledger) and 432 ms (general ledger, first page) |
 
 ## Verification
 
 | Check | Result |
 |---|---|
-| Backend tests (`uv run pytest --cov`, PostgreSQL 16 + pgvector) | 1,378 passed, coverage 91 % |
+| Backend tests (`uv run pytest --cov`, PostgreSQL 16 + pgvector) | 1,378 passed, coverage 91 % (1,383 with the tests added at closing, all passing in the U-3 run) |
 | AI gateway tests (`gateway/`) | 121 passed, 5 skipped (live provider tests without keys), coverage 94 % |
 | Frontend unit tests (`npx vitest run --coverage`) | 221 passed, coverage 92 % |
 | Playwright, desktop and mobile, against `tessera seed demo --phase 2` | 46 passed, 14 skipped (desktop-only scenarios on mobile); API started as in CI (login rate limit 200 per minute, background jobs running) |
-| U-3: Phase 1 database (commit `1a1fada`) → `tessera db migrate` → current suite | {{U3_EVIDENCE}} |
+| U-3: Phase 1 database (commit `1a1fada`) → `tessera db migrate` → current suite | Phase 1 schema and demo (commit `1a1fada`) → `tessera db migrate` (installs `account`, upgrades `product` and `sale`, loads the new demo data, D-102) → `tessera db check`: no drift → full current suite on that database: 1,383 passed, 0 failed |
 | AI evaluation sets in replay | all 44 features (21 from Phase 1, 23 from Phase 2) meet every threshold: 2,842 cases, 1,766 of them for Phase 2 |
 | `tessera ai eval report --strict` | nothing missing ("every declared AI feature is complete") |
 | Lint and types | ruff, ruff format, mypy (`tessera`, CI scope), eslint, prettier, tsc: clean |
