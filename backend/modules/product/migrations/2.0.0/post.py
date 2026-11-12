@@ -14,6 +14,8 @@ from typing import Any
 
 def migrate(env: Any, from_version: str) -> None:
     cr = env.cr
+    # the column is new: the schema sync filled it with the field's default ('reference'), so every unit is
+    # classified here (users could not set a type before 2.0)
     cr.execute("UPDATE product_uom SET rounding = 0.01 WHERE rounding IS NULL OR rounding <= 0")
     cr.execute(
         """
@@ -29,7 +31,6 @@ def migrate(env: Any, from_version: str) -> None:
                    WHEN u.factor < 1 THEN 'smaller'
                    ELSE 'bigger'
                END
-         WHERE u.uom_type IS NULL
         """
     )
     # stored flags of existing products: sellable unless not for sale, never a template

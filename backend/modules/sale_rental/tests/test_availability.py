@@ -260,6 +260,8 @@ def test_concurrent_confirmations_cannot_double_book(registry: Any, database_url
             orders.with_context(_sale_internal=True).write({"state": "cancelled"})
             orders.unlink()
             cleanup["product.product"].browse([product_id]).unlink()
+            # rental_product() archived the demo promotions in this committed transaction: restore them
+            cleanup["sale.promotion"].elevated().with_context(active_test=False).search([]).write({"active": True})
             cleanup["contacts.partner"].browse([partner_id]).unlink()
 
 
