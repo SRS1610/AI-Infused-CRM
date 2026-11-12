@@ -307,6 +307,8 @@ def test_exclusion_constraint_between_connections(registry: Any, database_url: s
             cleanup.cr.execute("DELETE FROM sale_rental_allocation WHERE product_id = :p", {"p": product_id})
             cleanup["sale.quotation"].browse([order_id]).unlink()
             cleanup["product.product"].browse([product_id]).unlink()
+            # rental_product() archived the demo promotions in this committed transaction: restore them
+            cleanup["sale.promotion"].elevated().with_context(active_test=False).search([]).write({"active": True})
 
 
 def test_availability_ignores_company_rules(env: Any) -> None:
