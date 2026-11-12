@@ -503,3 +503,23 @@ msgstr "Modèles de répartition analytique"
 msgid "New invoice and bill lines without a distribution get the one of the most specific matching model."
 msgstr "Les nouvelles lignes de factures sans répartition reçoivent celle du modèle correspondant le plus précis."
 
+#: ai_allocation.py:192
+msgid "Analytic suggestions work on invoice and bill lines"
+msgstr "Les suggestions analytiques portent sur les lignes de factures clients et fournisseurs"
+
+#: ai_allocation.py:242
+#, python-brace-format
+msgid "Analytic distribution for '{label}'"
+msgstr "Répartition analytique pour « {label} »"
+
+#: ai_allocation.py:283
+msgid "Choose an invoice or bill line"
+msgstr "Choisissez une ligne de facture client ou fournisseur"
+
+#: ai_allocation.py:317
+msgid "No such journal item"
+msgstr "Écriture comptable introuvable"
+
+#: ai_allocation.py:327
+msgid "No such document"
+msgstr "Pièce introuvable"

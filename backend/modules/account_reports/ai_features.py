@@ -30,6 +30,7 @@ from tessera.ai import Source
 from tessera.ai.runtime import HANDLERS, handler, run_feature
 from tessera.ai.tools import ToolContext
 from tessera.exceptions import AccessError, MissingError
+from tessera.i18n import _
 
 if TYPE_CHECKING:
     from tessera.orm.environment import Environment
@@ -158,7 +159,11 @@ def build_params(env: Environment, data: dict[str, Any], question: str, today: d
     codes = {r["code"]: r for r in list_reports(env)}
     report = str(data.get("report") or "")
     if report not in codes:
-        return {"params": None, "warnings": [f"Unknown or unavailable report '{report}'"], "unresolved": {}}
+        return {
+            "params": None,
+            "warnings": [str(_("Unknown or unavailable report '{report}'", report=report))],
+            "unresolved": {},
+        }
     info = codes[report]
     companies = _companies(env)
     by_name = {_fold(c.name): c for c in companies}
@@ -178,7 +183,7 @@ def build_params(env: Environment, data: dict[str, Any], question: str, today: d
         date_from = _date_in_question(data.get("date_from"), question)
         date_to = _date_in_question(data.get("date_to"), question)
         if date_to is None:
-            warnings.append("The period's dates are not in the question; the report's default period is used")
+            warnings.append(str(_("The period's dates are not in the question; the report's default period is used")))
             date_from, date_to = None, today
     else:
         date_from, date_to = resolve_period(env, company, keyword, today)
@@ -186,7 +191,7 @@ def build_params(env: Environment, data: dict[str, Any], question: str, today: d
         date_from = None
     comparison = data.get("comparison") if data.get("comparison") in ("previous_period", "previous_year") else "none"
     if comparison != "none" and not info["allow_comparison"]:
-        warnings.append("This report has no comparison columns")
+        warnings.append(str(_("This report has no comparison columns")))
         comparison = "none"
     periods = int(data.get("periods") or 1)
     periods = max(1, min(12, periods))
@@ -212,8 +217,13 @@ def build_params(env: Environment, data: dict[str, Any], question: str, today: d
         )
     except PydanticError as exc:
         return {"params": None, "warnings": [str(exc.errors()[0]["msg"])], "unresolved": unresolved}
+    labels = {
+        "companies": _("Not found among the companies you work in: {names}"),
+        "partners": _("Not found among the partners you can access: {names}"),
+        "journals": _("Not found among the journals you can access: {names}"),
+    }
     for kind, names in unresolved.items():
-        warnings.append(f"Not found among the {kind} you can access: {', '.join(names)}")
+        warnings.append(str(labels[kind]).format(names=", ".join(names)))
     sys_env = env.elevated("report parameter names")
     return {
         "params": params.model_dump(mode="json"),

@@ -325,6 +325,66 @@ msgstr ""
 msgid "Result"
 msgstr ""
 
+#: ai_failures.py:337
+msgid "Insufficient funds"
+msgstr ""
+
+#: ai_failures.py:338
+msgid "Card expired"
+msgstr ""
+
+#: ai_failures.py:339
+msgid "Authentication required"
+msgstr ""
+
+#: ai_failures.py:340
+msgid "Fraud suspected"
+msgstr ""
+
+#: ai_failures.py:341
+msgid "Provider error"
+msgstr ""
+
+#: ai_failures.py:342
+msgid "Other reason"
+msgstr ""
+
+#: ai_failures.py:349
+msgid "Ask the customer to pay again in a few days or with another card; do not retry repeatedly."
+msgstr ""
+
+#: ai_failures.py:352
+msgid "Ask the customer to update the saved card or pay with a new one."
+msgstr ""
+
+#: ai_failures.py:353
+msgid "Send the payment link again so the customer completes the bank's verification."
+msgstr ""
+
+#: ai_failures.py:354
+msgid "Do not retry; review the order and contact the customer through a known channel."
+msgstr ""
+
+#: ai_failures.py:355
+msgid "Retry later or check the provider's status; the customer is not at fault."
+msgstr ""
+
+#: ai_failures.py:356
+msgid "Contact the customer or the provider: the reason is not one of the known categories."
+msgstr ""
+
+#: ai_failures.py:368
+msgid "Only failed or cancelled payments have a failure reason"
+msgstr ""
+
+#: ai_failures.py:527
+msgid "No such payment transaction"
+msgstr ""
+
+#: ai_failures.py:418
+msgid "Unknown customer"
+msgstr ""
+
 #: api.py:83
 msgid "Too many attempts; try again in a minute"
 msgstr ""

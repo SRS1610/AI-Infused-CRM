@@ -71,6 +71,33 @@ card has insufficient funds."); the customer can try again.
 | `GET /api/v1/payment/invoices/{id}/status?reference=&token=` | link token or session | state of an attempt (checks the provider while pending) |
 | `POST /api/v1/payment/webhook/{provider id}` | provider signature | notifications |
 
+## AI: payment failure summary (`payment.failure_summary`)
+
+Sub-phase 2.6. A failed or cancelled transaction keeps the provider's explanation (*Provider message*). The
+panel *Why did this payment fail? (AI)* of such a transaction puts it in one category — **insufficient funds,
+card expired, authentication required, fraud suspected, provider error, other** — with the next step to take
+(update the card, send the link again for the bank's verification, never retry a suspected fraud, retry later
+after a provider error…). The panel *Payment failures (AI)* of a provider lists the failures of the last 90
+days per customer (count, amounts, main reason); **Summarise all failures** asks the model for a short
+narrative whose figures must all be the summary's (a sentence with another number is removed).
+
+How the category is chosen (deterministic, no model): a decline code in the message wins (Stripe's documented
+codes such as `insufficient_funds`, `expired_card`, `authentication_required`, `stolen_card`,
+`processing_error`, written `decline_code: …`, `code=…` or bare); otherwise phrases in English, French, German,
+Spanish, Italian, Dutch and Portuguese, the **earliest** phrase in the message deciding, so text appended after
+the provider's own words cannot change the category. An abandoned checkout ("the checkout session expired") is
+*other*. Nothing is written, retried or sent; every request is an `ai_core.run`. The feature has a per-company
+switch (*AI → Features*); switched off, the panels disappear and the endpoints answer `404 feature_disabled`.
+
+| Endpoint | |
+|---|---|
+| `GET /api/v1/payment/ai/transactions/{id}/failure` | category, label, next step of one failed transaction |
+| `GET /api/v1/payment/ai/failures?days=&provider_id=&partner_id=` | failures by category, customer and provider (current company, transactions the user can read) |
+| `POST /api/v1/payment/ai/failures/narrative?days=` | the model's narrative (figures checked) |
+
+Limits: messages worded unlike any known phrase fall back to *other* (5 of the 6 hold-out messages of the
+evaluation set); a model fallback for those is a possible later step.
+
 ## Access
 
 Billing users see providers (not their credentials), transactions and saved methods; advisers configure

@@ -393,6 +393,27 @@ msgstr ""
 msgid "{\"<analytic account id>\": percent}; at most 100 % per plan"
 msgstr ""
 
+#: ai_allocation.py:192
+msgid "Analytic suggestions work on invoice and bill lines"
+msgstr ""
+
+#: ai_allocation.py:242
+#, python-brace-format
+msgid "Analytic distribution for '{label}'"
+msgstr ""
+
+#: ai_allocation.py:283
+msgid "Choose an invoice or bill line"
+msgstr ""
+
+#: ai_allocation.py:317
+msgid "No such journal item"
+msgstr ""
+
+#: ai_allocation.py:327
+msgid "No such document"
+msgstr ""
+
 #: models/analytic.py:30
 msgid "An analytic distribution maps analytic account ids to percentages"
 msgstr ""

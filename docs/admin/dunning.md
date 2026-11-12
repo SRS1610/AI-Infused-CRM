@@ -48,6 +48,21 @@ with levels. Sent runs are kept as a record (*Reminders sent* lists every remind
   computed `amount_due` / `max_days`. The personalised-message AI feature (sub-phase 2.6) proposes a message
   for a prepared line and keeps `invoice_table(ctx)` for the amounts.
 
+## AI: personalised reminders (`account_dunning.message_draft`)
+
+Sub-phase 2.6. On a prepared reminder (still to send), *Personalised message (AI)* → **Draft personalised message**
+asks the mid-tier model for the reminder's text: tone by level (friendly first reminder, firm second, formal final
+notice) and by the customer's history (earlier reminders, how late they usually pay, disputed invoices). The facts
+it sees are computed from the ledger; **every number in the draft must be one of them** — a sentence with another
+figure (a wrong total, an invented discount or deadline) is removed and listed — and the invoice table with the
+amounts and pay links is always the ledger's (`invoice_table`), never the model's.
+
+The draft is a **write proposal** on the reminder (subject and message): nothing changes before *Accept*, and
+accepting only replaces the text — no mail is queued until the run is sent as before. Read-only users get the
+draft without a proposal. The customer's name is sent to the model (`redaction: minimal`), so the feature is only
+routed to providers approved for personal data. Per-company switch: switched off, the panel disappears and the
+endpoint answers `404 feature_disabled` without calling the gateway.
+
 ## Access
 
 Billing users run and send reminders; advisers configure levels. Levels and runs are per company.

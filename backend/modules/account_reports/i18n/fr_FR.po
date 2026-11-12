@@ -777,3 +777,27 @@ msgstr "Définitions des rapports financiers"
 #. menu name
 msgid "Cash-flow forecast"
 msgstr "Prévision de trésorerie"
+
+#: ai_features.py:221
+#, python-brace-format
+msgid "Not found among the companies you work in: {names}"
+msgstr "Introuvable parmi les sociétés où vous travaillez : {names}"
+
+#: ai_features.py:222
+#, python-brace-format
+msgid "Not found among the partners you can access: {names}"
+msgstr "Introuvable parmi les partenaires auxquels vous avez accès : {names}"
+
+#: ai_features.py:223
+#, python-brace-format
+msgid "Not found among the journals you can access: {names}"
+msgstr "Introuvable parmi les journaux auxquels vous avez accès : {names}"
+
+#: ai_features.py:164
+#, python-brace-format
+msgid "Unknown or unavailable report '{report}'"
+msgstr "Rapport « {report} » inconnu ou indisponible"
+
+#: ai_features.py:186
+msgid "The period's dates are not in the question; the report's default period is used"
+msgstr "Les dates de la période ne figurent pas dans la question ; la période par défaut du rapport est utilisée"

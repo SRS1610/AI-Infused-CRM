@@ -56,6 +56,8 @@ export interface ReportFilters {
   include_draft?: boolean;
   account_type?: "receivable" | "payable" | "all";
   company_ids?: number[];
+  partner_ids?: number[];
+  journal_ids?: number[];
   currency?: string;
   unfold?: string[];
   expand?: string;
@@ -71,6 +73,8 @@ export function reportQuery(filters: ReportFilters): Record<string, string | num
     include_draft: filters.include_draft || undefined,
     account_type: filters.account_type && filters.account_type !== "all" ? filters.account_type : undefined,
     company_ids: filters.company_ids?.length ? filters.company_ids.join(",") : undefined,
+    partner_ids: filters.partner_ids?.length ? filters.partner_ids.join(",") : undefined,
+    journal_ids: filters.journal_ids?.length ? filters.journal_ids.join(",") : undefined,
     currency: filters.currency || undefined,
     unfold: filters.unfold?.length ? filters.unfold.join(",") : undefined,
     expand: filters.expand,

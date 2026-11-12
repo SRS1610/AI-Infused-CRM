@@ -134,6 +134,154 @@ msgstr ""
 msgid "Closed On"
 msgstr ""
 
+#: ai_prefiling.py:180
+msgid "Taxes without tax grids"
+msgstr ""
+
+#: ai_prefiling.py:181
+msgid "Tax amounts outside every grid"
+msgstr ""
+
+#: ai_prefiling.py:182
+msgid "Reverse charge for a partner without tax ID"
+msgstr ""
+
+#: ai_prefiling.py:183
+msgid "Unusual tax for the customer's country"
+msgstr ""
+
+#: ai_prefiling.py:184
+msgid "Fiscal position different from the partner's"
+msgstr ""
+
+#: ai_prefiling.py:185
+msgid "Draft entries in the period"
+msgstr ""
+
+#: ai_prefiling.py:186
+msgid "Return does not tie to the tax accounts"
+msgstr ""
+
+#: ai_prefiling.py:187
+msgid "Period already locked"
+msgstr ""
+
+#: ai_prefiling.py:188
+msgid "Tax rate never used for this country before"
+msgstr ""
+
+#: ai_prefiling.py:189
+msgid "Grid far from previous periods"
+msgstr ""
+
+#: ai_prefiling.py:196
+msgid "Amounts of these taxes never reach the return; the declared figures are too low."
+msgstr ""
+
+#: ai_prefiling.py:197
+msgid "Tax amounts were booked outside the return's grids, so the return will not tie."
+msgstr ""
+
+#: ai_prefiling.py:198
+msgid ""
+"Reverse charge and intra-EU treatment require the partner's tax ID; without it the exemption can "
+"be refused in an audit."
+msgstr ""
+
+#: ai_prefiling.py:202
+msgid "Most invoices to this country use another tax: the odd ones may be wrong."
+msgstr ""
+
+#: ai_prefiling.py:203
+msgid ""
+"The tax treatment differs from what the partner's country and tax ID call for (for example "
+"domestic VAT charged to an EU business)."
+msgstr ""
+
+#: ai_prefiling.py:207
+msgid "Drafts dated in the period are left out of the return and locked out by the closing."
+msgstr ""
+
+#: ai_prefiling.py:208
+msgid "The return and the tax accounts disagree: a manual entry or a grid is missing."
+msgstr ""
+
+#: ai_prefiling.py:209
+msgid "The period is closed: corrections go in the next return."
+msgstr ""
+
+#: ai_prefiling.py:210
+msgid "Customers of this country and kind were never charged this rate in the previous periods."
+msgstr ""
+
+#: ai_prefiling.py:213
+msgid ""
+"The grid moved far from its usual level in the previous periods; check it is a real change in "
+"business and not a coding error."
+msgstr ""
+
+#: ai_prefiling.py:223
+msgid "Add tax grids to the base and tax distribution of these taxes."
+msgstr ""
+
+#: ai_prefiling.py:224
+msgid "Fix the taxes of these entries, or add the grids and reset them to draft."
+msgstr ""
+
+#: ai_prefiling.py:225
+msgid "Add the partner's tax ID, or correct the fiscal position of the documents."
+msgstr ""
+
+#: ai_prefiling.py:226
+msgid "Open the listed invoices and check their taxes."
+msgstr ""
+
+#: ai_prefiling.py:227
+msgid "Correct the fiscal position (credit note and new invoice if posted)."
+msgstr ""
+
+#: ai_prefiling.py:228
+msgid "Post or delete the drafts before closing."
+msgstr ""
+
+#: ai_prefiling.py:229
+msgid "Find the manual entries on tax accounts and correct them before closing."
+msgstr ""
+
+#: ai_prefiling.py:230
+msgid "Prepare the correction in the next period."
+msgstr ""
+
+#: ai_prefiling.py:231
+msgid "Open the listed invoices and confirm the rate or correct the tax."
+msgstr ""
+
+#: ai_prefiling.py:232
+msgid "Compare the grid's documents with the previous period's before filing."
+msgstr ""
+
+#: ai_prefiling.py:324
+msgid "Choose a tax return"
+msgstr ""
+
+#: ai_prefiling.py:393
+msgid "No such tax return"
+msgstr ""
+
+#: ai_prefiling.py:111
+msgid "no country"
+msgstr ""
+
+#: ai_prefiling.py:272
+#, python-brace-format
+msgid "{count} customer invoices use a tax rate never used for their country before"
+msgstr ""
+
+#: ai_prefiling.py:290
+#, python-brace-format
+msgid "{count} grids moved far from the previous periods: {grids}"
+msgstr ""
+
 #: closing.py:132
 #, python-brace-format
 msgid "Tax payable: {group}"

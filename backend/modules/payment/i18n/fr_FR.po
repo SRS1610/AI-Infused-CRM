@@ -487,3 +487,62 @@ msgstr "Prestataires de paiement"
 msgid "Provider notifications"
 msgstr "Notifications des prestataires"
 
+#: ai_failures.py:337
+msgid "Insufficient funds"
+msgstr "Fonds insuffisants"
+
+#: ai_failures.py:338
+msgid "Card expired"
+msgstr "Carte expirée"
+
+#: ai_failures.py:339
+msgid "Authentication required"
+msgstr "Authentification requise"
+
+#: ai_failures.py:340
+msgid "Fraud suspected"
+msgstr "Suspicion de fraude"
+
+#: ai_failures.py:341
+msgid "Provider error"
+msgstr "Erreur du prestataire"
+
+#: ai_failures.py:342
+msgid "Other reason"
+msgstr "Autre motif"
+
+#: ai_failures.py:349
+msgid "Ask the customer to pay again in a few days or with another card; do not retry repeatedly."
+msgstr "Demandez au client de payer à nouveau dans quelques jours ou avec une autre carte ; ne relancez pas le paiement à répétition."
+
+#: ai_failures.py:352
+msgid "Ask the customer to update the saved card or pay with a new one."
+msgstr "Demandez au client de mettre à jour la carte enregistrée ou de payer avec une nouvelle carte."
+
+#: ai_failures.py:353
+msgid "Send the payment link again so the customer completes the bank's verification."
+msgstr "Renvoyez le lien de paiement pour que le client termine la vérification de sa banque."
+
+#: ai_failures.py:354
+msgid "Do not retry; review the order and contact the customer through a known channel."
+msgstr "Ne relancez pas ; vérifiez la commande et contactez le client par un canal connu."
+
+#: ai_failures.py:355
+msgid "Retry later or check the provider's status; the customer is not at fault."
+msgstr "Réessayez plus tard ou vérifiez l'état du prestataire ; le client n'y est pour rien."
+
+#: ai_failures.py:356
+msgid "Contact the customer or the provider: the reason is not one of the known categories."
+msgstr "Contactez le client ou le prestataire : le motif ne fait partie d'aucune catégorie connue."
+
+#: ai_failures.py:368
+msgid "Only failed or cancelled payments have a failure reason"
+msgstr "Seuls les paiements échoués ou annulés ont un motif d'échec"
+
+#: ai_failures.py:527
+msgid "No such payment transaction"
+msgstr "Transaction de paiement introuvable"
+
+#: ai_failures.py:418
+msgid "Unknown customer"
+msgstr "Client inconnu"

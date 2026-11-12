@@ -56,6 +56,28 @@ and credit notes for categories S, E, K (intra-EU), G (export), mixed rates, dis
 foreign currency, and assert zero `fatal` findings; they also check that a broken document is reported with
 the right rule ids. To update the rules, follow `validation/README.md`.
 
+### AI: explaining validation errors (`account_einvoice.error_explain`)
+
+On an e-invoice in error (or rejected), *Explain e-invoice errors (AI)* → **Explain the errors** lists each failed
+rule once (repeated findings are counted) with:
+
+- **the field to fix**, decided by Tessera, not by the model: a catalogue of the CEN EN 16931 and Peppol BIS 3 rules
+  reported on the whole document (for example `PEPPOL-EN16931-R010` → the customer's Peppol address, `BR-S-02` →
+  the company's VAT number, `BR-CO-16` → the invoice's lines and totals, `BR-61` → the company's bank account), and
+  otherwise the finding's location: the party (`AccountingCustomerParty` → the customer, `AccountingSupplierParty` →
+  your company), the invoice line, the tax category, the totals or the payment means, and its last element
+  (`EndpointID` → Peppol address, `PartyTaxScheme/CompanyID` → VAT number, `Country/IdentificationCode` → country…);
+  XSD messages name the element. A link opens the customer, the company, the invoice (for a line), or the tax;
+- **a plain-language explanation and a fix hint** written by the mid-tier model from the findings and the invoice's
+  facts. A sentence quoting a figure that is in neither is removed, a rule the model invents is ignored, and a rule
+  it skips (or every rule when AI is unavailable) gets the validator's message and a generic fix.
+
+Nothing is written. The feature has a per-company switch (*AI → Features*): switched off, the panel disappears and
+`POST /api/v1/account_einvoice/ai/documents/{id}/explain` answers `404 feature_disabled` without calling the
+gateway. Every request is an `ai_core.run`. Limits: rules missing from the catalogue and reported on the whole
+document fall back to "lines and totals"; findings from the access point itself are attributed to the company's
+Peppol address.
+
 ## Receiving
 
 The poll collects documents addressed to the company's Peppol address: each becomes a **draft vendor bill**

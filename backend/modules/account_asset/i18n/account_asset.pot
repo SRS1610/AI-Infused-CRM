@@ -343,6 +343,110 @@ msgstr ""
 msgid "Assets"
 msgstr ""
 
+#: ai_features.py:461
+msgid "The depreciation entries do not add up to the depreciable value"
+msgstr ""
+
+#: ai_features.py:462
+msgid "A depreciation entry is negative"
+msgstr ""
+
+#: ai_features.py:463
+msgid "A depreciation entry dated in the past is still a draft"
+msgstr ""
+
+#: ai_features.py:464
+msgid "A draft entry is dated before a posted one"
+msgstr ""
+
+#: ai_features.py:465
+msgid "The book value is below the salvage value"
+msgstr ""
+
+#: ai_features.py:466
+msgid "The useful life differs a lot from the asset model's"
+msgstr ""
+
+#: ai_features.py:467
+msgid "The depreciation method is not the asset model's"
+msgstr ""
+
+#: ai_features.py:468
+msgid "The useful life differs a lot from other assets of the same model"
+msgstr ""
+
+#: ai_features.py:469
+msgid "The salvage value is more than half of the original value"
+msgstr ""
+
+#: ai_features.py:470
+msgid "The acquisition date is in the future"
+msgstr ""
+
+#: ai_features.py:471
+msgid "The asset was acquired months ago and is still a draft"
+msgstr ""
+
+#: ai_features.py:472
+msgid "The original value differs from the bill line it came from"
+msgstr ""
+
+#: ai_features.py:473
+msgid "A depreciation entry is far above the board's usual amount"
+msgstr ""
+
+#: ai_features.py:474
+msgid "The useful life is outside the usual range for this type of asset"
+msgstr ""
+
+#: ai_features.py:475
+msgid "A declining method is unusual for this type of asset"
+msgstr ""
+
+#: ai_features.py:476
+msgid "A depreciation period has no entry"
+msgstr ""
+
+#: ai_features.py:477
+msgid "Two depreciation entries fall in the same period"
+msgstr ""
+
+#: ai_features.py:187
+msgid "Asset classification works on vendor bill lines"
+msgstr ""
+
+#: ai_features.py:304
+msgid "The bill line no longer exists"
+msgstr ""
+
+#: ai_features.py:308
+msgid "The asset model no longer exists"
+msgstr ""
+
+#: ai_features.py:322
+msgid "This bill line already has an asset"
+msgstr ""
+
+#: ai_features.py:324
+msgid "Post the bill first: assets are created from posted bill lines"
+msgstr ""
+
+#: ai_features.py:547
+msgid "Choose an asset"
+msgstr ""
+
+#: ai_features.py:586
+msgid "No such bill line"
+msgstr ""
+
+#: ai_features.py:596
+msgid "No such bill"
+msgstr ""
+
+#: ai_features.py:610
+msgid "No such asset"
+msgstr ""
+
 #: models/asset.py:360
 #, python-brace-format
 msgid "{name}: depreciation"
