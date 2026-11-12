@@ -23,7 +23,7 @@ Modules: `product` 2.0, `sale` 2.0, `sale_subscription`, `sale_rental`, `sale_co
 | U-7 | Axe: no serious / critical violation on every new view type and module home | **Met** | the U-1 crawl runs axe on every menu; `frontend/e2e/account.spec.ts` checks the accounting views, the reconciliation screen and the reports |
 | U-8 | Every user-facing string translatable; `fr_FR` ≥ 95 % | **Met** | server 4,832 / 4,832 strings (`tessera i18n stats`, test fails under 95 %), client catalogue complete |
 | U-9 | ASVS L2 delta reviewed; no high-severity finding open | **Met** | [asvs-phase-2.md](security/asvs-phase-2.md): 68 requirements; 3 high, 3 medium and 1 low fixed with regression tests (SEC-50 – SEC-56, D-101); 6 low open and scheduled (SEC-57 – SEC-62) |
-| U-10 | Metrics for every job and AI feature | **Met** | new jobs (FX revaluation, bank sync, dunning, subscriptions, rentals, anomaly checks, Peppol status, churn scoring) and the 22 features report through the Phase 1 job and AI-run metrics on `GET /metrics` |
+| U-10 | Metrics for every job and AI feature | **Met** | new jobs (FX revaluation, bank sync, dunning, subscriptions, rentals, anomaly checks, Peppol status, churn scoring) and the 23 features report through the Phase 1 job and AI-run metrics on `GET /metrics` |
 | U-11 | All AI features pass the §1.3 gates | **Met in replay** | `tessera ai eval run` (all thresholds) and `tessera ai eval report --strict` (nothing missing); live run pending, as in Phase 1 |
 
 ### Phase 2 (BUILD_PLAN §3)
@@ -52,8 +52,8 @@ Modules: `product` 2.0, `sale` 2.0, `sale_subscription`, `sale_rental`, `sale_co
 | Frontend unit tests (`npx vitest run --coverage`) | 221 passed, coverage 92 % |
 | Playwright, desktop and mobile, against `tessera seed demo --phase 2` | {{PLAYWRIGHT}} |
 | U-3: Phase 1 database (commit `1a1fada`) → `tessera db migrate` → current suite | {{U3_EVIDENCE}} |
-| AI evaluation sets in replay | {{EVAL_SUMMARY}} |
-| `tessera ai eval report --strict` | {{REPORT_STRICT}} |
+| AI evaluation sets in replay | all 44 features (21 from Phase 1, 23 from Phase 2) meet every threshold: 2,842 cases, 1,766 of them for Phase 2 |
+| `tessera ai eval report --strict` | nothing missing ("every declared AI feature is complete") |
 | Lint and types | ruff, ruff format, mypy (`tessera`, CI scope), eslint, prettier, tsc: clean |
 | Docker Compose | builds, starts, seeds Phase 2 and serves the demo (see U-1) |
 
@@ -84,7 +84,7 @@ Modules: `product` 2.0, `sale` 2.0, `sale_subscription`, `sale_rental`, `sale_co
   MRR (D-091); rentals priced by covering duration with unit reservations, late fees and deposits (D-089);
   commission plans and statements (D-090).
 - **SAML single sign-on** (`auth_saml`, D-076).
-- **AI features**: the 22 features below.
+- **AI features**: the 23 features below.
 - **Upgrade path**: `tessera db migrate` installs new dependencies, loads new demo records on databases with
   demo data (`missing` loader mode), and fills static defaults on added columns.
 
@@ -126,7 +126,34 @@ user; nothing is written before a proposal is accepted; each run is in `ai_core.
 
 | feature | flag | eval score vs threshold | live run date | acceptance rate (demo) |
 |---|---|---|---|---|
-{{AI_TABLE}}
+| `account.bill_ocr` | per company, on | header f1 0.998 ≥ 0.9; line f1 0.994 ≥ 0.8; coding accuracy 0.992 ≥ 0.85; proposal gate 1 = 1.0; isolation 1 = 1.0 (125 cases) | not run | n/a |
+| `account.anomaly` | per company, on | duplicate recall 0.968 ≥ 0.95; false positive rate 0.013 ≤ 0.05 (127 cases) | not run | n/a |
+| `account.cashflow_forecast` | per company, on | mape 0.085 ≤ 0.2; numbers from engine 1 = 1.0 (120 cases) | not run | n/a |
+| `account_analytic.allocation_suggest` | per company, on | exact accuracy 0.944 ≥ 0.8; zero mutations 1 = 1.0 (54 cases) | not run | n/a |
+| `account_asset.classify` | per company, on | accuracy 0.965 ≥ 0.85; zero mutations 1 = 1.0 (114 cases) | not run | n/a |
+| `account_asset.depreciation_check` | per company, on | precision 1 ≥ 0.8; recall 1 ≥ 0.8; code accuracy 1 ≥ 0.8 (61 cases) | not run | n/a |
+| `account_bank.reconcile_suggest` | per company, on | top1 accuracy 1 ≥ 0.85; zero mutations 1 = 1.0 (120 cases) | not run | n/a |
+| `account_budget.variance_explain` | per company, on | numeric consistency 1 = 1.0; guard accuracy 1 = 1.0; rubric score 0.925 ≥ 0.8 (32 cases) | not run | n/a |
+| `account_dunning.message_draft` | per company, on | rubric score 0.856 ≥ 0.8; amount correctness 1 = 1.0; guard accuracy 1 = 1.0; tone match 1 ≥ 0.95; mail before accept 0 = 0 (32 cases) | not run | n/a |
+| `account_einvoice.error_explain` | per company, on | field attribution 1 ≥ 0.9; rubric score 0.955 ≥ 0.8; guard accuracy 1 = 1.0 (40 cases) | not run | n/a |
+| `account_reports.nl_report` | per company, on | param accuracy 0.948 ≥ 0.85; numbers from model 0 = 0 (58 cases) | not run | n/a |
+| `account_tax.prefiling` | per company, on | recall 1 ≥ 0.9; explained 1 = 1.0 (64 cases) | not run | n/a |
+| `payment.failure_summary` | per company, on | category accuracy 0.921 ≥ 0.9 (63 cases) | not run | n/a |
+| `product.description_draft` | per company, on | rubric score 0.865 ≥ 0.8; invented specs 0 = 0; spec check accuracy 1 = 1.0; contains 1 ≥ 0.9 (34 cases) | not run | n/a |
+| `sale.upsell` | per company, on | top3 precision 0.78 ≥ 0.6; injection invariance 1 = 1.0 (132 cases) | not run | n/a |
+| `sale.discount_suggest` | per company, on | within band 1 = 1.0; proposals within band 1 = 1.0; band accuracy 1 ≥ 0.95; zero mutations 1 = 1.0; injection invariance 1 = 1.0 (40 cases) | not run | n/a |
+| `sale.quote_from_text` | per company, on | line f1 0.977 ≥ 0.85; fabricated products 0 = 0; flagged recall 0.909 ≥ 0.9 (36 cases) | not run | n/a |
+| `sale.pricing_breach` | per company, on | precision 0.954 ≥ 0.9; recall 1 ≥ 0.8; injection invariance 1 = 1.0 (48 cases) | not run | n/a |
+| `sale_commission.explain` | per company, on | numeric consistency 1 = 1.0; guard accuracy 1 = 1.0; total stated 1 ≥ 0.9; rubric score 0.919 ≥ 0.8 (32 cases) | not run | n/a |
+| `sale_rental.demand_forecast` | per company, on | mape 0.095 ≤ 0.25; coverage 80 0.848 ≥ 0.7; injection invariance 1 = 1.0 (124 cases) | not run | n/a |
+| `sale_rental.usage_anomaly` | per company, on | precision 0.957 ≥ 0.7; recall 0.898 ≥ 0.5; injection invariance 1 = 1.0 (154 cases) | not run | n/a |
+| `sale_subscription.churn_predict` | per company, on | auc 0.857 ≥ 0.75; explanations present 1 = 1.0; factor validity 1 ≥ 0.95; extraction match 1 = 1.0; injection invariance 1 = 1.0 (124 cases) | not run | n/a |
+| `sale_subscription.renewal_draft` | per company, on | rubric score 0.863 ≥ 0.8; numeric consistency 1 = 1.0; guard accuracy 1 = 1.0; tone match 1 ≥ 0.95; posted before accept 0 = 0; mail before accept 0 = 0; proposal per draft 1 = 1.0 (32 cases) | not run | n/a |
 
 Every feature also scores injection resistance 1.0 (threshold 1.0) where it reads free text, and schema
-validity 1.0 where it returns structured output.
+validity 1.0 where it returns structured output. Replay latency p95 is under 1.7 s for every feature except
+`account_tax.prefiling` (12.1 s), `account_analytic.allocation_suggest` (9.4 s) and
+`account_asset.depreciation_check` (15.2 s, median 1.2 s): their evaluation cases build and post a whole
+scenario (a tax period, a booking history, an asset with its board) inside the measured call, and the run
+shared the machine with the U-3 suite. These three are deterministic checks run from a button or a job, not
+streamed answers; a harness that times the feature apart from its fixture is a follow-up.

@@ -6,7 +6,7 @@ An open, modular, multi-company business suite with a CRM at its core that grows
 > pricelists, sales orders with invoicing policies, subscriptions, rentals and commissions; a general ledger
 > with US, EU and generic charts, taxes, payments, bank import and reconciliation, multi-currency, analytic
 > accounting, budgets, fixed assets, financial reports, tax returns, dunning, UBL / Peppol e-invoicing,
-> online payments (Stripe) and SAML single sign-on, with 22 more AI features. Every acceptance criterion is
+> online payments (Stripe) and SAML single sign-on, with 23 more AI features. Every acceptance criterion is
 > met in replay; the live AI evaluation run needs a provider key. Details:
 > [docs/phase-2-summary.md](docs/phase-2-summary.md) ([Phase 1](docs/phase-1-summary.md)). Security
 > reviews: [Phase 2](docs/security/asvs-phase-2.md), [Phase 1](docs/security/asvs-phase-1.md).

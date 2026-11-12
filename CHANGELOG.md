@@ -2,7 +2,9 @@
 
 All notable changes are recorded here, grouped by phase. Format follows [Keep a Changelog](https://keepachangelog.com/); versions follow the platform version, modules carry their own versions in their manifests.
 
-## [Unreleased] — Phase 2 (Sales and Accounting), in progress
+## [Unreleased] — Phase 2 (Sales and Accounting) complete, awaiting sign-off
+
+Summary of what works, what is stubbed and the known gaps: [docs/phase-2-summary.md](docs/phase-2-summary.md).
 
 ### Sub-phase 2.1 — Accounting core
 - **Ledger (`account` 1.0.0, D-072, D-073, D-077).** Charts of accounts for the US, EU-style VAT and a
@@ -252,6 +254,16 @@ All notable changes are recorded here, grouped by phase. Format follows [Keep a 
   (SEC-53); the test payment provider is refused in production (SEC-54); report CSV/XLSX exports neutralise
   spreadsheet formulas (SEC-55); invoice and quotation e-mails escape names (SEC-56). A test checks that every
   Phase 2 model is company-scoped or explicitly shared.
+- **Upgrade path (U-3).** `tessera db migrate` installs the new dependencies of upgraded modules, loads the new
+  demo records on databases that have demo data (data loader mode `missing`: create absent records only), fills
+  static defaults on added columns, and classifies every Phase 1 unit of measure; a Phase 1 database upgraded
+  this way passes the full current suite.
+- **Acceptance.** U-5 test for the Phase 2 fields restricted by groups; ledger refuses partners of another
+  company on entries; demo customers of subscriptions taken from the right company; performance tables for the
+  Phase 2 list views and reports; object store volume limit raised for the demo stack.
+- **Phase 2 demo script** ([docs/demos/phase-2.md](docs/demos/phase-2.md)) and **summary**
+  ([docs/phase-2-summary.md](docs/phase-2-summary.md)): acceptance table, verification, works / stubbed / gaps
+  and the scores of the 23 Phase 2 AI features.
 
 ## [Unreleased] — Phase 1 complete, awaiting sign-off
 
