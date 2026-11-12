@@ -51,6 +51,39 @@ All notable changes are recorded here, grouped by phase. Format follows [Keep a 
   installs new dependencies first. `portal` no longer depends on `sale` (dependency cycle with `account`).
   Guide: [docs/user/sale.md](docs/user/sale.md).
 
+### Sub-phase 2.3 — Bank, payments, dunning, e-invoicing
+- **Bank statements (`account_bank` 1.0.0, 2-d).** Statements and transactions per bank / cash journal;
+  posting books bank ↔ suspense, matching replaces the suspense item with counterparts on open invoices,
+  bills, credit notes or outstanding payments (partial matches leave the rest open; foreign items get their
+  exchange difference) and write-offs with optional tax, through draft → post of the transaction's entry;
+  undo restores the suspense item. Import of CAMT.053 (`.001.02`–`.08`, batched entries, references,
+  counterparty, instructed currency), OFX 1.x/2.x, MT940 (multi-statement, multi-line `:86:`) and CSV
+  (header detection, column mapping, date / decimal formats, debit / credit columns) with balance checks and
+  duplicate skipping (`UNIQUE (journal_id, unique_import_id)`); `POST /api/v1/account_bank/import`,
+  `tessera account import-statement FILE --journal CODE`. Reconciliation rules (invoice matching with
+  references, partner, amount and tolerance; write-off suggestions by label, amount, partner) shipped per
+  company, `suggest_matches()` with scores and reason codes, automatic reconciliation after import, from a
+  button and hourly. Reconciliation screen (*Accounting → Bank → Reconcile*). The demo CAMT.053 statement is
+  reconciled for more than 90 % by the shipped rules. Guide: [docs/admin/bank.md](docs/admin/bank.md).
+- **Online payments (`payment` 1.0.0, 2-j).** Payment providers (Stripe over its REST API with `httpx`,
+  and a test provider) with encrypted credentials, transactions, saved payment methods, notifications
+  recorded once per `(provider, event id)` so a replayed webhook is a no-op; `Stripe-Signature`
+  verification (HMAC-SHA256, 5-minute tolerance). *Pay now* on the customer invoice page
+  (`/portal/invoices/<id>`), confirmed payments booked in the provider's journal and matched with the
+  invoice; failed and cancelled payments keep the provider's message; token charges and refunds.
+  Guide: [docs/admin/payments.md](docs/admin/payments.md).
+- **Payment reminders (`account_dunning` 1.0.0).** Dunning levels per company (days overdue, email,
+  letter, fee); runs find each customer's overdue undisputed invoices (not *In payment*, not excluded),
+  never send a level twice within its delay, queue emails with the invoice list and pay links, create fee
+  invoices and print letters; daily job; replaceable message renderer for the AI feature of 2.6.
+  Guide: [docs/admin/dunning.md](docs/admin/dunning.md).
+- **E-invoicing (`account_einvoice` 1.0.0, 2-h).** UBL 2.1 Invoice / CreditNote per Peppol BIS Billing 3.0
+  (endpoints, VAT categories S/Z/E/AE/K/G with VATEX reasons, payment means, price allowances, tax currency)
+  validated with the vendored OASIS UBL 2.1 schemas, the CEN EN 16931 rules and the OpenPeppol BIS 3
+  schematron run by Saxon-HE (`saxonche`, new dependency); structured findings on `account.edi_document`;
+  *Send via Peppol*, a mock access point that delivers and receives, inbound documents as draft vendor
+  bills, status poll every 20 minutes. Guide: [docs/admin/einvoicing.md](docs/admin/einvoicing.md).
+
 ### Sub-phase 2.4 — Analytic, budgets, assets, reports, tax return
 - **Analytic accounting (`account_analytic` 1.0.0).** Analytic plans (shared or per company, optional or
   mandatory by account type, account prefix or journal) and analytic accounts with revenue, costs and
@@ -89,69 +122,6 @@ All notable changes are recorded here, grouped by phase. Format follows [Keep a 
   with the report snapshot; deterministic pre-filing checks (`prefiling_checks`).
 - Guides: [docs/admin/reports.md](docs/admin/reports.md), [docs/admin/tax-return.md](docs/admin/tax-return.md).
 
-### Sub-phase 2.3 — Bank, payments, dunning, e-invoicing
-- **Bank statements (`account_bank` 1.0.0, 2-d).** Statements and transactions per bank / cash journal;
-  posting books bank ↔ suspense, matching replaces the suspense item with counterparts on open invoices,
-  bills, credit notes or outstanding payments (partial matches leave the rest open; foreign items get their
-  exchange difference) and write-offs with optional tax, through draft → post of the transaction's entry;
-  undo restores the suspense item. Import of CAMT.053 (`.001.02`–`.08`, batched entries, references,
-  counterparty, instructed currency), OFX 1.x/2.x, MT940 (multi-statement, multi-line `:86:`) and CSV
-  (header detection, column mapping, date / decimal formats, debit / credit columns) with balance checks and
-  duplicate skipping (`UNIQUE (journal_id, unique_import_id)`); `POST /api/v1/account_bank/import`,
-  `tessera account import-statement FILE --journal CODE`. Reconciliation rules (invoice matching with
-  references, partner, amount and tolerance; write-off suggestions by label, amount, partner) shipped per
-  company, `suggest_matches()` with scores and reason codes, automatic reconciliation after import, from a
-  button and hourly. Reconciliation screen (*Accounting → Bank → Reconcile*). The demo CAMT.053 statement is
-  reconciled for more than 90 % by the shipped rules. Guide: [docs/admin/bank.md](docs/admin/bank.md).
-- **Online payments (`payment` 1.0.0, 2-j).** Payment providers (Stripe over its REST API with `httpx`,
-  and a test provider) with encrypted credentials, transactions, saved payment methods, notifications
-  recorded once per `(provider, event id)` so a replayed webhook is a no-op; `Stripe-Signature`
-  verification (HMAC-SHA256, 5-minute tolerance). *Pay now* on the customer invoice page
-  (`/portal/invoices/<id>`), confirmed payments booked in the provider's journal and matched with the
-  invoice; failed and cancelled payments keep the provider's message; token charges and refunds.
-  Guide: [docs/admin/payments.md](docs/admin/payments.md).
-- **Payment reminders (`account_dunning` 1.0.0).** Dunning levels per company (days overdue, email,
-  letter, fee); runs find each customer's overdue undisputed invoices (not *In payment*, not excluded),
-  never send a level twice within its delay, queue emails with the invoice list and pay links, create fee
-  invoices and print letters; daily job; replaceable message renderer for the AI feature of 2.6.
-  Guide: [docs/admin/dunning.md](docs/admin/dunning.md).
-- **E-invoicing (`account_einvoice` 1.0.0, 2-h).** UBL 2.1 Invoice / CreditNote per Peppol BIS Billing 3.0
-  (endpoints, VAT categories S/Z/E/AE/K/G with VATEX reasons, payment means, price allowances, tax currency)
-  validated with the vendored OASIS UBL 2.1 schemas, the CEN EN 16931 rules and the OpenPeppol BIS 3
-  schematron run by Saxon-HE (`saxonche`, new dependency); structured findings on `account.edi_document`;
-  *Send via Peppol*, a mock access point that delivers and receives, inbound documents as draft vendor
-  bills, status poll every 20 minutes. Guide: [docs/admin/einvoicing.md](docs/admin/einvoicing.md).
-
-### Sub-phase 2.6 — AI features
-- **Finance AI features.** Ten features, each with a per-company switch, gate tests (switch off → `404
-  feature_disabled` without gateway call; scoping and company isolation; `ai_core.run` rows; nothing written before a
-  proposal is accepted), a client affordance with vitest tests, French, guide sections and governance rows; all pass
-  in replay (`tessera ai eval run`). `account_bank.reconcile_suggest` (AI suggestions and *AI: propose matches* in the
-  reconciliation screen; top-1 1.0 on 120 cases), `account_reports.nl_report` (*Ask* box filling the report filters
-  for review; parameter accuracy 0.948), `account_dunning.message_draft` (*Draft personalised message* on a reminder,
-  write proposal; amounts 1.0, judge 0.86), `account_budget.variance_explain` (*Explain variance* panel; numeric
-  consistency 1.0), `account_asset.classify` (asset model per vendor bill line, action proposal creating the asset;
-  accuracy 0.965 on 114 lines) and `account_asset.depreciation_check` (life out of range for the type, declining
-  buildings / software, missing or duplicated postings, salvage, model and peer checks; precision 1.0 on 61 assets),
-  `account_tax.prefiling` (ranked and explained pre-filing findings plus rate-per-country outliers and grid swings
-  against four previous periods; recall 1.0 on 64 scenarios), `account_analytic.allocation_suggest` (models first,
-  nearest-neighbour history vote; exact-distribution accuracy 0.944 on 54 scenarios),
-  `account_einvoice.error_explain` (field to fix decided from rule id and location with a link, the model writes the
-  explanation and fix; attribution 1.0 on 75 real validator findings, judge 0.955) and `payment.failure_summary`
-  (decline codes and seven-language phrases, per customer / provider; category accuracy 0.921 on 63 messages).
-- **Subscription, rental and commission AI features.** `sale_subscription.churn_predict` (per-company logistic
-  regression on `churn_features` with prior weights at cold start; score, risk and top-5 factors stored by a daily job
-  and *Score now*; *Churn and renewal (AI)* panel and *At risk (AI)* filter; AUC 0.86 on 120 held-out synthetic
-  subscriptions, explanations for every score), `sale_subscription.renewal_draft` (renewal e-mail whose tone follows
-  the churn risk, every figure checked against the records, message proposal — nothing posted or queued before
-  *Send*; judge 4.3/5), `sale_rental.demand_forecast` (weekly-profile x damped robust trend forecast of units out with
-  an 80 % range beside what is booked, company-scoped history; weekly MAPE 9.5 % on 120 generated histories),
-  `sale_rental.usage_anomaly` (daily alerts for repeated late returns, unusually long bookings and utilisation
-  spikes / drops, stored in *Rentals > Usage alerts* and notified; precision 0.96 on 150 labelled cases) and
-  `sale_commission.explain` (statement explanations citing only `statement_facts` numbers, 2-k second half; numeric
-  consistency 1.0, clarity 4.6/5). New `sale.subscription_churn_model` and `sale.rental_anomaly` models,
-  `rental_history(company_id=…)`, client panels on the subscription, rental product, rental order and commission
-  statement forms, French catalogues, guides and the governance inventory.
 ### Sub-phase 2.5 — Subscriptions, rentals, commissions
 - **Rentals (`sale_rental` 1.0.0, 2-f rental half).** Rentable products with a number of units, rental prices
   per hours / days / weeks / months (optionally per pricelist and company), late fees per hour and per day and a
@@ -230,6 +200,37 @@ All notable changes are recorded here, grouped by phase. Format follows [Keep a 
   `run_feature(..., attachments=[...])` sends them.
 - Guide: [docs/admin/accounting.md](docs/admin/accounting.md#ai-features); governance inventory in
   [docs/ai/governance.md](docs/ai/governance.md#accounting-account).
+
+### Sub-phase 2.6 — AI features
+- **Finance AI features.** Ten features, each with a per-company switch, gate tests (switch off → `404
+  feature_disabled` without gateway call; scoping and company isolation; `ai_core.run` rows; nothing written before a
+  proposal is accepted), a client affordance with vitest tests, French, guide sections and governance rows; all pass
+  in replay (`tessera ai eval run`). `account_bank.reconcile_suggest` (AI suggestions and *AI: propose matches* in the
+  reconciliation screen; top-1 1.0 on 120 cases), `account_reports.nl_report` (*Ask* box filling the report filters
+  for review; parameter accuracy 0.948), `account_dunning.message_draft` (*Draft personalised message* on a reminder,
+  write proposal; amounts 1.0, judge 0.86), `account_budget.variance_explain` (*Explain variance* panel; numeric
+  consistency 1.0), `account_asset.classify` (asset model per vendor bill line, action proposal creating the asset;
+  accuracy 0.965 on 114 lines) and `account_asset.depreciation_check` (life out of range for the type, declining
+  buildings / software, missing or duplicated postings, salvage, model and peer checks; precision 1.0 on 61 assets),
+  `account_tax.prefiling` (ranked and explained pre-filing findings plus rate-per-country outliers and grid swings
+  against four previous periods; recall 1.0 on 64 scenarios), `account_analytic.allocation_suggest` (models first,
+  nearest-neighbour history vote; exact-distribution accuracy 0.944 on 54 scenarios),
+  `account_einvoice.error_explain` (field to fix decided from rule id and location with a link, the model writes the
+  explanation and fix; attribution 1.0 on 75 real validator findings, judge 0.955) and `payment.failure_summary`
+  (decline codes and seven-language phrases, per customer / provider; category accuracy 0.921 on 63 messages).
+- **Subscription, rental and commission AI features.** `sale_subscription.churn_predict` (per-company logistic
+  regression on `churn_features` with prior weights at cold start; score, risk and top-5 factors stored by a daily job
+  and *Score now*; *Churn and renewal (AI)* panel and *At risk (AI)* filter; AUC 0.86 on 120 held-out synthetic
+  subscriptions, explanations for every score), `sale_subscription.renewal_draft` (renewal e-mail whose tone follows
+  the churn risk, every figure checked against the records, message proposal — nothing posted or queued before
+  *Send*; judge 4.3/5), `sale_rental.demand_forecast` (weekly-profile x damped robust trend forecast of units out with
+  an 80 % range beside what is booked, company-scoped history; weekly MAPE 9.5 % on 120 generated histories),
+  `sale_rental.usage_anomaly` (daily alerts for repeated late returns, unusually long bookings and utilisation
+  spikes / drops, stored in *Rentals > Usage alerts* and notified; precision 0.96 on 150 labelled cases) and
+  `sale_commission.explain` (statement explanations citing only `statement_facts` numbers, 2-k second half; numeric
+  consistency 1.0, clarity 4.6/5). New `sale.subscription_churn_model` and `sale.rental_anomaly` models,
+  `rental_history(company_id=…)`, client panels on the subscription, rental product, rental order and commission
+  statement forms, French catalogues, guides and the governance inventory.
 
 ### Sub-phase 2.7 — SAML single sign-on
 - **SAML 2.0 single sign-on (`auth_saml`, D-013, D-069).** Administrators add SAML identity providers under

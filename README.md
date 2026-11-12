@@ -2,12 +2,14 @@
 
 An open, modular, multi-company business suite with a CRM at its core that grows into a full ERP, with AI built into every module — proposing, never committing, and always bound by the user's permissions.
 
-> **Status:** Phase 1 (foundation, CRM and AI) is complete: kernel, web client, platform services,
-> Contacts, Discuss, Calendar, CRM, Products, Quotations, the AI platform with 21 AI features, and Studio,
-> in English and French. Every Phase 1 acceptance criterion is met except the live AI evaluation run,
-> which needs a provider key. Details, scores and open items:
-> [docs/phase-1-summary.md](docs/phase-1-summary.md). Security review:
-> [docs/security/asvs-phase-1.md](docs/security/asvs-phase-1.md).
+> **Status:** Phase 2 (sales and accounting) is complete and awaiting sign-off: product variants and
+> pricelists, sales orders with invoicing policies, subscriptions, rentals and commissions; a general ledger
+> with US, EU and generic charts, taxes, payments, bank import and reconciliation, multi-currency, analytic
+> accounting, budgets, fixed assets, financial reports, tax returns, dunning, UBL / Peppol e-invoicing,
+> online payments (Stripe) and SAML single sign-on, with 22 more AI features. Every acceptance criterion is
+> met in replay; the live AI evaluation run needs a provider key. Details:
+> [docs/phase-2-summary.md](docs/phase-2-summary.md) ([Phase 1](docs/phase-1-summary.md)). Security
+> reviews: [Phase 2](docs/security/asvs-phase-2.md), [Phase 1](docs/security/asvs-phase-1.md).
 
 ## Try it
 
@@ -22,11 +24,12 @@ make up
 ```
 
 ```bash
-docker compose -f deploy/compose/docker-compose.yml exec api tessera seed demo --phase 1
+docker compose -f deploy/compose/docker-compose.yml exec api tessera seed demo --phase 2
 ```
 
 Open http://localhost:5173 and sign in as `admin` / `admin1234`. Without Docker, or for the guided
-tour of every feature, follow [docs/demos/phase-1.md](docs/demos/phase-1.md). No AI provider key is
+tour of every feature, follow [docs/demos/phase-2.md](docs/demos/phase-2.md) (Phase 1:
+[docs/demos/phase-1.md](docs/demos/phase-1.md)). No AI provider key is
 needed for the demo: a deterministic test provider answers until you configure one under
 **Settings → AI**.
 
@@ -49,8 +52,11 @@ Common tasks: `make test`, `make e2e`, `make lint`; `make help` lists the rest.
 | [Architecture](docs/architecture/ARCHITECTURE.md) | Stack, kernel (metadata ORM, modules, security, multi-company/currency/language), platform services, web client, tenancy, performance, testing |
 | [Module dependency map](docs/architecture/MODULE_DEPENDENCY_MAP.md) | Every module by phase and layer, dependency graphs, bridge-module convention, install order |
 | [Core ERD](docs/architecture/ERD_CORE.md) | Entities and relationships for the kernel, platform modules, Phase 1 apps and the AI platform |
+| [Phase 2 ERD](docs/architecture/ERD_PHASE_2.md) | Products, sales, recurring revenue, ledger, bank, payments, management accounting |
 | [AI architecture note](docs/architecture/AI_ARCHITECTURE.md) | Gateway, provider adapters, routing, tools under user permissions, retrieval with record-rule filtering, proposals, guardrails, audit, evaluation, compliance |
 | [Build plan](docs/architecture/BUILD_PLAN.md) | Phases 1–8 with scope, AI features and acceptance criteria |
+| [Phase 2 summary](docs/phase-2-summary.md) | What works, what is stubbed, known gaps, AI feature scores |
+| [Phase 2 demo](docs/demos/phase-2.md) | Walkthrough of every Phase 2 feature on the demo data |
 | [Phase 1 summary](docs/phase-1-summary.md) | What works, what is stubbed, known gaps, AI feature scores |
 | [Phase 1 demo](docs/demos/phase-1.md) | Walkthrough of every Phase 1 feature on the demo data |
 | [User guides](docs/user/) · [Administration](docs/admin/) · [Developers](docs/dev/) · [AI](docs/ai/) · [API](docs/api/README.md) | How to use, run and extend each part |
