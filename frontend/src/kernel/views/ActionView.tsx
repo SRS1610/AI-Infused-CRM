@@ -121,7 +121,7 @@ export function ActionView() {
     return null;
   }
   const client = def.kind === "client" ? clientAction(def.client_tag) : undefined;
-  if (client) return client();
+  if (client) return <div className="client-page">{client()}</div>;
   if (def.kind !== "window" || !def.model)
     return (
       <div className="alert info">

@@ -793,6 +793,9 @@ input[type="radio"] {
   padding: 0 24px 32px;
   outline: none;
 }
+.client-page {
+  padding-top: 20px;
+}
 .offline-banner {
   background: var(--warning);
   color: #111;
