@@ -3007,11 +3007,6 @@ tr.clickable {
   padding-left: 1.25rem;
   font-size: 0.85rem;
 }
-.ai-dashboard .data-table {
-  width: 100%;
-  overflow-x: auto;
-  display: block;
-}
 .ai-dashboard .num {
   text-align: right;
   white-space: nowrap;
