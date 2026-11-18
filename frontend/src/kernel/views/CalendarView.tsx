@@ -184,6 +184,11 @@ export function CalendarView({ model, meta, view, domain, onOpen }: Props) {
           ))}
         </div>
       </div>
+      {records.data && records.data.length === 0 && (
+        <p className="calendar-empty" role="status">
+          {t("Nothing scheduled in this period. Use New to add an entry, or move to another period.")}
+        </p>
+      )}
       {mode === "month" ? (
         <div className="calendar-grid" role="grid" aria-label={label}>
           <div role="row" className="calendar-row head">

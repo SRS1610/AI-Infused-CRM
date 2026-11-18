@@ -110,7 +110,7 @@ describe("AI-ranked daily to-do", () => {
   it("is hidden when the feature is off", async () => {
     const { calls } = mockFetch(routes([]));
     wrap(<ActivityDashboard />, "/a/chatter.action_my_activities?ranked=1");
-    expect(await screen.findByText("Nothing to do. 🎉")).toBeInTheDocument();
+    expect(await screen.findByText("Nothing to do.")).toBeInTheDocument();
     await waitFor(() => expect(calls.some((c) => c.path === "/api/v1/ai/status")).toBe(true));
     expect(screen.queryByRole("button", { name: /Rank my day/ })).not.toBeInTheDocument();
     expect(calls.some((c) => c.path === "/api/v1/chatter/ai/todo")).toBe(false);

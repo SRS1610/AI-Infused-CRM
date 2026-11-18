@@ -81,7 +81,7 @@ function Documents() {
       {docs.isLoading && <p className="muted">{t("Loading…")}</p>}
       {docs.data && docs.data.quotations.length === 0 && <p className="muted">{t("No quotations yet.")}</p>}
       {docs.data && docs.data.quotations.length > 0 && (
-        <table className="pivot-table">
+        <table className="data-table">
           <thead>
             <tr>
               <th scope="col">{t("Number")}</th>
@@ -113,7 +113,7 @@ function Documents() {
       {subs.data && subs.data.subscriptions.length > 0 && (
         <>
           <h2>{t("Subscriptions")}</h2>
-          <table className="pivot-table">
+          <table className="data-table">
             <thead>
               <tr>
                 <th scope="col">{t("Number")}</th>

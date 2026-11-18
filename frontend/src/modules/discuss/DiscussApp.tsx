@@ -8,6 +8,7 @@ import { registerClientAction } from "../../kernel/extensions";
 import { t, tn, tx } from "../../kernel/i18n";
 import { useRealtime } from "../../kernel/realtime";
 import { useSession } from "../../kernel/session";
+import { Icon } from "../../kernel/icons";
 import {
   CatchUpButton,
   CatchUpPanel,
@@ -122,16 +123,21 @@ export function DiscussApp() {
   return (
     <div className="discuss">
       <nav className="discuss-sidebar" aria-label={t("Conversations")}>
-        <CatchUpButton onClick={() => setPanel("catchup")} />
+        <div className="discuss-sidebar-head">
+          <span className="discuss-title">{t("Discuss")}</span>
+          <CatchUpButton onClick={() => setPanel("catchup")} />
+        </div>
         {section(
           t("Channels"),
           list.filter((c) => c.type === "channel"),
         )}
         <div className="button-row">
           <button type="button" className="btn small ghost" onClick={() => setPanel("browse")}>
+            <Icon name="search" size={14} />
             {t("Browse")}
           </button>
           <button type="button" className="btn small ghost" onClick={() => setPanel("new")}>
+            <Icon name="plus" size={14} />
             {t("New channel")}
           </button>
         </div>
@@ -139,9 +145,12 @@ export function DiscussApp() {
           t("Direct messages"),
           list.filter((c) => c.type !== "channel"),
         )}
-        <button type="button" className="btn small ghost" onClick={() => setPanel("dm")}>
-          {t("Message someone")}
-        </button>
+        <div className="button-row">
+          <button type="button" className="btn small ghost" onClick={() => setPanel("dm")}>
+            <Icon name="send" size={14} />
+            {t("Message someone")}
+          </button>
+        </div>
       </nav>
       <section
         className="discuss-main"
@@ -174,7 +183,18 @@ export function DiscussApp() {
             onJump={jump}
           />
         )}
-        {!panel && !current && <p className="muted">{t("Join a channel or start a conversation.")}</p>}
+        {!panel && !current && (
+          <div className="discuss-empty">
+            <span className="app-glyph" aria-hidden="true">
+              <Icon name="message-square" size={22} />
+            </span>
+            <h2>{t("Pick a conversation")}</h2>
+            <p>{t("Join a channel or start a conversation.")}</p>
+            <button type="button" className="btn primary" onClick={() => setPanel("browse")}>
+              {t("See all channels")}
+            </button>
+          </div>
+        )}
       </section>
     </div>
   );

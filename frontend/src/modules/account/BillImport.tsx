@@ -9,6 +9,8 @@ import { aiErrorMessage, ai, type Proposal } from "../../kernel/ai/api";
 import { AiLabel, AiUnavailable, Feedback, useAiFeature } from "../../kernel/ai/components";
 import { registerClientAction, registerFormPanel, registerSearchAddon } from "../../kernel/extensions";
 import { t } from "../../kernel/i18n";
+import { Icon } from "../../kernel/icons";
+import { PageHeader } from "../../kernel/shell/PageHeader";
 import { accountAi, money, type ReadResult, type Review } from "./api";
 
 export const FEATURE = "account.bill_ocr";
@@ -261,7 +263,18 @@ export function BillReview({
 }
 
 /** Upload one document and review the proposal. */
-export function BillReader({ moveType, moveId, onDone }: { moveType?: string; moveId?: number; onDone?: () => void }) {
+export function BillReader({
+  moveType,
+  moveId,
+  onDone,
+  large = false,
+}: {
+  moveType?: string;
+  moveId?: number;
+  onDone?: () => void;
+  /** a drop zone (the "Read from documents" page) instead of a small button */
+  large?: boolean;
+}) {
   const feature = useAiFeature(FEATURE);
   const navigate = useNavigate();
   const inputId = useId();
@@ -284,9 +297,25 @@ export function BillReader({ moveType, moveId, onDone }: { moveType?: string; mo
   };
   return (
     <div className="bill-reader">
-      <label htmlFor={inputId} className="btn small">
-        {t("Read a document (PDF or image)")}
-      </label>
+      {large ? (
+        <label
+          htmlFor={inputId}
+          className="dropzone"
+          onDragOver={(e) => e.preventDefault()}
+          onDrop={(e) => {
+            e.preventDefault();
+            void read(e.dataTransfer.files?.[0]);
+          }}
+        >
+          <Icon name="upload" size={28} />
+          <strong>{t("Read a document (PDF or image)")}</strong>
+          <span>{t("Drop a file here or click to choose one. PDF, PNG, JPEG or WebP, 15 MB at most.")}</span>
+        </label>
+      ) : (
+        <label htmlFor={inputId} className="btn small">
+          {t("Read a document (PDF or image)")}
+        </label>
+      )}
       <input
         id={inputId}
         type="file"
@@ -328,18 +357,18 @@ export function BillImportPage() {
   const feature = useAiFeature(FEATURE);
   return (
     <div className="page bill-import">
-      <h1>{moveType === "out_invoice" ? t("Read invoices from documents") : t("Read bills from documents")}</h1>
+      <PageHeader
+        title={moveType === "out_invoice" ? t("Read invoices from documents") : t("Read bills from documents")}
+        subtitle={t(
+          "Upload a PDF or a scan. The partner, the lines, their accounts and taxes are proposed for review; the draft is created only when you accept.",
+        )}
+      />
       {!feature.enabled && !feature.loading ? (
         <p className="muted">{t("Document reading is turned off for this company.")}</p>
       ) : (
-        <>
-          <p className="muted">
-            {t(
-              "Upload a PDF or a scan. The partner, the lines, their accounts and taxes are proposed for review; the draft is created only when you accept.",
-            )}
-          </p>
-          <BillReader moveType={typeof moveType === "string" ? moveType : undefined} />
-        </>
+        <div className="panel-card ai-card">
+          <BillReader moveType={typeof moveType === "string" ? moveType : undefined} large />
+        </div>
       )}
     </div>
   );

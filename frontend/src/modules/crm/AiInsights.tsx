@@ -14,6 +14,7 @@ import {
 import { request } from "../../kernel/api/client";
 import { registerFormPanel, registerSelectionAction } from "../../kernel/extensions";
 import { formatNumber } from "../../kernel/format";
+import { ScrollTable } from "../../kernel/views/ScrollTable";
 import { t } from "../../kernel/i18n";
 
 export interface ScoreFactor {
@@ -385,52 +386,54 @@ export function RoutingReview({ ids, onDone }: { ids: number[]; onDone: () => vo
       {result.isLoading && <p className="muted">{t("Finding the best salesperson for each lead…")}</p>}
       {result.error && <div className="alert error">{aiErrorMessage(result.error)}</div>}
       {result.data && (
-        <table className="data-table">
-          <caption className="sr-only">{t("Suggested assignees")}</caption>
-          <thead>
-            <tr>
-              <th scope="col">{t("Lead")}</th>
-              <th scope="col">{t("Suggested")}</th>
-              <th scope="col">{t("Why")}</th>
-              <th scope="col">{t("Decision")}</th>
-            </tr>
-          </thead>
-          <tbody>
-            {result.data.rows.map((r) => (
-              <tr key={r.lead_id}>
-                <th scope="row">{r.lead}</th>
-                <td>{r.user ?? "—"}</td>
-                <td className="small">{r.reasons.join("; ")}</td>
-                <td>
-                  {r.proposal && !decided[r.proposal.id] ? (
-                    <span className="ai-actions">
-                      <button
-                        type="button"
-                        className="btn primary small"
-                        aria-label={t("Accept {user} for {lead}", { user: r.user, lead: r.lead })}
-                        onClick={() => decide(r.proposal!, true)}
-                      >
-                        {t("Accept")}
-                      </button>
-                      <button
-                        type="button"
-                        className="btn small"
-                        aria-label={t("Reject suggestion for {lead}", { lead: r.lead })}
-                        onClick={() => decide(r.proposal!, false)}
-                      >
-                        {t("Reject")}
-                      </button>
-                    </span>
-                  ) : (
-                    <span className="badge">
-                      {r.proposal ? decidedLabel(decided[r.proposal.id]) : routingStatusLabel(r.status)}
-                    </span>
-                  )}
-                </td>
+        <ScrollTable label={t("Forecast with confidence range")}>
+          <table className="data-table">
+            <caption className="sr-only">{t("Suggested assignees")}</caption>
+            <thead>
+              <tr>
+                <th scope="col">{t("Lead")}</th>
+                <th scope="col">{t("Suggested")}</th>
+                <th scope="col">{t("Why")}</th>
+                <th scope="col">{t("Decision")}</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {result.data.rows.map((r) => (
+                <tr key={r.lead_id}>
+                  <th scope="row">{r.lead}</th>
+                  <td>{r.user ?? "—"}</td>
+                  <td className="small">{r.reasons.join("; ")}</td>
+                  <td>
+                    {r.proposal && !decided[r.proposal.id] ? (
+                      <span className="ai-actions">
+                        <button
+                          type="button"
+                          className="btn primary small"
+                          aria-label={t("Accept {user} for {lead}", { user: r.user, lead: r.lead })}
+                          onClick={() => decide(r.proposal!, true)}
+                        >
+                          {t("Accept")}
+                        </button>
+                        <button
+                          type="button"
+                          className="btn small"
+                          aria-label={t("Reject suggestion for {lead}", { lead: r.lead })}
+                          onClick={() => decide(r.proposal!, false)}
+                        >
+                          {t("Reject")}
+                        </button>
+                      </span>
+                    ) : (
+                      <span className="badge">
+                        {r.proposal ? decidedLabel(decided[r.proposal.id]) : routingStatusLabel(r.status)}
+                      </span>
+                    )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </ScrollTable>
       )}
       <div className="ai-actions">
         {pending.length > 0 && (
@@ -476,40 +479,42 @@ export function AiForecastSection() {
   };
   const fc = data.data?.forecast;
   return (
-    <section aria-labelledby="ai-forecast-h" className="ai-forecast">
+    <section aria-labelledby="ai-forecast-h" className="ai-forecast panel-card flush ai-card">
       <h2 id="ai-forecast-h">
         {t("Forecast with confidence range")} <AiLabel text={t("AI forecast")} />
       </h2>
       {fc ? (
         <>
-          <table className="pivot-table">
-            <thead>
-              <tr>
-                <th scope="col">{t("Month")}</th>
-                <th scope="col" className="num">
-                  {t("Low (P10)")}
-                </th>
-                <th scope="col" className="num">
-                  {t("Likely (P50)")}
-                </th>
-                <th scope="col" className="num">
-                  {t("High (P90)")}
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {fc.periods.map((p) => (
-                <tr key={p.period}>
-                  <th scope="row">{p.label}</th>
-                  <td className="num">{formatNumber(p.p10, 0)}</td>
-                  <td className="num">
-                    <strong>{formatNumber(p.p50, 0)}</strong>
-                  </td>
-                  <td className="num">{formatNumber(p.p90, 0)}</td>
+          <ScrollTable label={t("Forecast with confidence range")}>
+            <table className="data-table">
+              <thead>
+                <tr>
+                  <th scope="col">{t("Month")}</th>
+                  <th scope="col" className="num">
+                    {t("Low (P10)")}
+                  </th>
+                  <th scope="col" className="num">
+                    {t("Likely (P50)")}
+                  </th>
+                  <th scope="col" className="num">
+                    {t("High (P90)")}
+                  </th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {fc.periods.map((p) => (
+                  <tr key={p.period}>
+                    <th scope="row">{p.label}</th>
+                    <td className="num">{formatNumber(p.p10, 0)}</td>
+                    <td className="num">
+                      <strong>{formatNumber(p.p50, 0)}</strong>
+                    </td>
+                    <td className="num">{formatNumber(p.p90, 0)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </ScrollTable>
           <ul className="ai-forecast-explanations small">
             {fc.periods.map((p) => (
               <li key={p.period}>{p.explanation}</li>

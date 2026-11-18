@@ -3,7 +3,9 @@ import { useState } from "react";
 import { api, request } from "../../kernel/api/client";
 import { registerClientAction } from "../../kernel/extensions";
 import { formatMonetary } from "../../kernel/format";
-import { t } from "../../kernel/i18n";
+import { t, tn } from "../../kernel/i18n";
+import { Icon } from "../../kernel/icons";
+import { PageHeader } from "../../kernel/shell/PageHeader";
 import { AiLineSuggestions, AiSuggestOpenButton } from "./BankAi";
 
 const LINE_MODEL = "account.bank_statement_line";
@@ -164,8 +166,37 @@ export function BankReconcile() {
 
   return (
     <div className="bank-reconcile">
-      <h1 className="page-title">{t("Bank reconciliation")}</h1>
-      <div className="toolbar" role="toolbar" aria-label={t("Bank reconciliation")}>
+      <PageHeader
+        title={t("Bank reconciliation")}
+        subtitle={lines.data ? tn("{count} transaction", "{count} transactions", lines.data.length) : undefined}
+        actions={
+          <div className="page-actions" role="toolbar" aria-label={t("Bank reconciliation")}>
+            <button type="button" className="btn primary" onClick={() => void autoReconcile()}>
+              <Icon name="refresh" />
+              {t("Auto-reconcile")}
+            </button>
+            <AiSuggestOpenButton
+              journalId={journalId || null}
+              onDone={(text, error) => setMessage({ kind: error ? "error" : "info", text })}
+            />
+            <label className="btn ghost">
+              <Icon name="upload" />
+              {importing ? t("Importing…") : t("Import a statement")}
+              <input
+                type="file"
+                hidden
+                aria-label={t("Statement file")}
+                accept=".csv,.txt,.ofx,.qfx,.xml,.sta,.940,.mt940"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) void importFile(file);
+                  e.target.value = "";
+                }}
+              />
+            </label>
+          </div>
+        }
+      >
         <label>
           {t("Journal")}{" "}
           <select
@@ -190,35 +221,14 @@ export function BankReconcile() {
           </select>
         </label>
         <input
-          className="input"
+          className="input search-input"
           type="search"
           placeholder={t("Search transactions")}
           aria-label={t("Search transactions")}
           value={query}
           onChange={(e) => setQuery(e.target.value)}
         />
-        <button type="button" className="btn" onClick={() => void autoReconcile()}>
-          {t("Auto-reconcile")}
-        </button>
-        <AiSuggestOpenButton
-          journalId={journalId || null}
-          onDone={(text, error) => setMessage({ kind: error ? "error" : "info", text })}
-        />
-        <label className="btn ghost">
-          {importing ? t("Importing…") : t("Import a statement")}
-          <input
-            type="file"
-            hidden
-            aria-label={t("Statement file")}
-            accept=".csv,.txt,.ofx,.qfx,.xml,.sta,.940,.mt940"
-            onChange={(e) => {
-              const file = e.target.files?.[0];
-              if (file) void importFile(file);
-              e.target.value = "";
-            }}
-          />
-        </label>
-      </div>
+      </PageHeader>
       {message && (
         <div
           className={`alert ${message.kind === "error" ? "error" : "info"}`}
@@ -228,10 +238,10 @@ export function BankReconcile() {
         </div>
       )}
       <div className="bank-reconcile-panes">
-        <section aria-labelledby="bank-lines-h" className="bank-lines">
+        <section aria-labelledby="bank-lines-h" className="bank-lines panel-card flush">
           <h2 id="bank-lines-h">{t("Transactions")}</h2>
-          {lines.isLoading && <p className="muted">{t("Loading…")}</p>}
-          {lines.data && lines.data.length === 0 && <p className="muted">{t("Nothing to reconcile.")}</p>}
+          {lines.isLoading && <p className="muted card-note">{t("Loading…")}</p>}
+          {lines.data && lines.data.length === 0 && <p className="muted card-note">{t("Nothing to reconcile.")}</p>}
           <ul className="bank-line-list">
             {(lines.data ?? []).map((line) => (
               <li key={line.id}>
@@ -253,10 +263,10 @@ export function BankReconcile() {
             ))}
           </ul>
         </section>
-        <section aria-labelledby="bank-match-h" className="bank-match">
+        <section aria-labelledby="bank-match-h" className="bank-match panel-card flush">
           <h2 id="bank-match-h">{t("Match")}</h2>
           {selected === null ? (
-            <p className="muted">{t("Select a transaction to see matching suggestions.")}</p>
+            <p className="muted card-note">{t("Select a transaction to see matching suggestions.")}</p>
           ) : (
             <LinePanel key={selected} lineId={selected} run={run} />
           )}

@@ -119,7 +119,7 @@ export function QuotePage() {
         </div>
         <span className={`badge state-${q.state}`}>{quoteStateLabel(q.state)}</span>
       </header>
-      <div className="table-scroll">
+      <div className="table-scroll" tabIndex={0} role="region" aria-label={t("Lines")}>
         <table className="pivot-table quote-lines">
           <thead>
             <tr>

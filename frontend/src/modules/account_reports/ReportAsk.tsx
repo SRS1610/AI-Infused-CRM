@@ -82,7 +82,7 @@ export function ReportAsk({
   };
   const p = result?.data.params;
   return (
-    <div className="report-ask control-panel">
+    <div className="report-ask-box">
       <form
         onSubmit={(e) => {
           e.preventDefault();

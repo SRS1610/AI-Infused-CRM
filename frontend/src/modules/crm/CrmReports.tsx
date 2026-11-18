@@ -4,6 +4,8 @@ import { request } from "../../kernel/api/client";
 import { registerClientAction } from "../../kernel/extensions";
 import { formatNumber } from "../../kernel/format";
 import { t, tx } from "../../kernel/i18n";
+import { PageHeader } from "../../kernel/shell/PageHeader";
+import { ScrollTable } from "../../kernel/views/ScrollTable";
 import { AiForecastSection } from "./AiInsights";
 
 interface Velocity {
@@ -52,7 +54,10 @@ export function CrmReports() {
 
   return (
     <div className="crm-reports">
-      <h1 className="page-title">{t("Sales analysis")}</h1>
+      <PageHeader
+        title={t("Sales analysis")}
+        subtitle={t("Pipeline velocity, funnel and expected revenue by closing month")}
+      />
       {velocity.data && (
         <div className="kpis" aria-label={t("Sales velocity")}>
           <div className="kpi">
@@ -77,69 +82,73 @@ export function CrmReports() {
           </div>
         </div>
       )}
-      <section aria-labelledby="funnel-h">
+      <section aria-labelledby="funnel-h" className="panel-card flush">
         <h2 id="funnel-h">{t("Funnel")}</h2>
-        <table className="pivot-table">
-          <thead>
-            <tr>
-              <th scope="col">{t("Stage")}</th>
-              <th scope="col" className="num">
-                {t("In stage")}
-              </th>
-              <th scope="col" className="num">
-                {t("Reached")}
-              </th>
-              <th scope="col">{t("Conversion")}</th>
-              <th scope="col" className="num">
-                {t("Revenue in stage")}
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {(funnel.data ?? []).map((r) => (
-              <tr key={r.stage}>
-                <th scope="row">{r.stage}</th>
-                <td className="num">{r.count}</td>
-                <td className="num">{r.reached}</td>
-                <td>
-                  <span className="bar" style={{ width: `${(100 * r.reached) / maxReached}%` }} aria-hidden="true" />{" "}
-                  {r.conversion} %
-                </td>
-                <td className="num">{formatNumber(r.revenue, 0)}</td>
+        <ScrollTable label={t("Funnel")}>
+          <table className="data-table">
+            <thead>
+              <tr>
+                <th scope="col">{t("Stage")}</th>
+                <th scope="col" className="num">
+                  {t("In stage")}
+                </th>
+                <th scope="col" className="num">
+                  {t("Reached")}
+                </th>
+                <th scope="col">{t("Conversion")}</th>
+                <th scope="col" className="num">
+                  {t("Revenue in stage")}
+                </th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {(funnel.data ?? []).map((r) => (
+                <tr key={r.stage}>
+                  <th scope="row">{r.stage}</th>
+                  <td className="num">{r.count}</td>
+                  <td className="num">{r.reached}</td>
+                  <td>
+                    <span className="bar" style={{ width: `${(100 * r.reached) / maxReached}%` }} aria-hidden="true" />{" "}
+                    {r.conversion} %
+                  </td>
+                  <td className="num">{formatNumber(r.revenue, 0)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </ScrollTable>
       </section>
       <AiForecastSection />
-      <section aria-labelledby="forecast-h">
+      <section aria-labelledby="forecast-h" className="panel-card flush">
         <h2 id="forecast-h">{t("Forecast by expected closing month")}</h2>
-        <table className="pivot-table">
-          <thead>
-            <tr>
-              <th scope="col">{t("Month")}</th>
-              <th scope="col" className="num">
-                {t("Opportunities")}
-              </th>
-              <th scope="col" className="num">
-                {t("Pipeline")}
-              </th>
-              <th scope="col" className="num">
-                {t("Weighted")}
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {(forecast.data ?? []).map((r) => (
-              <tr key={r.month ?? "none"}>
-                <th scope="row">{r.month ? r.month.slice(0, 7) : t("No date")}</th>
-                <td className="num">{r.count}</td>
-                <td className="num">{formatNumber(r.pipeline, 2)}</td>
-                <td className="num">{formatNumber(r.weighted, 2)}</td>
+        <ScrollTable label={t("Forecast by expected closing month")}>
+          <table className="data-table">
+            <thead>
+              <tr>
+                <th scope="col">{t("Month")}</th>
+                <th scope="col" className="num">
+                  {t("Opportunities")}
+                </th>
+                <th scope="col" className="num">
+                  {t("Pipeline")}
+                </th>
+                <th scope="col" className="num">
+                  {t("Weighted")}
+                </th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {(forecast.data ?? []).map((r) => (
+                <tr key={r.month ?? "none"}>
+                  <th scope="row">{r.month ? r.month.slice(0, 7) : t("No date")}</th>
+                  <td className="num">{r.count}</td>
+                  <td className="num">{formatNumber(r.pipeline, 2)}</td>
+                  <td className="num">{formatNumber(r.weighted, 2)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </ScrollTable>
       </section>
       <section aria-labelledby="winrate-h">
         <h2 id="winrate-h">
@@ -157,36 +166,38 @@ export function CrmReports() {
             ),
           })}
         </h2>
-        <table className="pivot-table">
-          <thead>
-            <tr>
-              <th scope="col">{groupBy === "user_id" ? t("Salesperson") : t("Team")}</th>
-              <th scope="col" className="num">
-                {t("Won")}
-              </th>
-              <th scope="col" className="num">
-                {t("Lost")}
-              </th>
-              <th scope="col" className="num">
-                {t("Win rate")}
-              </th>
-              <th scope="col" className="num">
-                {t("Won revenue")}
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {(winRate.data ?? []).map((r) => (
-              <tr key={r.label}>
-                <th scope="row">{r.label}</th>
-                <td className="num">{r.won}</td>
-                <td className="num">{r.lost}</td>
-                <td className="num">{formatNumber(r.win_rate, 1)} %</td>
-                <td className="num">{formatNumber(r.won_revenue, 0)}</td>
+        <ScrollTable label={t("Forecast by expected closing month")}>
+          <table className="data-table">
+            <thead>
+              <tr>
+                <th scope="col">{groupBy === "user_id" ? t("Salesperson") : t("Team")}</th>
+                <th scope="col" className="num">
+                  {t("Won")}
+                </th>
+                <th scope="col" className="num">
+                  {t("Lost")}
+                </th>
+                <th scope="col" className="num">
+                  {t("Win rate")}
+                </th>
+                <th scope="col" className="num">
+                  {t("Won revenue")}
+                </th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {(winRate.data ?? []).map((r) => (
+                <tr key={r.label}>
+                  <th scope="row">{r.label}</th>
+                  <td className="num">{r.won}</td>
+                  <td className="num">{r.lost}</td>
+                  <td className="num">{formatNumber(r.win_rate, 1)} %</td>
+                  <td className="num">{formatNumber(r.won_revenue, 0)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </ScrollTable>
       </section>
     </div>
   );

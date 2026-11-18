@@ -127,7 +127,7 @@ export function PivotView({ model, meta, view, domain }: Props) {
         </div>
       )}
       {!result.isLoading && (
-        <div className="table-scroll">
+        <div className="table-scroll" tabIndex={0} role="region" aria-label={t("Pivot table")}>
           <table className="pivot-table">
             <caption className="sr-only">
               {col

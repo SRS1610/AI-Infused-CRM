@@ -98,7 +98,7 @@ export function ImportPage() {
               <span className="badge">{t("Mapping “{name}” applied", { name: job.saved_mapping })}</span>
             )}
           </p>
-          <div className="table-scroll">
+          <div className="table-scroll" tabIndex={0} role="region" aria-label={t("Preview")}>
             <table className="import-mapping">
               <thead>
                 <tr>

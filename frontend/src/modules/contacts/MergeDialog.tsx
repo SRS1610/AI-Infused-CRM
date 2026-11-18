@@ -68,7 +68,7 @@ export function MergeDialog({ ids, onDone }: { ids: number[]; onDone: () => void
                 "The kept contact receives every reference (quotes, leads, messages, activities, attachments) of the others, which are archived. You can undo the merge for 7 days.",
               )}
             </p>
-            <div className="table-scroll">
+            <div className="table-scroll" tabIndex={0} role="region" aria-label={t("Compare")}>
               <table className="import-mapping">
                 <thead>
                   <tr>

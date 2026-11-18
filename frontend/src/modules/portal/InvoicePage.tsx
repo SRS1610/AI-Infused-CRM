@@ -151,7 +151,7 @@ export function InvoicePage() {
           {notice.text}
         </div>
       )}
-      <table className="pivot-table">
+      <table className="data-table">
         <thead>
           <tr>
             <th scope="col">{t("Description")}</th>

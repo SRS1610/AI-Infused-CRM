@@ -44,6 +44,16 @@ style their own components with the same tokens and classes; they never hard-cod
 | `.kanban-card` (`.card-title`, `.card-line`, `.card-amount`, `.card-foot`, `.card-owner`, `.card-stars`) | kanban cards |
 | `.table-wrap`, `.table`, `.table-scroll` | grids; `.num` right-aligns numbers with tabular figures |
 | `.access-denied` | the page shown for a 403 (`AccessDenied` component) |
+| `PageHeader` (`.page-head`) | the white band at the top of a page that is not a generic view (reports, dashboards, tools): title, subtitle and actions, then the page's own controls on the command row |
+| `.panel-card`, `.panel-card.flush`, `.panel-card.ai-card`, `.card-grid` | content cards; `flush` for a card that holds a table under an `h2` band; `ai-card` adds the violet edge to AI output |
+| `.kpis` / `.kpi` | headline figures above a dashboard (label, then value) |
+| `.data-table` inside `ScrollTable` | tables in cards; `ScrollTable` makes a wide table scroll sideways in a focusable, labelled region |
+| `.dropzone` | file upload area (drag and drop or click) |
+| `.portal-page` | customer-facing documents opened from an e-mail link: a centred sheet with an accent strip |
+
+App-specific pages (financial reports, cash-flow forecast, bank reconciliation, document reading, AI usage,
+CRM reports, activities, Studio) are built from these: `PageHeader`, optional `.kpis`, then cards. Discuss
+is a full-height two-pane layout (conversations, conversation).
 
 ## Icons
 

@@ -9,6 +9,7 @@ import { errorText, studio, type StudioFieldInfo } from "./api";
 import { AddField, EditField } from "./FieldEditors";
 import { LayoutEditor, NewView, type LayoutType } from "./LayoutEditors";
 import { SearchEditor } from "./SearchEditor";
+import { PageHeader } from "../../kernel/shell/PageHeader";
 import { WorkflowBuilder } from "./WorkflowBuilder";
 
 function AutomationForm({ model, fields, onDone }: { model: string; fields: StudioFieldInfo[]; onDone: () => void }) {
@@ -246,8 +247,10 @@ export function StudioApp() {
   };
   return (
     <div className="page studio-app">
-      <header className="page-header">
-        <h1>{t("Studio")}</h1>
+      <PageHeader
+        title={t("Studio")}
+        subtitle={t("Customise fields, views, search, automations and workflows; every change can be rolled back")}
+      >
         <label className="field inline">
           <span>{t("Model")}</span>
           <select className="input" aria-label={t("Model")} value={model} onChange={(e) => setModel(e.target.value)}>
@@ -258,10 +261,10 @@ export function StudioApp() {
             ))}
           </select>
         </label>
-      </header>
+      </PageHeader>
       {models.error && <div className="alert error">{errorText(models.error)}</div>}
       <div className="studio-main">
-        <div className="studio-work">
+        <div className="studio-work panel-card">
           <div role="tablist" className="tabs" aria-label={t("Studio sections")}>
             {tabs.map(([key, label], i) => (
               <button

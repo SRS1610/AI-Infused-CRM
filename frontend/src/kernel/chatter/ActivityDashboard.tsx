@@ -7,6 +7,8 @@ import { request } from "../api/client";
 import { chatter } from "../api/platform";
 import { formatDate } from "../format";
 import { t } from "../i18n";
+import { PageHeader } from "../shell/PageHeader";
+import { ScrollTable } from "../views/ScrollTable";
 import { ActivityRow } from "./Chatter";
 
 const STATE_KEYS = ["overdue", "today", "planned"] as const;
@@ -57,21 +59,26 @@ export function ActivityDashboard() {
   const totals = buckets.map((s) => ({ ...s, count: summary.reduce((n, m) => n + m[s.key], 0) }));
   return (
     <div className="activity-dashboard">
-      <div className="activity-dashboard-head">
-        <h1 className="page-title">{t("My activities")}</h1>
-        {/* ranked by rules on the server (no AI provider), so it works while the AI gateway is down;
-            hidden when the feature is turned off for the company */}
-        {todo.enabled && (
-          <button
-            type="button"
-            className={`btn small${ranked ? " active" : " ghost"}`}
-            aria-pressed={ranked}
-            onClick={() => setRanked((r) => !r)}
-          >
-            ✦ {t("Rank my day")}
-          </button>
-        )}
-      </div>
+      <PageHeader
+        title={t("My activities")}
+        subtitle={t("Calls, meetings and to-dos assigned to you, by due date")}
+        actions={
+          <>
+            {/* ranked by rules on the server (no AI provider), so it works while the AI gateway is down;
+                hidden when the feature is turned off for the company */}
+            {todo.enabled && (
+              <button
+                type="button"
+                className={`btn small${ranked ? " active" : " ghost"}`}
+                aria-pressed={ranked}
+                onClick={() => setRanked((r) => !r)}
+              >
+                ✦ {t("Rank my day")}
+              </button>
+            )}
+          </>
+        }
+      />
       {todo.enabled && ranked && <RankedTodoPanel onChange={() => void data.refetch()} />}
       <div className="activity-buckets" role="tablist" aria-label={t("Due")}>
         <button
@@ -97,37 +104,43 @@ export function ActivityDashboard() {
         ))}
       </div>
       {summary.length > 0 && (
-        <table className="activity-summary">
-          <thead>
-            <tr>
-              <th scope="col">{t("Document")}</th>
-              {buckets.map((s) => (
-                <th key={s.key} scope="col" className="num">
-                  {s.label}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {summary.map((m) => (
-              <tr key={m.model}>
-                <th scope="row">{m.label}</th>
-                {buckets.map((s) => (
-                  <td key={s.key} className={`num ${m[s.key] ? s.key : ""}`}>
-                    {m[s.key]}
-                  </td>
+        <div className="panel-card flush">
+          <ScrollTable label={t("Due")}>
+            <table className="data-table activity-summary">
+              <thead>
+                <tr>
+                  <th scope="col">{t("Document")}</th>
+                  {buckets.map((s) => (
+                    <th key={s.key} scope="col" className="num">
+                      {s.label}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {summary.map((m) => (
+                  <tr key={m.model}>
+                    <th scope="row">{m.label}</th>
+                    {buckets.map((s) => (
+                      <td key={s.key} className={`num ${m[s.key] ? s.key : ""}`}>
+                        {m[s.key]}
+                      </td>
+                    ))}
+                  </tr>
                 ))}
-              </tr>
-            ))}
-          </tbody>
-        </table>
+              </tbody>
+            </table>
+          </ScrollTable>
+        </div>
       )}
-      <div className="activity-list">
+      <div className="activity-list panel-card flush">
         {data.isLoading && <div className="loading">{t("Loading…")}</div>}
         {(data.data?.items ?? []).map((a) => (
           <ActivityRow key={a.id} activity={a} showRecord onChange={() => void data.refetch()} />
         ))}
-        {!data.isLoading && (data.data?.items.length ?? 0) === 0 && <p className="muted">{t("Nothing to do.")} 🎉</p>}
+        {!data.isLoading && (data.data?.items.length ?? 0) === 0 && (
+          <p className="muted card-note">{t("Nothing to do.")}</p>
+        )}
       </div>
     </div>
   );
@@ -166,7 +179,7 @@ function RankedTodoPanel({ onChange }: { onChange: () => void }) {
           {aiErrorMessage(ranked.error)}
         </div>
       )}
-      {ranked.data && items.length === 0 && <p className="muted">{t("Nothing to rank.")} 🎉</p>}
+      {ranked.data && items.length === 0 && <p className="muted">{t("Nothing to rank.")}</p>}
       {items.length > 0 && (
         <ol className="ai-todo-list">
           {items.map((i) => (

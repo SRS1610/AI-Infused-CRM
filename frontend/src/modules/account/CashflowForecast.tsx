@@ -8,6 +8,8 @@ import { aiErrorMessage } from "../../kernel/ai/api";
 import { AiLabel, AiUnavailable, Feedback, useAiFeature } from "../../kernel/ai/components";
 import { registerClientAction } from "../../kernel/extensions";
 import { t } from "../../kernel/i18n";
+import { PageHeader } from "../../kernel/shell/PageHeader";
+import { ScrollTable } from "../../kernel/views/ScrollTable";
 import { accountAi, money, type Forecast, type Narrative } from "./api";
 
 export const CASHFLOW = "account.cashflow_forecast";
@@ -99,18 +101,21 @@ export function CashflowForecastPage() {
   if (!feature.loading && !feature.enabled)
     return (
       <div className="page">
-        <h1>{t("Cash-flow forecast")}</h1>
+        <PageHeader title={t("Cash-flow forecast")} />
         <p className="muted">{t("The cash-flow forecast is turned off for this company.")}</p>
       </div>
     );
   const f = forecast.data;
   return (
     <div className="page cashflow-forecast">
-      <h1>{t("Cash-flow forecast")}</h1>
-      <div className="toolbar">
+      <PageHeader
+        title={t("Cash-flow forecast")}
+        subtitle={t("Expected bank and cash position from open invoices, bills and recurring movements")}
+      >
         <label htmlFor={selectId}>{t("Horizon")}</label>{" "}
         <select
           id={selectId}
+          className="input small"
           value={weeks}
           onChange={(e) => {
             setWeeks(Number(e.target.value));
@@ -123,7 +128,7 @@ export function CashflowForecastPage() {
             </option>
           ))}
         </select>
-      </div>
+      </PageHeader>
       {forecast.isLoading && (
         <p role="status" className="loading">
           {t("Loading…")}
@@ -136,12 +141,37 @@ export function CashflowForecastPage() {
       )}
       {f && (
         <>
-          <p className="muted">
-            {t("Cash today")}: <strong>{money(f.opening, f.currency)}</strong> · {t("Open receivables")}:{" "}
-            {money(f.open_receivables)} · {t("Open payables")}: {money(f.open_payables)}
-          </p>
-          <ForecastChart forecast={f} />
-          <section aria-label={t("Narrative")}>
+          <div className="kpis">
+            <div className="kpi">
+              <span>{t("Cash today")}</span>
+              <strong>{money(f.opening, f.currency)}</strong>
+            </div>
+            <div className="kpi">
+              <span>{t("Open receivables")}</span>
+              <strong>{money(f.open_receivables)}</strong>
+            </div>
+            <div className="kpi">
+              <span>{t("Open payables")}</span>
+              <strong>{money(f.open_payables)}</strong>
+            </div>
+            {f.weeks.length > 0 && (
+              <div className="kpi">
+                <span>{t("Lowest point")}</span>
+                <strong>{money(Math.min(...f.weeks.map((w) => Number(w.position))))}</strong>
+              </div>
+            )}
+            {f.weeks.length > 0 && (
+              <div className="kpi">
+                <span>{t("End of horizon")}</span>
+                <strong>{money(f.weeks[f.weeks.length - 1].position)}</strong>
+              </div>
+            )}
+          </div>
+          <div className="panel-card">
+            <h2 className="panel-card-title">{t("Expected cash position")}</h2>
+            <ForecastChart forecast={f} />
+          </div>
+          <section className="panel-card ai-card" aria-label={t("Narrative")}>
             {narrative ? (
               <p className="ai-text">
                 <AiLabel text={narrative.narrative_source === "model" ? t("AI-generated") : t("From the figures")} />{" "}
@@ -163,45 +193,57 @@ export function CashflowForecastPage() {
               </div>
             )}
           </section>
-          <table className="list-table">
-            <caption>{t("Weekly cash position")}</caption>
-            <thead>
-              <tr>
-                <th scope="col">{t("Week")}</th>
-                <th scope="col">{t("Until")}</th>
-                <th scope="col">{t("In")}</th>
-                <th scope="col">{t("Out")}</th>
-                <th scope="col">{t("Position")}</th>
-                <th scope="col">{t("Range")}</th>
-              </tr>
-            </thead>
-            <tbody>
-              {f.weeks.map((w) => (
-                <tr key={w.week}>
-                  <th scope="row">{w.week}</th>
-                  <td>{w.end}</td>
-                  <td className="num">{money(w.inflow)}</td>
-                  <td className="num">{money(w.outflow)}</td>
-                  <td className="num">{money(w.position)}</td>
-                  <td className="num">
-                    {money(w.low)} – {money(w.high)}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-          {f.largest_items.length > 0 && (
-            <>
-              <h2>{t("Largest expected items")}</h2>
-              <ul>
-                {f.largest_items.map((b) => (
-                  <li key={`${b.label}-${b.date}`}>
-                    {b.date} · {b.label} · {money(b.amount)}
-                  </li>
-                ))}
-              </ul>
-            </>
-          )}
+          <div className="card-grid">
+            <div className="panel-card flush">
+              <ScrollTable label={t("Weekly cash position")}>
+                <table className="data-table">
+                  <caption className="table-caption">{t("Weekly cash position")}</caption>
+                  <thead>
+                    <tr>
+                      <th scope="col">{t("Week")}</th>
+                      <th scope="col">{t("Until")}</th>
+                      <th scope="col">{t("In")}</th>
+                      <th scope="col">{t("Out")}</th>
+                      <th scope="col">{t("Position")}</th>
+                      <th scope="col">{t("Range")}</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {f.weeks.map((w) => (
+                      <tr key={w.week}>
+                        <th scope="row">{w.week}</th>
+                        <td>{w.end}</td>
+                        <td className="num">{money(w.inflow)}</td>
+                        <td className="num">{money(w.outflow)}</td>
+                        <td className="num">{money(w.position)}</td>
+                        <td className="num">
+                          {money(w.low)} – {money(w.high)}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </ScrollTable>
+            </div>
+            {f.largest_items.length > 0 && (
+              <div className="panel-card flush">
+                <h2>{t("Largest expected items")}</h2>
+                <ScrollTable label={t("Largest expected items")}>
+                  <table className="data-table">
+                    <tbody>
+                      {f.largest_items.map((b) => (
+                        <tr key={`${b.label}-${b.date}`}>
+                          <td>{b.date}</td>
+                          <td>{b.label}</td>
+                          <td className="num">{money(b.amount)}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </ScrollTable>
+              </div>
+            )}
+          </div>
         </>
       )}
     </div>

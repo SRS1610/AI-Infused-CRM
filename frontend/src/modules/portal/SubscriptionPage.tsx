@@ -147,7 +147,7 @@ export function SubscriptionPage() {
           {t("Your subscription ends on {date}.", { date: s.end_date ?? "" })}
         </div>
       )}
-      <table className="pivot-table">
+      <table className="data-table">
         <thead>
           <tr>
             <th scope="col">{t("Description")}</th>
@@ -177,7 +177,7 @@ export function SubscriptionPage() {
       {s.invoices.length === 0 ? (
         <p className="muted">{t("No invoices yet.")}</p>
       ) : (
-        <table className="pivot-table">
+        <table className="data-table">
           <thead>
             <tr>
               <th scope="col">{t("Number")}</th>

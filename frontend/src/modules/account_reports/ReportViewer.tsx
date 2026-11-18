@@ -15,6 +15,9 @@ import {
   type ReportLine,
 } from "./api";
 import { ReportAsk, type ScopeLabels } from "./ReportAsk";
+import { Icon } from "../../kernel/icons";
+import { ScrollTable } from "../../kernel/views/ScrollTable";
+import { PageHeader } from "../../kernel/shell/PageHeader";
 
 const ITEM_FIELDS = ["date", "move_id", "account_id", "partner_id", "name", "debit", "credit", "balance"];
 
@@ -36,8 +39,8 @@ function DrillDown({ title, domain, onClose }: { title: string; domain: Domain; 
   });
   const total = items.data?.total ?? 0;
   return (
-    <section className="report-drilldown" aria-labelledby={headingId}>
-      <div className="control-panel">
+    <section className="report-drilldown panel-card flush" aria-labelledby={headingId}>
+      <div className="drill-head">
         <h2 id={headingId}>{title}</h2>
         <button type="button" className="btn small" onClick={onClose}>
           {t("Close")}
@@ -49,40 +52,42 @@ function DrillDown({ title, domain, onClose }: { title: string; domain: Domain; 
         </p>
       )}
       {items.data && (
-        <table className="pivot-table">
-          <caption className="sr-only">{t("Journal items")}</caption>
-          <thead>
-            <tr>
-              <th scope="col">{t("Date")}</th>
-              <th scope="col">{t("Entry")}</th>
-              <th scope="col">{t("Account")}</th>
-              <th scope="col">{t("Partner")}</th>
-              <th scope="col">{t("Label")}</th>
-              <th scope="col" className="num">
-                {t("Debit")}
-              </th>
-              <th scope="col" className="num">
-                {t("Credit")}
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {items.data.items.map((item) => {
-              const move = item.move_id as { id: number; display_name: string } | null;
-              return (
-                <tr key={String(item.id)}>
-                  <td>{formatDate(item.date as string)}</td>
-                  <td>{move ? <Link to={`/m/account.move/${move.id}`}>{move.display_name}</Link> : ""}</td>
-                  <td>{(item.account_id as { display_name?: string } | null)?.display_name ?? ""}</td>
-                  <td>{(item.partner_id as { display_name?: string } | null)?.display_name ?? ""}</td>
-                  <td>{String(item.name ?? "")}</td>
-                  <td className="num">{formatNumber(Number(item.debit), 2)}</td>
-                  <td className="num">{formatNumber(Number(item.credit), 2)}</td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
+        <ScrollTable label={t("Journal items")}>
+          <table className="data-table">
+            <caption className="sr-only">{t("Journal items")}</caption>
+            <thead>
+              <tr>
+                <th scope="col">{t("Date")}</th>
+                <th scope="col">{t("Entry")}</th>
+                <th scope="col">{t("Account")}</th>
+                <th scope="col">{t("Partner")}</th>
+                <th scope="col">{t("Label")}</th>
+                <th scope="col" className="num">
+                  {t("Debit")}
+                </th>
+                <th scope="col" className="num">
+                  {t("Credit")}
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {items.data.items.map((item) => {
+                const move = item.move_id as { id: number; display_name: string } | null;
+                return (
+                  <tr key={String(item.id)}>
+                    <td>{formatDate(item.date as string)}</td>
+                    <td>{move ? <Link to={`/m/account.move/${move.id}`}>{move.display_name}</Link> : ""}</td>
+                    <td>{(item.account_id as { display_name?: string } | null)?.display_name ?? ""}</td>
+                    <td>{(item.partner_id as { display_name?: string } | null)?.display_name ?? ""}</td>
+                    <td>{String(item.name ?? "")}</td>
+                    <td className="num">{formatNumber(Number(item.debit), 2)}</td>
+                    <td className="num">{formatNumber(Number(item.credit), 2)}</td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </ScrollTable>
       )}
       {total > offset + 80 && (
         <button type="button" className="btn small" onClick={() => setOffset(offset + 80)}>
@@ -167,15 +172,140 @@ export function ReportViewer({
 
   return (
     <div className="account-report">
-      <h1 className="page-title">{data?.report.name ?? t("Financial report")}</h1>
-      <ReportAsk
-        onApply={(target, next, labels) => {
-          if (target === code) {
-            setFilters({ ...defaultFilters(), ...next });
-            setScope(labels);
-          } else onSwitch?.(target, next, labels);
-        }}
-      />
+      <PageHeader
+        title={data?.report.name ?? t("Financial report")}
+        subtitle={
+          data
+            ? `${data.companies.map((c) => c.name).join(", ")} · ${data.currency.name}${data.consolidated ? ` · ${t("Consolidated")}` : ""}`
+            : undefined
+        }
+        actions={
+          <div className="report-exports" role="group" aria-label={t("Export")}>
+            {(["xlsx", "csv", "pdf"] as const).map((fmt) => (
+              <a key={fmt} className="btn ghost" href={reportsApi.exportUrl(code, exportFilters, fmt)} download>
+                <Icon name="download" />
+                {fmt.toUpperCase()}
+              </a>
+            ))}
+          </div>
+        }
+      >
+        <form className="report-filters" aria-label={t("Report filters")} onSubmit={(e) => e.preventDefault()}>
+          {!asOf && (
+            <label>
+              {t("From")}{" "}
+              <input
+                className="input small"
+                type="date"
+                value={filters.date_from ?? ""}
+                onChange={(e) => set({ date_from: e.target.value || undefined })}
+              />
+            </label>
+          )}
+          <label>
+            {asOf ? t("As of") : t("To")}{" "}
+            <input
+              className="input small"
+              type="date"
+              value={filters.date_to ?? ""}
+              onChange={(e) => set({ date_to: e.target.value || undefined })}
+            />
+          </label>
+          {data?.report.allow_comparison && (
+            <label>
+              {t("Compare with")}{" "}
+              <select
+                className="input small"
+                value={filters.comparison}
+                onChange={(e) => set({ comparison: e.target.value as ReportFilters["comparison"] })}
+              >
+                <option value="none">{t("No comparison")}</option>
+                <option value="previous_period">{t("Previous period")}</option>
+                <option value="previous_year">{t("Previous year")}</option>
+              </select>
+            </label>
+          )}
+          {data?.report.allow_comparison && filters.comparison !== "none" && (
+            <label>
+              {t("Periods")}{" "}
+              <input
+                className="input small num"
+                type="number"
+                min={1}
+                max={12}
+                value={filters.periods ?? 1}
+                onChange={(e) => set({ periods: Math.min(12, Math.max(1, Number(e.target.value) || 1)) })}
+              />
+            </label>
+          )}
+          {data?.report.engine === "partner_ledger" && (
+            <label>
+              {t("Accounts")}{" "}
+              <select
+                className="input small"
+                value={filters.account_type}
+                onChange={(e) => set({ account_type: e.target.value as ReportFilters["account_type"] })}
+              >
+                <option value="all">{t("Receivable and payable")}</option>
+                <option value="receivable">{t("Receivable")}</option>
+                <option value="payable">{t("Payable")}</option>
+              </select>
+            </label>
+          )}
+          <label>
+            <input
+              type="checkbox"
+              checked={!!filters.include_draft}
+              onChange={(e) => set({ include_draft: e.target.checked })}
+            />{" "}
+            {t("Include draft entries")}
+          </label>
+          {companies.length > 1 && (
+            <fieldset className="report-companies">
+              <legend>{t("Companies")}</legend>
+              {companies.map((c) => (
+                <label key={c.id}>
+                  <input
+                    type="checkbox"
+                    checked={(filters.company_ids ?? []).includes(c.id)}
+                    onChange={(e) =>
+                      set({
+                        company_ids: e.target.checked
+                          ? [...(filters.company_ids ?? []), c.id]
+                          : (filters.company_ids ?? []).filter((id) => id !== c.id),
+                      })
+                    }
+                  />{" "}
+                  {c.name}
+                </label>
+              ))}
+            </fieldset>
+          )}
+          {(filters.company_ids?.length ?? 0) > 1 && (
+            <label>
+              {t("Currency")}{" "}
+              <input
+                className="input small"
+                maxLength={3}
+                size={4}
+                value={filters.currency ?? ""}
+                placeholder={data?.currency.name}
+                onChange={(e) => set({ currency: e.target.value.toUpperCase() || undefined })}
+              />
+            </label>
+          )}
+        </form>
+      </PageHeader>
+      <div className="panel-card report-ask">
+        <ReportAsk
+          onApply={(target, next, labels) => {
+            if (target === code) {
+              setFilters({ ...defaultFilters(), ...next });
+              setScope(labels);
+            } else onSwitch?.(target, next, labels);
+          }}
+        />
+      </div>
       {((filters.partner_ids?.length ?? 0) > 0 || (filters.journal_ids?.length ?? 0) > 0) && (
         <p className="report-scope">
           {t("Only: {names}", { names: [...scope.partners, ...scope.journals].join(", ") })}{" "}
@@ -191,122 +321,6 @@ export function ReportViewer({
           </button>
         </p>
       )}
-      <form
-        className="report-filters control-panel"
-        aria-label={t("Report filters")}
-        onSubmit={(e) => e.preventDefault()}
-      >
-        {!asOf && (
-          <label>
-            {t("From")}{" "}
-            <input
-              className="input small"
-              type="date"
-              value={filters.date_from ?? ""}
-              onChange={(e) => set({ date_from: e.target.value || undefined })}
-            />
-          </label>
-        )}
-        <label>
-          {asOf ? t("As of") : t("To")}{" "}
-          <input
-            className="input small"
-            type="date"
-            value={filters.date_to ?? ""}
-            onChange={(e) => set({ date_to: e.target.value || undefined })}
-          />
-        </label>
-        {data?.report.allow_comparison && (
-          <label>
-            {t("Compare with")}{" "}
-            <select
-              className="input small"
-              value={filters.comparison}
-              onChange={(e) => set({ comparison: e.target.value as ReportFilters["comparison"] })}
-            >
-              <option value="none">{t("No comparison")}</option>
-              <option value="previous_period">{t("Previous period")}</option>
-              <option value="previous_year">{t("Previous year")}</option>
-            </select>
-          </label>
-        )}
-        {data?.report.allow_comparison && filters.comparison !== "none" && (
-          <label>
-            {t("Periods")}{" "}
-            <input
-              className="input small num"
-              type="number"
-              min={1}
-              max={12}
-              value={filters.periods ?? 1}
-              onChange={(e) => set({ periods: Math.min(12, Math.max(1, Number(e.target.value) || 1)) })}
-            />
-          </label>
-        )}
-        {data?.report.engine === "partner_ledger" && (
-          <label>
-            {t("Accounts")}{" "}
-            <select
-              className="input small"
-              value={filters.account_type}
-              onChange={(e) => set({ account_type: e.target.value as ReportFilters["account_type"] })}
-            >
-              <option value="all">{t("Receivable and payable")}</option>
-              <option value="receivable">{t("Receivable")}</option>
-              <option value="payable">{t("Payable")}</option>
-            </select>
-          </label>
-        )}
-        <label>
-          <input
-            type="checkbox"
-            checked={!!filters.include_draft}
-            onChange={(e) => set({ include_draft: e.target.checked })}
-          />{" "}
-          {t("Include draft entries")}
-        </label>
-        {companies.length > 1 && (
-          <fieldset className="report-companies">
-            <legend>{t("Companies")}</legend>
-            {companies.map((c) => (
-              <label key={c.id}>
-                <input
-                  type="checkbox"
-                  checked={(filters.company_ids ?? []).includes(c.id)}
-                  onChange={(e) =>
-                    set({
-                      company_ids: e.target.checked
-                        ? [...(filters.company_ids ?? []), c.id]
-                        : (filters.company_ids ?? []).filter((id) => id !== c.id),
-                    })
-                  }
-                />{" "}
-                {c.name}
-              </label>
-            ))}
-          </fieldset>
-        )}
-        {(filters.company_ids?.length ?? 0) > 1 && (
-          <label>
-            {t("Currency")}{" "}
-            <input
-              className="input small"
-              maxLength={3}
-              size={4}
-              value={filters.currency ?? ""}
-              placeholder={data?.currency.name}
-              onChange={(e) => set({ currency: e.target.value.toUpperCase() || undefined })}
-            />
-          </label>
-        )}
-        <div className="report-exports" role="group" aria-label={t("Export")}>
-          {(["xlsx", "csv", "pdf"] as const).map((fmt) => (
-            <a key={fmt} className="btn small" href={reportsApi.exportUrl(code, exportFilters, fmt)} download>
-              {fmt.toUpperCase()}
-            </a>
-          ))}
-        </div>
-      </form>
       {report.isLoading && (
         <p role="status" className="loading">
           {t("Loading…")}
@@ -324,102 +338,105 @@ export function ReportViewer({
       ))}
       {data && (
         <>
-          <p className="report-meta">
-            {data.companies.map((c) => c.name).join(", ")} · {data.currency.name}
-            {data.consolidated ? ` · ${t("Consolidated")}` : ""}
-          </p>
-          <table className="pivot-table report-table">
-            <caption className="sr-only">{data.report.name}</caption>
-            <thead>
-              {groups.some((g) => g.label) && (
-                <tr>
-                  <td />
-                  {groups.map((g, i) => (
-                    <th key={i} scope="colgroup" colSpan={g.span} className="num">
-                      {g.label}
-                    </th>
-                  ))}
-                </tr>
-              )}
-              <tr>
-                <th scope="col">{t("Line")}</th>
-                {data.columns.map((c) => (
-                  <th key={c.key} scope="col" className={c.type === "monetary" ? "num" : undefined}>
-                    {c.label}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {rows.map((line) => {
-                const strong = line.style === "total" || line.style === "header";
-                if (line.style === "load_more")
-                  return (
-                    <tr key={line.id}>
-                      <td colSpan={data.columns.length + 1} style={{ paddingLeft: `${0.5 + line.level * 1.25}rem` }}>
-                        <button
-                          type="button"
-                          className="btn small"
-                          disabled={loadingMore === line.id}
-                          onClick={() => void loadMore(line)}
-                        >
-                          {t("Load more ({count} remaining)", { count: line.remaining ?? 0 })}
-                        </button>
-                      </td>
+          <div className="panel-card flush">
+            <ScrollTable label={data.report.name}>
+              <table className="data-table report-table">
+                <caption className="sr-only">{data.report.name}</caption>
+                <thead>
+                  {groups.some((g) => g.label) && (
+                    <tr>
+                      <td />
+                      {groups.map((g, i) => (
+                        <th key={i} scope="colgroup" colSpan={g.span} className="num">
+                          {g.label}
+                        </th>
+                      ))}
                     </tr>
-                  );
-                return (
-                  <tr key={line.id} className={`report-line ${line.style}`}>
-                    <th
-                      scope="row"
-                      style={{ paddingLeft: `${0.5 + line.level * 1.25}rem`, fontWeight: strong ? 700 : 400 }}
-                    >
-                      {line.unfoldable ? (
-                        <button
-                          type="button"
-                          className="btn ghost small"
-                          aria-expanded={line.unfolded}
-                          onClick={() => toggle(line)}
-                        >
-                          <span aria-hidden="true">{line.unfolded ? "▾" : "▸"}</span> {line.name}
-                        </button>
-                      ) : line.move_id ? (
-                        <Link to={`/m/account.move/${line.move_id}`}>{line.name}</Link>
-                      ) : (
-                        line.name
-                      )}
-                    </th>
-                    {data.columns.map((column, i) => {
-                      const text = cellText(line.values[i], column, digits);
-                      const domain = line.domains?.[i];
+                  )}
+                  <tr>
+                    <th scope="col">{t("Line")}</th>
+                    {data.columns.map((c) => (
+                      <th key={c.key} scope="col" className={c.type === "monetary" ? "num" : undefined}>
+                        {c.label}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {rows.map((line) => {
+                    const strong = line.style === "total" || line.style === "header";
+                    if (line.style === "load_more")
                       return (
-                        <td key={column.key} className={column.type === "monetary" ? "num" : undefined}>
-                          {domain && text && column.type === "monetary" && line.style !== "item" ? (
+                        <tr key={line.id}>
+                          <td
+                            colSpan={data.columns.length + 1}
+                            style={{ paddingLeft: `${0.5 + line.level * 1.25}rem` }}
+                          >
+                            <button
+                              type="button"
+                              className="btn small"
+                              disabled={loadingMore === line.id}
+                              onClick={() => void loadMore(line)}
+                            >
+                              {t("Load more ({count} remaining)", { count: line.remaining ?? 0 })}
+                            </button>
+                          </td>
+                        </tr>
+                      );
+                    return (
+                      <tr key={line.id} className={`report-line ${line.style}`}>
+                        <th
+                          scope="row"
+                          style={{ paddingLeft: `${0.5 + line.level * 1.25}rem`, fontWeight: strong ? 700 : 400 }}
+                        >
+                          {line.unfoldable ? (
                             <button
                               type="button"
                               className="btn ghost small"
-                              title={t("Show the journal items")}
-                              aria-label={t("Journal items of {line}, {column}: {amount}", {
-                                line: line.name,
-                                column: [column.group, column.label].filter(Boolean).join(" "),
-                                amount: text,
-                              })}
-                              onClick={() => setDrill({ title: `${line.name} · ${column.label}`, domain })}
+                              aria-expanded={line.unfolded}
+                              onClick={() => toggle(line)}
                             >
-                              {text}
+                              <span aria-hidden="true">{line.unfolded ? "▾" : "▸"}</span> {line.name}
                             </button>
+                          ) : line.move_id ? (
+                            <Link to={`/m/account.move/${line.move_id}`}>{line.name}</Link>
                           ) : (
-                            <span style={{ fontWeight: strong ? 700 : 400 }}>{text}</span>
+                            line.name
                           )}
-                        </td>
-                      );
-                    })}
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-          {rows.length === 0 && <p className="empty">{t("Nothing to report for these filters.")}</p>}
+                        </th>
+                        {data.columns.map((column, i) => {
+                          const text = cellText(line.values[i], column, digits);
+                          const domain = line.domains?.[i];
+                          return (
+                            <td key={column.key} className={column.type === "monetary" ? "num" : undefined}>
+                              {domain && text && column.type === "monetary" && line.style !== "item" ? (
+                                <button
+                                  type="button"
+                                  className="btn ghost small"
+                                  title={t("Show the journal items")}
+                                  aria-label={t("Journal items of {line}, {column}: {amount}", {
+                                    line: line.name,
+                                    column: [column.group, column.label].filter(Boolean).join(" "),
+                                    amount: text,
+                                  })}
+                                  onClick={() => setDrill({ title: `${line.name} · ${column.label}`, domain })}
+                                >
+                                  {text}
+                                </button>
+                              ) : (
+                                <span style={{ fontWeight: strong ? 700 : 400 }}>{text}</span>
+                              )}
+                            </td>
+                          );
+                        })}
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </ScrollTable>
+            {rows.length === 0 && <p className="empty">{t("Nothing to report for these filters.")}</p>}
+          </div>
         </>
       )}
       {drill && <DrillDown title={drill.title} domain={drill.domain} onClose={() => setDrill(null)} />}

@@ -288,6 +288,15 @@ Summary of what works, what is stubbed and the known gaps: [docs/phase-2-summary
   page instead of an error naming the model; calendar entries starting at midnight show no “12:00 AM”; empty
   lists suggest the next step; the CRM AI score reads “AI-estimated chance to win” beside the salesperson's
   Probability.
+- **App-specific pages in the design system.** A shared `PageHeader`, cards, KPI tiles and focusable table
+  scrollers. Financial reports: title with companies and currency, exports in the header, filters on the
+  command row, the Ask box as an AI card, the report as a table card with shaded headings and ruled totals.
+  Cash-flow forecast: five headline figures, chart, AI commentary and tables in cards. Bank reconciliation:
+  actions in the header, filters on the command row, transactions and matches as cards. Document reading: a
+  drop zone. AI usage and cost: headline figures (requests, tokens, spend, features on) and cards. CRM sales
+  analysis, My activities and Studio: page header and cards. Discuss: a full-height two-pane layout with an
+  empty state. Calendar: a note when nothing is scheduled in the period. Customer portal pages: a centred
+  document sheet with a payment footer.
 - **Checks.** 228 client tests (92 % coverage), 46 end-to-end tests with axe, and all 163 menus opened with
   axe (no serious or critical violation; a success-green and the notification badge were darkened to reach
   4.5:1).
