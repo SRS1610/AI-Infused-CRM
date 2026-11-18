@@ -10,6 +10,11 @@ export function configureFormat(lang: string, tz?: string): void {
   timeZone = tz || undefined;
 }
 
+/** The display locale (BCP 47), e.g. "fr-FR". */
+export function currentLocale(): string {
+  return locale;
+}
+
 export function formatNumber(value: number | null | undefined, digits?: number): string {
   if (value === null || value === undefined || Number.isNaN(value)) return "";
   return new Intl.NumberFormat(

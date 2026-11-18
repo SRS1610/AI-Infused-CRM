@@ -2,6 +2,9 @@ import { useQuery } from "@tanstack/react-query";
 import { api } from "../api/client";
 import type { ListColumn } from "../api/types";
 import { displayValue } from "../format";
+import { RelatedNames } from "./RelatedNames";
+
+const NUMERIC = new Set(["integer", "float", "monetary"]);
 import { t } from "../i18n";
 
 interface Props {
@@ -29,25 +32,33 @@ export function One2manyTable({ comodel, ids, columns, label, onOpen }: Props) {
   if (!ids.length) return <p className="muted">{t("No {items}.", { items: label.toLowerCase() })}</p>;
   const meta = views.data?.fields ?? {};
   return (
-    <table className="table compact" aria-label={label}>
-      <thead>
-        <tr>
-          {cols.map((c) => (
-            <th key={c.field} scope="col">
-              {c.label ?? meta[c.field]?.string ?? c.field}
-            </th>
-          ))}
-        </tr>
-      </thead>
-      <tbody>
-        {(rows.data?.items ?? []).map((row) => (
-          <tr key={row.id} onClick={() => onOpen?.(Number(row.id))} className={onOpen ? "clickable" : undefined}>
+    <div className="table-scroll" tabIndex={0} role="region" aria-label={label}>
+      <table className="table compact" aria-label={label}>
+        <thead>
+          <tr>
             {cols.map((c) => (
-              <td key={c.field}>{displayValue(meta[c.field], row[c.field], row)}</td>
+              <th key={c.field} scope="col" className={NUMERIC.has(meta[c.field]?.type ?? "") ? "num" : undefined}>
+                {c.label ?? meta[c.field]?.string ?? c.field}
+              </th>
             ))}
           </tr>
-        ))}
-      </tbody>
-    </table>
+        </thead>
+        <tbody>
+          {(rows.data?.items ?? []).map((row) => (
+            <tr key={row.id} onClick={() => onOpen?.(Number(row.id))} className={onOpen ? "clickable" : undefined}>
+              {cols.map((c) => (
+                <td key={c.field} className={NUMERIC.has(meta[c.field]?.type ?? "") ? "num" : undefined}>
+                  {meta[c.field]?.type === "many2many" && Array.isArray(row[c.field]) ? (
+                    <RelatedNames comodel={meta[c.field].comodel} ids={row[c.field]} />
+                  ) : (
+                    displayValue(meta[c.field], row[c.field], row)
+                  )}
+                </td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
   );
 }

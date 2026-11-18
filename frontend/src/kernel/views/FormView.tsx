@@ -12,6 +12,9 @@ import { useRealtime, type RealtimeEvent } from "../realtime";
 import { useSession } from "../session";
 import { StatusBar } from "./StatusBar";
 import { ButtonDialog } from "./ButtonDialog";
+import { Icon, initials, menuIcon } from "../icons";
+import { AccessDenied, isAccessError } from "../shell/AccessDenied";
+import { displayValue } from "../format";
 import { t } from "../i18n";
 
 interface Props {
@@ -51,6 +54,42 @@ function toWrite(fields: FieldsMeta, name: string, value: any): any {
   if (f.type === "many2one") return value ? value.id : null;
   if (f.type === "many2many" || f.type === "one2many") return [["set", Array.isArray(value) ? value : []]];
   return value;
+}
+
+const AMOUNT_FIELDS = ["amount_total", "expected_revenue", "amount_residual", "recurring_monthly", "amount"];
+const TYPE_FIELDS = ["move_type", "type"];
+const STATUS_FIELDS = ["state", "payment_state", "subscription_state", "invoice_status"];
+
+/** Up to three facts for the record header: amount, owner, status. */
+function headerFacts(
+  fields: FieldsMeta,
+  names: string[],
+  record: RecordData,
+): { label: string; value: React.ReactNode }[] {
+  const out: { label: string; value: React.ReactNode }[] = [];
+  const amount = AMOUNT_FIELDS.find((n) => names.includes(n) && fields[n]?.type === "monetary");
+  if (amount && record[amount] !== null && record[amount] !== undefined)
+    out.push({ label: fields[amount].string, value: displayValue(fields[amount], record[amount], record) });
+  const owner = fields.user_id;
+  if (names.includes("user_id") && owner?.type === "many2one" && record.user_id?.display_name)
+    out.push({
+      label: owner.string,
+      value: (
+        <>
+          <span className="avatar small" aria-hidden="true">
+            {initials(record.user_id.display_name)}
+          </span>
+          {record.user_id.display_name}
+        </>
+      ),
+    });
+  const status = STATUS_FIELDS.find((n) => names.includes(n) && fields[n]?.type === "selection" && record[n]);
+  if (status)
+    out.push({
+      label: fields[status].string,
+      value: <span className={`badge badge-${record[status]}`}>{displayValue(fields[status], record[status])}</span>,
+    });
+  return out;
 }
 
 export function FormView({ model, recordId, meta, view, defaults, onSaved, onBack }: Props) {
@@ -198,6 +237,7 @@ export function FormView({ model, recordId, meta, view, defaults, onSaved, onBac
         {t("Loading…")}
       </div>
     );
+  if (recordId !== null && isAccessError(loaded.error)) return <AccessDenied />;
   if (recordId !== null && loaded.isError)
     return (
       <div className="alert error" role="alert">
@@ -209,12 +249,20 @@ export function FormView({ model, recordId, meta, view, defaults, onSaved, onBac
     if (node.invisible !== undefined && evaluate(node.invisible, record)) return null;
     const children = (list?: ViewNode[]) => list?.map((child, i) => render(child, `${key}.${i}`));
     switch (node.kind) {
-      case "sheet":
+      case "sheet": {
+        // one card for the fields, then one card per notebook
+        const kids = (node.children ?? []).map((child, i) => ({ child, i }));
+        const main = kids.filter(({ child }) => child.kind !== "notebook");
+        const books = kids.filter(({ child }) => child.kind === "notebook");
         return (
           <div key={key} className="sheet">
-            {children(node.children)}
+            {main.length > 0 && (
+              <div className="sheet-card">{main.map(({ child, i }) => render(child, `${key}.${i}`))}</div>
+            )}
+            {books.map(({ child, i }) => render(child, `${key}.${i}`))}
           </div>
         );
+      }
       case "group": {
         const cols = typeof node.columns === "number" ? node.columns : 1;
         return (
@@ -286,7 +334,7 @@ export function FormView({ model, recordId, meta, view, defaults, onSaved, onBac
         key={key}
         className={`form-field${isTitle ? " title-field" : ""}${field.type === "one2many" || field.type === "html" ? " wide" : ""}`}
       >
-        <label htmlFor={id} className={isTitle ? "sr-only" : undefined}>
+        <label htmlFor={id}>
           {node.label ?? field.string}
           {required && !readonly && (
             <span aria-hidden="true" className="req">
@@ -315,54 +363,90 @@ export function FormView({ model, recordId, meta, view, defaults, onSaved, onBac
   };
 
   const showChatter = recordId !== null && !!view.chatter && modules.has("chatter");
-  const form = (
-    <form
-      className="form-view"
-      aria-label={
-        record.display_name ? String(record.display_name) : t("New {model}", { model: meta.model.description })
-      }
-      onSubmit={(e) => {
-        e.preventDefault();
-        void save();
-      }}
-    >
+  // the sheet's own buttons go to the command bar and its stage pickers to the process bar
+  const top = view.root?.kind === "sheet" ? (view.root.children ?? []) : [];
+  const isProcess = (n: ViewNode) => n.kind === "field" && n.widget === "statusbar";
+  const commandNodes = top.filter((n) => n.kind === "buttons");
+  const processNodes = top.filter(isProcess);
+  const body: ViewNode | undefined =
+    view.root?.kind === "sheet"
+      ? { ...view.root, children: top.filter((n) => n.kind !== "buttons" && !isProcess(n)) }
+      : view.root;
+  const facts = recordId !== null ? headerFacts(meta.fields, fieldNames, record) : [];
+  const kind = TYPE_FIELDS.find((n) => fieldNames.includes(n) && meta.fields[n]?.type === "selection" && record[n]);
+  const typeLabel = kind ? displayValue(meta.fields[kind], record[kind]) : meta.model.description;
+  const title =
+    recordId === null ? t("New {model}", { model: meta.model.description }) : String(record.display_name ?? "");
+  const formDomId = `${formId}-form`;
+  const head = (
+    <>
       <div className="form-toolbar">
         <button type="button" className="btn ghost" onClick={onBack} aria-label={t("Back to list")}>
-          ← {t("Back")}
+          <Icon name="arrow-left" />
+          {t("Back")}
         </button>
-        <div className="breadcrumb" aria-live="polite">
-          {recordId === null ? t("New {model}", { model: meta.model.description }) : String(record.display_name ?? "")}
-          {dirty && (
-            <span className="dirty" title={t("Unsaved changes")}>
-              {" "}
-              •
-            </span>
-          )}
-        </div>
+        <span className="cmd-sep" aria-hidden="true" />
         {canWrite && (
           <>
             <button
               type="submit"
+              form={formDomId}
               className="btn primary"
               disabled={saving || (!dirty && recordId !== null)}
               title={t("Save (Ctrl/⌘+S)")}
             >
+              <Icon name="save" />
               {saving ? t("Saving…") : t("Save")}
             </button>
-            <button type="button" className="btn" onClick={discard} disabled={!dirty} title={t("Discard (Esc)")}>
+            <button type="button" className="btn ghost" onClick={discard} disabled={!dirty} title={t("Discard (Esc)")}>
+              <Icon name="undo" />
               {t("Discard")}
             </button>
           </>
         )}
-        {recordId !== null && meta.model.access.unlink && (
-          <button type="button" className="btn danger ghost" onClick={remove}>
-            {t("Delete")}
-          </button>
-        )}
+        {commandNodes.map((n, i) => render(n, `cmd.${i}`))}
         {recordId !== null && (printable.data?.length ?? 0) > 0 && (
           <PrintMenu templates={printable.data!} recordId={recordId} />
         )}
+        {recordId !== null && meta.model.access.unlink && (
+          <button type="button" className="btn danger ghost" onClick={remove}>
+            <Icon name="trash" />
+            {t("Delete")}
+          </button>
+        )}
       </div>
+      <header className="record-header">
+        <div className="rh-main">
+          <span className="app-glyph" aria-hidden="true">
+            <Icon name={menuIcon({ action: model })} size={20} />
+          </span>
+          <div>
+            <div className="rh-type">{typeLabel}</div>
+            <h1 className="rh-name" aria-live="polite">
+              {title}
+              {dirty && (
+                <span className="dirty" title={t("Unsaved changes")}>
+                  {" "}
+                  •
+                </span>
+              )}
+            </h1>
+          </div>
+        </div>
+        {facts.length > 0 && (
+          <dl className="rh-facts">
+            {facts.map((f) => (
+              <div key={f.label} className="rh-fact">
+                <dt>{f.label}</dt>
+                <dd>{f.value}</dd>
+              </div>
+            ))}
+          </dl>
+        )}
+      </header>
+      {processNodes.length > 0 && (
+        <div className="process-bar">{processNodes.map((n, i) => render(n, `process.${i}`))}</div>
+      )}
       {recordId !== null && modules.has("workflow") && (
         <StatusBar
           model={model}
@@ -373,6 +457,20 @@ export function FormView({ model, recordId, meta, view, defaults, onSaved, onBac
           }}
         />
       )}
+    </>
+  );
+  const form = (
+    <form
+      id={formDomId}
+      className="form-view"
+      aria-label={
+        record.display_name ? String(record.display_name) : t("New {model}", { model: meta.model.description })
+      }
+      onSubmit={(e) => {
+        e.preventDefault();
+        void save();
+      }}
+    >
       {message && (
         <div className={`alert ${message.kind}`} role="alert">
           {message.text}
@@ -391,7 +489,7 @@ export function FormView({ model, recordId, meta, view, defaults, onSaved, onBac
           )}
         </div>
       )}
-      {view.root ? render(view.root, "root") : null}
+      {body ? render(body, "root") : null}
       {pending && (
         <ButtonDialog
           node={pending}
@@ -412,14 +510,20 @@ export function FormView({ model, recordId, meta, view, defaults, onSaved, onBac
       {p.render({ model, resId: recordId as number, record, reload: () => void loaded.refetch() })}
     </section>
   ));
-  if (!showChatter && !side.length) return form;
   return (
-    <div className="form-with-chatter">
-      {form}
-      <div className="form-side">
-        {side}
-        {showChatter && <Chatter model={model} resId={recordId as number} canWrite={meta.model.access.write} />}
-      </div>
+    <div className="record-page">
+      {head}
+      {!showChatter && !side.length ? (
+        form
+      ) : (
+        <div className="form-with-chatter">
+          {form}
+          <div className="form-side">
+            {side}
+            {showChatter && <Chatter model={model} resId={recordId as number} canWrite={meta.model.access.write} />}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -435,6 +539,7 @@ function PrintMenu({ templates, recordId }: { templates: { id: number; name: str
         aria-expanded={open}
         onClick={() => setOpen((o) => !o)}
       >
+        <Icon name="printer" />
         {t("Print")}
       </button>
       {open && (

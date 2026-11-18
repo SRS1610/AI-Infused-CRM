@@ -95,7 +95,7 @@ describe("CRM AI insights", () => {
     });
     panel({ user_id: { id: 3, display_name: "Demo" } });
     expect(await screen.findByLabelText("AI score 72 out of 100")).toBeInTheDocument();
-    expect(screen.getByText("Win probability 72 %")).toBeInTheDocument();
+    expect(screen.getByText("AI-estimated chance to win: 72 %")).toBeInTheDocument();
     expect(screen.getByText("Model v3, trained on 412 closed deals")).toBeInTheDocument();
     expect(screen.getAllByRole("note").map((n) => n.textContent)).toEqual(
       expect.arrayContaining(["✦ AI score", "✦ AI alert"]),

@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useNavigate, useParams } from "react-router-dom";
 import { api } from "../api/client";
 import { FormView } from "./FormView";
+import { AccessDenied, isAccessError } from "../shell/AccessDenied";
 import { t } from "../i18n";
 
 /** /m/:model/:id — open any record directly (notifications, search results, links in emails). */
@@ -15,6 +16,7 @@ export function RecordView() {
         {t("Loading…")}
       </div>
     );
+  if (isAccessError(views.error)) return <AccessDenied />;
   if (views.isError || !views.data?.views.form)
     return (
       <div className="alert error" role="alert">

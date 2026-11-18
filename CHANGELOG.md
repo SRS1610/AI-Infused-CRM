@@ -266,6 +266,32 @@ Summary of what works, what is stubbed and the known gaps: [docs/phase-2-summary
   ([docs/phase-2-summary.md](docs/phase-2-summary.md)): acceptance table, verification, works / stubbed / gaps
   and the scores of the 23 Phase 2 AI features.
 
+### Interface redesign (D-103)
+- **Enterprise design system.** New tokens for light and dark (cool neutrals, cobalt accent, navy suite bar,
+  semantic status colours, violet AI accent), 32 px controls, 40 px grid rows, 4 px corners and light
+  elevation; Inter Variable bundled (`@fontsource-variable/inter` 5.3.0) and a curated Lucide icon set
+  (`lucide-react` 1.66.0). Guide: [docs/dev/design-system.md](docs/dev/design-system.md).
+- **Shell.** Suite bar with app launcher, global search (Ctrl/⌘+K), notifications, company switcher and a user
+  menu behind the user's initials; collapsible app navigation with icons and an active marker; Home tiles
+  with each app's icon, colour and first sections; a two-pane sign-in page. On phones the header no longer
+  overflows. User guide: [docs/user/getting-around.md](docs/user/getting-around.md).
+- **Views.** List pages: title row with an icon view switcher, then a command bar (New, Import, Export,
+  search). Grids: sticky headers, tabular figures, coloured status pills, many2many values by name. Kanban:
+  amount in bold, priority as stars, owner initials, tag chips; no more raw ids or record counts on cards.
+  Record pages: command bar with the record's own actions, header with the record's kind, name and key facts
+  (amount, owner, status), chevron stage bar with done steps ticked, details in one card, tabs in another,
+  assistant panels and chatter as cards beside them.
+- **UX review fixes.** Date groups in pivots, graphs and grouped lists read “Nov 2026” / “Q4 2026” / “W46
+  2026” and sort by date; selection groups show their labels; Studio's “Add a field” options no longer overlap
+  (a `checkbox` class sized labels as 16 px squares); list totals only add up the columns a view marks with
+  `sum`, else amounts (no more summed percentages); a page the user's role does not include shows an access
+  page instead of an error naming the model; calendar entries starting at midnight show no “12:00 AM”; empty
+  lists suggest the next step; the CRM AI score reads “AI-estimated chance to win” beside the salesperson's
+  Probability.
+- **Checks.** 228 client tests (92 % coverage), 46 end-to-end tests with axe, and all 163 menus opened with
+  axe (no serious or critical violation; a success-green and the notification badge were darkened to reach
+  4.5:1).
+
 ## [Unreleased] — Phase 1 complete, awaiting sign-off
 
 Summary of what works, what is stubbed and the known gaps: [docs/phase-1-summary.md](docs/phase-1-summary.md).

@@ -6,6 +6,8 @@ import { and } from "../domain";
 import { selectionActionsFor } from "../extensions";
 import { FieldInput } from "../fields/FieldInput";
 import { displayValue } from "../format";
+import { RelatedNames } from "../fields/RelatedNames";
+import { dateGroupLabel } from "./pivotData";
 import { t, tn, tx } from "../i18n";
 
 interface Props {
@@ -73,12 +75,16 @@ export function ListView({ model, meta, view, domain, groupBy, context, pageSize
     return [...names].filter((n) => n in meta.fields);
   }, [columns, meta.fields]);
 
+  // totals: the columns the view marks with `sum`, otherwise its stored money columns (rates, percentages,
+  // multipliers and quantities are not summed unless the view asks for it)
+  const declared = columns.some((c) => c.sum);
   const sumColumns = columns.filter(
     (c) =>
       NUMERIC.has(meta.fields[c.field]?.type) &&
       meta.fields[c.field]?.store &&
       c.field !== "id" &&
-      c.field !== "sequence",
+      c.field !== "sequence" &&
+      (declared ? !!c.sum : meta.fields[c.field]?.type === "monetary"),
   );
   const aggregates = sumColumns.map((c) => `${c.field}:sum`);
 
@@ -200,6 +206,8 @@ export function ListView({ model, meta, view, domain, groupBy, context, pageSize
         />
       );
     }
+    if (field?.type === "many2many" && Array.isArray(row[col.field]))
+      return <RelatedNames comodel={field.comodel} ids={row[col.field]} chips={col.widget === "many2many_tags"} />;
     const text = displayValue(field, row[col.field], row);
     if (col.widget === "badge" && text) return <span className={`badge badge-${row[col.field]}`}>{text}</span>;
     return text;
@@ -439,7 +447,12 @@ export function ListView({ model, meta, view, domain, groupBy, context, pageSize
             {groupBy.length === 0 && !rows.isLoading && items.length === 0 && (
               <tr>
                 <td colSpan={columns.length + 1} className="empty">
-                  {t("No records match.")}
+                  <strong>{t("No records match.")}</strong>
+                  <span>
+                    {meta.model.access.create
+                      ? t("Change the search or filters, or add one with New.")
+                      : t("Change the search or filters to see more.")}
+                  </span>
                 </td>
               </tr>
             )}
@@ -486,8 +499,11 @@ export function ListView({ model, meta, view, domain, groupBy, context, pageSize
 
 function groupLabel(meta: ViewsResponse, field: string, value: any): string {
   if (value === null || value === undefined || value === false) return t("None");
-  const f = meta.fields[field.split(":")[0]];
+  const [name, granularity] = field.split(":");
+  const f = meta.fields[name];
   if (f?.type === "many2one") return value.display_name ?? `#${value.id}`;
+  if ((f?.type === "date" || f?.type === "datetime") && typeof value === "string")
+    return dateGroupLabel(value, granularity || "month");
   return displayValue(f, value) || String(value);
 }
 

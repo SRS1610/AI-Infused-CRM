@@ -14,7 +14,7 @@ import { CommandPalette } from "./shell/CommandPalette";
 import { NotificationBell } from "./shell/NotificationBell";
 import { CalendarView } from "./views/CalendarView";
 import { GraphView } from "./views/GraphView";
-import { buildPivot, groupLabel, series, toCsv } from "./views/pivotData";
+import { buildPivot, dateGroupLabel, groupLabel, series, toCsv } from "./views/pivotData";
 import { PivotView } from "./views/PivotView";
 import { StatusBar } from "./views/StatusBar";
 
@@ -131,6 +131,22 @@ describe("pivot data helpers", () => {
   });
   it("labels and series", () => {
     expect(groupLabel(null)).toBe("None");
+    expect(dateGroupLabel("2026-11-01T00:00:00+00:00")).toBe("Nov 2026");
+    expect(dateGroupLabel("2026-11-01", "quarter")).toBe("Q4 2026");
+    expect(dateGroupLabel("2026-01-01", "week")).toBe("W1 2026");
+    expect(dateGroupLabel("2027-01-01", "week")).toBe("W53 2026"); // ISO weeks belong to the year of their Thursday
+    expect(dateGroupLabel("2026-11-01", "year")).toBe("2026");
+    expect(groupLabel("2026-11-01T00:00:00+00:00", "closing:month")).toBe("Nov 2026");
+    const byMonth = buildPivot(
+      [
+        { __count: 1, __domain: [], "closing:month": "2026-04-01", "amount:sum": 1 },
+        { __count: 1, __domain: [], "closing:month": "2026-01-01", "amount:sum": 2 },
+      ],
+      ["closing:month"],
+      null,
+      "amount:sum",
+    );
+    expect(byMonth.rows).toEqual([["Jan 2026"], ["Apr 2026"]]); // chronological, not alphabetical
     expect(groupLabel({ id: 1, display_name: "X" })).toBe("X");
     expect(series(groups, "stage", "amount:sum")).toEqual([
       { label: "new", value: 100 },
@@ -320,7 +336,7 @@ describe("calendar, pivot and graph", () => {
       }),
     });
     wrap(<PivotView model="demo.deal" meta={meta} view={meta.views.pivot} domain={[]} />);
-    expect(await screen.findByRole("rowheader", { name: "won" })).toBeInTheDocument();
+    expect(await screen.findByRole("rowheader", { name: "Won" })).toBeInTheDocument(); // selection label, not key
     expect(screen.getAllByText("40").length).toBeGreaterThan(0); // total
     fireEvent.change(screen.getByLabelText("Columns"), { target: { value: "owner_id" } });
     await waitFor(() => expect(calls.some((c) => c.body?.groupby?.join(",") === "stage,owner_id")).toBe(true));

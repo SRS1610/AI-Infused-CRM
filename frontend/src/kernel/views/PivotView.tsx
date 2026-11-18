@@ -54,7 +54,7 @@ export function PivotView({ model, meta, view, domain }: Props) {
   const colKey = col ? groupSpec(meta, col) : null;
   const valueKey = measure === "__count" ? "__count" : `${measure}:sum`;
   const table = useMemo(
-    () => buildPivot(result.data?.groups ?? [], rowKeys, colKey, valueKey),
+    () => buildPivot(result.data?.groups ?? [], rowKeys, colKey, valueKey, meta.fields),
     [result.data, rowKeys.join(","), colKey, valueKey], // eslint-disable-line react-hooks/exhaustive-deps
   );
   const label = (n: string) => meta.fields[n]?.string ?? n;

@@ -53,8 +53,8 @@ export function GraphView({ model, meta, view, domain }: Props) {
     enabled: !!by,
   });
   const data = useMemo(
-    () => series(result.data?.groups ?? [], spec, measure === "__count" ? "__count" : `${measure}:sum`),
-    [result.data, spec, measure],
+    () => series(result.data?.groups ?? [], spec, measure === "__count" ? "__count" : `${measure}:sum`, meta.fields),
+    [result.data, spec, measure, meta.fields],
   );
   const measureLabel = measure === "__count" ? t("Count") : (meta.fields[measure]?.string ?? measure);
   const byLabel = meta.fields[by]?.string ?? by;

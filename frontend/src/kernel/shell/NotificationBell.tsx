@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import { Icon } from "../icons";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { api } from "../api/client";
@@ -41,13 +42,14 @@ export function NotificationBell() {
     <div className="dropdown">
       <button
         type="button"
-        className="btn ghost small bell"
+        className="suite-btn bell"
         aria-label={t("Notifications: {count} unread", { count: unread })}
         aria-haspopup="dialog"
         aria-expanded={open}
         onClick={() => setOpen((o) => !o)}
       >
-        🔔{unread > 0 && <span className="badge count">{unread > 99 ? "99+" : unread}</span>}
+        <Icon name="bell" size={18} />
+        {unread > 0 && <span className="badge count">{unread > 99 ? "99+" : unread}</span>}
       </button>
       {open && (
         <div className="dropdown-menu right notification-panel" role="dialog" aria-label={t("Notifications")}>

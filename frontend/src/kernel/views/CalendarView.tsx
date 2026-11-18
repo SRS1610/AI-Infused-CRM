@@ -42,7 +42,11 @@ function addDays(d: Date, n: number): Date {
   return out;
 }
 
-const time = (d: Date | null) => (d ? d.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" }) : null);
+/** Start time of an entry; none for entries starting at midnight (whole-day rentals, date-only fields). */
+const time = (d: Date | null) =>
+  d && (d.getHours() || d.getMinutes())
+    ? d.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" })
+    : null;
 
 /** Month, week and day views of records placed on their ``date_start`` field. Views may declare an
  * ``expand_endpoint`` (e.g. recurring meetings) returning occurrences for a window. */
@@ -134,7 +138,7 @@ export function CalendarView({ model, meta, view, domain, onOpen }: Props) {
       className="calendar-event"
       onClick={() => onOpen(it.id)}
     >
-      {it.start && <span className="muted">{time(it.start)} </span>}
+      {time(it.start) && <span className="muted">{time(it.start)} </span>}
       {it.title}
       {it.recurring && <span aria-label={t("repeats")}> ↻</span>}
     </button>

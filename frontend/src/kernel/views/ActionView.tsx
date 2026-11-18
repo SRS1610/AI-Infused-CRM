@@ -16,9 +16,19 @@ import { ListView } from "./ListView";
 import { PivotView } from "./PivotView";
 import { emptySearch, SearchBar, type SearchState } from "./SearchBar";
 import { buildDomain } from "./searchDomain";
+import { Icon } from "../icons";
+import { AccessDenied, isAccessError } from "../shell/AccessDenied";
 import { t } from "../i18n";
 
 const LATER = new Set(["activity", "gantt", "map"]);
+const VIEW_ICONS: Record<string, string> = {
+  list: "list",
+  kanban: "kanban",
+  calendar: "calendar",
+  pivot: "table",
+  graph: "chart",
+  activity: "check-square",
+};
 
 /** Display names of the view types (the API values stay in English). */
 function viewTypeLabel(type: string): string {
@@ -98,6 +108,7 @@ export function ActionView() {
         {t("Loading…")}
       </div>
     );
+  if (isAccessError(action.error) || isAccessError(views.error)) return <AccessDenied />;
   if (action.isError)
     return (
       <div className="alert error" role="alert">
@@ -130,43 +141,58 @@ export function ActionView() {
     <div className="action-view">
       {viewType !== "form" && (
         <div className="control-panel">
-          <h1 className="page-title">{def.name}</h1>
-          {meta.model.access.create && (
-            <button type="button" className="btn primary" onClick={() => go({ id: "new" })} title={t("New (Alt+N)")}>
-              {t("New")}
-            </button>
-          )}
-          {meta.model.access.create && (
-            <button type="button" className="btn ghost" onClick={() => navigate(`/import/${def.model}`)}>
-              {t("Import")}
-            </button>
-          )}
-          <button type="button" className="btn ghost" onClick={() => setExporting(true)}>
-            {t("Export")}
-          </button>
-          <SearchBar
-            model={def.model}
-            meta={meta}
-            view={meta.views.search}
-            value={search}
-            onChange={setSearch}
-            inputRef={searchInput}
-          />
-          <div className="view-switcher" role="tablist" aria-label={t("View type")}>
-            {def.view_types
-              .filter((vt) => vt !== "form")
-              .map((vt) => (
+          <div className="cp-row cp-title-row">
+            <h1 className="page-title">{def.name}</h1>
+            <div className="view-switcher" role="tablist" aria-label={t("View type")}>
+              {def.view_types
+                .filter((vt) => vt !== "form")
+                .map((vt) => (
+                  <button
+                    key={vt}
+                    type="button"
+                    role="tab"
+                    aria-selected={viewType === vt}
+                    className={viewType === vt ? "btn small active" : "btn small ghost"}
+                    onClick={() => go({ view: vt, id: null })}
+                  >
+                    <Icon name={VIEW_ICONS[vt] ?? "list"} size={15} />
+                    {viewTypeLabel(vt)}
+                  </button>
+                ))}
+            </div>
+          </div>
+          <div className="cp-row command-bar">
+            <div className="cmd-group">
+              {meta.model.access.create && (
                 <button
-                  key={vt}
                   type="button"
-                  role="tab"
-                  aria-selected={viewType === vt}
-                  className={viewType === vt ? "btn small active" : "btn small ghost"}
-                  onClick={() => go({ view: vt, id: null })}
+                  className="btn primary"
+                  onClick={() => go({ id: "new" })}
+                  title={t("New (Alt+N)")}
                 >
-                  {viewTypeLabel(vt)}
+                  <Icon name="plus" />
+                  {t("New")}
                 </button>
-              ))}
+              )}
+              {meta.model.access.create && (
+                <button type="button" className="btn ghost" onClick={() => navigate(`/import/${def.model}`)}>
+                  <Icon name="upload" />
+                  {t("Import")}
+                </button>
+              )}
+              <button type="button" className="btn ghost" onClick={() => setExporting(true)}>
+                <Icon name="download" />
+                {t("Export")}
+              </button>
+            </div>
+            <SearchBar
+              model={def.model}
+              meta={meta}
+              view={meta.views.search}
+              value={search}
+              onChange={setSearch}
+              inputRef={searchInput}
+            />
           </div>
         </div>
       )}

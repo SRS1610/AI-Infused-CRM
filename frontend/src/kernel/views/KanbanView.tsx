@@ -5,6 +5,8 @@ import type { Domain, GroupRow, RecordData, ViewDef, ViewNode, ViewsResponse } f
 import { and } from "../domain";
 import { displayValue, formatNumber } from "../format";
 import { collectFields } from "./FormView";
+import { initials } from "../icons";
+import { RelatedNames } from "../fields/RelatedNames";
 import { t } from "../i18n";
 
 interface Props {
@@ -216,32 +218,86 @@ function KanbanColumn({
 }
 
 function Card({ node, record, meta }: { node?: ViewNode; record: RecordData; meta: ViewsResponse }) {
-  if (!node) return <strong>{String(record.display_name ?? "")}</strong>;
-  const render = (n: ViewNode, key: string): React.ReactNode => {
-    if (n.kind === "field" && n.name) {
-      const field = meta.fields[n.name];
-      const text =
-        n.name === "display_name" ? String(record.display_name ?? "") : displayValue(field, record[n.name], record);
-      if (!text) return null;
-      if (n.widget === "title")
-        return (
+  if (!node) return <strong className="card-title">{String(record.display_name ?? "")}</strong>;
+  const head: React.ReactNode[] = [];
+  const lines: React.ReactNode[] = [];
+  const foot: React.ReactNode[] = [];
+  const walk = (n: ViewNode, key: string) => {
+    if (n.kind !== "field" || !n.name) {
+      (n.children ?? []).forEach((c, i) => walk(c, `${key}.${i}`));
+      return;
+    }
+    const field = meta.fields[n.name];
+    const value = record[n.name];
+    if (n.name === "display_name" || n.widget === "title") {
+      const text = n.name === "display_name" ? String(record.display_name ?? "") : displayValue(field, value, record);
+      if (text)
+        head.push(
           <strong key={key} className="card-title">
             {text}
-          </strong>
+          </strong>,
         );
-      if (n.widget === "badge")
-        return (
-          <span key={key} className={`badge badge-${record[n.name]}`}>
-            {text}
-          </span>
-        );
-      return (
-        <div key={key} className="card-line">
-          {text}
-        </div>
-      );
+      return;
     }
-    return <div key={key}>{(n.children ?? []).map((c, i) => render(c, `${key}.${i}`))}</div>;
+    if (!field || value === null || value === undefined || value === false) return;
+    if (n.widget === "priority" && field.type === "selection") {
+      const level = Number(value);
+      const max = Math.max(0, (field.selection?.length ?? 1) - 1);
+      if (max)
+        foot.push(
+          <span
+            key={key}
+            className="card-stars"
+            title={displayValue(field, value)}
+            aria-label={displayValue(field, value)}
+          >
+            {"★".repeat(level)}
+            <span className="muted">{"☆".repeat(Math.max(0, max - level))}</span>
+          </span>,
+        );
+      return;
+    }
+    if (field.type === "many2one" && field.comodel === "core.user") {
+      if (value.display_name)
+        foot.push(
+          <span key={key} className="card-owner" title={field.string}>
+            <span className="avatar small" aria-hidden="true">
+              {initials(value.display_name)}
+            </span>
+            {value.display_name}
+          </span>,
+        );
+      return;
+    }
+    if (field.type === "many2one" && !value.display_name) return; // a record the user cannot read
+    if (field.type === "many2many" || field.type === "one2many") {
+      const ids = Array.isArray(value) ? value.filter((v: any) => typeof v === "number") : [];
+      if (ids.length && field.type === "many2many")
+        lines.push(<RelatedNames key={key} comodel={field.comodel} ids={ids} chips />);
+      return;
+    }
+    const text = displayValue(field, value, record);
+    if (!text) return;
+    if (n.widget === "badge" || field.type === "selection") {
+      foot.push(
+        <span key={key} className={`badge badge-${value}`}>
+          {text}
+        </span>,
+      );
+      return;
+    }
+    lines.push(
+      <div key={key} className={field.type === "monetary" ? "card-line card-amount" : "card-line"}>
+        {text}
+      </div>,
+    );
   };
-  return <>{render(node, "c")}</>;
+  walk(node, "c");
+  return (
+    <>
+      {head}
+      {lines}
+      {foot.length > 0 && <div className="card-foot">{foot}</div>}
+    </>
+  );
 }

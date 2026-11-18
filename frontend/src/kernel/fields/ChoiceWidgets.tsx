@@ -26,15 +26,16 @@ export function StatusbarWidget({
       ? (field.selection ?? []).map(([k, l]) => ({ key: k, label: l }))
       : (options.data?.items ?? []).map((r) => ({ key: r.id, label: String(r.display_name) }));
   const current = field.type === "many2one" ? (value?.id ?? null) : value;
+  const currentIndex = items.findIndex((item) => item.key === current);
   return (
     <div className="statusbar-widget" role="radiogroup" aria-label={field.string} id={id}>
-      {items.map((item) => (
+      {items.map((item, i) => (
         <button
           key={String(item.key)}
           type="button"
           role="radio"
           aria-checked={item.key === current}
-          className={item.key === current ? "step current" : "step"}
+          className={item.key === current ? "step current" : i < currentIndex ? "step done" : "step"}
           disabled={readonly}
           onClick={() => onChange(field.type === "many2one" ? { id: item.key, display_name: item.label } : item.key)}
         >

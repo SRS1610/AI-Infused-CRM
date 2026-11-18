@@ -131,7 +131,12 @@ export function ScoreBlock({ leadId, score }: { leadId: number; score: NonNullab
         </span>
         <span className="ai-score-meta">
           <AiLabel text={t("AI score")} />
-          <span className="small">{t("Win probability {value}", { value: pct(score.probability) })}</span>
+          <span
+            className="small"
+            title={t("Estimated from similar deals; the Probability field is set by the salesperson")}
+          >
+            {t("AI-estimated chance to win: {value}", { value: pct(score.probability) })}
+          </span>
           <span className="muted small">
             {score.source === "model" && score.model
               ? t("Model v{version}, trained on {rows} closed deals", {

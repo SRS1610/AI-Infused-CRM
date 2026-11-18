@@ -1,5 +1,5 @@
 import { QueryClient } from "@tanstack/react-query";
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, within, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { App } from "../../App";
 import { mockFetch } from "../../test/mockApi";
@@ -94,7 +94,10 @@ describe("login and shell", () => {
     await userEvent.click(screen.getByRole("button", { name: "Verify" }));
     expect(await screen.findByRole("heading", { name: "Welcome, Admin" })).toBeInTheDocument();
     expect(calls.find((c) => c.path === "/api/v1/auth/totp")!.body).toEqual({ pre_auth_token: "pre", code: "123456" });
-    expect((await screen.findAllByRole("button", { name: "Settings" })).length).toBe(2); // top bar + home tile
+    expect((await screen.findAllByRole("button", { name: "Settings" })).length).toBe(1); // home tile
+    await userEvent.click(screen.getByRole("button", { name: "App launcher" }));
+    const launcher = screen.getByRole("navigation", { name: "Applications" });
+    expect(within(launcher).getByRole("button", { name: "Settings" })).toBeInTheDocument();
   });
 
   it("shows login errors", async () => {
