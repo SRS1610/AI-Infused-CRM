@@ -1,0 +1,18 @@
+[
+  {"id": "quote_acme", "model": "sale.quotation", "values": {
+    "partner_id": "contacts.partner_acme_jordan", "client_reference": "PO-ACME-2026-17",
+    "note": "<p>Prices exclude shipping. Payment within 30 days.</p>",
+    "line_ids": [
+      {"display_type": "section", "name": "Hardware"},
+      {"product_id": "product.product_robot_arm", "quantity": 2},
+      {"product_id": "product.product_gripper", "quantity": 2, "discount": 10},
+      {"display_type": "section", "name": "Services"},
+      {"product_id": "product.product_onboarding", "quantity": 1},
+      {"product_id": "product.product_support", "quantity": 1, "is_optional": true}
+    ]
+  }},
+  {"id": "quote_initech", "model": "sale.quotation", "values": {
+    "partner_id": "contacts.partner_initech_priya",
+    "line_ids": [{"product_id": "product.product_consulting", "quantity": 5}]
+  }}
+]

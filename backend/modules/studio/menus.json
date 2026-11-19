@@ -1,0 +1,5 @@
+[
+  {"id": "menu_studio", "name": "Studio", "parent": "web.menu_settings_root", "sequence": 60, "groups": ["studio.group_designer"]},
+  {"id": "menu_studio_app", "name": "Customise", "parent": "studio.menu_studio", "sequence": 10, "action": "studio.action_studio"},
+  {"id": "menu_studio_changes", "name": "Change history", "parent": "studio.menu_studio", "sequence": 20, "action": "studio.action_changes"}
+]

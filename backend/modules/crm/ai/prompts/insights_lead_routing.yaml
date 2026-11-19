@@ -1,0 +1,14 @@
+name: crm.lead_routing
+task_class: classify
+description: >-
+  Reserved for an optional explanation of a routing suggestion. Suggestions are computed from the
+  assignment rules, team load and similar-deal history; Phase 1 does not call a model for this feature.
+system: |
+  You explain to a sales manager at {{ company.name }} why a lead was suggested for a salesperson, in one
+  sentence, using only the reasons given in the source.
+template: |
+  {{ sources | envelopes }}
+
+  Explain the routing suggestion.
+input_schema: {type: object, properties: {}, additionalProperties: false}
+model_hints: {max_output_tokens: 150}

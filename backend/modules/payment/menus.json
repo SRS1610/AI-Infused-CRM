@@ -1,0 +1,6 @@
+[
+  {"id": "menu_transactions", "name": "Online payments", "parent": "account.menu_customers", "sequence": 40, "action": "payment.action_transactions"},
+  {"id": "menu_tokens", "name": "Saved payment methods", "parent": "account.menu_customers", "sequence": 45, "action": "payment.action_tokens"},
+  {"id": "menu_providers", "name": "Payment providers", "parent": "account.menu_config", "sequence": 80, "action": "payment.action_providers"},
+  {"id": "menu_events", "name": "Provider notifications", "parent": "account.menu_config", "sequence": 85, "action": "payment.action_events"}
+]

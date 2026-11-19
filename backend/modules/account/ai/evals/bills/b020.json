@@ -1,0 +1,100 @@
+{
+ "gold": {
+  "amount_tax": 0.0,
+  "amount_total": 4840.0,
+  "amount_untaxed": 4840.0,
+  "currency": "EUR",
+  "due_date": null,
+  "iban": "DE38370400442212691790",
+  "invoice_date": "2026-05-18",
+  "invoice_number": "VW-2026-2625",
+  "lines": [
+   {
+    "account": "commissions",
+    "amount": 2310.0,
+    "description": "Handelsvertreterprovision",
+    "quantity": 1.0,
+    "tax": "purchase_vat_20_rc",
+    "tax_rate": 0.0,
+    "unit_price": 2310.0
+   },
+   {
+    "account": "commissions",
+    "amount": 2530.0,
+    "description": "Vermittlungsprovision Aufträge",
+    "quantity": 1.0,
+    "tax": "purchase_vat_20_rc",
+    "tax_rate": 0.0,
+    "unit_price": 2530.0
+   }
+  ],
+  "move_type": "in_invoice",
+  "needs_review": false,
+  "partner_name": "Vertriebsagentur Wagner KG",
+  "partner_vat": "DE626695596"
+ },
+ "spec": {
+  "amount_tax": 0.0,
+  "amount_total": 4840.0,
+  "amount_untaxed": 4840.0,
+  "buyer": {
+   "city": "75001 Paris",
+   "country": "France",
+   "name": "My Company (Europe)",
+   "street": "8 avenue de l'Opéra",
+   "vat": "FR32123456789"
+  },
+  "credit_note": false,
+  "currency": "EUR",
+  "due_date": null,
+  "id": "b020",
+  "invoice_date": "2026-05-18",
+  "invoice_number": "VW-2026-2625",
+  "kind": "digital",
+  "lang": "de",
+  "layout": "letter",
+  "lines": [
+   {
+    "amount": 2310.0,
+    "description": "Handelsvertreterprovision",
+    "quantity": 1.0,
+    "tax_rate": 0.0,
+    "unit_price": 2310.0
+   },
+   {
+    "amount": 2530.0,
+    "description": "Vermittlungsprovision Aufträge",
+    "quantity": 1.0,
+    "tax_rate": 0.0,
+    "unit_price": 2530.0
+   }
+  ],
+  "move_type": "in_invoice",
+  "notes": "",
+  "reverse_charge": true,
+  "seed": 899721,
+  "seller": {
+   "address": "Friedrichstraße 112, 10117 Berlin",
+   "country": "DE",
+   "iban": "DE38 3704 0044 2212 6917 90",
+   "name": "Vertriebsagentur Wagner KG",
+   "vat": "DE626695596"
+  },
+  "tax_lines": [
+   {
+    "amount": 0.0,
+    "base": 4840.0,
+    "rate": 0.0
+   }
+  ]
+ },
+ "world": {
+  "history": [],
+  "vendor": {
+   "iban": "DE38 3704 0044 2212 6917 90",
+   "known": false,
+   "name": "Vertriebsagentur Wagner KG",
+   "vat": "DE626695596"
+  }
+ }
+}

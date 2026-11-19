@@ -1,0 +1,3 @@
+[
+  {"id": "sched_budget_refresh", "model": "core.scheduled_job", "noupdate": true, "values": {"name": "Budget actuals and theoretical amounts", "job_name": "account_budget.refresh", "cron": "40 1 * * *"}}
+]

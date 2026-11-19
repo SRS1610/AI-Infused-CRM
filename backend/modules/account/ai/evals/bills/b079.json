@@ -1,0 +1,97 @@
+{
+ "gold": {
+  "amount_tax": 0.0,
+  "amount_total": 861.88,
+  "amount_untaxed": 861.88,
+  "currency": "EUR",
+  "due_date": "2026-07-06",
+  "iban": "ES1521005804956210075356",
+  "invoice_date": "2026-05-07",
+  "invoice_number": "SI978-9283",
+  "lines": [
+   {
+    "account": "software",
+    "amount": 861.88,
+    "description": "Alojamiento web mensual",
+    "quantity": 2.0,
+    "tax": "purchase_vat_20_rc",
+    "tax_rate": 0.0,
+    "unit_price": 430.94
+   }
+  ],
+  "move_type": "in_invoice",
+  "needs_review": false,
+  "partner_name": "Soluciones Informáticas Ibéricas SL",
+  "partner_vat": "ESC44938670"
+ },
+ "spec": {
+  "amount_tax": 0.0,
+  "amount_total": 861.88,
+  "amount_untaxed": 861.88,
+  "buyer": {
+   "city": "75001 Paris",
+   "country": "France",
+   "name": "My Company (Europe)",
+   "street": "8 avenue de l'Opéra",
+   "vat": "FR32123456789"
+  },
+  "credit_note": false,
+  "currency": "EUR",
+  "due_date": "2026-07-06",
+  "id": "b079",
+  "invoice_date": "2026-05-07",
+  "invoice_number": "SI978-9283",
+  "kind": "scan",
+  "lang": "es",
+  "layout": "letter",
+  "lines": [
+   {
+    "amount": 861.88,
+    "description": "Alojamiento web mensual",
+    "quantity": 2.0,
+    "tax_rate": 0.0,
+    "unit_price": 430.94
+   }
+  ],
+  "move_type": "in_invoice",
+  "notes": "",
+  "reverse_charge": true,
+  "seed": 486741,
+  "seller": {
+   "address": "Calle de Alcalá 85, 28009 Madrid",
+   "country": "ES",
+   "iban": "ES15 2100 5804 9562 1007 5356",
+   "name": "Soluciones Informáticas Ibéricas SL",
+   "vat": "ESC44938670"
+  },
+  "tax_lines": [
+   {
+    "amount": 0.0,
+    "base": 861.88,
+    "rate": 0.0
+   }
+  ]
+ },
+ "world": {
+  "history": [
+   {
+    "date": "2026-04-02",
+    "lines": [
+     {
+      "account": "software",
+      "description": "Alojamiento web mensual",
+      "quantity": 1.0,
+      "tax": "purchase_vat_20_rc",
+      "unit_price": 67.49
+     }
+    ]
+   }
+  ],
+  "vendor": {
+   "iban": "ES15 2100 5804 9562 1007 5356",
+   "known": true,
+   "name": "Soluciones Informáticas Ibéricas SL",
+   "vat": "ESC44938670"
+  }
+ }
+}

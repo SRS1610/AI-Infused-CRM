@@ -1,0 +1,30 @@
+{
+  "candidates": [
+    {
+      "content": {
+        "parts": [
+          {
+            "text": "{\"title\": \"Contract renewal\", \"sentiment\": \"positive\", \"next_step\": \"Schedule the Q3 pricing review\"}"
+          }
+        ],
+        "role": "model"
+      },
+      "index": 0,
+      "finishReason": "STOP"
+    }
+  ],
+  "usageMetadata": {
+    "promptTokenCount": 205,
+    "totalTokenCount": 293,
+    "candidatesTokenCount": 27,
+    "promptTokensDetails": [
+      {
+        "modality": "TEXT",
+        "tokenCount": 205
+      }
+    ],
+    "thoughtsTokenCount": 61
+  },
+  "modelVersion": "gemini-2.5-flash",
+  "responseId": "pNXUcBi6FtJc0P1S3gFz7Tn"
+}

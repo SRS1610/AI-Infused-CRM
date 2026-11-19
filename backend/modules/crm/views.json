@@ -1,0 +1,67 @@
+[
+  {"id": "view_lead_kanban", "model": "crm.lead", "type": "kanban", "name": "crm.lead.kanban", "default_group_by": "stage_id", "all_groups": true,
+   "sum_field": "expected_revenue",
+   "root": {"kind": "card", "children": [
+     {"kind": "field", "name": "name", "widget": "title"},
+     {"kind": "field", "name": "partner_id"},
+     {"kind": "field", "name": "expected_revenue"},
+     {"kind": "field", "name": "priority", "widget": "priority"},
+     {"kind": "field", "name": "user_id"},
+     {"kind": "field", "name": "tag_ids", "widget": "many2many_tags"}
+   ]}},
+  {"id": "view_lead_list", "model": "crm.lead", "type": "list", "name": "crm.lead.list",
+   "columns": [{"field": "name"}, {"field": "partner_id"}, {"field": "email_from", "optional": "hide"}, {"field": "stage_id"}, {"field": "user_id"}, {"field": "team_id", "optional": "hide"},
+               {"field": "expected_revenue", "sum": true}, {"field": "probability", "optional": "hide"}, {"field": "prorated_revenue", "sum": true, "optional": "hide"}, {"field": "date_deadline"}, {"field": "score", "optional": "hide"}]},
+  {"id": "view_lead_list_leads", "model": "crm.lead", "type": "list", "name": "crm.lead.list.leads",
+   "columns": [{"field": "name"}, {"field": "contact_name"}, {"field": "partner_name"}, {"field": "email_from"}, {"field": "team_id"}, {"field": "user_id"}, {"field": "score"}, {"field": "create_date"}]},
+  {"id": "view_lead_form", "model": "crm.lead", "type": "form", "name": "crm.lead.form", "chatter": true,
+   "root": {"kind": "sheet", "children": [
+     {"kind": "buttons", "children": [
+       {"kind": "button", "method": "action_convert", "label": "Convert to opportunity", "invisible": ["type", "!=", "lead"]},
+       {"kind": "button", "method": "action_set_won", "label": "Won", "invisible": {"any": [["type", "!=", "opportunity"], ["is_won", "=", true], ["active", "=", false]]}},
+       {"kind": "button", "method": "action_set_lost", "label": "Lost", "invisible": {"any": [["active", "=", false], ["is_won", "=", true]]}},
+       {"kind": "button", "method": "action_restore", "label": "Restore", "invisible": ["active", "=", true]},
+       {"kind": "button", "method": "action_new_quotation", "label": "New quotation", "invisible": ["type", "!=", "opportunity"]}
+     ]},
+     {"kind": "field", "name": "stage_id", "widget": "statusbar"},
+     {"kind": "field", "name": "name", "widget": "title"},
+     {"kind": "group", "name": "money", "columns": 3, "children": [
+       {"kind": "field", "name": "expected_revenue"}, {"kind": "field", "name": "probability"}, {"kind": "field", "name": "date_deadline"}
+     ]},
+     {"kind": "group", "name": "main", "columns": 2, "children": [
+       {"kind": "field", "name": "partner_id"}, {"kind": "field", "name": "user_id"},
+       {"kind": "field", "name": "email_from", "widget": "email"}, {"kind": "field", "name": "team_id"},
+       {"kind": "field", "name": "phone", "widget": "phone"}, {"kind": "field", "name": "priority", "widget": "priority"},
+       {"kind": "field", "name": "tag_ids", "widget": "many2many_tags"}, {"kind": "field", "name": "type"}
+     ]},
+     {"kind": "notebook", "pages": [
+       {"kind": "page", "name": "page_notes", "title": "Notes", "children": [{"kind": "field", "name": "description"}]},
+       {"kind": "page", "name": "page_contact", "title": "Contact details", "children": [
+         {"kind": "group", "name": "contact", "columns": 2, "children": [
+           {"kind": "field", "name": "partner_name"}, {"kind": "field", "name": "contact_name"}, {"kind": "field", "name": "function"},
+           {"kind": "field", "name": "mobile"}, {"kind": "field", "name": "website"}, {"kind": "field", "name": "street"},
+           {"kind": "field", "name": "city"}, {"kind": "field", "name": "zip"}, {"kind": "field", "name": "country_id"}
+         ]}]},
+       {"kind": "page", "name": "page_marketing", "title": "Marketing", "children": [{"kind": "field", "name": "source_id"}, {"kind": "field", "name": "medium_id"}, {"kind": "field", "name": "campaign_id"}]},
+       {"kind": "page", "name": "page_quotes", "title": "Quotations", "children": [{"kind": "field", "name": "quotation_ids"}]},
+       {"kind": "page", "name": "page_score", "title": "Score", "children": [{"kind": "field", "name": "score"}, {"kind": "field", "name": "score_factors"}]},
+       {"kind": "page", "name": "page_lost", "title": "Lost", "invisible": ["lost", "=", false], "children": [{"kind": "field", "name": "lost_reason_id"}, {"kind": "field", "name": "lost_feedback"}]}
+     ]}
+   ]}},
+  {"id": "view_lead_search", "model": "crm.lead", "type": "search", "name": "crm.lead.search",
+   "fields": ["name", "partner_id", "email_from", "contact_name", "partner_name"],
+   "filters": [
+     {"name": "mine", "label": "My pipeline", "domain": [["user_id", "=", "$uid"]]},
+     {"name": "unassigned", "label": "Unassigned", "domain": [["user_id", "=", null]]},
+     {"name": "hot", "label": "Score ≥ 50", "domain": [["score", ">=", 50]]},
+     {"name": "won", "label": "Won", "domain": [["is_won", "=", true]]},
+     {"name": "lost", "label": "Lost", "domain": [["lost", "=", true], ["active", "=", false]]},
+     {"name": "closing", "label": "Closing this month", "domain": [["date_deadline", "<=", "$today"]]}
+   ],
+   "group_bys": [{"field": "stage_id"}, {"field": "user_id"}, {"field": "team_id"}, {"field": "country_id"}, {"field": "source_id"}]},
+  {"id": "view_lead_calendar", "model": "crm.lead", "type": "calendar", "name": "crm.lead.calendar", "date_start": "date_deadline", "title": "name"},
+  {"id": "view_lead_pivot", "model": "crm.lead", "type": "pivot", "name": "crm.lead.pivot", "rows": ["stage_id"], "col": "user_id", "measures": ["expected_revenue"]},
+  {"id": "view_lead_graph", "model": "crm.lead", "type": "graph", "name": "crm.lead.graph", "row": "stage_id", "measures": ["expected_revenue"]},
+  {"id": "view_lead_forecast_graph", "model": "crm.lead", "type": "graph", "name": "crm.lead.forecast.graph", "row": "date_deadline", "measures": ["prorated_revenue"]},
+  {"id": "view_lead_forecast_pivot", "model": "crm.lead", "type": "pivot", "name": "crm.lead.forecast.pivot", "rows": ["date_deadline"], "col": "stage_id", "measures": ["prorated_revenue"]}
+]

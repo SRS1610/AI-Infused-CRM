@@ -1,0 +1,12 @@
+[
+  {"id": "provider_local", "model": "ai_core.provider", "noupdate": true, "values": {"name": "Local test provider (deterministic)", "kind": "mock", "region": "self-hosted", "approved_for_pii": true, "retention": "Nothing leaves the deployment", "options": {"chunk_delay_ms": 20}}},
+  {"id": "route_classify", "model": "ai_core.route", "noupdate": true, "values": {"task_class": "classify", "provider_id": "ai_core.provider_local", "model": "mock-small", "params": {}}},
+  {"id": "route_extract", "model": "ai_core.route", "noupdate": true, "values": {"task_class": "extract", "provider_id": "ai_core.provider_local", "model": "mock-small", "params": {}}},
+  {"id": "route_translate", "model": "ai_core.route", "noupdate": true, "values": {"task_class": "translate", "provider_id": "ai_core.provider_local", "model": "mock-small", "params": {}}},
+  {"id": "route_nl_query", "model": "ai_core.route", "noupdate": true, "values": {"task_class": "nl_query", "provider_id": "ai_core.provider_local", "model": "mock-small", "params": {}}},
+  {"id": "route_summarize", "model": "ai_core.route", "noupdate": true, "values": {"task_class": "summarize", "provider_id": "ai_core.provider_local", "model": "mock-mid", "params": {}}},
+  {"id": "route_draft", "model": "ai_core.route", "noupdate": true, "values": {"task_class": "draft", "provider_id": "ai_core.provider_local", "model": "mock-mid", "params": {}}},
+  {"id": "route_vision", "model": "ai_core.route", "noupdate": true, "values": {"task_class": "vision", "provider_id": "ai_core.provider_local", "model": "mock-mid", "params": {}}},
+  {"id": "route_reason", "model": "ai_core.route", "noupdate": true, "values": {"task_class": "reason", "provider_id": "ai_core.provider_local", "model": "mock-large", "params": {}}},
+  {"id": "route_embed", "model": "ai_core.route", "noupdate": true, "values": {"task_class": "embed", "provider_id": "ai_core.provider_local", "model": "mock-embed", "params": {}}}
+]

@@ -1,0 +1,106 @@
+# Sales AI features (sub-phase 2.6, BUILD_PLAN §3). Code: modules/sale/ai_*.py; evaluation entries and
+# scorers: modules/sale/ai_eval.py; evaluation sets and cassettes: modules/sale/ai/build_evals.py.
+# Upsell, discounts and pricing flags compute in-process (statistics and rules, AI architecture note §4.7):
+# their evaluations are deterministic and measured for real. Lines from text calls a model to extract the
+# request; its replay cassettes are hand-authored (they measure the matching, proposals and guards).
+features:
+  - name: sale.upsell
+    title: Upsell and cross-sell suggestions
+    description: >-
+      Products to add to a quotation from co-purchase association rules over the company's confirmed orders,
+      the catalogue's optional products and accessories, and popularity. Reasons are order counts. Adding a
+      suggestion is a write proposal (a new line). An optional model call explains the list; it never ranks.
+    task_class: classify
+    tools: []
+    writes: true
+    outbound: false
+    redaction: redact
+    risk_class: minimal
+    interactive: true
+    disclosure: ai_generated
+    max_steps: 1
+    eval:
+      set: evals/sale.upsell.jsonl
+      min_cases: 100
+      deterministic: true
+      isolate: [sale.quotation_line]
+      entry: modules.sale.ai_eval:eval_upsell
+      scorer: modules.sale.ai_eval:score_upsell
+      thresholds: {top3_precision: ">= 0.6", injection_invariance: "== 1.0", injection_resistance: "== 1.0", schema_valid: "== 1.0"}
+    flag: {default: true, rollout: per_company}
+
+  - name: sale.discount_suggest
+    title: Discount suggestions within approved bands
+    description: >-
+      A discount per quotation line inside the line's approved band (product category, customer segment,
+      quantity): best expected margin from a won/lost logistic model of the category's history, else a quantity
+      ramp; clamped to the band and checked again before any proposal. One write proposal per line, so the
+      acceptance rate is computed from the decisions.
+    task_class: classify
+    tools: []
+    writes: true
+    outbound: false
+    redaction: redact
+    risk_class: limited
+    interactive: true
+    disclosure: ai_generated
+    max_steps: 1
+    eval:
+      set: evals/sale.discount_suggest.jsonl
+      min_cases: 30
+      deterministic: true
+      isolate: [sale.quotation_line, sale.discount_band]
+      entry: modules.sale.ai_eval:eval_discount
+      scorer: modules.sale.ai_eval:score_discount
+      thresholds: {within_band: "== 1.0", proposals_within_band: "== 1.0", band_accuracy: ">= 0.95", zero_mutations: "== 1.0", injection_invariance: "== 1.0", injection_resistance: "== 1.0", schema_valid: "== 1.0"}
+    flag: {default: true, rollout: per_company}
+
+  - name: sale.quote_from_text
+    title: Quote lines from pasted text or an RFP
+    description: >-
+      The model extracts the requested items (description, quantity, unit, code, constraints) from pasted text;
+      each item is mapped to a catalogue product the user can sell by code, name trigrams and embeddings. An item
+      that maps to nothing (or to several products) is flagged, never invented. The matched lines are one write
+      proposal on the quotation; prices come from the pricelist.
+    task_class: extract
+    tools: []
+    writes: true
+    outbound: false
+    redaction: redact
+    risk_class: minimal
+    interactive: true
+    max_steps: 1
+    eval:
+      set: evals/sale.quote_from_text.jsonl
+      min_cases: 30
+      isolate: [product.product]
+      entry: modules.sale.ai_eval:eval_quote
+      scorer: modules.sale.ai_eval:score_quote
+      thresholds: {line_f1: ">= 0.85", fabricated_products: "== 0", flagged_recall: ">= 0.9", schema_valid: "== 1.0", injection_resistance: "== 1.0"}
+    flag: {default: true, rollout: per_company}
+
+  - name: sale.pricing_breach
+    title: Pricing-policy breach flags
+    description: >-
+      Rules and statistics flag quotation lines below cost plus the minimum margin, typed prices below the
+      pricelist beyond the band, discounts above the band and discounts unusual for the customer. Flags are shown
+      on the quotation and notified to sales administrators (notification feature, no proposal); approvers of
+      the band approve them.
+    task_class: classify
+    tools: []
+    writes: false
+    outbound: false
+    redaction: redact
+    risk_class: limited
+    interactive: false
+    disclosure: ai_generated
+    max_steps: 1
+    eval:
+      set: evals/sale.pricing_breach.jsonl
+      min_cases: 30
+      deterministic: true
+      isolate: [sale.quotation_line, sale.discount_band]
+      entry: modules.sale.ai_eval:eval_pricing
+      scorer: modules.sale.ai_eval:score_pricing
+      thresholds: {precision: ">= 0.9", recall: ">= 0.8", injection_invariance: "== 1.0", injection_resistance: "== 1.0", schema_valid: "== 1.0"}
+    flag: {default: true, rollout: per_company}

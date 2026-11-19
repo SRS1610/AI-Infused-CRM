@@ -1,0 +1,97 @@
+{
+ "gold": {
+  "amount_tax": 0.0,
+  "amount_total": 363.93,
+  "amount_untaxed": 363.93,
+  "currency": "USD",
+  "due_date": null,
+  "iban": null,
+  "invoice_date": "2026-07-28",
+  "invoice_number": "006800/26",
+  "lines": [
+   {
+    "account": "software",
+    "amount": 363.93,
+    "description": "Annual antivirus subscription",
+    "quantity": 3.0,
+    "tax": "purchase_vat_0_import",
+    "tax_rate": 0.0,
+    "unit_price": 121.31
+   }
+  ],
+  "move_type": "in_invoice",
+  "needs_review": false,
+  "partner_name": "Atlas Cloud Inc.",
+  "partner_vat": null
+ },
+ "spec": {
+  "amount_tax": 0.0,
+  "amount_total": 363.93,
+  "amount_untaxed": 363.93,
+  "buyer": {
+   "city": "75001 Paris",
+   "country": "France",
+   "name": "My Company (Europe)",
+   "street": "8 avenue de l'Opéra",
+   "vat": "FR32123456789"
+  },
+  "credit_note": false,
+  "currency": "USD",
+  "due_date": null,
+  "id": "b013",
+  "invoice_date": "2026-07-28",
+  "invoice_number": "006800/26",
+  "kind": "digital",
+  "lang": "en",
+  "layout": "classic",
+  "lines": [
+   {
+    "amount": 363.93,
+    "description": "Annual antivirus subscription",
+    "quantity": 3.0,
+    "tax_rate": 0.0,
+    "unit_price": 121.31
+   }
+  ],
+  "move_type": "in_invoice",
+  "notes": "",
+  "reverse_charge": false,
+  "seed": 235297,
+  "seller": {
+   "address": "500 Market Street, San Francisco, CA 94105",
+   "country": "US",
+   "iban": null,
+   "name": "Atlas Cloud Inc.",
+   "vat": null
+  },
+  "tax_lines": [
+   {
+    "amount": 0.0,
+    "base": 363.93,
+    "rate": 0.0
+   }
+  ]
+ },
+ "world": {
+  "history": [
+   {
+    "date": "2026-06-23",
+    "lines": [
+     {
+      "account": "software",
+      "description": "Cloud hosting - monthly plan",
+      "quantity": 1.0,
+      "tax": "purchase_vat_0_import",
+      "unit_price": 192.79
+     }
+    ]
+   }
+  ],
+  "vendor": {
+   "iban": null,
+   "known": true,
+   "name": "Atlas Cloud Inc.",
+   "vat": null
+  }
+ }
+}

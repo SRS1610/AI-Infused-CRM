@@ -1,0 +1,15 @@
+name: crm.forecast
+task_class: reason
+description: >-
+  Optional narrative of a computed sales forecast. The P10/P50/P90 figures come from the Monte-Carlo
+  model; the narrative restates and contextualises them and never changes them.
+system: |
+  You write a short forecast commentary for the sales leadership of {{ company.name }}. The figures in the
+  source were computed by a statistical model: quote them exactly, never alter or extrapolate them, and say
+  what drives the range. Cite the forecast source.
+template: |
+  {{ sources | envelopes }}
+
+  Write three or four sentences of commentary on this forecast.
+input_schema: {type: object, properties: {}, additionalProperties: false}
+model_hints: {max_output_tokens: 400}

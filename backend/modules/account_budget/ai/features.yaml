@@ -1,0 +1,23 @@
+# Budget AI features (sub-phase 2.6, BUILD_PLAN §3). Code: modules/account_budget/ai_features.py; cases and
+# cassettes: ai/build_evals.py.
+features:
+  - name: account_budget.variance_explain
+    title: Plain-language variance explanations
+    description: >-
+      Explains a budget's variances in a few sentences from the budget-vs-actual report only. Every figure
+      must be one of the report's (sentences with other numbers are removed); nothing is written.
+    task_class: summarize
+    tools: []
+    writes: false
+    outbound: false
+    redaction: redact
+    risk_class: minimal
+    interactive: true
+    max_steps: 1
+    eval:
+      set: evals/account_budget.variance_explain.jsonl
+      min_cases: 30
+      entry: modules.account_budget.ai_features:eval_entry
+      scorer: modules.account_budget.ai_features:score
+      thresholds: {numeric_consistency: "== 1.0", guard_accuracy: "== 1.0", rubric_score: ">= 0.8", schema_valid: "== 1.0", injection_resistance: "== 1.0"}
+    flag: {default: true, rollout: per_company}

@@ -1,0 +1,122 @@
+{
+ "gold": {
+  "amount_tax": 0.0,
+  "amount_total": 2970.0,
+  "amount_untaxed": 2970.0,
+  "currency": "EUR",
+  "due_date": "2026-06-15",
+  "iban": null,
+  "invoice_date": "2026-05-31",
+  "invoice_number": "DA-2026-2129",
+  "lines": [
+   {
+    "account": "income",
+    "amount": 1760.0,
+    "description": "Robot arm RA-5",
+    "quantity": 1.0,
+    "tax": "sale_vat_0_eu",
+    "tax_rate": 0.0,
+    "unit_price": 1760.0
+   },
+   {
+    "account": "income_services",
+    "amount": 1210.0,
+    "description": "Maintenance contract - quarter",
+    "quantity": 1.0,
+    "tax": "sale_vat_0_eu",
+    "tax_rate": 0.0,
+    "unit_price": 1210.0
+   }
+  ],
+  "move_type": "out_invoice",
+  "needs_review": false,
+  "partner_name": "Delta Automation Ltd",
+  "partner_vat": "IE5651417E"
+ },
+ "spec": {
+  "amount_tax": 0.0,
+  "amount_total": 2970.0,
+  "amount_untaxed": 2970.0,
+  "buyer": {
+   "address": "Unit 4, Sandyford Business Park, Dublin 18",
+   "city": "",
+   "country": "IE",
+   "name": "Delta Automation Ltd",
+   "street": "",
+   "vat": "IE5651417E"
+  },
+  "credit_note": false,
+  "currency": "EUR",
+  "due_date": "2026-06-15",
+  "id": "b116",
+  "invoice_date": "2026-05-31",
+  "invoice_number": "DA-2026-2129",
+  "kind": "scan",
+  "lang": "en",
+  "layout": "letter",
+  "lines": [
+   {
+    "amount": 1760.0,
+    "description": "Robot arm RA-5",
+    "quantity": 1.0,
+    "tax_rate": 0.0,
+    "unit_price": 1760.0
+   },
+   {
+    "amount": 1210.0,
+    "description": "Maintenance contract - quarter",
+    "quantity": 1.0,
+    "tax_rate": 0.0,
+    "unit_price": 1210.0
+   }
+  ],
+  "move_type": "out_invoice",
+  "notes": "",
+  "reverse_charge": true,
+  "seed": 987931,
+  "seller": {
+   "address": "8 avenue de l'Opéra, 75001 Paris",
+   "country": "FR",
+   "iban": "FR76 3000 4000 0312 3456 7890 143",
+   "name": "My Company (Europe)",
+   "vat": "FR32123456789"
+  },
+  "tax_lines": [
+   {
+    "amount": 0.0,
+    "base": 2970.0,
+    "rate": 0.0
+   }
+  ]
+ },
+ "world": {
+  "history": [
+   {
+    "date": "2026-04-26",
+    "lines": [
+     {
+      "account": "income",
+      "description": "Proximity sensor PS-2",
+      "quantity": 1.0,
+      "tax": "sale_vat_0_eu",
+      "unit_price": 330.0
+     },
+     {
+      "account": "income_services",
+      "description": "Maintenance contract - quarter",
+      "quantity": 1.0,
+      "tax": "sale_vat_0_eu",
+      "unit_price": 640.0
+     }
+    ]
+   }
+  ],
+  "vendor": {
+   "customer": true,
+   "iban": null,
+   "known": true,
+   "name": "Delta Automation Ltd",
+   "vat": "IE5651417E"
+  }
+ }
+}

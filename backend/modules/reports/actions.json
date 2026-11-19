@@ -1,0 +1,4 @@
+[
+  {"id": "action_templates", "name": "Report templates", "model": "reports.template", "views": ["list", "form"], "groups": ["reports.group_report_manager", "core.group_system"]},
+  {"id": "action_layouts", "name": "Report layouts", "model": "reports.layout", "views": ["list", "form"], "groups": ["reports.group_report_manager", "core.group_system"]}
+]

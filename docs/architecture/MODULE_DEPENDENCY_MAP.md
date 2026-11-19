@@ -105,8 +105,11 @@ flowchart TB
     account_budget --> account_analytic
     account_asset --> account
     account_bank --> account
-    account_tax_report --> account
-    einvoice --> account
+    account_reports --> account
+    account_tax --> account_reports
+    account_dunning --> account
+    auth_saml --> P1
+    account_einvoice --> account
     payment --> account
     payment --> portal_p1["portal"]
     sale_full --> account
@@ -351,13 +354,16 @@ Layer: **P** platform, **A** app, **B** bridge/integration. "Depends on" lists d
 | `sale_commission` | 2 | A | `sale`, `ai_core` | Commission plans, statements, payouts | Plain-language commission statement explanations |
 | `sale_subscription` | 2 | A | `sale`, `payment`, `ai_core` | Recurring billing, proration, renewals, churn tracking | Churn prediction; personalised renewal drafts; usage anomaly alerts |
 | `sale_rental` | 2 | A | `sale`, `ai_core` | Rental orders, availability calendars, pickup/return | Rental demand forecasting |
-| `account` | 2 | A | `contacts`, `product`, `uom`, `workflow`, `reports`, `portal`, `ai_core` | Chart of accounts, journals, fiscal periods, invoices, bills, credit notes, payments, taxes, fiscal positions, multi-currency, dunning, financial reports | Invoice/bill OCR with auto-coding; anomaly detection; cash-flow forecasting; NL reports; personalised dunning |
+| `account` | 2 | A | `contacts`, `product`, `uom`, `workflow`, `reports`, `portal`, `ai_core` | Chart of accounts, journals, fiscal periods, invoices, bills, credit notes, payments, taxes, fiscal positions, multi-currency | Invoice/bill OCR with auto-coding; anomaly detection; cash-flow forecasting; NL reports; personalised dunning |
 | `account_analytic` | 2 | A | `account` | Cost centres, analytic plans and distribution | Analytic allocation suggestions |
 | `account_budget` | 2 | A | `account_analytic` | Budgets and budget-vs-actual | Plain-language variance explanations |
 | `account_asset` | 2 | A | `account` | Fixed assets and depreciation schedules | Asset classification from invoice text; depreciation anomaly checks |
 | `account_bank` | 2 | A | `account` | Statement import (CSV, OFX, CAMT.053, MT940), reconciliation rules, bank feeds | Reconciliation suggestions |
-| `account_tax_report` | 2 | A | `account` | Tax return reports, closing entries | Pre-filing anomaly checks |
-| `einvoice` | 2 | A | `account` | Peppol/UBL e-invoicing through country adapters | Mapping error explanations |
+| `account_reports` | 2 | A | `account` | Financial reports engine: general ledger, trial balance, P&L, balance sheet, cash flow, aged balances, partner ledger, consolidation | Natural-language reports (parameters for review) |
+| `account_tax` | 2 | A | `account_reports` | Tax return reports, closing entries | Pre-filing anomaly checks |
+| `account_dunning` | 2 | A | `account` | Dunning levels, payment reminders, fees | Personalised dunning messages |
+| `auth_saml` | 2 | B | `core` | SAML 2.0 single sign-on (D-013) | — (platform) |
+| `account_einvoice` | 2 | A | `account` | Peppol/UBL e-invoicing through country adapters | Mapping error explanations |
 | `payment` | 2 | A | `account`, `portal` | Payment providers (Stripe, PayPal, …), tokens, portal payments | Failed-payment reason summaries |
 
 ### Phase 2b — E-Signature

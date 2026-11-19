@@ -1,0 +1,145 @@
+{
+ "gold": {
+  "amount_tax": 0.0,
+  "amount_total": 3580.0,
+  "amount_untaxed": 3580.0,
+  "currency": "EUR",
+  "due_date": null,
+  "iban": "DE38370400442212691790",
+  "invoice_date": "2026-09-23",
+  "invoice_number": "R202606772",
+  "lines": [
+   {
+    "account": "commissions",
+    "amount": 1140.0,
+    "description": "Vermittlungsprovision Aufträge",
+    "quantity": 1.0,
+    "tax": "purchase_vat_20_rc",
+    "tax_rate": 0.0,
+    "unit_price": 1140.0
+   },
+   {
+    "account": "commissions",
+    "amount": 690.0,
+    "description": "Handelsvertreterprovision",
+    "quantity": 1.0,
+    "tax": "purchase_vat_20_rc",
+    "tax_rate": 0.0,
+    "unit_price": 690.0
+   },
+   {
+    "account": "commissions",
+    "amount": 400.0,
+    "description": "Vermittlungsprovision Aufträge",
+    "quantity": 1.0,
+    "tax": "purchase_vat_20_rc",
+    "tax_rate": 0.0,
+    "unit_price": 400.0
+   },
+   {
+    "account": "commissions",
+    "amount": 1350.0,
+    "description": "Vermittlungsprovision Aufträge",
+    "quantity": 1.0,
+    "tax": "purchase_vat_20_rc",
+    "tax_rate": 0.0,
+    "unit_price": 1350.0
+   }
+  ],
+  "move_type": "in_invoice",
+  "needs_review": false,
+  "partner_name": "Vertriebsagentur Wagner KG",
+  "partner_vat": "DE626695596"
+ },
+ "spec": {
+  "amount_tax": 0.0,
+  "amount_total": 3580.0,
+  "amount_untaxed": 3580.0,
+  "buyer": {
+   "city": "75001 Paris",
+   "country": "France",
+   "name": "My Company (Europe)",
+   "street": "8 avenue de l'Opéra",
+   "vat": "FR32123456789"
+  },
+  "credit_note": false,
+  "currency": "EUR",
+  "due_date": null,
+  "id": "b045",
+  "invoice_date": "2026-09-23",
+  "invoice_number": "R202606772",
+  "kind": "digital",
+  "lang": "de",
+  "layout": "classic",
+  "lines": [
+   {
+    "amount": 1140.0,
+    "description": "Vermittlungsprovision Aufträge",
+    "quantity": 1.0,
+    "tax_rate": 0.0,
+    "unit_price": 1140.0
+   },
+   {
+    "amount": 690.0,
+    "description": "Handelsvertreterprovision",
+    "quantity": 1.0,
+    "tax_rate": 0.0,
+    "unit_price": 690.0
+   },
+   {
+    "amount": 400.0,
+    "description": "Vermittlungsprovision Aufträge",
+    "quantity": 1.0,
+    "tax_rate": 0.0,
+    "unit_price": 400.0
+   },
+   {
+    "amount": 1350.0,
+    "description": "Vermittlungsprovision Aufträge",
+    "quantity": 1.0,
+    "tax_rate": 0.0,
+    "unit_price": 1350.0
+   }
+  ],
+  "move_type": "in_invoice",
+  "notes": "",
+  "reverse_charge": true,
+  "seed": 169342,
+  "seller": {
+   "address": "Friedrichstraße 112, 10117 Berlin",
+   "country": "DE",
+   "iban": "DE38 3704 0044 2212 6917 90",
+   "name": "Vertriebsagentur Wagner KG",
+   "vat": "DE626695596"
+  },
+  "tax_lines": [
+   {
+    "amount": 0.0,
+    "base": 3580.0,
+    "rate": 0.0
+   }
+  ]
+ },
+ "world": {
+  "history": [
+   {
+    "date": "2026-08-19",
+    "lines": [
+     {
+      "account": "commissions",
+      "description": "Vermittlungsprovision Aufträge",
+      "quantity": 1.0,
+      "tax": "purchase_vat_20_rc",
+      "unit_price": 1270.0
+     }
+    ]
+   }
+  ],
+  "vendor": {
+   "iban": "DE38 3704 0044 2212 6917 90",
+   "known": true,
+   "name": "Vertriebsagentur Wagner KG",
+   "vat": "DE626695596"
+  }
+ }
+}

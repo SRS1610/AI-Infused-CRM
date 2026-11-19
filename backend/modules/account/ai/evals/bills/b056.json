@@ -1,0 +1,116 @@
+{
+ "gold": {
+  "amount_tax": 836.0,
+  "amount_total": 5016.0,
+  "amount_untaxed": 4180.0,
+  "currency": "EUR",
+  "due_date": "2026-08-19",
+  "iban": "FR2130006078323561710186335",
+  "invoice_date": "2026-07-05",
+  "invoice_number": "003908/26",
+  "lines": [
+   {
+    "account": "expense",
+    "amount": 2580.0,
+    "description": "Honorarios de selección",
+    "quantity": 1.0,
+    "tax": "purchase_vat_20",
+    "tax_rate": 20.0,
+    "unit_price": 2580.0
+   },
+   {
+    "account": "expense",
+    "amount": 960.0,
+    "description": "Jornada de consultoría",
+    "quantity": 1.0,
+    "tax": "purchase_vat_20",
+    "tax_rate": 20.0,
+    "unit_price": 960.0
+   },
+   {
+    "account": "expense",
+    "amount": 640.0,
+    "description": "Asesoría jurídica",
+    "quantity": 1.0,
+    "tax": "purchase_vat_20",
+    "tax_rate": 20.0,
+    "unit_price": 640.0
+   }
+  ],
+  "move_type": "in_invoice",
+  "needs_review": false,
+  "partner_name": "Cabinet Lefèvre Avocats SELARL",
+  "partner_vat": "FR61850916266"
+ },
+ "spec": {
+  "amount_tax": 836.0,
+  "amount_total": 5016.0,
+  "amount_untaxed": 4180.0,
+  "buyer": {
+   "city": "75001 Paris",
+   "country": "France",
+   "name": "My Company (Europe)",
+   "street": "8 avenue de l'Opéra",
+   "vat": "FR32123456789"
+  },
+  "credit_note": false,
+  "currency": "EUR",
+  "due_date": "2026-08-19",
+  "id": "b056",
+  "invoice_date": "2026-07-05",
+  "invoice_number": "003908/26",
+  "kind": "digital",
+  "lang": "es",
+  "layout": "letter",
+  "lines": [
+   {
+    "amount": 2580.0,
+    "description": "Honorarios de selección",
+    "quantity": 1.0,
+    "tax_rate": 20.0,
+    "unit_price": 2580.0
+   },
+   {
+    "amount": 960.0,
+    "description": "Jornada de consultoría",
+    "quantity": 1.0,
+    "tax_rate": 20.0,
+    "unit_price": 960.0
+   },
+   {
+    "amount": 640.0,
+    "description": "Asesoría jurídica",
+    "quantity": 1.0,
+    "tax_rate": 20.0,
+    "unit_price": 640.0
+   }
+  ],
+  "move_type": "in_invoice",
+  "notes": "",
+  "reverse_charge": false,
+  "seed": 662520,
+  "seller": {
+   "address": "12 rue des Lilas, 69003 Lyon",
+   "country": "FR",
+   "iban": "FR21 3000 6078 3235 6171 0186 335",
+   "name": "Cabinet Lefèvre Avocats SELARL",
+   "vat": "FR61850916266"
+  },
+  "tax_lines": [
+   {
+    "amount": 836.0,
+    "base": 4180.0,
+    "rate": 20.0
+   }
+  ]
+ },
+ "world": {
+  "history": [],
+  "vendor": {
+   "iban": "FR21 3000 6078 3235 6171 0186 335",
+   "known": false,
+   "name": "Cabinet Lefèvre Avocats SELARL",
+   "vat": "FR61850916266"
+  }
+ }
+}

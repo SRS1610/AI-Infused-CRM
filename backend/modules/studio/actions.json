@@ -1,0 +1,4 @@
+[
+  {"id": "action_studio", "name": "Studio", "kind": "client", "client_tag": "studio"},
+  {"id": "action_changes", "name": "Studio changes", "model": "studio.change", "views": ["list"]}
+]

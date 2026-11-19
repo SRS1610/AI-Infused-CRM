@@ -1,0 +1,6 @@
+[
+  {"id": "product_cloud_seat", "model": "product.product", "values": {"name": "Cloud platform seat", "type": "service", "list_price": 49.0, "recurring_invoice": true, "description_sale": "Cloud platform seat"}},
+  {"id": "product_support_plan", "model": "product.product", "values": {"name": "Premium support plan", "type": "service", "list_price": 199.0, "recurring_invoice": true}},
+  {"id": "product_robot_monitoring", "model": "product.product", "values": {"name": "Robot fleet monitoring", "type": "service", "list_price": 1200.0, "recurring_invoice": true}},
+  {"id": "product_setup_fee", "model": "product.product", "values": {"name": "Subscription set-up", "type": "service", "list_price": 150.0}}
+]

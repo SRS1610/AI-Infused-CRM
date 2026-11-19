@@ -1,0 +1,192 @@
+# Tessera development stack. `make up` from the repository root.
+name: tessera
+
+x-backend-env: &backend-env
+  TESSERA_ENV: ${TESSERA_ENV:-development}
+  TESSERA_DATABASE_URL: postgresql://tessera:tessera@db:5432/tessera
+  TESSERA_TEST_DATABASE_URL: postgresql://tessera:tessera@db:5432/tessera_test
+  TESSERA_REDIS_URL: redis://redis:6379/0
+  TESSERA_SECRET_KEY: ${TESSERA_SECRET_KEY:-dev-only-secret-key-change-me-please-32b}
+  TESSERA_MASTER_KEY: ${TESSERA_MASTER_KEY:-ZGV2LW9ubHktbWFzdGVyLWtleS1jaGFuZ2UtbWUtMzItYnl0ZXMh}
+  TESSERA_BASE_URL: ${TESSERA_BASE_URL:-http://localhost:8000}
+  # base of links in e-mails (portal, password reset): the address people open the web client at
+  TESSERA_PUBLIC_URL: ${TESSERA_PUBLIC_URL:-http://localhost:5173}
+  TESSERA_STORAGE_BACKEND: s3
+  TESSERA_S3_ENDPOINT: http://objectstore:8333
+  TESSERA_S3_BUCKET: tessera
+  TESSERA_S3_ACCESS_KEY: tessera
+  TESSERA_S3_SECRET_KEY: tessera-secret
+  TESSERA_SMTP_HOST: mailpit
+  TESSERA_SMTP_PORT: "1025"
+  TESSERA_MAIL_FROM: noreply@tessera.local
+  TESSERA_AI_GATEWAY_URL: http://gateway:8100
+  TESSERA_AI_GATEWAY_TOKEN: ${TESSERA_AI_GATEWAY_TOKEN:-dev-only-gateway-token}
+
+services:
+  db:
+    image: pgvector/pgvector:pg16
+    environment:
+      POSTGRES_USER: tessera
+      POSTGRES_PASSWORD: tessera
+      POSTGRES_DB: tessera
+    command: ["postgres", "-c", "shared_preload_libraries=pg_stat_statements", "-c", "max_connections=200"]
+    volumes:
+      - db-data:/var/lib/postgresql/data
+      - ./init-db.sh:/docker-entrypoint-initdb.d/10-init.sh:ro
+    ports:
+      - "${TESSERA_DB_PORT:-5432}:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U tessera -d tessera"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  redis:
+    image: redis:7-alpine
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - redis-data:/data
+    ports:
+      - "${TESSERA_REDIS_PORT:-6379}:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  # S3-compatible object store for attachments (SeaweedFS, Apache-2.0). The application creates its
+  # bucket on first write. Production deployments point TESSERA_S3_* at their own S3 service.
+  objectstore:
+    image: chrislusf/seaweedfs:latest
+    command: >
+      server -dir=/data -s3 -s3.config=/etc/seaweedfs/s3.json -master.volumeSizeLimitMB=1024 -volume.max=100
+    volumes:
+      - objectstore-data:/data
+      - ./seaweedfs-s3.json:/etc/seaweedfs/s3.json:ro
+    ports:
+      - "9000:8333"
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://localhost:8333/healthz"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+
+  mailpit:
+    image: axllent/mailpit:latest
+    ports:
+      - "8025:8025"   # web UI
+      - "1025:1025"   # SMTP
+    environment:
+      MP_SMTP_AUTH_ACCEPT_ANY: "1"
+      MP_SMTP_AUTH_ALLOW_INSECURE: "1"
+
+  server:
+    build:
+      context: ../..
+      dockerfile: deploy/images/backend.Dockerfile
+    command: ["tessera", "serve", "--host", "0.0.0.0", "--port", "8000"]
+    environment: *backend-env
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      objectstore:
+        condition: service_healthy
+    ports:
+      - "8000:8000"
+    volumes:
+      - ../../backend:/app/backend
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://localhost:8000/healthz').status==200 else 1)"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+
+  worker:
+    build:
+      context: ../..
+      dockerfile: deploy/images/backend.Dockerfile
+    command: ["tessera", "worker", "--queues", "default,mail,reports,ai,imports"]
+    environment: *backend-env
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      objectstore:
+        condition: service_healthy
+    volumes:
+      - ../../backend:/app/backend
+
+  scheduler:
+    build:
+      context: ../..
+      dockerfile: deploy/images/backend.Dockerfile
+    command: ["tessera", "scheduler"]
+    environment: *backend-env
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      objectstore:
+        condition: service_healthy
+    volumes:
+      - ../../backend:/app/backend
+
+  gateway:
+    build:
+      context: ../..
+      dockerfile: deploy/images/gateway.Dockerfile
+    command: ["gateway", "serve", "--host", "0.0.0.0", "--port", "8100"]
+    environment:
+      GATEWAY_ENV: ${TESSERA_ENV:-development}
+      GATEWAY_DATABASE_URL: postgresql://tessera:tessera@db:5432/tessera
+      GATEWAY_REDIS_URL: redis://redis:6379/1
+      GATEWAY_SERVICE_TOKEN: ${TESSERA_AI_GATEWAY_TOKEN:-dev-only-gateway-token}
+      GATEWAY_MASTER_KEY: ${TESSERA_MASTER_KEY:-ZGV2LW9ubHktbWFzdGVyLWtleS1jaGFuZ2UtbWUtMzItYnl0ZXMh}
+      GATEWAY_ANTHROPIC_API_KEY: ${GATEWAY_ANTHROPIC_API_KEY:-}
+      GATEWAY_OPENAI_API_KEY: ${GATEWAY_OPENAI_API_KEY:-}
+      GATEWAY_OLLAMA_BASE_URL: ${GATEWAY_OLLAMA_BASE_URL:-http://ollama:11434}
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    ports:
+      - "8100:8100"
+    volumes:
+      - ../../gateway:/app/gateway
+
+  web:
+    build:
+      context: ../..
+      dockerfile: deploy/images/web.Dockerfile
+      target: dev
+    environment:
+      # the dev server proxies /api and the websocket to the API container
+      VITE_API_URL: http://server:8000
+      # extra public host names for the dev server, e.g. a Cloudflare named tunnel (docs/admin/cloudflare-tunnel.md)
+      VITE_ALLOWED_HOSTS: ${VITE_ALLOWED_HOSTS:-}
+    ports:
+      - "5173:5173"
+    volumes:
+      - ../../frontend:/app/frontend
+      - web-node-modules:/app/frontend/node_modules
+
+  # Optional self-hosted model server for the vLLM/Ollama adapter: `docker compose --profile ai-local up`
+  ollama:
+    image: ollama/ollama:latest
+    profiles: ["ai-local"]
+    volumes:
+      - ollama-data:/root/.ollama
+    ports:
+      - "11434:11434"
+
+volumes:
+  db-data:
+  redis-data:
+  objectstore-data:
+  ollama-data:
+  web-node-modules:

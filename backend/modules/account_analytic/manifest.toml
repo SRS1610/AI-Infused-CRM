@@ -1,0 +1,14 @@
+name = "account_analytic"
+version = "1.0.0"
+summary = "Analytic accounting: plans (cost centres, projects, departments), analytic accounts, distributions on journal items and analytic items"
+category = "Accounting"
+phase = 2
+depends = ["account"]
+license = "Apache-2.0"
+installable = true
+
+[load]
+security = ["security/access.json"]
+views = ["views.json"]
+actions = "actions.json"
+menus = "menus.json"

@@ -1,0 +1,15 @@
+name: ai_test.summarize
+task_class: summarize
+description: Summarise a support ticket for the agent handling it.
+system: |
+  You summarise support tickets for the agent who handles them. Be brief and factual.
+template: |
+  Ticket to summarise:
+  {{ sources | envelopes }}
+
+  Write a three-sentence summary{% if inputs.get('focus') %} focusing on {{ inputs.get('focus') }}{% endif %}. Cite the ticket.
+input_schema:
+  type: object
+  properties:
+    focus: {type: string}
+  additionalProperties: false

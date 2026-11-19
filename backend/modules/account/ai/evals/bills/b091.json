@@ -1,0 +1,113 @@
+{
+ "gold": {
+  "amount_tax": 150.31,
+  "amount_total": 1653.41,
+  "amount_untaxed": 1503.1,
+  "currency": "EUR",
+  "due_date": "2026-03-02",
+  "iban": "FR1130006628500070216103892",
+  "invoice_date": "2026-03-02",
+  "invoice_number": "000604/26",
+  "lines": [
+   {
+    "account": "travel",
+    "amount": 549.76,
+    "description": "Nuitée hôtel",
+    "quantity": 1.0,
+    "tax": "purchase_vat_10",
+    "tax_rate": 10.0,
+    "unit_price": 549.76
+   },
+   {
+    "account": "travel",
+    "amount": 953.34,
+    "description": "Vol Paris - Berlin",
+    "quantity": 2.0,
+    "tax": "purchase_vat_10",
+    "tax_rate": 10.0,
+    "unit_price": 476.67
+   }
+  ],
+  "move_type": "in_invoice",
+  "needs_review": false,
+  "partner_name": "Voyages Lumière SAS",
+  "partner_vat": "FR46445707977"
+ },
+ "spec": {
+  "amount_tax": 150.31,
+  "amount_total": 1653.41,
+  "amount_untaxed": 1503.1,
+  "buyer": {
+   "city": "75001 Paris",
+   "country": "France",
+   "name": "My Company (Europe)",
+   "street": "8 avenue de l'Opéra",
+   "vat": "FR32123456789"
+  },
+  "credit_note": false,
+  "currency": "EUR",
+  "due_date": "2026-03-02",
+  "id": "b091",
+  "invoice_date": "2026-03-02",
+  "invoice_number": "000604/26",
+  "kind": "scan",
+  "lang": "fr",
+  "layout": "letter",
+  "lines": [
+   {
+    "amount": 549.76,
+    "description": "Nuitée hôtel",
+    "quantity": 1.0,
+    "tax_rate": 10.0,
+    "unit_price": 549.76
+   },
+   {
+    "amount": 953.34,
+    "description": "Vol Paris - Berlin",
+    "quantity": 2.0,
+    "tax_rate": 10.0,
+    "unit_price": 476.67
+   }
+  ],
+  "move_type": "in_invoice",
+  "notes": "",
+  "reverse_charge": false,
+  "seed": 121752,
+  "seller": {
+   "address": "27 quai de la Fosse, 44000 Nantes",
+   "country": "FR",
+   "iban": "FR11 3000 6628 5000 7021 6103 892",
+   "name": "Voyages Lumière SAS",
+   "vat": "FR46445707977"
+  },
+  "tax_lines": [
+   {
+    "amount": 150.31,
+    "base": 1503.1,
+    "rate": 10.0
+   }
+  ]
+ },
+ "world": {
+  "history": [
+   {
+    "date": "2026-01-26",
+    "lines": [
+     {
+      "account": "travel",
+      "description": "Billet de train Paris - Lyon",
+      "quantity": 1.0,
+      "tax": "purchase_vat_10",
+      "unit_price": 475.96
+     }
+    ]
+   }
+  ],
+  "vendor": {
+   "iban": "FR11 3000 6628 5000 7021 6103 892",
+   "known": true,
+   "name": "Voyages Lumière SAS",
+   "vat": "FR46445707977"
+  }
+ }
+}

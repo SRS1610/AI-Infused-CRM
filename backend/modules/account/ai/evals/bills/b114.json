@@ -1,0 +1,122 @@
+{
+ "gold": {
+  "amount_tax": 0.0,
+  "amount_total": 2900.0,
+  "amount_untaxed": 2900.0,
+  "currency": "EUR",
+  "due_date": "2026-05-11",
+  "iban": null,
+  "invoice_date": "2026-04-11",
+  "invoice_number": "INV202608842",
+  "lines": [
+   {
+    "account": "income",
+    "amount": 1460.0,
+    "description": "Robot arm RA-5",
+    "quantity": 1.0,
+    "tax": "sale_vat_0_eu",
+    "tax_rate": 0.0,
+    "unit_price": 1460.0
+   },
+   {
+    "account": "income",
+    "amount": 1440.0,
+    "description": "Proximity sensor PS-2",
+    "quantity": 1.0,
+    "tax": "sale_vat_0_eu",
+    "tax_rate": 0.0,
+    "unit_price": 1440.0
+   }
+  ],
+  "move_type": "out_invoice",
+  "needs_review": false,
+  "partner_name": "Delta Automation Ltd",
+  "partner_vat": "IE1139182E"
+ },
+ "spec": {
+  "amount_tax": 0.0,
+  "amount_total": 2900.0,
+  "amount_untaxed": 2900.0,
+  "buyer": {
+   "address": "Unit 4, Sandyford Business Park, Dublin 18",
+   "city": "",
+   "country": "IE",
+   "name": "Delta Automation Ltd",
+   "street": "",
+   "vat": "IE1139182E"
+  },
+  "credit_note": false,
+  "currency": "EUR",
+  "due_date": "2026-05-11",
+  "id": "b114",
+  "invoice_date": "2026-04-11",
+  "invoice_number": "INV202608842",
+  "kind": "digital",
+  "lang": "en",
+  "layout": "modern",
+  "lines": [
+   {
+    "amount": 1460.0,
+    "description": "Robot arm RA-5",
+    "quantity": 1.0,
+    "tax_rate": 0.0,
+    "unit_price": 1460.0
+   },
+   {
+    "amount": 1440.0,
+    "description": "Proximity sensor PS-2",
+    "quantity": 1.0,
+    "tax_rate": 0.0,
+    "unit_price": 1440.0
+   }
+  ],
+  "move_type": "out_invoice",
+  "notes": "",
+  "reverse_charge": true,
+  "seed": 546292,
+  "seller": {
+   "address": "8 avenue de l'Opéra, 75001 Paris",
+   "country": "FR",
+   "iban": "FR76 3000 4000 0312 3456 7890 143",
+   "name": "My Company (Europe)",
+   "vat": "FR32123456789"
+  },
+  "tax_lines": [
+   {
+    "amount": 0.0,
+    "base": 2900.0,
+    "rate": 0.0
+   }
+  ]
+ },
+ "world": {
+  "history": [
+   {
+    "date": "2026-03-07",
+    "lines": [
+     {
+      "account": "income",
+      "description": "Robot arm RA-5",
+      "quantity": 1.0,
+      "tax": "sale_vat_0_eu",
+      "unit_price": 1410.0
+     },
+     {
+      "account": "income_services",
+      "description": "Installation and commissioning",
+      "quantity": 1.0,
+      "tax": "sale_vat_0_eu",
+      "unit_price": 1520.0
+     }
+    ]
+   }
+  ],
+  "vendor": {
+   "customer": true,
+   "iban": null,
+   "known": true,
+   "name": "Delta Automation Ltd",
+   "vat": "IE1139182E"
+  }
+ }
+}

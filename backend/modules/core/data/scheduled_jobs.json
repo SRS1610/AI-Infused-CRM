@@ -1,0 +1,4 @@
+[
+  {"id": "sched_jobs_sweep", "model": "core.scheduled_job", "noupdate": true, "values": {"name": "Job system sweep", "job_name": "core.jobs_sweep", "cron": "*/5 * * * *"}},
+  {"id": "sched_webhook_retry", "model": "core.scheduled_job", "noupdate": true, "values": {"name": "Retry failed webhook deliveries", "job_name": "core.webhook_retry", "cron": "* * * * *"}}
+]

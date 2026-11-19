@@ -1,0 +1,15 @@
+name = "discuss"
+version = "1.0.0"
+summary = "Team chat: channels, direct messages, mentions, threads, files, reactions, presence and unread counters"
+category = "Productivity"
+phase = 1
+depends = ["core", "web", "chatter"]
+license = "Apache-2.0"
+installable = true
+application = true
+
+[load]
+security = ["security/access.json"]
+data = ["data/channels.json"]
+actions = "actions.json"
+menus = "menus.json"

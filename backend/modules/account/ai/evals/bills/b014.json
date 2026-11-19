@@ -1,0 +1,113 @@
+{
+ "gold": {
+  "amount_tax": 0.0,
+  "amount_total": 1464.18,
+  "amount_untaxed": 1464.18,
+  "currency": "GBP",
+  "due_date": "2026-01-24",
+  "iban": "GB65NWBK57306876579883",
+  "invoice_date": "2026-01-24",
+  "invoice_number": "TO428-7396",
+  "lines": [
+   {
+    "account": "expense",
+    "amount": 334.42,
+    "description": "Office chairs",
+    "quantity": 1.0,
+    "tax": "purchase_vat_0_import",
+    "tax_rate": 0.0,
+    "unit_price": 334.42
+   },
+   {
+    "account": "expense",
+    "amount": 1129.76,
+    "description": "Toner cartridge black",
+    "quantity": 4.0,
+    "tax": "purchase_vat_0_import",
+    "tax_rate": 0.0,
+    "unit_price": 282.44
+   }
+  ],
+  "move_type": "in_invoice",
+  "needs_review": false,
+  "partner_name": "Thames Office Supplies Ltd",
+  "partner_vat": "GB196181641"
+ },
+ "spec": {
+  "amount_tax": 0.0,
+  "amount_total": 1464.18,
+  "amount_untaxed": 1464.18,
+  "buyer": {
+   "city": "75001 Paris",
+   "country": "France",
+   "name": "My Company (Europe)",
+   "street": "8 avenue de l'Opéra",
+   "vat": "FR32123456789"
+  },
+  "credit_note": false,
+  "currency": "GBP",
+  "due_date": "2026-01-24",
+  "id": "b014",
+  "invoice_date": "2026-01-24",
+  "invoice_number": "TO428-7396",
+  "kind": "digital",
+  "lang": "en",
+  "layout": "modern",
+  "lines": [
+   {
+    "amount": 334.42,
+    "description": "Office chairs",
+    "quantity": 1.0,
+    "tax_rate": 0.0,
+    "unit_price": 334.42
+   },
+   {
+    "amount": 1129.76,
+    "description": "Toner cartridge black",
+    "quantity": 4.0,
+    "tax_rate": 0.0,
+    "unit_price": 282.44
+   }
+  ],
+  "move_type": "in_invoice",
+  "notes": "",
+  "reverse_charge": false,
+  "seed": 494317,
+  "seller": {
+   "address": "8 Deansgate, Manchester M3 2BW",
+   "country": "GB",
+   "iban": "GB65 NWBK 5730 6876 5798 83",
+   "name": "Thames Office Supplies Ltd",
+   "vat": "GB196181641"
+  },
+  "tax_lines": [
+   {
+    "amount": 0.0,
+    "base": 1464.18,
+    "rate": 0.0
+   }
+  ]
+ },
+ "world": {
+  "history": [
+   {
+    "date": "2025-12-20",
+    "lines": [
+     {
+      "account": "expense",
+      "description": "Toner cartridge black",
+      "quantity": 3.0,
+      "tax": "purchase_vat_0_import",
+      "unit_price": 128.89
+     }
+    ]
+   }
+  ],
+  "vendor": {
+   "iban": "GB65 NWBK 5730 6876 5798 83",
+   "known": true,
+   "name": "Thames Office Supplies Ltd",
+   "vat": "GB196181641"
+  }
+ }
+}

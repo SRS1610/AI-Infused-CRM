@@ -1,0 +1,122 @@
+[
+  {"id": "view_asset_list", "model": "account.asset", "type": "list", "name": "account.asset.list",
+   "columns": [{"field": "name"}, {"field": "acquisition_date"}, {"field": "method"}, {"field": "method_number"}, {"field": "method_period"},
+               {"field": "original_value", "sum": true}, {"field": "book_value"}, {"field": "value_residual", "optional": "hide"},
+               {"field": "account_asset_id", "optional": "hide"}, {"field": "state", "widget": "badge"}, {"field": "company_id", "optional": "hide"}]},
+  {"id": "view_asset_form", "model": "account.asset", "type": "form", "name": "account.asset.form", "chatter": true,
+   "root": {"kind": "sheet", "children": [
+     {"kind": "buttons", "children": [
+       {"kind": "button", "method": "action_validate", "label": "Confirm", "invisible": ["state", "!=", "draft"]},
+       {"kind": "button", "method": "compute_depreciation_board", "label": "Compute depreciation", "invisible": ["state", "not_in", ["draft", "open"]]},
+       {"kind": "button", "method": "action_post_due", "label": "Post due entries", "invisible": ["state", "!=", "open"]},
+       {"kind": "button", "method": "action_modify", "label": "Modify", "dialog_title": "Change the book value", "submit_label": "Apply",
+        "params": [
+          {"name": "value", "label": "New book value", "type": "number", "required": true},
+          {"name": "date", "label": "Date", "type": "date"},
+          {"name": "reason", "label": "Reason", "type": "text"}
+        ],
+        "invisible": ["state", "!=", "open"]},
+       {"kind": "button", "method": "action_pause", "label": "Pause", "dialog_title": "Pause the depreciation", "params": [{"name": "date", "label": "Pause date", "type": "date"}], "invisible": ["state", "!=", "open"]},
+       {"kind": "button", "method": "action_resume", "label": "Resume", "dialog_title": "Resume the depreciation", "params": [{"name": "date", "label": "Resume date", "type": "date"}], "invisible": ["state", "!=", "paused"]},
+       {"kind": "button", "method": "action_sell", "label": "Sell", "dialog_title": "Sell the asset", "submit_label": "Post the sale",
+        "params": [{"name": "date", "label": "Sale date", "type": "date"}, {"name": "amount", "label": "Sale price received", "type": "number", "required": true}],
+        "invisible": ["state", "not_in", ["open", "paused"]]},
+       {"kind": "button", "method": "action_dispose", "label": "Dispose", "dialog_title": "Dispose of the asset", "submit_label": "Post the disposal",
+        "confirm": "The book value will be booked as a loss on disposal.",
+        "params": [{"name": "date", "label": "Disposal date", "type": "date"}, {"name": "reason", "label": "Reason", "type": "text"}],
+        "invisible": ["state", "not_in", ["open", "paused"]]},
+       {"kind": "button", "method": "action_set_to_draft", "label": "Back to draft", "invisible": ["state", "!=", "open"]}
+     ]},
+     {"kind": "field", "name": "name", "widget": "title"},
+     {"kind": "group", "name": "main", "columns": 2, "children": [
+       {"kind": "field", "name": "model_id"},
+       {"kind": "field", "name": "state", "readonly": true, "widget": "badge"},
+       {"kind": "field", "name": "original_value"},
+       {"kind": "field", "name": "acquisition_date"},
+       {"kind": "field", "name": "salvage_value"},
+       {"kind": "field", "name": "prorata_date"},
+       {"kind": "field", "name": "book_value", "readonly": true},
+       {"kind": "field", "name": "depreciated_value", "readonly": true},
+       {"kind": "field", "name": "value_residual", "readonly": true},
+       {"kind": "field", "name": "asset_type"}
+     ]},
+     {"kind": "notebook", "pages": [
+       {"kind": "page", "name": "page_board", "title": "Depreciation board", "children": [
+         {"kind": "field", "name": "depreciation_move_ids", "readonly": true, "columns": [
+           {"field": "date"}, {"field": "name"}, {"field": "asset_depreciation_value"}, {"field": "asset_depreciated_value"},
+           {"field": "asset_remaining_value"}, {"field": "asset_value_change", "optional": "hide"}, {"field": "state"}
+         ]}
+       ]},
+       {"kind": "page", "name": "page_method", "title": "Depreciation method", "children": [
+         {"kind": "group", "name": "method", "columns": 2, "children": [
+           {"kind": "field", "name": "method"},
+           {"kind": "field", "name": "method_progress_factor", "invisible": ["method", "=", "linear"]},
+           {"kind": "field", "name": "method_number"},
+           {"kind": "field", "name": "method_period"},
+           {"kind": "field", "name": "prorata_computation_type"},
+           {"kind": "field", "name": "life_units", "readonly": true}
+         ]},
+         {"kind": "group", "name": "accounting", "title": "Accounting", "columns": 2, "children": [
+           {"kind": "field", "name": "account_asset_id"},
+           {"kind": "field", "name": "account_depreciation_id"},
+           {"kind": "field", "name": "account_depreciation_expense_id"},
+           {"kind": "field", "name": "journal_id"},
+           {"kind": "field", "name": "company_id"}
+         ]}
+       ]},
+       {"kind": "page", "name": "page_origin", "title": "Purchase and changes", "children": [
+         {"kind": "field", "name": "original_move_line_ids", "readonly": true, "columns": [{"field": "move_name"}, {"field": "date"}, {"field": "account_id"}, {"field": "name"}, {"field": "balance"}]},
+         {"kind": "field", "name": "children_ids", "readonly": true, "columns": [{"field": "name"}, {"field": "acquisition_date"}, {"field": "original_value"}, {"field": "book_value"}, {"field": "state"}]},
+         {"kind": "group", "name": "disposal", "columns": 2, "children": [
+           {"kind": "field", "name": "parent_id", "readonly": true},
+           {"kind": "field", "name": "restart_date", "readonly": true},
+           {"kind": "field", "name": "disposal_date", "readonly": true},
+           {"kind": "field", "name": "disposal_move_id", "readonly": true}
+         ]},
+         {"kind": "field", "name": "note"}
+       ]}
+     ]}
+   ]}},
+  {"id": "view_asset_search", "model": "account.asset", "type": "search", "name": "account.asset.search",
+   "fields": ["name", "account_asset_id", "model_id"],
+   "filters": [
+     {"name": "running", "label": "Running", "domain": [["state", "=", "open"]]},
+     {"name": "paused", "label": "Paused", "domain": [["state", "=", "paused"]]},
+     {"name": "closed", "label": "Closed", "domain": [["state", "=", "close"]]}
+   ],
+   "group_bys": [{"field": "state"}, {"field": "account_asset_id"}, {"field": "model_id"}, {"field": "acquisition_date:year"}]},
+  {"id": "view_asset_model_list", "model": "account.asset", "type": "list", "name": "account.asset.model.list",
+   "columns": [{"field": "name"}, {"field": "method"}, {"field": "method_number"}, {"field": "method_period"}, {"field": "prorata_computation_type"}, {"field": "account_asset_id"}, {"field": "company_id", "optional": "hide"}]},
+  {"id": "view_asset_model_form", "model": "account.asset", "type": "form", "name": "account.asset.model.form",
+   "root": {"kind": "sheet", "children": [
+     {"kind": "field", "name": "name", "widget": "title"},
+     {"kind": "group", "name": "method", "title": "Depreciation method", "columns": 2, "children": [
+       {"kind": "field", "name": "asset_type"},
+       {"kind": "field", "name": "method"},
+       {"kind": "field", "name": "method_progress_factor", "invisible": ["method", "=", "linear"]},
+       {"kind": "field", "name": "method_number"},
+       {"kind": "field", "name": "method_period"},
+       {"kind": "field", "name": "prorata_computation_type"}
+     ]},
+     {"kind": "group", "name": "accounting", "title": "Accounting", "columns": 2, "children": [
+       {"kind": "field", "name": "account_asset_id"},
+       {"kind": "field", "name": "account_depreciation_id"},
+       {"kind": "field", "name": "account_depreciation_expense_id"},
+       {"kind": "field", "name": "journal_id"},
+       {"kind": "field", "name": "company_id"}
+     ]},
+     {"kind": "field", "name": "state", "invisible": ["id", "!=", -1]}
+   ]}},
+  {"id": "view_board_list", "model": "account.move", "type": "list", "name": "account.move.depreciation.list",
+   "columns": [{"field": "date"}, {"field": "name"}, {"field": "asset_id"}, {"field": "asset_depreciation_value", "sum": true}, {"field": "asset_depreciated_value"}, {"field": "asset_remaining_value"}, {"field": "state", "widget": "badge"}, {"field": "company_id", "optional": "hide"}]},
+  {"id": "view_account_form_asset", "model": "account.account", "type": "form", "name": "account.account.form.asset", "inherit": "account.view_account_form",
+   "operations": [
+     {"op": "insert_after", "anchor": {"field": "deprecated"}, "node": {"kind": "field", "name": "create_asset"}},
+     {"op": "insert_after", "anchor": {"field": "create_asset"}, "node": {"kind": "field", "name": "asset_model_id"}}
+   ]},
+  {"id": "view_invoice_form_asset", "model": "account.move", "type": "form", "name": "account.move.invoice.form.asset", "inherit": "account.view_invoice_form",
+   "operations": [
+     {"op": "append", "anchor": {"path": "/root/children/0"}, "node": {"kind": "button", "method": "action_create_assets", "label": "Create assets",
+      "invisible": {"any": [["state", "!=", "posted"], ["move_type", "!=", "in_invoice"]]}}}
+   ]}
+]

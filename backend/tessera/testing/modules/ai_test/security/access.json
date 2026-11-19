@@ -1,0 +1,4 @@
+[
+  {"id": "access_ticket_user", "model": "core.model_access", "values": {"name": "ai_test.ticket: users", "model_name": "ai_test.ticket", "group_id": "core.group_user", "perm_read": true, "perm_write": true, "perm_create": true, "perm_unlink": false}},
+  {"id": "access_ticket_system", "model": "core.model_access", "values": {"name": "ai_test.ticket: admin", "model_name": "ai_test.ticket", "group_id": "core.group_system", "perm_read": true, "perm_write": true, "perm_create": true, "perm_unlink": true}}
+]

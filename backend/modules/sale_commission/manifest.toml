@@ -1,0 +1,15 @@
+name = "sale_commission"
+version = "1.0.0"
+summary = "Sales commissions: plans with rates and accelerators, statements from invoices and credit notes, payout by vendor bill"
+category = "Sales"
+phase = 2
+depends = ["sale", "account", "crm"]
+license = "Apache-2.0"
+installable = true
+
+[load]
+security = ["security/access.json", "security/rules.json"]
+demo = ["data/demo/plan.json"]
+views = ["views.json"]
+actions = "actions.json"
+menus = "menus.json"

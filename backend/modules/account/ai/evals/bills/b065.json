@@ -1,0 +1,97 @@
+{
+ "gold": {
+  "amount_tax": 0.0,
+  "amount_total": 380.7,
+  "amount_untaxed": 380.7,
+  "currency": "EUR",
+  "due_date": null,
+  "iban": "IE66AIBK19962682922592",
+  "invoice_date": "2026-06-04",
+  "invoice_number": "008837/26",
+  "lines": [
+   {
+    "account": "cogs",
+    "amount": 380.7,
+    "description": "Circuit boards rev. B",
+    "quantity": 2.0,
+    "tax": "purchase_vat_20_rc",
+    "tax_rate": 0.0,
+    "unit_price": 190.35
+   }
+  ],
+  "move_type": "in_invoice",
+  "needs_review": false,
+  "partner_name": "Kildare Components Ltd",
+  "partner_vat": "IE9230436F"
+ },
+ "spec": {
+  "amount_tax": 0.0,
+  "amount_total": 380.7,
+  "amount_untaxed": 380.7,
+  "buyer": {
+   "city": "75001 Paris",
+   "country": "France",
+   "name": "My Company (Europe)",
+   "street": "8 avenue de l'Opéra",
+   "vat": "FR32123456789"
+  },
+  "credit_note": false,
+  "currency": "EUR",
+  "due_date": null,
+  "id": "b065",
+  "invoice_date": "2026-06-04",
+  "invoice_number": "008837/26",
+  "kind": "digital",
+  "lang": "en",
+  "layout": "classic",
+  "lines": [
+   {
+    "amount": 380.7,
+    "description": "Circuit boards rev. B",
+    "quantity": 2.0,
+    "tax_rate": 0.0,
+    "unit_price": 190.35
+   }
+  ],
+  "move_type": "in_invoice",
+  "notes": "",
+  "reverse_charge": true,
+  "seed": 588290,
+  "seller": {
+   "address": "12 Grand Parade, Cork",
+   "country": "IE",
+   "iban": "IE66 AIBK 1996 2682 9225 92",
+   "name": "Kildare Components Ltd",
+   "vat": "IE9230436F"
+  },
+  "tax_lines": [
+   {
+    "amount": 0.0,
+    "base": 380.7,
+    "rate": 0.0
+   }
+  ]
+ },
+ "world": {
+  "history": [
+   {
+    "date": "2026-04-30",
+    "lines": [
+     {
+      "account": "cogs",
+      "description": "Aluminium profiles 2 m",
+      "quantity": 3.0,
+      "tax": "purchase_vat_20_rc",
+      "unit_price": 12.66
+     }
+    ]
+   }
+  ],
+  "vendor": {
+   "iban": "IE66 AIBK 1996 2682 9225 92",
+   "known": true,
+   "name": "Kildare Components Ltd",
+   "vat": "IE9230436F"
+  }
+ }
+}

@@ -1,0 +1,516 @@
+{
+ "code": "generic",
+ "name": "Generic chart of accounts",
+ "country_tags": false,
+ "accounts": [
+  {
+   "id": "bank",
+   "code": "1000",
+   "name": "Bank",
+   "type": "asset_cash"
+  },
+  {
+   "id": "cash",
+   "code": "1010",
+   "name": "Cash",
+   "type": "asset_cash"
+  },
+  {
+   "id": "outstanding_receipts",
+   "code": "1020",
+   "name": "Outstanding receipts",
+   "type": "asset_current",
+   "reconcile": true
+  },
+  {
+   "id": "outstanding_payments",
+   "code": "1030",
+   "name": "Outstanding payments",
+   "type": "asset_current",
+   "reconcile": true
+  },
+  {
+   "id": "suspense",
+   "code": "1040",
+   "name": "Bank suspense account",
+   "type": "asset_current",
+   "reconcile": true
+  },
+  {
+   "id": "transfer",
+   "code": "1050",
+   "name": "Internal transfers",
+   "type": "asset_current",
+   "reconcile": true
+  },
+  {
+   "id": "receivable",
+   "code": "1100",
+   "name": "Accounts receivable",
+   "type": "asset_receivable",
+   "reconcile": true
+  },
+  {
+   "id": "inventory",
+   "code": "1200",
+   "name": "Inventory",
+   "type": "asset_current"
+  },
+  {
+   "id": "prepayments",
+   "code": "1300",
+   "name": "Prepaid expenses",
+   "type": "asset_prepayments"
+  },
+  {
+   "id": "tax_receivable",
+   "code": "1400",
+   "name": "Tax receivable",
+   "type": "asset_current"
+  },
+  {
+   "id": "tax_deductible",
+   "code": "1410",
+   "name": "Deductible tax",
+   "type": "asset_current"
+  },
+  {
+   "id": "fixed_assets",
+   "code": "1500",
+   "name": "Property, plant and equipment",
+   "type": "asset_fixed"
+  },
+  {
+   "id": "accumulated_depreciation",
+   "code": "1510",
+   "name": "Accumulated depreciation",
+   "type": "asset_fixed"
+  },
+  {
+   "id": "intangible_assets",
+   "code": "1600",
+   "name": "Intangible assets",
+   "type": "asset_non_current"
+  },
+  {
+   "id": "payable",
+   "code": "2000",
+   "name": "Accounts payable",
+   "type": "liability_payable",
+   "reconcile": true
+  },
+  {
+   "id": "tax_payable",
+   "code": "2100",
+   "name": "Tax payable",
+   "type": "liability_current"
+  },
+  {
+   "id": "tax_due",
+   "code": "2110",
+   "name": "Tax collected",
+   "type": "liability_current"
+  },
+  {
+   "id": "accrued",
+   "code": "2200",
+   "name": "Accrued expenses",
+   "type": "liability_current"
+  },
+  {
+   "id": "customer_deposits",
+   "code": "2300",
+   "name": "Customer deposits",
+   "type": "liability_current"
+  },
+  {
+   "id": "credit_card",
+   "code": "2400",
+   "name": "Credit card",
+   "type": "liability_credit_card"
+  },
+  {
+   "id": "loans",
+   "code": "2500",
+   "name": "Long-term loans",
+   "type": "liability_non_current"
+  },
+  {
+   "id": "capital",
+   "code": "3000",
+   "name": "Share capital",
+   "type": "equity"
+  },
+  {
+   "id": "retained_earnings",
+   "code": "3100",
+   "name": "Retained earnings",
+   "type": "equity"
+  },
+  {
+   "id": "current_earnings",
+   "code": "3900",
+   "name": "Current year earnings",
+   "type": "equity_unaffected"
+  },
+  {
+   "id": "income",
+   "code": "4000",
+   "name": "Product sales",
+   "type": "income"
+  },
+  {
+   "id": "income_services",
+   "code": "4100",
+   "name": "Service revenue",
+   "type": "income"
+  },
+  {
+   "id": "income_subscriptions",
+   "code": "4200",
+   "name": "Subscription revenue",
+   "type": "income"
+  },
+  {
+   "id": "income_rental",
+   "code": "4300",
+   "name": "Rental revenue",
+   "type": "income"
+  },
+  {
+   "id": "income_other",
+   "code": "4900",
+   "name": "Other income",
+   "type": "income_other"
+  },
+  {
+   "id": "exchange_gain",
+   "code": "4910",
+   "name": "Foreign exchange gains",
+   "type": "income_other"
+  },
+  {
+   "id": "discount_received",
+   "code": "4920",
+   "name": "Cash discounts received",
+   "type": "income_other"
+  },
+  {
+   "id": "asset_gain",
+   "code": "4930",
+   "name": "Gain on disposal of assets",
+   "type": "income_other"
+  },
+  {
+   "id": "cogs",
+   "code": "5000",
+   "name": "Cost of goods sold",
+   "type": "expense_direct_cost"
+  },
+  {
+   "id": "expense",
+   "code": "6000",
+   "name": "General expenses",
+   "type": "expense"
+  },
+  {
+   "id": "rent",
+   "code": "6100",
+   "name": "Rent",
+   "type": "expense"
+  },
+  {
+   "id": "salaries",
+   "code": "6200",
+   "name": "Salaries and wages",
+   "type": "expense"
+  },
+  {
+   "id": "depreciation",
+   "code": "6300",
+   "name": "Depreciation",
+   "type": "expense_depreciation"
+  },
+  {
+   "id": "commissions",
+   "code": "6400",
+   "name": "Sales commissions",
+   "type": "expense"
+  },
+  {
+   "id": "software",
+   "code": "6500",
+   "name": "Software and subscriptions",
+   "type": "expense"
+  },
+  {
+   "id": "travel",
+   "code": "6600",
+   "name": "Travel",
+   "type": "expense"
+  },
+  {
+   "id": "bank_fees",
+   "code": "6700",
+   "name": "Bank fees",
+   "type": "expense"
+  },
+  {
+   "id": "exchange_loss",
+   "code": "6900",
+   "name": "Foreign exchange losses",
+   "type": "expense"
+  },
+  {
+   "id": "discount_given",
+   "code": "6910",
+   "name": "Cash discounts granted",
+   "type": "expense"
+  },
+  {
+   "id": "rounding",
+   "code": "6920",
+   "name": "Rounding differences",
+   "type": "expense"
+  },
+  {
+   "id": "asset_loss",
+   "code": "6930",
+   "name": "Loss on disposal of assets",
+   "type": "expense"
+  },
+  {
+   "id": "bad_debts",
+   "code": "6940",
+   "name": "Bad debts",
+   "type": "expense"
+  }
+ ],
+ "tax_groups": [
+  {
+   "id": "tg_tax",
+   "name": "Tax",
+   "payable": "tax_payable",
+   "receivable": "tax_receivable"
+  },
+  {
+   "id": "tg_exempt",
+   "name": "Exempt",
+   "sequence": 20
+  }
+ ],
+ "taxes": [
+  {
+   "id": "sale_tax_10",
+   "name": "Sales tax 10%",
+   "description": "Sales tax 10%",
+   "use": "sale",
+   "amount": 10,
+   "group": "tg_tax",
+   "price_include": false,
+   "sequence": 1,
+   "invoice": {
+    "base_tags": [
+     "+01"
+    ],
+    "tax": [
+     {
+      "factor": 100,
+      "account": "tax_due",
+      "tags": [
+       "+02"
+      ]
+     }
+    ]
+   },
+   "refund": {
+    "base_tags": [
+     "-01"
+    ],
+    "tax": [
+     {
+      "factor": 100,
+      "account": "tax_due",
+      "tags": [
+       "-02"
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "id": "sale_tax_0",
+   "name": "Sales tax exempt",
+   "description": "Sales tax exempt",
+   "use": "sale",
+   "amount": 0,
+   "group": "tg_exempt",
+   "price_include": false,
+   "sequence": 2,
+   "invoice": {
+    "base_tags": [
+     "+03"
+    ],
+    "tax": [
+     {
+      "factor": 100
+     }
+    ]
+   },
+   "refund": {
+    "base_tags": [
+     "-03"
+    ],
+    "tax": [
+     {
+      "factor": 100
+     }
+    ]
+   }
+  },
+  {
+   "id": "purchase_tax_10",
+   "name": "Purchase tax 10%",
+   "description": "Purchase tax 10%",
+   "use": "purchase",
+   "amount": 10,
+   "group": "tg_tax",
+   "price_include": false,
+   "sequence": 1,
+   "invoice": {
+    "base_tags": [
+     "+04"
+    ],
+    "tax": [
+     {
+      "factor": 100,
+      "account": "tax_deductible",
+      "tags": [
+       "+05"
+      ]
+     }
+    ]
+   },
+   "refund": {
+    "base_tags": [
+     "-04"
+    ],
+    "tax": [
+     {
+      "factor": 100,
+      "account": "tax_deductible",
+      "tags": [
+       "-05"
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "id": "purchase_tax_0",
+   "name": "Purchase tax exempt",
+   "description": "Purchase tax exempt",
+   "use": "purchase",
+   "amount": 0,
+   "group": "tg_exempt",
+   "price_include": false,
+   "sequence": 2,
+   "invoice": {
+    "base_tags": [
+     "+06"
+    ],
+    "tax": [
+     {
+      "factor": 100
+     }
+    ]
+   },
+   "refund": {
+    "base_tags": [
+     "-06"
+    ],
+    "tax": [
+     {
+      "factor": 100
+     }
+    ]
+   }
+  }
+ ],
+ "fiscal_positions": [
+  {
+   "id": "fp_export",
+   "name": "Export (no tax)",
+   "auto_apply": true,
+   "exclude_own_country": true,
+   "sequence": 20,
+   "taxes": [
+    {
+     "src": "sale_tax_10",
+     "dest": "sale_tax_0"
+    },
+    {
+     "src": "purchase_tax_10",
+     "dest": "purchase_tax_0"
+    }
+   ]
+  }
+ ],
+ "journals": [
+  {
+   "id": "journal_sale",
+   "name": "Customer invoices",
+   "code": "INV",
+   "type": "sale",
+   "default_account": "income",
+   "hash": true,
+   "sequence": 5
+  },
+  {
+   "id": "journal_purchase",
+   "name": "Vendor bills",
+   "code": "BILL",
+   "type": "purchase",
+   "default_account": "expense",
+   "hash": true,
+   "sequence": 6
+  },
+  {
+   "id": "journal_bank",
+   "name": "Bank",
+   "code": "BNK1",
+   "type": "bank",
+   "default_account": "bank",
+   "suspense_account": "suspense",
+   "sequence": 10
+  },
+  {
+   "id": "journal_cash",
+   "name": "Cash",
+   "code": "CSH1",
+   "type": "cash",
+   "default_account": "cash",
+   "suspense_account": "suspense",
+   "sequence": 11
+  },
+  {
+   "id": "journal_misc",
+   "name": "Miscellaneous operations",
+   "code": "MISC",
+   "type": "general",
+   "sequence": 20
+  },
+  {
+   "id": "journal_exchange",
+   "name": "Exchange differences",
+   "code": "EXCH",
+   "type": "general",
+   "sequence": 21
+  }
+ ],
+ "defaults": {
+  "exchange_journal": "journal_exchange",
+  "sale_tax": "sale_tax_10",
+  "purchase_tax": "purchase_tax_10"
+ }
+}

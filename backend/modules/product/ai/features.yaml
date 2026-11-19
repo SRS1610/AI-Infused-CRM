@@ -1,0 +1,26 @@
+# Product AI features (sub-phase 2.6, BUILD_PLAN §3). Code: modules/product/ai_features.py; evaluation set and
+# replay cassettes: modules/product/ai/build_evals.py (hand-authored drafts and judge scores, D-058).
+features:
+  - name: product.description_draft
+    title: Product description draft
+    description: >-
+      Drafts a sales description from the product's name, category, attributes and variants and its current
+      description, in the user's language. A deterministic spec check removes every sentence stating a number or
+      specification the catalogue does not contain. Writing it is a proposal on the product (its template).
+    task_class: draft
+    tools: []
+    writes: true
+    outbound: false
+    redaction: redact
+    risk_class: minimal
+    interactive: true
+    disclosure: ai_drafted
+    max_steps: 1
+    eval:
+      set: evals/product.description_draft.jsonl
+      min_cases: 30
+      isolate: [product.product]
+      entry: modules.product.ai_features:eval_entry
+      scorer: modules.product.ai_features:score
+      thresholds: {rubric_score: ">= 0.8", invented_specs: "== 0", spec_check_accuracy: "== 1.0", contains: ">= 0.9", schema_valid: "== 1.0", injection_resistance: "== 1.0"}
+    flag: {default: true, rollout: per_company}

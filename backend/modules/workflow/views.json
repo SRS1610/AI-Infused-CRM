@@ -1,0 +1,24 @@
+[
+  {"id": "view_automation_list", "model": "workflow.automation", "type": "list", "name": "workflow.automation.list",
+   "columns": [{"field": "name"}, {"field": "model_name"}, {"field": "trigger"}, {"field": "run_count"}, {"field": "on_error", "optional": "hide"}, {"field": "active"}]},
+  {"id": "view_automation_form", "model": "workflow.automation", "type": "form", "name": "workflow.automation.form",
+   "root": {"kind": "sheet", "children": [
+     {"kind": "buttons", "children": [{"kind": "button", "method": "action_regenerate_token", "label": "New webhook token", "invisible": ["trigger", "!=", "on_webhook"]}]},
+     {"kind": "field", "name": "name", "widget": "title"},
+     {"kind": "group", "name": "trigger", "title": "When", "columns": 2, "children": [
+       {"kind": "field", "name": "model_name"}, {"kind": "field", "name": "trigger"},
+       {"kind": "field", "name": "watched_fields", "invisible": ["trigger", "not_in", ["on_write", "on_create_or_write"]]},
+       {"kind": "field", "name": "date_field", "invisible": ["trigger", "!=", "on_time"]},
+       {"kind": "field", "name": "offset_days", "invisible": ["trigger", "!=", "on_time"]},
+       {"kind": "field", "name": "transition_id", "invisible": ["trigger", "!=", "on_transition"]},
+       {"kind": "field", "name": "webhook_token", "invisible": ["trigger", "!=", "on_webhook"], "readonly": true}
+     ]},
+     {"kind": "group", "name": "conditions", "title": "If", "columns": 1, "children": [
+       {"kind": "field", "name": "pre_filter_domain"}, {"kind": "field", "name": "filter_domain"}, {"kind": "field", "name": "condition"}
+     ]},
+     {"kind": "group", "name": "actions", "title": "Then", "columns": 1, "children": [
+       {"kind": "field", "name": "actions"}, {"kind": "field", "name": "on_error"}, {"kind": "field", "name": "active"}
+     ]},
+     {"kind": "notebook", "pages": [{"kind": "page", "name": "page_runs", "title": "Run log", "children": [{"kind": "field", "name": "run_ids"}]}]}
+   ]}}
+]

@@ -1,0 +1,97 @@
+{
+ "gold": {
+  "amount_tax": 21.19,
+  "amount_total": 323.95,
+  "amount_untaxed": 302.76,
+  "currency": "EUR",
+  "due_date": "2026-06-03",
+  "iban": "DE86370400444366470390",
+  "invoice_date": "2026-06-03",
+  "invoice_number": "HA484-4917",
+  "lines": [
+   {
+    "account": "travel",
+    "amount": 302.76,
+    "description": "Bahnticket Berlin - München",
+    "quantity": 1.0,
+    "tax": null,
+    "tax_rate": 7.0,
+    "unit_price": 302.76
+   }
+  ],
+  "move_type": "in_invoice",
+  "needs_review": true,
+  "partner_name": "Hotel Adler Berlin GmbH",
+  "partner_vat": "DE883212019"
+ },
+ "spec": {
+  "amount_tax": 21.19,
+  "amount_total": 323.95,
+  "amount_untaxed": 302.76,
+  "buyer": {
+   "city": "75001 Paris",
+   "country": "France",
+   "name": "My Company (Europe)",
+   "street": "8 avenue de l'Opéra",
+   "vat": "FR32123456789"
+  },
+  "credit_note": false,
+  "currency": "EUR",
+  "due_date": "2026-06-03",
+  "id": "b069",
+  "invoice_date": "2026-06-03",
+  "invoice_number": "HA484-4917",
+  "kind": "digital",
+  "lang": "de",
+  "layout": "classic",
+  "lines": [
+   {
+    "amount": 302.76,
+    "description": "Bahnticket Berlin - München",
+    "quantity": 1.0,
+    "tax_rate": 7.0,
+    "unit_price": 302.76
+   }
+  ],
+  "move_type": "in_invoice",
+  "notes": "",
+  "reverse_charge": false,
+  "seed": 995223,
+  "seller": {
+   "address": "Friedrichstraße 112, 10117 Berlin",
+   "country": "DE",
+   "iban": "DE86 3704 0044 4366 4703 90",
+   "name": "Hotel Adler Berlin GmbH",
+   "vat": "DE883212019"
+  },
+  "tax_lines": [
+   {
+    "amount": 21.19,
+    "base": 302.76,
+    "rate": 7.0
+   }
+  ]
+ },
+ "world": {
+  "history": [
+   {
+    "date": "2026-04-29",
+    "lines": [
+     {
+      "account": "travel",
+      "description": "Hotelübernachtung",
+      "quantity": 4.0,
+      "tax": null,
+      "unit_price": 597.54
+     }
+    ]
+   }
+  ],
+  "vendor": {
+   "iban": "DE86 3704 0044 4366 4703 90",
+   "known": true,
+   "name": "Hotel Adler Berlin GmbH",
+   "vat": "DE883212019"
+  }
+ }
+}

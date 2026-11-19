@@ -1,0 +1,5 @@
+[
+  {"id": "menu_settings_reports", "name": "Reports", "parent": "web.menu_settings_root", "sequence": 45},
+  {"id": "menu_templates", "name": "Templates", "parent": "reports.menu_settings_reports", "sequence": 10, "action": "reports.action_templates"},
+  {"id": "menu_layouts", "name": "Layouts", "parent": "reports.menu_settings_reports", "sequence": 20, "action": "reports.action_layouts"}
+]

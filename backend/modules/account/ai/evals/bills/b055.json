@@ -1,0 +1,129 @@
+{
+ "gold": {
+  "amount_tax": 203.33,
+  "amount_total": 2236.63,
+  "amount_untaxed": 2033.3,
+  "currency": "EUR",
+  "due_date": "2026-10-29",
+  "iban": "FR1130006628500070216103892",
+  "invoice_date": "2026-09-29",
+  "invoice_number": "005600/26",
+  "lines": [
+   {
+    "account": "travel",
+    "amount": 385.18,
+    "description": "Course de taxi",
+    "quantity": 2.0,
+    "tax": "purchase_vat_10",
+    "tax_rate": 10.0,
+    "unit_price": 192.59
+   },
+   {
+    "account": "travel",
+    "amount": 1022.55,
+    "description": "Vol Paris - Berlin",
+    "quantity": 3.0,
+    "tax": "purchase_vat_10",
+    "tax_rate": 10.0,
+    "unit_price": 340.85
+   },
+   {
+    "account": "travel",
+    "amount": 625.57,
+    "description": "Nuitée hôtel",
+    "quantity": 1.0,
+    "tax": "purchase_vat_10",
+    "tax_rate": 10.0,
+    "unit_price": 625.57
+   }
+  ],
+  "move_type": "in_invoice",
+  "needs_review": false,
+  "partner_name": "Voyages Lumière SAS",
+  "partner_vat": "FR46445707977"
+ },
+ "spec": {
+  "amount_tax": 203.33,
+  "amount_total": 2236.63,
+  "amount_untaxed": 2033.3,
+  "buyer": {
+   "city": "75001 Paris",
+   "country": "France",
+   "name": "My Company (Europe)",
+   "street": "8 avenue de l'Opéra",
+   "vat": "FR32123456789"
+  },
+  "credit_note": false,
+  "currency": "EUR",
+  "due_date": "2026-10-29",
+  "id": "b055",
+  "invoice_date": "2026-09-29",
+  "invoice_number": "005600/26",
+  "kind": "digital",
+  "lang": "fr",
+  "layout": "compact",
+  "lines": [
+   {
+    "amount": 385.18,
+    "description": "Course de taxi",
+    "quantity": 2.0,
+    "tax_rate": 10.0,
+    "unit_price": 192.59
+   },
+   {
+    "amount": 1022.55,
+    "description": "Vol Paris - Berlin",
+    "quantity": 3.0,
+    "tax_rate": 10.0,
+    "unit_price": 340.85
+   },
+   {
+    "amount": 625.57,
+    "description": "Nuitée hôtel",
+    "quantity": 1.0,
+    "tax_rate": 10.0,
+    "unit_price": 625.57
+   }
+  ],
+  "move_type": "in_invoice",
+  "notes": "",
+  "reverse_charge": false,
+  "seed": 275311,
+  "seller": {
+   "address": "27 quai de la Fosse, 44000 Nantes",
+   "country": "FR",
+   "iban": "FR11 3000 6628 5000 7021 6103 892",
+   "name": "Voyages Lumière SAS",
+   "vat": "FR46445707977"
+  },
+  "tax_lines": [
+   {
+    "amount": 203.33,
+    "base": 2033.3,
+    "rate": 10.0
+   }
+  ]
+ },
+ "world": {
+  "history": [
+   {
+    "date": "2026-08-25",
+    "lines": [
+     {
+      "account": "travel",
+      "description": "Course de taxi",
+      "quantity": 1.0,
+      "tax": "purchase_vat_10",
+      "unit_price": 84.41
+     }
+    ]
+   }
+  ],
+  "vendor": {
+   "iban": "FR11 3000 6628 5000 7021 6103 892",
+   "known": true,
+   "name": "Voyages Lumière SAS",
+   "vat": "FR46445707977"
+  }
+ }
+}

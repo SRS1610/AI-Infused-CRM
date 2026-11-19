@@ -1,0 +1,5 @@
+[
+  {"id": "access_account_asset_group_account_invoice", "model": "core.model_access", "values": {"name": "account.asset: account.group_account_invoice", "model_name": "account.asset", "group_id": "account.group_account_invoice", "perm_read": true, "perm_write": false, "perm_create": false, "perm_unlink": false}},
+  {"id": "access_account_asset_group_account_readonly", "model": "core.model_access", "values": {"name": "account.asset: account.group_account_readonly", "model_name": "account.asset", "group_id": "account.group_account_readonly", "perm_read": true, "perm_write": false, "perm_create": false, "perm_unlink": false}},
+  {"id": "access_account_asset_group_account_user", "model": "core.model_access", "values": {"name": "account.asset: account.group_account_user", "model_name": "account.asset", "group_id": "account.group_account_user", "perm_read": true, "perm_write": true, "perm_create": true, "perm_unlink": true}}
+]

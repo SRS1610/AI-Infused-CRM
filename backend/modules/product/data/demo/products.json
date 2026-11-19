@@ -1,0 +1,8 @@
+[
+  {"id": "product_consulting", "model": "product.product", "values": {"name": "Consulting day", "default_code": "SRV-CONS", "type": "service", "category_id": "product.category_services", "uom_id": "product.uom_day", "list_price": 1200, "standard_price": 600, "tax_percent": 20, "description_sale": "On-site or remote consulting by a senior consultant (8 hours)."}},
+  {"id": "product_onboarding", "model": "product.product", "values": {"name": "Onboarding package", "default_code": "SRV-ONB", "type": "service", "category_id": "product.category_services", "list_price": 2500, "standard_price": 900, "tax_percent": 20}},
+  {"id": "product_support", "model": "product.product", "values": {"name": "Premium support (annual)", "default_code": "SRV-SUP", "type": "service", "category_id": "product.category_services", "list_price": 4800, "standard_price": 1500, "tax_percent": 20}},
+  {"id": "product_robot_arm", "model": "product.product", "values": {"name": "Collaborative robot arm", "default_code": "HW-ARM6", "barcode": "4006381333931", "type": "goods", "category_id": "product.category_goods", "list_price": 18900, "standard_price": 11200, "tax_percent": 20}},
+  {"id": "product_gripper", "model": "product.product", "values": {"name": "Vacuum gripper kit", "default_code": "HW-GRIP", "type": "goods", "category_id": "product.category_goods", "list_price": 1450, "standard_price": 610, "tax_percent": 20}},
+  {"id": "product_sensor", "model": "product.product", "values": {"name": "Force-torque sensor", "default_code": "HW-FTS", "type": "goods", "category_id": "product.category_goods", "list_price": 3200, "standard_price": 1700, "tax_percent": 20}}
+]

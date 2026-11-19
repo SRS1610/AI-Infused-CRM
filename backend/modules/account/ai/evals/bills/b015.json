@@ -1,0 +1,129 @@
+{
+ "gold": {
+  "amount_tax": 0.0,
+  "amount_total": 1227.74,
+  "amount_untaxed": 1227.74,
+  "currency": "EUR",
+  "due_date": "2026-05-07",
+  "iban": "IE66AIBK19962682922592",
+  "invoice_date": "2026-03-08",
+  "invoice_number": "KC-2026-0922",
+  "lines": [
+   {
+    "account": "cogs",
+    "amount": 558.96,
+    "description": "Packaging cartons",
+    "quantity": 3.0,
+    "tax": "purchase_vat_20_rc",
+    "tax_rate": 0.0,
+    "unit_price": 186.32
+   },
+   {
+    "account": "cogs",
+    "amount": 257.22,
+    "description": "Circuit boards rev. B",
+    "quantity": 1.0,
+    "tax": "purchase_vat_20_rc",
+    "tax_rate": 0.0,
+    "unit_price": 257.22
+   },
+   {
+    "account": "cogs",
+    "amount": 411.56,
+    "description": "Aluminium profiles 2 m",
+    "quantity": 2.0,
+    "tax": "purchase_vat_20_rc",
+    "tax_rate": 0.0,
+    "unit_price": 205.78
+   }
+  ],
+  "move_type": "in_invoice",
+  "needs_review": false,
+  "partner_name": "Kildare Components Ltd",
+  "partner_vat": "IE9230436F"
+ },
+ "spec": {
+  "amount_tax": 0.0,
+  "amount_total": 1227.74,
+  "amount_untaxed": 1227.74,
+  "buyer": {
+   "city": "75001 Paris",
+   "country": "France",
+   "name": "My Company (Europe)",
+   "street": "8 avenue de l'Opéra",
+   "vat": "FR32123456789"
+  },
+  "credit_note": false,
+  "currency": "EUR",
+  "due_date": "2026-05-07",
+  "id": "b015",
+  "invoice_date": "2026-03-08",
+  "invoice_number": "KC-2026-0922",
+  "kind": "digital",
+  "lang": "en",
+  "layout": "compact",
+  "lines": [
+   {
+    "amount": 558.96,
+    "description": "Packaging cartons",
+    "quantity": 3.0,
+    "tax_rate": 0.0,
+    "unit_price": 186.32
+   },
+   {
+    "amount": 257.22,
+    "description": "Circuit boards rev. B",
+    "quantity": 1.0,
+    "tax_rate": 0.0,
+    "unit_price": 257.22
+   },
+   {
+    "amount": 411.56,
+    "description": "Aluminium profiles 2 m",
+    "quantity": 2.0,
+    "tax_rate": 0.0,
+    "unit_price": 205.78
+   }
+  ],
+  "move_type": "in_invoice",
+  "notes": "",
+  "reverse_charge": true,
+  "seed": 224443,
+  "seller": {
+   "address": "12 Grand Parade, Cork",
+   "country": "IE",
+   "iban": "IE66 AIBK 1996 2682 9225 92",
+   "name": "Kildare Components Ltd",
+   "vat": "IE9230436F"
+  },
+  "tax_lines": [
+   {
+    "amount": 0.0,
+    "base": 1227.74,
+    "rate": 0.0
+   }
+  ]
+ },
+ "world": {
+  "history": [
+   {
+    "date": "2026-02-01",
+    "lines": [
+     {
+      "account": "cogs",
+      "description": "Packaging cartons",
+      "quantity": 4.0,
+      "tax": "purchase_vat_20_rc",
+      "unit_price": 99.54
+     }
+    ]
+   }
+  ],
+  "vendor": {
+   "iban": "IE66 AIBK 1996 2682 9225 92",
+   "known": true,
+   "name": "Kildare Components Ltd",
+   "vat": "IE9230436F"
+  }
+ }
+}

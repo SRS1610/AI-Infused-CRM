@@ -1,0 +1,7 @@
+[
+  {"id": "stage_new", "model": "crm.stage", "noupdate": true, "values": {"name": "New", "sequence": 1, "probability": 10}},
+  {"id": "stage_qualified", "model": "crm.stage", "noupdate": true, "values": {"name": "Qualified", "sequence": 2, "probability": 30, "requirements": "Budget, authority, need and timing confirmed"}},
+  {"id": "stage_proposition", "model": "crm.stage", "noupdate": true, "values": {"name": "Proposition", "sequence": 3, "probability": 60}},
+  {"id": "stage_negotiation", "model": "crm.stage", "noupdate": true, "values": {"name": "Negotiation", "sequence": 4, "probability": 80}},
+  {"id": "stage_won", "model": "crm.stage", "noupdate": true, "values": {"name": "Won", "sequence": 9, "probability": 100, "is_won": true, "fold": true}}
+]

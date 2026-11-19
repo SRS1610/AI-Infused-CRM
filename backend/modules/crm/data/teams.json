@@ -1,0 +1,3 @@
+[
+  {"id": "team_sales", "model": "crm.team", "noupdate": true, "values": {"name": "Sales", "alias_name": "crm", "assignment_mode": "round_robin"}}
+]

@@ -1,0 +1,12 @@
+[
+  {"id": "group_user", "model": "core.group", "noupdate": true,
+   "values": {"name": "Internal user", "category": "Platform", "comment": "Every employee using the back office"}},
+  {"id": "group_multi_company", "model": "core.group", "noupdate": true,
+   "values": {"name": "Multi-company", "category": "Platform", "comment": "May switch between allowed companies", "implied_ids": ["core.group_user"]}},
+  {"id": "group_system", "model": "core.group", "noupdate": true,
+   "values": {"name": "Settings / Administrator", "category": "Platform", "comment": "Full configuration access", "implied_ids": ["core.group_user", "core.group_multi_company"]}},
+  {"id": "group_portal", "model": "core.group", "noupdate": true,
+   "values": {"name": "Portal user", "category": "Platform", "comment": "External users (customers, vendors) with narrow access"}},
+  {"id": "group_public", "model": "core.group", "noupdate": true,
+   "values": {"name": "Public", "category": "Platform", "comment": "Anonymous website visitors"}}
+]

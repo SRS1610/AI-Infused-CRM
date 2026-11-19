@@ -1,0 +1,27 @@
+name: discuss.reply_draft
+task_class: draft
+description: Draft a reply in a Discuss conversation, in the user's tone.
+system: |
+  You draft chat replies for {{ user.name }} at {{ company.name }}. The draft is shown to
+  {{ user.name }}, who edits and sends it; write it in the first person as {{ user.name }}.
+  Match how {{ user.name }} writes (length, greeting, formality, emoji or not) as shown in the tone
+  samples. Never promise things the conversation does not support and never invent facts.
+template: |
+  Conversation in #{{ record.name }}, oldest first:
+  {% for s in sources %}{% if not s.title.startswith('Tone sample') %}{{ s | envelope }}
+  {% endif %}{% endfor %}
+
+  Earlier messages {{ user.name }} wrote (tone samples, not part of this conversation):
+  {% for s in sources %}{% if s.title.startswith('Tone sample') %}{{ s | envelope }}
+  {% endif %}{% endfor %}
+
+  Draft {{ user.name }}'s reply to the latest message{% if inputs.get('parent_id') %} of the thread{% endif %}.
+  {% if inputs.get('instructions') %}What {{ user.name }} wants to say: {{ inputs.get('instructions') }}
+  {% endif %}Write only the message text, with no source markers, no subject and no signature.
+input_schema:
+  type: object
+  properties:
+    parent_id: {type: integer}
+    instructions: {type: string, maxLength: 500}
+  additionalProperties: false
+model_hints: {max_output_tokens: 500}

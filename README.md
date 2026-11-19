@@ -2,7 +2,70 @@
 
 An open, modular, multi-company business suite with a CRM at its core that grows into a full ERP, with AI built into every module — proposing, never committing, and always bound by the user's permissions.
 
-> **Status:** planning. Architecture, module map, core ERD, AI architecture and the phased build plan are in [`docs/architecture/`](docs/architecture/) and are awaiting approval before Phase 1 code is written. Nothing here runs yet.
+> **Status:** Phase 2 (sales and accounting) is complete and awaiting sign-off: product variants and
+> pricelists, sales orders with invoicing policies, subscriptions, rentals and commissions; a general ledger
+> with US, EU and generic charts, taxes, payments, bank import and reconciliation, multi-currency, analytic
+> accounting, budgets, fixed assets, financial reports, tax returns, dunning, UBL / Peppol e-invoicing,
+> online payments (Stripe) and SAML single sign-on, with 23 more AI features. Every acceptance criterion is
+> met in replay; the live AI evaluation run needs a provider key. Details:
+> [docs/phase-2-summary.md](docs/phase-2-summary.md) ([Phase 1](docs/phase-1-summary.md)). Security
+> reviews: [Phase 2](docs/security/asvs-phase-2.md), [Phase 1](docs/security/asvs-phase-1.md).
+
+## Try it
+
+You need [Docker](https://docs.docker.com/get-docker/) (Docker Desktop on Windows and macOS) and Git. No
+Python or Node.js install is needed: everything runs in containers.
+
+```bash
+git clone https://github.com/SRS1610/AI-Infused-CRM.git
+```
+
+```bash
+cd AI-Infused-CRM
+```
+
+```bash
+make up
+```
+
+Wait until `make up` returns and the containers are healthy (the first build takes a few minutes), then load
+the demo data:
+
+```bash
+make demo
+```
+
+Open http://localhost:5173 and sign in as `admin` / `admin1234` (also `demo` / `demo1234`, a salesperson,
+and `marie` / `demo1234`, who works in French). Without `make` (for example on Windows), run the same steps
+with Docker Compose:
+
+```bash
+docker compose -f deploy/compose/docker-compose.yml up -d --build
+```
+
+```bash
+docker compose -f deploy/compose/docker-compose.yml exec server tessera seed demo --phase 2
+```
+
+Stop everything with `make down` (or `docker compose -f deploy/compose/docker-compose.yml down`). For the
+guided tour of every feature, or to run without Docker, follow [docs/demos/phase-2.md](docs/demos/phase-2.md)
+(Phase 1: [docs/demos/phase-1.md](docs/demos/phase-1.md)). No AI provider key is needed for the demo: a
+deterministic test provider answers until you configure one under **Settings → AI**.
+
+To let other people try your running copy over the internet, publish it with Cloudflare Tunnel:
+[docs/admin/cloudflare-tunnel.md](docs/admin/cloudflare-tunnel.md).
+
+## Repository
+
+| Path | What it holds |
+|---|---|
+| `backend/` | Python 3.12 API, metadata ORM, module system, CLI (`tessera`), and the modules in `backend/modules/` |
+| `gateway/` | AI gateway service: provider adapters, routing, budgets, redaction, ledger |
+| `frontend/` | React + TypeScript web client, unit tests and Playwright end-to-end tests |
+| `deploy/` | Docker Compose stack and container images |
+| `docs/` | Architecture, user, administrator, developer and AI guides, demo script |
+
+Common tasks: `make test`, `make e2e`, `make lint`; `make help` lists the rest.
 
 ## Documents
 
@@ -11,12 +74,18 @@ An open, modular, multi-company business suite with a CRM at its core that grows
 | [Architecture](docs/architecture/ARCHITECTURE.md) | Stack, kernel (metadata ORM, modules, security, multi-company/currency/language), platform services, web client, tenancy, performance, testing |
 | [Module dependency map](docs/architecture/MODULE_DEPENDENCY_MAP.md) | Every module by phase and layer, dependency graphs, bridge-module convention, install order |
 | [Core ERD](docs/architecture/ERD_CORE.md) | Entities and relationships for the kernel, platform modules, Phase 1 apps and the AI platform |
+| [Phase 2 ERD](docs/architecture/ERD_PHASE_2.md) | Products, sales, recurring revenue, ledger, bank, payments, management accounting |
 | [AI architecture note](docs/architecture/AI_ARCHITECTURE.md) | Gateway, provider adapters, routing, tools under user permissions, retrieval with record-rule filtering, proposals, guardrails, audit, evaluation, compliance |
 | [Build plan](docs/architecture/BUILD_PLAN.md) | Phases 1–8 with scope, AI features and acceptance criteria |
+| [Phase 2 summary](docs/phase-2-summary.md) | What works, what is stubbed, known gaps, AI feature scores |
+| [Phase 2 demo](docs/demos/phase-2.md) | Walkthrough of every Phase 2 feature on the demo data |
+| [Phase 1 summary](docs/phase-1-summary.md) | What works, what is stubbed, known gaps, AI feature scores |
+| [Phase 1 demo](docs/demos/phase-1.md) | Walkthrough of every Phase 1 feature on the demo data |
+| [User guides](docs/user/) · [Administration](docs/admin/) · [Developers](docs/dev/) · [AI](docs/ai/) · [API](docs/api/README.md) | How to use, run and extend each part |
 | [DECISIONS.md](DECISIONS.md) | Non-blocking decisions taken with their rationale |
 | [CHANGELOG.md](CHANGELOG.md) | Per-phase change log |
 
-## Planned stack
+## Stack
 
 Python 3.12 · FastAPI · PostgreSQL 16 + pgvector · Redis · Celery · React + TypeScript · Docker Compose · GitHub Actions. See the architecture document for the reasoning behind the custom metadata ORM.
 

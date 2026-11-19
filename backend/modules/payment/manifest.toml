@@ -1,0 +1,15 @@
+name = "payment"
+version = "1.0.0"
+summary = "Online payments: payment providers (Stripe, test), transactions, saved payment methods, portal invoice payment"
+category = "Accounting"
+phase = 2
+depends = ["account", "portal"]
+license = "Apache-2.0"
+installable = true
+post_init = "hooks:post_init"
+
+[load]
+security = ["security/access.json"]
+views = ["views.json"]
+actions = "actions.json"
+menus = "menus.json"

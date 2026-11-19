@@ -1,0 +1,116 @@
+{
+ "gold": {
+  "amount_tax": 0.0,
+  "amount_total": 4540.0,
+  "amount_untaxed": 4540.0,
+  "currency": "EUR",
+  "due_date": "2026-03-26",
+  "iban": "ES0421001485182111912581",
+  "invoice_date": "2026-01-25",
+  "invoice_number": "AC575-6312",
+  "lines": [
+   {
+    "account": "expense",
+    "amount": 410.0,
+    "description": "Jornada de consultoría",
+    "quantity": 1.0,
+    "tax": "purchase_vat_20_rc",
+    "tax_rate": 0.0,
+    "unit_price": 410.0
+   },
+   {
+    "account": "expense",
+    "amount": 2610.0,
+    "description": "Honorarios de selección",
+    "quantity": 1.0,
+    "tax": "purchase_vat_20_rc",
+    "tax_rate": 0.0,
+    "unit_price": 2610.0
+   },
+   {
+    "account": "expense",
+    "amount": 1520.0,
+    "description": "Servicios de contabilidad trimestral",
+    "quantity": 1.0,
+    "tax": "purchase_vat_20_rc",
+    "tax_rate": 0.0,
+    "unit_price": 1520.0
+   }
+  ],
+  "move_type": "in_invoice",
+  "needs_review": false,
+  "partner_name": "Asesores Castellana SL",
+  "partner_vat": "ESB86007500"
+ },
+ "spec": {
+  "amount_tax": 0.0,
+  "amount_total": 4540.0,
+  "amount_untaxed": 4540.0,
+  "buyer": {
+   "city": "75001 Paris",
+   "country": "France",
+   "name": "My Company (Europe)",
+   "street": "8 avenue de l'Opéra",
+   "vat": "FR32123456789"
+  },
+  "credit_note": false,
+  "currency": "EUR",
+  "due_date": "2026-03-26",
+  "id": "b090",
+  "invoice_date": "2026-01-25",
+  "invoice_number": "AC575-6312",
+  "kind": "scan",
+  "lang": "es",
+  "layout": "compact",
+  "lines": [
+   {
+    "amount": 410.0,
+    "description": "Jornada de consultoría",
+    "quantity": 1.0,
+    "tax_rate": 0.0,
+    "unit_price": 410.0
+   },
+   {
+    "amount": 2610.0,
+    "description": "Honorarios de selección",
+    "quantity": 1.0,
+    "tax_rate": 0.0,
+    "unit_price": 2610.0
+   },
+   {
+    "amount": 1520.0,
+    "description": "Servicios de contabilidad trimestral",
+    "quantity": 1.0,
+    "tax_rate": 0.0,
+    "unit_price": 1520.0
+   }
+  ],
+  "move_type": "in_invoice",
+  "notes": "",
+  "reverse_charge": true,
+  "seed": 161540,
+  "seller": {
+   "address": "Avinguda Diagonal 400, 08037 Barcelona",
+   "country": "ES",
+   "iban": "ES04 2100 1485 1821 1191 2581",
+   "name": "Asesores Castellana SL",
+   "vat": "ESB86007500"
+  },
+  "tax_lines": [
+   {
+    "amount": 0.0,
+    "base": 4540.0,
+    "rate": 0.0
+   }
+  ]
+ },
+ "world": {
+  "history": [],
+  "vendor": {
+   "iban": "ES04 2100 1485 1821 1191 2581",
+   "known": false,
+   "name": "Asesores Castellana SL",
+   "vat": "ESB86007500"
+  }
+ }
+}

@@ -1,0 +1,14 @@
+name: sale.upsell
+task_class: classify
+description: Optional one-line explanation of each product suggestion (the ranking is statistical).
+system: |
+  You help salespeople of {{ company.name }} understand why products are suggested for a quotation. The
+  suggestions and their order-history counts were computed by the system. For each suggestion write one short
+  sentence based only on the counts and reasons given; do not change the order, add products or invent figures.
+template: |
+  {{ sources | envelopes }}
+
+  Explain each suggestion in one sentence.
+input_schema: {type: object, properties: {}, additionalProperties: false}
+output_schema: null
+model_hints: {max_output_tokens: 400}

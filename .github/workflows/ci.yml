@@ -1,0 +1,177 @@
+name: CI
+
+on:
+  push:
+    branches: [main, "claude/**"]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  UV_LINK_MODE: copy
+
+jobs:
+  backend-lint:
+    name: Backend lint & types
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+          cache-dependency-glob: backend/uv.lock
+      - run: uv python install 3.12
+      - run: uv sync --frozen
+      - run: uv run ruff check .
+      - run: uv run ruff format --check .
+      - run: uv run mypy tessera
+
+  backend-test:
+    name: Backend tests
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    services:
+      postgres:
+        image: pgvector/pgvector:pg16
+        env:
+          POSTGRES_USER: tessera
+          POSTGRES_PASSWORD: tessera
+          POSTGRES_DB: tessera_test
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U tessera -d tessera_test"
+          --health-interval 5s --health-timeout 3s --health-retries 20
+      redis:
+        image: redis:7-alpine
+        ports: ["6379:6379"]
+        options: >-
+          --health-cmd "redis-cli ping" --health-interval 5s --health-timeout 3s --health-retries 20
+    env:
+      TESSERA_ENV: test
+      TESSERA_TEST_DATABASE_URL: postgresql://tessera:tessera@localhost:5432/tessera_test
+      TESSERA_DATABASE_URL: postgresql://tessera:tessera@localhost:5432/tessera_test
+      TESSERA_REDIS_URL: redis://localhost:6379/0
+      TESSERA_SECRET_KEY: ci-only-secret-key-not-for-production-32b
+      TESSERA_MASTER_KEY: Y2ktb25seS1tYXN0ZXIta2V5LW5vdC1mb3ItcHJvZHVjdGlvbi0zMmI=
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+          cache-dependency-glob: backend/uv.lock
+      - run: uv python install 3.12
+      - run: uv sync --frozen
+      - name: System libraries for PDF rendering and report tests
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends libpango-1.0-0 libpangoft2-1.0-0 libharfbuzz-subset0 poppler-utils
+      - name: Prepare database extensions
+        run: |
+          PGPASSWORD=tessera psql -h localhost -U tessera -d tessera_test -c "CREATE EXTENSION IF NOT EXISTS vector; CREATE EXTENSION IF NOT EXISTS pg_trgm; CREATE EXTENSION IF NOT EXISTS unaccent; CREATE EXTENSION IF NOT EXISTS btree_gin; CREATE EXTENSION IF NOT EXISTS btree_gist; CREATE EXTENSION IF NOT EXISTS pgcrypto;"
+      # serial: the suite builds one shared test database and some API tests commit
+      - run: uv run pytest --cov --cov-report=xml --cov-report=term
+      # every declared AI feature has its prompt, flag, thresholds, eval cases, cassettes and guardrail cases (1.6-a)
+      - run: uv run tessera ai eval report --strict
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: backend-coverage
+          path: backend/coverage.xml
+
+  gateway-test:
+    name: AI gateway tests
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: gateway
+    services:
+      postgres:
+        image: pgvector/pgvector:pg16
+        env:
+          POSTGRES_USER: tessera
+          POSTGRES_PASSWORD: tessera
+          POSTGRES_DB: postgres
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U tessera" --health-interval 5s --health-timeout 3s --health-retries 20
+    env:
+      GATEWAY_TEST_ADMIN_URL: postgresql://tessera:tessera@localhost:5432/postgres
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+          cache-dependency-glob: gateway/uv.lock
+      - run: uv python install 3.12
+      - run: uv sync --frozen
+      - run: uv run ruff check . && uv run ruff format --check . && uv run mypy gateway
+      - run: uv run pytest --cov --cov-report=term
+
+  frontend:
+    name: Frontend lint, types, unit tests
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npx vitest run --coverage
+      - run: npm run build
+
+  e2e:
+    name: End-to-end smoke (Playwright)
+    runs-on: ubuntu-latest
+    needs: [backend-test, frontend]
+    services:
+      postgres:
+        image: pgvector/pgvector:pg16
+        env:
+          POSTGRES_USER: tessera
+          POSTGRES_PASSWORD: tessera
+          POSTGRES_DB: tessera
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U tessera -d tessera" --health-interval 5s --health-timeout 3s --health-retries 20
+    env:
+      TESSERA_ENV: development
+      TESSERA_DATABASE_URL: postgresql://tessera:tessera@localhost:5432/tessera
+      TESSERA_LOGIN_RATE_LIMIT_PER_MINUTE: "200"
+      TESSERA_AI_GATEWAY_URL: inprocess
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: cd backend && uv sync --frozen && uv run tessera seed demo --phase 2
+      # run the server from the virtualenv, not `uv run`: a background uv process holds the uv cache lock,
+      # and setup-uv's post-job cache prune then fails
+      - run: cd backend && (.venv/bin/tessera serve --port 8000 &) && sleep 5
+      - run: cd frontend && npm ci && npx playwright install --with-deps chromium
+      - run: cd frontend && (npx vite --port 5173 --strictPort &) && sleep 5 && npx playwright test
+      - name: Stop the servers
+        if: always()
+        run: pkill -f "tessera serve" || true; pkill -f vite || true
+
+  compose-config:
+    name: Compose config validates
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: cp .env.example .env
+      - run: docker compose -f deploy/compose/docker-compose.yml --env-file .env config --quiet

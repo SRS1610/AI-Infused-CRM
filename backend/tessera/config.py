@@ -1,0 +1,169 @@
+"""Process configuration.
+
+Everything is read from environment variables prefixed ``TESSERA_`` (or a ``.env``
+file in development). Secrets are never defaulted in production: :func:`Settings.check`
+refuses to start with placeholder values when ``TESSERA_ENV=production``.
+"""
+
+from __future__ import annotations
+
+import base64
+from functools import lru_cache
+from pathlib import Path
+from typing import Annotated, Literal
+
+from pydantic import Field, field_validator
+from pydantic_settings import BaseSettings, NoDecode, SettingsConfigDict
+
+BACKEND_ROOT = Path(__file__).resolve().parent.parent
+DEFAULT_MODULE_PATH = BACKEND_ROOT / "modules"
+
+Env = Literal["development", "test", "production"]
+
+DEV_MASTER_KEY = "ZGV2LW9ubHktbWFzdGVyLWtleS1jaGFuZ2UtbWUtMzItYnl0ZXMh"  # "dev-only-master-key-change-me-32-bytes!"
+
+
+class Settings(BaseSettings):
+    model_config = SettingsConfigDict(env_prefix="TESSERA_", env_file=".env", extra="ignore")
+
+    env: Env = "development"
+
+    # database
+    database_url: str = "postgresql://tessera:tessera@localhost:5432/tessera"
+    test_database_url: str = "postgresql://tessera:tessera@localhost:5432/tessera_test"
+    db_pool_size: int = 10
+    db_max_overflow: int = 20
+    db_statement_timeout_ms: int = 60_000
+    db_jit: bool = False  # PostgreSQL JIT for this application's sessions (off: interactive queries)
+
+    # redis
+    redis_url: str = "redis://localhost:6379/0"
+    realtime_backend: Literal["memory", "redis"] = "memory"
+    jobs_backend: Literal["celery", "inline", "manual"] = "inline"  # inline: thread in the web process (dev)
+
+    # web
+    secret_key: str = "dev-only-secret-key-change-me-please-32b"  # noqa: S105 - rejected by check() in production
+    master_key: str = DEV_MASTER_KEY  # rejected by check() in production
+    base_url: str = "http://localhost:8000"
+    allowed_hosts: Annotated[list[str], NoDecode] = Field(default_factory=lambda: ["localhost", "127.0.0.1"])
+    cors_origins: Annotated[list[str], NoDecode] = Field(default_factory=lambda: ["http://localhost:5173"])
+    session_cookie_name: str = "tessera_session"
+    cookie_secure: bool | None = None  # None → secure in production only
+    session_idle_minutes: int = 60 * 8
+    session_absolute_hours: int = 24 * 7
+    login_rate_limit_per_minute: int = 10
+    login_lockout_attempts: int = 5
+    login_lockout_minutes: int = 15
+    metrics_token: str = ""  # bearer token for GET /metrics; required in production
+    api_rate_limit_per_minute: int = 600  # per session or API key
+    api_ip_rate_limit_per_minute: int = 6000  # per client address (many users can share one)
+    # Reverse proxies whose X-Forwarded-For is believed (addresses or CIDR ranges). A request from anyone
+    # else is identified by its own address, so a client cannot pick the address used for rate limiting,
+    # lockout and the audit log by sending the header itself.
+    trusted_proxies: Annotated[list[str], NoDecode] = Field(
+        default_factory=lambda: ["127.0.0.0/8", "::1/128", "10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16"]
+    )
+    # Outbound calls configured by users (webhooks, automation webhooks, CalDAV) may reach private, loopback
+    # and link-local addresses: None → only outside production.
+    outbound_allow_private: bool | None = None
+
+    # modules
+    module_paths: Annotated[list[Path], NoDecode] = Field(default_factory=lambda: [DEFAULT_MODULE_PATH])
+    default_lang: str = "en_US"
+    default_tz: str = "UTC"
+    admin_password: str | None = None  # initial password of the `admin` user; "admin1234" outside production
+
+    # storage
+    storage_backend: Literal["s3", "filesystem"] = "filesystem"
+    storage_path: Path = BACKEND_ROOT / "var" / "storage"
+    s3_endpoint: str | None = None
+    s3_bucket: str = "tessera"
+    s3_access_key: str | None = None
+    s3_secret_key: str | None = None
+    s3_region: str = "us-east-1"
+
+    # mail
+    smtp_host: str = "localhost"
+    smtp_port: int = 1025
+    smtp_user: str | None = None
+    smtp_password: str | None = None
+    smtp_tls: bool = False
+    mail_from: str = "noreply@tessera.local"
+    public_url: str = "http://localhost:5173"  # base of links in emails (portal, password reset, …)
+    mail_catchall_domain: str | None = None  # domain of inbound aliases and reply+ addresses
+    mail_inbound_token: str | None = None  # shared secret for POST /api/v1/chatter/inbound (MTA webhook)
+
+    # OAuth clients of calendar sync (a company setting ``calendar.<provider>_client_id`` / ``_client_secret``
+    # overrides these for that company's users)
+    google_oauth_client_id: str | None = None
+    google_oauth_client_secret: str | None = None
+    microsoft_oauth_client_id: str | None = None
+    microsoft_oauth_client_secret: str | None = None
+    microsoft_oauth_tenant: str = "common"
+
+    # AI gateway
+    ai_gateway_url: str = "http://localhost:8100"
+    ai_gateway_token: str = "dev-only-gateway-token"  # noqa: S105 - rejected by check() in production
+
+    # logging / observability
+    log_level: str = "INFO"
+    log_json: bool | None = None  # None → JSON in production, console otherwise
+    otel_exporter_endpoint: str | None = None
+
+    @field_validator("module_paths", mode="before")
+    @classmethod
+    def _split_paths(cls, value: object) -> object:
+        if isinstance(value, str):
+            return [Path(p).expanduser() for p in value.split(":") if p]
+        return value
+
+    @field_validator("allowed_hosts", "cors_origins", "trusted_proxies", mode="before")
+    @classmethod
+    def _split_hosts(cls, value: object) -> object:
+        if isinstance(value, str):
+            return [h.strip() for h in value.split(",") if h.strip()]
+        return value
+
+    @property
+    def secure_cookies(self) -> bool:
+        return self.is_production if self.cookie_secure is None else self.cookie_secure
+
+    @property
+    def is_production(self) -> bool:
+        return self.env == "production"
+
+    @property
+    def outbound_private_allowed(self) -> bool:
+        return not self.is_production if self.outbound_allow_private is None else self.outbound_allow_private
+
+    @property
+    def master_key_bytes(self) -> bytes:
+        return base64.b64decode(self.master_key)
+
+    def check(self) -> None:
+        """Refuse to run production with development placeholders."""
+        if not self.is_production:
+            return
+        problems = []
+        if "dev-only" in self.secret_key or "change-me" in self.secret_key or len(self.secret_key) < 32:
+            problems.append("TESSERA_SECRET_KEY must be a random value of at least 32 characters")
+        if len(self.master_key_bytes) < 32:
+            problems.append("TESSERA_MASTER_KEY must decode to at least 32 bytes")
+        if self.master_key == DEV_MASTER_KEY or b"dev-only" in self.master_key_bytes:
+            problems.append("TESSERA_MASTER_KEY must be a random value, not the development key")
+        if "dev-only" in self.ai_gateway_token:
+            problems.append("TESSERA_AI_GATEWAY_TOKEN must be set")
+        if "*" in self.cors_origins:
+            problems.append("TESSERA_CORS_ORIGINS must list origins: '*' would accept credentialed calls from any site")
+        if problems:
+            raise RuntimeError("Unsafe production configuration:\n - " + "\n - ".join(problems))
+
+
+@lru_cache(maxsize=1)
+def get_settings() -> Settings:
+    return Settings()
+
+
+def reset_settings_cache() -> None:
+    """Used by tests that change environment variables."""
+    get_settings.cache_clear()

@@ -1,0 +1,6 @@
+name = "contacts_test"
+version = "1.0.0"
+summary = "Test module: references from books to contacts (many2one and many2many) for merge tests"
+category = "Testing"
+phase = 0
+depends = ["contacts", "chatter_test"]

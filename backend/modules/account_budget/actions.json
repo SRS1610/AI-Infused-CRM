@@ -1,0 +1,11 @@
+[
+  {"id": "action_budgets", "name": "Budgets", "model": "account.budget",
+   "views": ["list", "form"],
+   "view_refs": {"list": "account_budget.view_budget_list", "form": "account_budget.view_budget_form"},
+   "search_view": "account_budget.view_budget_search"},
+  {"id": "action_budget_analysis", "name": "Budget vs actual", "model": "account.budget_line",
+   "views": ["list", "pivot", "graph", "form"],
+   "view_refs": {"list": "account_budget.view_budget_line_list", "form": "account_budget.view_budget_line_form", "pivot": "account_budget.view_budget_line_pivot", "graph": "account_budget.view_budget_line_graph"},
+   "search_view": "account_budget.view_budget_line_search",
+   "help": "Planned and actual amounts are positive: costs on expense lines, income on revenue lines. Variance = actual - planned."}
+]

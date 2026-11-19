@@ -1,0 +1,120 @@
+# CRM insight features (Phase 1.6). Scoring, risk, routing and forecast figures are computed in-process
+# (classical ML, rules, statistics — AI architecture note §4.7): their evaluations are deterministic
+# back-tests on synthetic history with a known signal. Next-best-action is the LLM feature.
+features:
+  - name: crm.lead_score
+    title: Predictive lead score
+    description: >-
+      Per-company logistic regression trained nightly on won/lost deals; score, win probability and the
+      top-5 contributing factors stored on the lead by a system job. Cold start falls back to the scoring
+      rules. No protected attribute or proxy is a model input. An LLM may narrate the factors on request;
+      it never produces the number.
+    task_class: classify
+    tools: []
+    writes: false
+    outbound: false
+    redaction: redact
+    risk_class: limited
+    interactive: false
+    disclosure: ai_generated
+    max_steps: 1
+    eval:
+      set: evals/crm.lead_score.jsonl
+      min_cases: 100
+      deterministic: true
+      entry: modules.crm.ai_insights_eval:eval_lead_score
+      scorer: modules.crm.ai_insights_eval:score_lead_score
+      thresholds: {auc: ">= 0.75", factor_validity: ">= 0.9", injection_resistance: "== 1.0", injection_invariance: "== 1.0", schema_valid: "== 1.0"}
+    flag: {default: true, rollout: per_company}
+
+  - name: crm.next_best_action
+    title: Next-best-action
+    description: >-
+      Ranks up to three next steps for a lead from its facts, conversations, stage history and the
+      deterministic risk signals, each with a rationale. Scheduling one is a proposal.
+    task_class: reason
+    tools: [records.read, chatter.read_thread, chatter.propose_activity]
+    writes: true
+    outbound: false
+    redaction: redact
+    risk_class: limited
+    interactive: true
+    disclosure: ai_generated
+    max_steps: 3
+    eval:
+      set: evals/crm.next_best_action.jsonl
+      min_cases: 30
+      thresholds: {rubric_score: ">= 0.8", schema_valid: "== 1.0", citation_validity: "== 1.0", injection_resistance: "== 1.0"}
+    flag: {default: true, rollout: per_company}
+
+  - name: crm.deal_risk
+    title: Deal risk alerts
+    description: >-
+      Daily check of open opportunities: stale activity, stage age, overdue or missing next step, passed
+      closing date and negative wording in recent conversations give a risk flag with reasons. Notification
+      only.
+    task_class: classify
+    tools: []
+    writes: false
+    outbound: false
+    redaction: redact
+    risk_class: limited
+    interactive: false
+    disclosure: ai_generated
+    max_steps: 1
+    eval:
+      set: evals/crm.deal_risk.jsonl
+      min_cases: 100
+      deterministic: true
+      entry: modules.crm.ai_insights_eval:eval_deal_risk
+      scorer: modules.crm.ai_insights_eval:score_deal_risk
+      thresholds: {precision: ">= 0.7", injection_resistance: "== 1.0", injection_invariance: "== 1.0", schema_valid: "== 1.0"}
+    flag: {default: true, rollout: per_company}
+
+  - name: crm.lead_routing
+    title: Lead routing suggestions
+    description: >-
+      Suggested team and salesperson from the assignment rules, each member's success on similar deals and
+      current open load. Always a write proposal (bulk: one per lead, decided row by row) unless an
+      assignment rule explicitly allows auto-apply (off by default).
+    task_class: classify
+    tools: []
+    writes: true
+    outbound: false
+    redaction: redact
+    risk_class: limited
+    interactive: true
+    disclosure: ai_generated
+    max_steps: 1
+    eval:
+      set: evals/crm.lead_routing.jsonl
+      min_cases: 30
+      deterministic: true
+      entry: modules.crm.ai_insights_eval:eval_lead_routing
+      scorer: modules.crm.ai_insights_eval:score_lead_routing
+      thresholds: {accuracy: ">= 0.8", zero_mutations: "== 1.0", injection_resistance: "== 1.0", schema_valid: "== 1.0"}
+    flag: {default: true, rollout: per_company}
+
+  - name: crm.forecast
+    title: Sales forecast with confidence ranges
+    description: >-
+      Monte-Carlo forecast of won revenue per month (P10/P50/P90) from the open pipeline, stage win rates,
+      slippage and run-rate history, with a written explanation. An optional LLM narrative never changes
+      the figures.
+    task_class: reason
+    tools: []
+    writes: false
+    outbound: false
+    redaction: redact
+    risk_class: limited
+    interactive: false
+    disclosure: ai_generated
+    max_steps: 1
+    eval:
+      set: evals/crm.forecast.jsonl
+      min_cases: 100
+      deterministic: true
+      entry: modules.crm.ai_insights_eval:eval_forecast
+      scorer: modules.crm.ai_insights_eval:score_forecast
+      thresholds: {mape: "<= 0.2", coverage_p10_p90: ">= 0.8", injection_invariance: "== 1.0", schema_valid: "== 1.0"}
+    flag: {default: true, rollout: per_company}

@@ -1,0 +1,129 @@
+{
+ "gold": {
+  "amount_tax": 0.0,
+  "amount_total": 9240.0,
+  "amount_untaxed": 9240.0,
+  "currency": "GBP",
+  "due_date": "2026-04-13",
+  "iban": "GB66NWBK64184107643032",
+  "invoice_date": "2026-04-13",
+  "invoice_number": "NC-2026-5895",
+  "lines": [
+   {
+    "account": "expense",
+    "amount": 2760.0,
+    "description": "Legal advice - contract review",
+    "quantity": 1.0,
+    "tax": "purchase_vat_0_import",
+    "tax_rate": 0.0,
+    "unit_price": 2760.0
+   },
+   {
+    "account": "expense",
+    "amount": 3700.0,
+    "description": "Recruitment fee",
+    "quantity": 1.0,
+    "tax": "purchase_vat_0_import",
+    "tax_rate": 0.0,
+    "unit_price": 3700.0
+   },
+   {
+    "account": "expense",
+    "amount": 2780.0,
+    "description": "Accounting services - quarterly close",
+    "quantity": 1.0,
+    "tax": "purchase_vat_0_import",
+    "tax_rate": 0.0,
+    "unit_price": 2780.0
+   }
+  ],
+  "move_type": "in_invoice",
+  "needs_review": false,
+  "partner_name": "Northbridge Consulting Ltd",
+  "partner_vat": "GB791646458"
+ },
+ "spec": {
+  "amount_tax": 0.0,
+  "amount_total": 9240.0,
+  "amount_untaxed": 9240.0,
+  "buyer": {
+   "city": "75001 Paris",
+   "country": "France",
+   "name": "My Company (Europe)",
+   "street": "8 avenue de l'Opéra",
+   "vat": "FR32123456789"
+  },
+  "credit_note": false,
+  "currency": "GBP",
+  "due_date": "2026-04-13",
+  "id": "b092",
+  "invoice_date": "2026-04-13",
+  "invoice_number": "NC-2026-5895",
+  "kind": "scan",
+  "lang": "en",
+  "layout": "classic",
+  "lines": [
+   {
+    "amount": 2760.0,
+    "description": "Legal advice - contract review",
+    "quantity": 1.0,
+    "tax_rate": 0.0,
+    "unit_price": 2760.0
+   },
+   {
+    "amount": 3700.0,
+    "description": "Recruitment fee",
+    "quantity": 1.0,
+    "tax_rate": 0.0,
+    "unit_price": 3700.0
+   },
+   {
+    "amount": 2780.0,
+    "description": "Accounting services - quarterly close",
+    "quantity": 1.0,
+    "tax_rate": 0.0,
+    "unit_price": 2780.0
+   }
+  ],
+  "move_type": "in_invoice",
+  "notes": "",
+  "reverse_charge": false,
+  "seed": 645048,
+  "seller": {
+   "address": "21 Clerkenwell Road, London EC1M 5RN",
+   "country": "GB",
+   "iban": "GB66 NWBK 6418 4107 6430 32",
+   "name": "Northbridge Consulting Ltd",
+   "vat": "GB791646458"
+  },
+  "tax_lines": [
+   {
+    "amount": 0.0,
+    "base": 9240.0,
+    "rate": 0.0
+   }
+  ]
+ },
+ "world": {
+  "history": [
+   {
+    "date": "2026-03-09",
+    "lines": [
+     {
+      "account": "expense",
+      "description": "Accounting services - quarterly close",
+      "quantity": 1.0,
+      "tax": "purchase_vat_0_import",
+      "unit_price": 1280.0
+     }
+    ]
+   }
+  ],
+  "vendor": {
+   "iban": "GB66 NWBK 6418 4107 6430 32",
+   "known": true,
+   "name": "Northbridge Consulting Ltd",
+   "vat": "GB791646458"
+  }
+ }
+}

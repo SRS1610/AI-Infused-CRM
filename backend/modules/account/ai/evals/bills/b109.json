@@ -1,0 +1,154 @@
+{
+ "gold": {
+  "amount_tax": 910.0,
+  "amount_total": 5460.0,
+  "amount_untaxed": 4550.0,
+  "currency": "EUR",
+  "due_date": "2026-04-15",
+  "iban": null,
+  "invoice_date": "2026-03-16",
+  "invoice_number": "RA-2026-9990",
+  "lines": [
+   {
+    "account": "income",
+    "amount": 460.0,
+    "description": "Bras robotisé RA-5",
+    "quantity": 1.0,
+    "tax": "sale_vat_20",
+    "tax_rate": 20.0,
+    "unit_price": 460.0
+   },
+   {
+    "account": "income_services",
+    "amount": 1290.0,
+    "description": "Contrat de maintenance - trimestre",
+    "quantity": 1.0,
+    "tax": "sale_vat_20",
+    "tax_rate": 20.0,
+    "unit_price": 1290.0
+   },
+   {
+    "account": "income",
+    "amount": 1190.0,
+    "description": "Capteur de proximité PS-2",
+    "quantity": 1.0,
+    "tax": "sale_vat_20",
+    "tax_rate": 20.0,
+    "unit_price": 1190.0
+   },
+   {
+    "account": "income",
+    "amount": 1610.0,
+    "description": "Capteur de proximité PS-2",
+    "quantity": 1.0,
+    "tax": "sale_vat_20",
+    "tax_rate": 20.0,
+    "unit_price": 1610.0
+   }
+  ],
+  "move_type": "out_invoice",
+  "needs_review": false,
+  "partner_name": "Robotique Atlantique SAS",
+  "partner_vat": "FR95615455680"
+ },
+ "spec": {
+  "amount_tax": 910.0,
+  "amount_total": 5460.0,
+  "amount_untaxed": 4550.0,
+  "buyer": {
+   "address": "4 boulevard Voltaire, 75011 Paris",
+   "city": "",
+   "country": "FR",
+   "name": "Robotique Atlantique SAS",
+   "street": "",
+   "vat": "FR95615455680"
+  },
+  "credit_note": false,
+  "currency": "EUR",
+  "due_date": "2026-04-15",
+  "id": "b109",
+  "invoice_date": "2026-03-16",
+  "invoice_number": "RA-2026-9990",
+  "kind": "digital",
+  "lang": "fr",
+  "layout": "classic",
+  "lines": [
+   {
+    "amount": 460.0,
+    "description": "Bras robotisé RA-5",
+    "quantity": 1.0,
+    "tax_rate": 20.0,
+    "unit_price": 460.0
+   },
+   {
+    "amount": 1290.0,
+    "description": "Contrat de maintenance - trimestre",
+    "quantity": 1.0,
+    "tax_rate": 20.0,
+    "unit_price": 1290.0
+   },
+   {
+    "amount": 1190.0,
+    "description": "Capteur de proximité PS-2",
+    "quantity": 1.0,
+    "tax_rate": 20.0,
+    "unit_price": 1190.0
+   },
+   {
+    "amount": 1610.0,
+    "description": "Capteur de proximité PS-2",
+    "quantity": 1.0,
+    "tax_rate": 20.0,
+    "unit_price": 1610.0
+   }
+  ],
+  "move_type": "out_invoice",
+  "notes": "",
+  "reverse_charge": false,
+  "seed": 885035,
+  "seller": {
+   "address": "8 avenue de l'Opéra, 75001 Paris",
+   "country": "FR",
+   "iban": "FR76 3000 4000 0312 3456 7890 143",
+   "name": "My Company (Europe)",
+   "vat": "FR32123456789"
+  },
+  "tax_lines": [
+   {
+    "amount": 910.0,
+    "base": 4550.0,
+    "rate": 20.0
+   }
+  ]
+ },
+ "world": {
+  "history": [
+   {
+    "date": "2026-02-09",
+    "lines": [
+     {
+      "account": "income",
+      "description": "Bras robotisé RA-5",
+      "quantity": 1.0,
+      "tax": "sale_vat_20",
+      "unit_price": 1060.0
+     },
+     {
+      "account": "income_services",
+      "description": "Contrat de maintenance - trimestre",
+      "quantity": 1.0,
+      "tax": "sale_vat_20",
+      "unit_price": 1900.0
+     }
+    ]
+   }
+  ],
+  "vendor": {
+   "customer": true,
+   "iban": null,
+   "known": true,
+   "name": "Robotique Atlantique SAS",
+   "vat": "FR95615455680"
+  }
+ }
+}

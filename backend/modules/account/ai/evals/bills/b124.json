@@ -1,0 +1,106 @@
+{
+ "gold": {
+  "amount_tax": 60.88,
+  "amount_total": 678.89,
+  "amount_untaxed": 618.01,
+  "currency": "EUR",
+  "due_date": "2026-02-09",
+  "iban": "FR1330006100763506620997333",
+  "invoice_date": "2026-01-10",
+  "invoice_number": "BV874-1885",
+  "lines": [
+   {
+    "account": "expense",
+    "amount": 432.58,
+    "description": "Office chairs",
+    "quantity": 2.0,
+    "tax": "purchase_vat_5",
+    "tax_rate": 5.5,
+    "unit_price": 216.29
+   },
+   {
+    "account": "expense",
+    "amount": 185.43,
+    "description": "Printer paper A4 (box of 5 reams)",
+    "quantity": 3.0,
+    "tax": "purchase_vat_20",
+    "tax_rate": 20.0,
+    "unit_price": 61.81
+   }
+  ],
+  "move_type": "in_invoice",
+  "needs_review": false,
+  "partner_name": "Bureau Vallée Paris SAS",
+  "partner_vat": "FR80591834724"
+ },
+ "spec": {
+  "amount_tax": 60.88,
+  "amount_total": 678.89,
+  "amount_untaxed": 618.01,
+  "buyer": {
+   "city": "75001 Paris",
+   "country": "France",
+   "name": "My Company (Europe)",
+   "street": "8 avenue de l'Opéra",
+   "vat": "FR32123456789"
+  },
+  "credit_note": false,
+  "currency": "EUR",
+  "due_date": "2026-02-09",
+  "id": "b124",
+  "invoice_date": "2026-01-10",
+  "invoice_number": "BV874-1885",
+  "kind": "digital",
+  "lang": "en",
+  "layout": "classic",
+  "lines": [
+   {
+    "amount": 432.58,
+    "description": "Office chairs",
+    "quantity": 2.0,
+    "tax_rate": 5.5,
+    "unit_price": 216.29
+   },
+   {
+    "amount": 185.43,
+    "description": "Printer paper A4 (box of 5 reams)",
+    "quantity": 3.0,
+    "tax_rate": 20.0,
+    "unit_price": 61.81
+   }
+  ],
+  "move_type": "in_invoice",
+  "notes": "",
+  "reverse_charge": false,
+  "seed": 280758,
+  "seller": {
+   "address": "4 boulevard Voltaire, 75011 Paris",
+   "country": "FR",
+   "iban": "FR13 3000 6100 7635 0662 0997 333",
+   "name": "Bureau Vallée Paris SAS",
+   "vat": "FR80591834724"
+  },
+  "tax_lines": [
+   {
+    "amount": 23.79,
+    "base": 432.58,
+    "rate": 5.5
+   },
+   {
+    "amount": 37.09,
+    "base": 185.43,
+    "rate": 20.0
+   }
+  ]
+ },
+ "world": {
+  "history": [],
+  "vendor": {
+   "iban": "FR13 3000 6100 7635 0662 0997 333",
+   "known": true,
+   "name": "Bureau Vallée Paris SAS",
+   "other_company": true,
+   "vat": "FR80591834724"
+  }
+ }
+}

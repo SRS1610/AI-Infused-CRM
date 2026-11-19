@@ -1,0 +1,58 @@
+[
+  {"id": "view_provider_list", "model": "payment.provider", "type": "list", "name": "payment.provider.list",
+   "columns": [{"field": "sequence", "widget": "handle"}, {"field": "name"}, {"field": "code"}, {"field": "state", "widget": "badge"}, {"field": "journal_id"}, {"field": "company_id", "optional": "hide"}]},
+  {"id": "view_provider_form", "model": "payment.provider", "type": "form", "name": "payment.provider.form", "chatter": true,
+   "root": {"kind": "sheet", "children": [
+     {"kind": "field", "name": "name", "widget": "title"},
+     {"kind": "group", "name": "main", "columns": 2, "children": [
+       {"kind": "field", "name": "code"}, {"kind": "field", "name": "state"},
+       {"kind": "field", "name": "journal_id"}, {"kind": "field", "name": "company_id"},
+       {"kind": "field", "name": "display_as"}, {"kind": "field", "name": "allow_tokenization"},
+       {"kind": "field", "name": "sequence"}
+     ]},
+     {"kind": "group", "name": "credentials", "title": "Credentials", "columns": 2, "invisible": ["code", "=", "test"], "children": [
+       {"kind": "field", "name": "publishable_key"}, {"kind": "field", "name": "secret_key"},
+       {"kind": "field", "name": "webhook_secret"}
+     ]}
+   ]}},
+  {"id": "view_transaction_list", "model": "payment.transaction", "type": "list", "name": "payment.transaction.list",
+   "columns": [{"field": "create_date"}, {"field": "reference"}, {"field": "provider_id"}, {"field": "partner_id"},
+               {"field": "amount", "sum": true}, {"field": "currency_id", "optional": "hide"}, {"field": "operation", "optional": "hide"},
+               {"field": "state", "widget": "badge"}, {"field": "state_message", "optional": "hide"}]},
+  {"id": "view_transaction_search", "model": "payment.transaction", "type": "search", "name": "payment.transaction.search",
+   "fields": ["reference", "partner_id", "provider_reference"],
+   "filters": [
+     {"name": "done", "label": "Confirmed", "domain": [["state", "=", "done"]]},
+     {"name": "pending", "label": "Pending", "domain": [["state", "in", ["pending", "authorized"]]]},
+     {"name": "failed", "label": "Failed or cancelled", "domain": [["state", "in", ["error", "cancel"]]]}],
+   "group_bys": [{"field": "provider_id"}, {"field": "state"}, {"field": "create_date:month"}]},
+  {"id": "view_transaction_form", "model": "payment.transaction", "type": "form", "name": "payment.transaction.form", "chatter": true,
+   "root": {"kind": "sheet", "children": [
+     {"kind": "buttons", "children": [
+       {"kind": "button", "method": "action_sync", "label": "Check status", "invisible": ["state", "not_in", ["pending", "authorized"]]},
+       {"kind": "button", "method": "action_refund", "label": "Refund", "dialog_title": "Refund this payment", "submit_label": "Refund",
+        "params": [{"name": "amount", "label": "Amount (empty = everything)", "type": "number"}],
+        "confirm": "The customer is paid back through the provider.", "invisible": {"any": [["state", "!=", "done"], ["operation", "=", "refund"]]}}
+     ]},
+     {"kind": "field", "name": "reference", "widget": "title"},
+     {"kind": "group", "name": "main", "columns": 2, "children": [
+       {"kind": "field", "name": "provider_id"}, {"kind": "field", "name": "state", "widget": "badge"},
+       {"kind": "field", "name": "amount"}, {"kind": "field", "name": "currency_id"},
+       {"kind": "field", "name": "partner_id"}, {"kind": "field", "name": "operation"},
+       {"kind": "field", "name": "provider_reference"}, {"kind": "field", "name": "payment_id"},
+       {"kind": "field", "name": "token_id"}, {"kind": "field", "name": "source_transaction_id"},
+       {"kind": "field", "name": "last_state_change"}
+     ]},
+     {"kind": "field", "name": "state_message"},
+     {"kind": "notebook", "pages": [
+       {"kind": "page", "name": "page_invoices", "title": "Invoices", "children": [{"kind": "field", "name": "invoice_ids"}]},
+       {"kind": "page", "name": "page_events", "title": "Notifications", "children": [
+         {"kind": "field", "name": "event_ids", "readonly": true, "columns": [{"field": "processed_at"}, {"field": "event_id"}, {"field": "event_type"}, {"field": "state"}, {"field": "result"}]}
+       ]}
+     ]}
+   ]}},
+  {"id": "view_token_list", "model": "payment.token", "type": "list", "name": "payment.token.list",
+   "columns": [{"field": "partner_id"}, {"field": "display"}, {"field": "provider_id"}, {"field": "active"}]},
+  {"id": "view_event_list", "model": "payment.event", "type": "list", "name": "payment.event.list",
+   "columns": [{"field": "processed_at"}, {"field": "provider_id"}, {"field": "event_id"}, {"field": "event_type"}, {"field": "transaction_id"}, {"field": "state"}, {"field": "result"}]}
+]

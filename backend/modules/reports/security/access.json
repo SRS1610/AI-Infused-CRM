@@ -1,0 +1,11 @@
+[
+  {"id": "group_report_manager", "model": "core.group", "noupdate": true, "values": {"name": "Reports / Designer", "category": "Platform", "comment": "Edit report templates and layouts", "implied_ids": ["core.group_user"]}},
+  {"id": "access_layout_user", "model": "core.model_access", "values": {"name": "report layout: user read", "model_name": "reports.layout", "group_id": "core.group_user", "perm_read": true}},
+  {"id": "access_layout_manager", "model": "core.model_access", "values": {"name": "report layout: designer", "model_name": "reports.layout", "group_id": "reports.group_report_manager", "perm_read": true, "perm_write": true, "perm_create": true, "perm_unlink": true}},
+  {"id": "access_template_user", "model": "core.model_access", "values": {"name": "report template: user read", "model_name": "reports.template", "group_id": "core.group_user", "perm_read": true}},
+  {"id": "access_template_manager", "model": "core.model_access", "values": {"name": "report template: designer", "model_name": "reports.template", "group_id": "reports.group_report_manager", "perm_read": true, "perm_write": true, "perm_create": true, "perm_unlink": true}},
+  {"id": "access_version_manager", "model": "core.model_access", "values": {"name": "report version: designer", "model_name": "reports.template_version", "group_id": "reports.group_report_manager", "perm_read": true, "perm_create": true}},
+  {"id": "access_layout_system", "model": "core.model_access", "values": {"name": "report layout: admin", "model_name": "reports.layout", "group_id": "core.group_system", "perm_read": true, "perm_write": true, "perm_create": true, "perm_unlink": true}},
+  {"id": "access_template_system", "model": "core.model_access", "values": {"name": "report template: admin", "model_name": "reports.template", "group_id": "core.group_system", "perm_read": true, "perm_write": true, "perm_create": true, "perm_unlink": true}},
+  {"id": "access_version_system", "model": "core.model_access", "values": {"name": "report version: admin", "model_name": "reports.template_version", "group_id": "core.group_system", "perm_read": true, "perm_create": true, "perm_unlink": true}}
+]

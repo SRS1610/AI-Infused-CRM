@@ -1,0 +1,48 @@
+[
+  {"id": "view_edi_document_list", "model": "account.edi_document", "type": "list", "name": "account.edi_document.list",
+   "columns": [{"field": "create_date"}, {"field": "move_id"}, {"field": "direction"}, {"field": "format", "optional": "hide"}, {"field": "receiver"}, {"field": "sender", "optional": "hide"},
+               {"field": "transmission_id", "optional": "hide"}, {"field": "error_count"}, {"field": "state", "widget": "badge"}, {"field": "company_id", "optional": "hide"}]},
+  {"id": "view_edi_document_search", "model": "account.edi_document", "type": "search", "name": "account.edi_document.search",
+   "fields": ["move_id", "transmission_id", "receiver", "sender"],
+   "filters": [
+     {"name": "errors", "label": "Errors and rejections", "domain": [["state", "in", ["error", "rejected"]]]},
+     {"name": "sent", "label": "Waiting for delivery", "domain": [["state", "=", "sent"]]},
+     {"name": "inbound", "label": "Received", "domain": [["direction", "=", "in"]]}],
+   "group_bys": [{"field": "state"}, {"field": "direction"}]},
+  {"id": "view_edi_document_form", "model": "account.edi_document", "type": "form", "name": "account.edi_document.form",
+   "root": {"kind": "sheet", "children": [
+     {"kind": "buttons", "children": [
+       {"kind": "button", "method": "action_retry", "label": "Validate and send again", "invisible": {"any": [["direction", "!=", "out"], ["state", "not_in", ["error", "rejected", "to_send"]]]}}
+     ]},
+     {"kind": "group", "name": "main", "columns": 2, "children": [
+       {"kind": "field", "name": "move_id", "readonly": true}, {"kind": "field", "name": "state", "widget": "badge", "readonly": true},
+       {"kind": "field", "name": "direction", "readonly": true}, {"kind": "field", "name": "format", "readonly": true},
+       {"kind": "field", "name": "sender", "readonly": true}, {"kind": "field", "name": "receiver", "readonly": true},
+       {"kind": "field", "name": "transmission_id", "readonly": true}, {"kind": "field", "name": "access_point", "readonly": true},
+       {"kind": "field", "name": "attachment_id", "readonly": true}, {"kind": "field", "name": "last_poll", "readonly": true},
+       {"kind": "field", "name": "error_count", "readonly": true}, {"kind": "field", "name": "company_id", "readonly": true}
+     ]},
+     {"kind": "field", "name": "message", "readonly": true},
+     {"kind": "field", "name": "errors", "readonly": true}
+   ]}},
+  {"id": "view_invoice_form_einvoice", "model": "account.move", "type": "form", "name": "account.move.form.einvoice", "inherit": "account.view_invoice_form",
+   "operations": [
+     {"op": "append", "anchor": {"path": "/root/children/0"}, "node": {"kind": "button", "method": "action_send_peppol", "label": "Send via Peppol",
+      "confirm": "Validate the e-invoice (UBL / Peppol BIS 3) and send it to the customer's Peppol address?",
+      "invisible": {"any": [["state", "!=", "posted"], ["move_type", "not_in", ["out_invoice", "out_refund"]]]}}}
+   ]},
+  {"id": "view_partner_form_peppol", "model": "contacts.partner", "type": "form", "name": "contacts.partner.form.peppol", "inherit": "contacts.view_partner_form",
+   "operations": [
+     {"op": "insert_after", "anchor": {"field": "vat"}, "node": {"kind": "field", "name": "peppol_eas"}},
+     {"op": "insert_after", "anchor": {"field": "peppol_eas"}, "node": {"kind": "field", "name": "peppol_endpoint"}}
+   ]},
+  {"id": "view_company_form_peppol", "model": "core.company", "type": "form", "name": "core.company.form.peppol", "inherit": "web.view_company_form",
+   "operations": [
+     {"op": "insert_after", "anchor": {"field": "vat"}, "node": {"kind": "field", "name": "company_registry"}},
+     {"op": "insert_after", "anchor": {"field": "company_registry"}, "node": {"kind": "field", "name": "peppol_eas"}},
+     {"op": "insert_after", "anchor": {"field": "peppol_eas"}, "node": {"kind": "field", "name": "peppol_endpoint"}},
+     {"op": "insert_after", "anchor": {"field": "peppol_endpoint"}, "node": {"kind": "field", "name": "peppol_access_point"}}
+   ]},
+  {"id": "view_mock_transmission_list", "model": "account.edi_mock_transmission", "type": "list", "name": "account.edi_mock_transmission.list",
+   "columns": [{"field": "create_date"}, {"field": "transmission_id"}, {"field": "sender"}, {"field": "receiver"}, {"field": "document_type"}, {"field": "state"}, {"field": "picked_up"}]}
+]

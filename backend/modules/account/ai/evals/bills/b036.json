@@ -1,0 +1,116 @@
+{
+ "gold": {
+  "amount_tax": 0.0,
+  "amount_total": 1239.97,
+  "amount_untaxed": 1239.97,
+  "currency": "EUR",
+  "due_date": "2026-10-10",
+  "iban": "IE69AIBK14266219389369",
+  "invoice_date": "2026-09-10",
+  "invoice_number": "BS-2026-5592",
+  "lines": [
+   {
+    "account": "software",
+    "amount": 917.91,
+    "description": "Alojamiento web mensual",
+    "quantity": 3.0,
+    "tax": "purchase_vat_20_rc",
+    "tax_rate": 0.0,
+    "unit_price": 305.97
+   },
+   {
+    "account": "software",
+    "amount": 192.74,
+    "description": "Suscripción anual software CRM",
+    "quantity": 1.0,
+    "tax": "purchase_vat_20_rc",
+    "tax_rate": 0.0,
+    "unit_price": 192.74
+   },
+   {
+    "account": "software",
+    "amount": 129.32,
+    "description": "Suscripción SaaS equipo",
+    "quantity": 1.0,
+    "tax": "purchase_vat_20_rc",
+    "tax_rate": 0.0,
+    "unit_price": 129.32
+   }
+  ],
+  "move_type": "in_invoice",
+  "needs_review": false,
+  "partner_name": "Brightwave Software Ltd",
+  "partner_vat": "IE3704551E"
+ },
+ "spec": {
+  "amount_tax": 0.0,
+  "amount_total": 1239.97,
+  "amount_untaxed": 1239.97,
+  "buyer": {
+   "city": "75001 Paris",
+   "country": "France",
+   "name": "My Company (Europe)",
+   "street": "8 avenue de l'Opéra",
+   "vat": "FR32123456789"
+  },
+  "credit_note": false,
+  "currency": "EUR",
+  "due_date": "2026-10-10",
+  "id": "b036",
+  "invoice_date": "2026-09-10",
+  "invoice_number": "BS-2026-5592",
+  "kind": "digital",
+  "lang": "es",
+  "layout": "letter",
+  "lines": [
+   {
+    "amount": 917.91,
+    "description": "Alojamiento web mensual",
+    "quantity": 3.0,
+    "tax_rate": 0.0,
+    "unit_price": 305.97
+   },
+   {
+    "amount": 192.74,
+    "description": "Suscripción anual software CRM",
+    "quantity": 1.0,
+    "tax_rate": 0.0,
+    "unit_price": 192.74
+   },
+   {
+    "amount": 129.32,
+    "description": "Suscripción SaaS equipo",
+    "quantity": 1.0,
+    "tax_rate": 0.0,
+    "unit_price": 129.32
+   }
+  ],
+  "move_type": "in_invoice",
+  "notes": "",
+  "reverse_charge": true,
+  "seed": 939503,
+  "seller": {
+   "address": "12 Grand Parade, Cork",
+   "country": "IE",
+   "iban": "IE69 AIBK 1426 6219 3893 69",
+   "name": "Brightwave Software Ltd",
+   "vat": "IE3704551E"
+  },
+  "tax_lines": [
+   {
+    "amount": 0.0,
+    "base": 1239.97,
+    "rate": 0.0
+   }
+  ]
+ },
+ "world": {
+  "history": [],
+  "vendor": {
+   "iban": "IE69 AIBK 1426 6219 3893 69",
+   "known": false,
+   "name": "Brightwave Software Ltd",
+   "vat": "IE3704551E"
+  }
+ }
+}

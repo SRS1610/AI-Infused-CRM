@@ -1,0 +1,14 @@
+[
+  {"id": "access_author_reader", "model": "core.model_access", "values": {"name": "author reader", "model_name": "ktest.author", "group_id": "kernel_test_a.group_reader", "perm_read": true}},
+  {"id": "access_author_librarian", "model": "core.model_access", "values": {"name": "author librarian", "model_name": "ktest.author", "group_id": "kernel_test_a.group_librarian", "perm_read": true, "perm_write": true, "perm_create": true, "perm_unlink": true}},
+  {"id": "access_book_reader", "model": "core.model_access", "values": {"name": "book reader", "model_name": "ktest.book", "group_id": "kernel_test_a.group_reader", "perm_read": true}},
+  {"id": "access_book_librarian", "model": "core.model_access", "values": {"name": "book librarian", "model_name": "ktest.book", "group_id": "kernel_test_a.group_librarian", "perm_read": true, "perm_write": true, "perm_create": true, "perm_unlink": true}},
+  {"id": "access_tag_reader", "model": "core.model_access", "values": {"name": "tag reader", "model_name": "ktest.tag", "group_id": "kernel_test_a.group_reader", "perm_read": true}},
+  {"id": "access_tag_librarian", "model": "core.model_access", "values": {"name": "tag librarian", "model_name": "ktest.tag", "group_id": "kernel_test_a.group_librarian", "perm_read": true, "perm_write": true, "perm_create": true, "perm_unlink": true}},
+  {"id": "access_chapter_reader", "model": "core.model_access", "values": {"name": "chapter reader", "model_name": "ktest.chapter", "group_id": "kernel_test_a.group_reader", "perm_read": true}},
+  {"id": "access_chapter_librarian", "model": "core.model_access", "values": {"name": "chapter librarian", "model_name": "ktest.chapter", "group_id": "kernel_test_a.group_librarian", "perm_read": true, "perm_write": true, "perm_create": true, "perm_unlink": true}},
+  {"id": "access_all_system", "model": "core.model_access", "values": {"name": "ktest admin: book", "model_name": "ktest.book", "group_id": "core.group_system", "perm_read": true, "perm_write": true, "perm_create": true, "perm_unlink": true}},
+  {"id": "access_all_system_author", "model": "core.model_access", "values": {"name": "ktest admin: author", "model_name": "ktest.author", "group_id": "core.group_system", "perm_read": true, "perm_write": true, "perm_create": true, "perm_unlink": true}},
+  {"id": "access_all_system_tag", "model": "core.model_access", "values": {"name": "ktest admin: tag", "model_name": "ktest.tag", "group_id": "core.group_system", "perm_read": true, "perm_write": true, "perm_create": true, "perm_unlink": true}},
+  {"id": "access_all_system_chapter", "model": "core.model_access", "values": {"name": "ktest admin: chapter", "model_name": "ktest.chapter", "group_id": "core.group_system", "perm_read": true, "perm_write": true, "perm_create": true, "perm_unlink": true}}
+]

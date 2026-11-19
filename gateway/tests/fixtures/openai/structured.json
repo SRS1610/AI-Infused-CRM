@@ -1,0 +1,37 @@
+{
+  "id": "chatcmpl-CZf0dV6g7jOo5",
+  "object": "chat.completion",
+  "created": 1762761600,
+  "model": "gpt-4.1-mini-2025-04-14",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "{\"title\": \"Contract renewal\", \"sentiment\": \"positive\", \"next_step\": \"Schedule the Q3 pricing review\"}",
+        "refusal": null,
+        "annotations": [],
+        "tool_calls": null
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 220,
+    "completion_tokens": 24,
+    "total_tokens": 244,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "audio_tokens": 0
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0,
+      "audio_tokens": 0,
+      "accepted_prediction_tokens": 0,
+      "rejected_prediction_tokens": 0
+    }
+  },
+  "system_fingerprint": "fp_6f2eabb9a5",
+  "service_tier": "default"
+}

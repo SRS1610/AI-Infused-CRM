@@ -1,0 +1,3 @@
+[
+  {"id": "sched_peppol_poll", "model": "core.scheduled_job", "noupdate": true, "values": {"name": "Peppol: transmission status and inbound documents", "job_name": "account_einvoice.poll", "cron": "*/20 * * * *"}}
+]

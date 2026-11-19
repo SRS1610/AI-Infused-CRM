@@ -1,0 +1,118 @@
+[
+  {"id": "view_bank_statement_list", "model": "account.bank_statement", "type": "list", "name": "account.bank_statement.list",
+   "columns": [{"field": "date"}, {"field": "name"}, {"field": "journal_id"}, {"field": "balance_start"}, {"field": "balance_end_real"},
+               {"field": "line_count"}, {"field": "reconciled_count"}, {"field": "state", "widget": "badge"}, {"field": "company_id", "optional": "hide"}]},
+  {"id": "view_bank_statement_search", "model": "account.bank_statement", "type": "search", "name": "account.bank_statement.search",
+   "fields": ["name", "journal_id"],
+   "filters": [{"name": "open", "label": "Open", "domain": [["state", "=", "open"]]}, {"name": "posted", "label": "Posted", "domain": [["state", "=", "posted"]]}],
+   "group_bys": [{"field": "journal_id"}, {"field": "date:month"}]},
+  {"id": "view_bank_statement_form", "model": "account.bank_statement", "type": "form", "name": "account.bank_statement.form", "chatter": true,
+   "root": {"kind": "sheet", "children": [
+     {"kind": "buttons", "children": [
+       {"kind": "button", "method": "action_post", "label": "Post", "invisible": ["state", "!=", "open"]},
+       {"kind": "button", "method": "action_auto_reconcile", "label": "Auto-reconcile", "invisible": ["state", "!=", "posted"]}
+     ]},
+     {"kind": "field", "name": "name", "widget": "title"},
+     {"kind": "group", "name": "main", "columns": 2, "children": [
+       {"kind": "field", "name": "journal_id", "readonly_if": ["state", "!=", "open"]},
+       {"kind": "field", "name": "date"},
+       {"kind": "field", "name": "balance_start"},
+       {"kind": "field", "name": "balance_end_real"},
+       {"kind": "field", "name": "balance_end", "readonly": true},
+       {"kind": "field", "name": "difference", "readonly": true},
+       {"kind": "field", "name": "state", "readonly": true, "widget": "badge"},
+       {"kind": "field", "name": "import_file_id", "readonly": true},
+       {"kind": "field", "name": "company_id", "readonly": true}
+     ]},
+     {"kind": "notebook", "pages": [
+       {"kind": "page", "name": "page_lines", "title": "Transactions", "children": [
+         {"kind": "field", "name": "line_ids", "columns": [
+           {"field": "date"}, {"field": "payment_ref"}, {"field": "partner_id"}, {"field": "partner_name"}, {"field": "ref"},
+           {"field": "amount"}, {"field": "amount_residual"}, {"field": "state"}]}
+       ]}
+     ]}
+   ]}},
+  {"id": "view_bank_statement_line_list", "model": "account.bank_statement_line", "type": "list", "name": "account.bank_statement_line.list",
+   "columns": [{"field": "date"}, {"field": "journal_id"}, {"field": "statement_id", "optional": "hide"}, {"field": "payment_ref"},
+               {"field": "partner_id"}, {"field": "partner_name", "optional": "hide"}, {"field": "ref", "optional": "hide"},
+               {"field": "amount", "sum": true}, {"field": "amount_residual"}, {"field": "reconcile_model_id", "optional": "hide"},
+               {"field": "state", "widget": "badge"}]},
+  {"id": "view_bank_statement_line_search", "model": "account.bank_statement_line", "type": "search", "name": "account.bank_statement_line.search",
+   "fields": ["payment_ref", "partner_id", "partner_name", "ref", "journal_id"],
+   "filters": [
+     {"name": "to_reconcile", "label": "To reconcile", "domain": [["state", "=", "posted"]]},
+     {"name": "reconciled", "label": "Reconciled", "domain": [["state", "=", "reconciled"]]},
+     {"name": "inbound", "label": "Money in", "domain": [["amount", ">", 0]]},
+     {"name": "outbound", "label": "Money out", "domain": [["amount", "<", 0]]}],
+   "group_bys": [{"field": "journal_id"}, {"field": "statement_id"}, {"field": "date:month"}]},
+  {"id": "view_bank_statement_line_form", "model": "account.bank_statement_line", "type": "form", "name": "account.bank_statement_line.form",
+   "root": {"kind": "sheet", "children": [
+     {"kind": "buttons", "children": [
+       {"kind": "button", "method": "action_post", "label": "Post", "invisible": ["state", "!=", "draft"]},
+       {"kind": "button", "method": "action_unmatch", "label": "Undo reconciliation", "confirm": "Undo the matches of this transaction?", "invisible": ["state", "!=", "reconciled"]}
+     ]},
+     {"kind": "field", "name": "payment_ref", "widget": "title"},
+     {"kind": "group", "name": "main", "columns": 2, "children": [
+       {"kind": "field", "name": "statement_id"}, {"kind": "field", "name": "journal_id"},
+       {"kind": "field", "name": "date"}, {"kind": "field", "name": "amount"},
+       {"kind": "field", "name": "partner_id"}, {"kind": "field", "name": "partner_name"},
+       {"kind": "field", "name": "account_number"}, {"kind": "field", "name": "ref"},
+       {"kind": "field", "name": "foreign_currency_id"}, {"kind": "field", "name": "amount_currency"},
+       {"kind": "field", "name": "transaction_type"}, {"kind": "field", "name": "unique_import_id", "readonly": true},
+       {"kind": "field", "name": "state", "readonly": true, "widget": "badge"}, {"kind": "field", "name": "amount_residual", "readonly": true},
+       {"kind": "field", "name": "move_id", "readonly": true}, {"kind": "field", "name": "reconcile_model_id", "readonly": true},
+       {"kind": "field", "name": "to_check"}
+     ]},
+     {"kind": "field", "name": "narration"}
+   ]}},
+  {"id": "view_reconcile_model_list", "model": "account.reconcile_model", "type": "list", "name": "account.reconcile_model.list",
+   "columns": [{"field": "sequence", "widget": "handle"}, {"field": "name"}, {"field": "rule_type"}, {"field": "auto_reconcile"}, {"field": "company_id", "optional": "hide"}]},
+  {"id": "view_reconcile_model_form", "model": "account.reconcile_model", "type": "form", "name": "account.reconcile_model.form",
+   "root": {"kind": "sheet", "children": [
+     {"kind": "field", "name": "name", "widget": "title"},
+     {"kind": "group", "name": "main", "columns": 2, "children": [
+       {"kind": "field", "name": "rule_type"}, {"kind": "field", "name": "auto_reconcile"},
+       {"kind": "field", "name": "sequence"}, {"kind": "field", "name": "company_id"},
+       {"kind": "field", "name": "active"}
+     ]},
+     {"kind": "group", "name": "conditions", "title": "Conditions", "columns": 2, "children": [
+       {"kind": "field", "name": "match_journal_ids"}, {"kind": "field", "name": "match_nature"},
+       {"kind": "field", "name": "match_amount"}, {"kind": "field", "name": "match_amount_min"},
+       {"kind": "field", "name": "match_amount_max"}, {"kind": "field", "name": "match_label"},
+       {"kind": "field", "name": "match_label_param"}, {"kind": "field", "name": "match_partner"},
+       {"kind": "field", "name": "match_partner_ids"}
+     ]},
+     {"kind": "group", "name": "matching", "title": "Invoice matching", "columns": 2, "invisible": ["rule_type", "!=", "invoice_matching"], "children": [
+       {"kind": "field", "name": "match_text_location"}, {"kind": "field", "name": "match_same_amount"},
+       {"kind": "field", "name": "allow_payment_tolerance"}, {"kind": "field", "name": "payment_tolerance_type"},
+       {"kind": "field", "name": "payment_tolerance_param"}, {"kind": "field", "name": "past_months_limit"}
+     ]},
+     {"kind": "notebook", "pages": [
+       {"kind": "page", "name": "page_counterparts", "title": "Counterparts", "children": [
+         {"kind": "field", "name": "line_ids", "columns": [{"field": "account_id"}, {"field": "label"}, {"field": "amount_type"}, {"field": "amount"}, {"field": "amount_string"}, {"field": "tax_ids"}]}
+       ]}
+     ]}
+   ]}},
+  {"id": "view_statement_import_form", "model": "account.bank_statement_import", "type": "form", "name": "account.bank_statement_import.form",
+   "root": {"kind": "sheet", "children": [
+     {"kind": "buttons", "children": [
+       {"kind": "button", "method": "action_import", "label": "Import", "invisible": ["state", "!=", "draft"]}
+     ]},
+     {"kind": "group", "name": "main", "columns": 2, "children": [
+       {"kind": "field", "name": "journal_id", "readonly_if": ["state", "!=", "draft"]},
+       {"kind": "field", "name": "data_file", "invisible": ["state", "!=", "draft"]},
+       {"kind": "field", "name": "filename"},
+       {"kind": "field", "name": "file_format"},
+       {"kind": "field", "name": "post"},
+       {"kind": "field", "name": "state", "readonly": true, "widget": "badge"}
+     ]},
+     {"kind": "group", "name": "result", "title": "Result", "columns": 2, "invisible": ["state", "=", "draft"], "children": [
+       {"kind": "field", "name": "line_count"}, {"kind": "field", "name": "duplicate_count"},
+       {"kind": "field", "name": "reconciled_count"}, {"kind": "field", "name": "attachment_id"},
+       {"kind": "field", "name": "statement_ids"}, {"kind": "field", "name": "message"}
+     ]}
+   ]}},
+  {"id": "view_statement_import_list", "model": "account.bank_statement_import", "type": "list", "name": "account.bank_statement_import.list",
+   "columns": [{"field": "create_date"}, {"field": "journal_id"}, {"field": "filename"}, {"field": "file_format"}, {"field": "line_count"},
+               {"field": "duplicate_count"}, {"field": "reconciled_count"}, {"field": "state", "widget": "badge"}]}
+]

@@ -1,0 +1,13 @@
+[
+ {"id": "view_tax_return_list", "model": "account.tax_return", "type": "list", "name": "account.tax_return.list", "columns": [{"field": "name"}, {"field": "date_from"}, {"field": "date_to"}, {"field": "amount_due"}, {"field": "amount_deductible"}, {"field": "amount_net"}, {"field": "state", "widget": "badge"}, {"field": "company_id", "optional": "hide"}]},
+ {"id": "view_tax_return_form", "model": "account.tax_return", "type": "form", "name": "account.tax_return.form", "root": {"kind": "sheet", "children": [
+   {"kind": "buttons", "children": [
+     {"kind": "button", "method": "action_refresh", "label": "Refresh figures and checks", "invisible": ["state", "=", "closed"]},
+     {"kind": "button", "method": "action_check", "label": "Run pre-filing checks"},
+     {"kind": "button", "method": "action_close", "label": "Close the period", "confirm": "Closing posts the tax closing entry and locks taxes up to the end of the period.", "invisible": ["state", "=", "closed"]}
+   ]},
+   {"kind": "group", "name": "main", "columns": 2, "children": [{"kind": "field", "name": "name"}, {"kind": "field", "name": "state", "readonly": true, "widget": "badge"}, {"kind": "field", "name": "date_from"}, {"kind": "field", "name": "date_to"}, {"kind": "field", "name": "company_id"}, {"kind": "field", "name": "report_id"}]},
+   {"kind": "group", "name": "amounts", "columns": 2, "children": [{"kind": "field", "name": "amount_due"}, {"kind": "field", "name": "amount_deductible"}, {"kind": "field", "name": "amount_net"}, {"kind": "field", "name": "closing_move_id"}, {"kind": "field", "name": "closed_by_id"}, {"kind": "field", "name": "closed_on"}]},
+   {"kind": "field", "name": "findings_summary"}
+ ]}}
+]

@@ -1,0 +1,4 @@
+[
+  {"id": "access_portal_access_user", "model": "core.model_access", "values": {"name": "portal access: user read", "model_name": "portal.access", "group_id": "core.group_user", "perm_read": true}},
+  {"id": "access_portal_access_system", "model": "core.model_access", "values": {"name": "portal access: admin", "model_name": "portal.access", "group_id": "core.group_system", "perm_read": true, "perm_write": true, "perm_create": true, "perm_unlink": true}}
+]

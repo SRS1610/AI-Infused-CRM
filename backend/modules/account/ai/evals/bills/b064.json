@@ -1,0 +1,116 @@
+{
+ "gold": {
+  "amount_tax": 0.0,
+  "amount_total": 706.35,
+  "amount_untaxed": 706.35,
+  "currency": "GBP",
+  "due_date": "2026-03-02",
+  "iban": "GB65NWBK57306876579883",
+  "invoice_date": "2026-01-31",
+  "invoice_number": "008183/26",
+  "lines": [
+   {
+    "account": "expense",
+    "amount": 355.86,
+    "description": "Coffee capsules",
+    "quantity": 1.0,
+    "tax": "purchase_vat_0_import",
+    "tax_rate": 0.0,
+    "unit_price": 355.86
+   },
+   {
+    "account": "expense",
+    "amount": 55.85,
+    "description": "Printer paper A4 (box of 5 reams)",
+    "quantity": 1.0,
+    "tax": "purchase_vat_0_import",
+    "tax_rate": 0.0,
+    "unit_price": 55.85
+   },
+   {
+    "account": "expense",
+    "amount": 294.64,
+    "description": "Toner cartridge black",
+    "quantity": 1.0,
+    "tax": "purchase_vat_0_import",
+    "tax_rate": 0.0,
+    "unit_price": 294.64
+   }
+  ],
+  "move_type": "in_invoice",
+  "needs_review": false,
+  "partner_name": "Thames Office Supplies Ltd",
+  "partner_vat": "GB196181641"
+ },
+ "spec": {
+  "amount_tax": 0.0,
+  "amount_total": 706.35,
+  "amount_untaxed": 706.35,
+  "buyer": {
+   "city": "75001 Paris",
+   "country": "France",
+   "name": "My Company (Europe)",
+   "street": "8 avenue de l'Opéra",
+   "vat": "FR32123456789"
+  },
+  "credit_note": false,
+  "currency": "GBP",
+  "due_date": "2026-03-02",
+  "id": "b064",
+  "invoice_date": "2026-01-31",
+  "invoice_number": "008183/26",
+  "kind": "digital",
+  "lang": "en",
+  "layout": "letter",
+  "lines": [
+   {
+    "amount": 355.86,
+    "description": "Coffee capsules",
+    "quantity": 1.0,
+    "tax_rate": 0.0,
+    "unit_price": 355.86
+   },
+   {
+    "amount": 55.85,
+    "description": "Printer paper A4 (box of 5 reams)",
+    "quantity": 1.0,
+    "tax_rate": 0.0,
+    "unit_price": 55.85
+   },
+   {
+    "amount": 294.64,
+    "description": "Toner cartridge black",
+    "quantity": 1.0,
+    "tax_rate": 0.0,
+    "unit_price": 294.64
+   }
+  ],
+  "move_type": "in_invoice",
+  "notes": "",
+  "reverse_charge": false,
+  "seed": 344417,
+  "seller": {
+   "address": "8 Deansgate, Manchester M3 2BW",
+   "country": "GB",
+   "iban": "GB65 NWBK 5730 6876 5798 83",
+   "name": "Thames Office Supplies Ltd",
+   "vat": "GB196181641"
+  },
+  "tax_lines": [
+   {
+    "amount": 0.0,
+    "base": 706.35,
+    "rate": 0.0
+   }
+  ]
+ },
+ "world": {
+  "history": [],
+  "vendor": {
+   "iban": "GB65 NWBK 5730 6876 5798 83",
+   "known": false,
+   "name": "Thames Office Supplies Ltd",
+   "vat": "GB196181641"
+  }
+ }
+}

@@ -1,0 +1,17 @@
+[
+  {"id": "action_assets", "name": "Assets", "model": "account.asset",
+   "views": ["list", "form"],
+   "view_refs": {"list": "account_asset.view_asset_list", "form": "account_asset.view_asset_form"},
+   "search_view": "account_asset.view_asset_search",
+   "domain": [["state", "!=", "model"]]},
+  {"id": "action_asset_models", "name": "Asset models", "model": "account.asset",
+   "views": ["list", "form"],
+   "view_refs": {"list": "account_asset.view_asset_model_list", "form": "account_asset.view_asset_model_form"},
+   "domain": [["state", "=", "model"]],
+   "context": {"default_state": "model"},
+   "help": "Depreciation settings reused by assets; attach a model to an account to create assets from vendor bills."},
+  {"id": "action_depreciation_entries", "name": "Depreciation entries", "model": "account.move",
+   "views": ["list", "form"],
+   "view_refs": {"list": "account_asset.view_board_list", "form": "account.view_move_form"},
+   "domain": [["asset_id", "!=", null]]}
+]

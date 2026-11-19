@@ -1,0 +1,28 @@
+# E-invoicing AI features (sub-phase 2.6). Code: modules/account_einvoice/ai_explain.py; cases and cassettes:
+# ai/build_evals.py (findings produced by the vendored validators on defective invoices, ai/mutations.py).
+features:
+  - name: account_einvoice.error_explain
+    title: E-invoice error explanations
+    description: >-
+      Explains each validation finding of an e-invoice (XSD, CEN EN 16931 and Peppol BIS 3 rule ids) in plain
+      language with a fix hint. The field to fix and its link (customer, company, invoice, line, tax, bank
+      account) are decided by a rule catalogue and the finding's location, not by the model; the model writes
+      the explanation and the hint only (figures checked, unknown rules ignored, catalogue wording when it is
+      unavailable). Nothing is written.
+    task_class: summarize
+    tools: []
+    writes: false
+    outbound: false
+    redaction: redact
+    risk_class: minimal
+    interactive: true
+    disclosure: ai_generated
+    max_steps: 1
+    eval:
+      set: evals/account_einvoice.error_explain.jsonl
+      min_cases: 30
+      entry: modules.account_einvoice.ai_explain:eval_entry
+      scorer: modules.account_einvoice.ai_explain:score
+      isolate: [account.edi_document, account.move]
+      thresholds: {field_attribution: ">= 0.9", rubric_score: ">= 0.8", guard_accuracy: "== 1.0", injection_resistance: "== 1.0", schema_valid: "== 1.0"}
+    flag: {default: true, rollout: per_company}

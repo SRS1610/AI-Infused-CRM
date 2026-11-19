@@ -1,0 +1,14 @@
+[
+  {"id": "author_austen", "model": "ktest.author", "values": {"name": "Jane Austen", "country_id": "core.country_gb", "bio": {"en_US": "English novelist.", "fr_FR": "Romancière anglaise."}}},
+  {"id": "author_dumas", "model": "ktest.author", "values": {"name": "Alexandre Dumas", "country_id": "core.country_fr", "bio": {"en_US": "French writer.", "fr_FR": "Écrivain français."}}},
+  {"id": "tag_classic", "model": "ktest.tag", "values": {"name": "Classic", "color": 1}},
+  {"id": "tag_romance", "model": "ktest.tag", "values": {"name": "Romance", "color": 2}},
+  {"id": "tag_adventure", "model": "ktest.tag", "values": {"name": "Adventure", "color": 3}},
+  {"id": "book_pride", "model": "ktest.book", "values": {"name": "Pride and Prejudice", "author_id": "kernel_test_a.author_austen", "tag_ids": ["kernel_test_a.tag_classic", "kernel_test_a.tag_romance"], "page_count": 432, "price": 12.5, "published": "1813-01-28", "status": "published",
+    "chapter_ids": [{"name": "Chapter 1", "sequence": 1, "words": 1200}, {"name": "Chapter 2", "sequence": 2, "words": 1500}]}},
+  {"id": "book_emma", "model": "ktest.book", "values": {"name": "Emma", "author_id": "kernel_test_a.author_austen", "tag_ids": ["kernel_test_a.tag_classic"], "page_count": 474, "price": 11.0, "published": "1815-12-23", "status": "review"}},
+  {"id": "book_musketeers", "model": "ktest.book", "values": {"name": "The Three Musketeers", "author_id": "kernel_test_a.author_dumas", "tag_ids": ["kernel_test_a.tag_classic", "kernel_test_a.tag_adventure"], "page_count": 700, "price": 15.0, "published": "1844-03-14", "status": "published"}},
+  {"id": "book_draft", "model": "ktest.book", "values": {"name": "Unfinished Manuscript", "author_id": "kernel_test_a.author_dumas", "page_count": 12, "status": "draft"}},
+  {"id": "user_reader", "model": "core.user", "values": {"login": "reader", "name": "Rita Reader", "password": "reader1234", "company_id": "core.main_company", "group_ids": ["kernel_test_a.group_reader"]}},
+  {"id": "user_librarian", "model": "core.user", "values": {"login": "librarian", "name": "Lee Librarian", "password": "librarian1234", "company_id": "core.main_company", "group_ids": ["kernel_test_a.group_librarian"]}}
+]

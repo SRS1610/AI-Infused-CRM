@@ -1,0 +1,7 @@
+[
+  {"id": "activity_type_todo", "model": "chatter.activity_type", "noupdate": true, "values": {"name": "To-do", "category": "todo", "icon": "check", "sequence": 1}},
+  {"id": "activity_type_call", "model": "chatter.activity_type", "noupdate": true, "values": {"name": "Call", "category": "call", "icon": "phone", "default_days": 1, "sequence": 2}},
+  {"id": "activity_type_meeting", "model": "chatter.activity_type", "noupdate": true, "values": {"name": "Meeting", "category": "meeting", "icon": "users", "default_days": 3, "sequence": 3}},
+  {"id": "activity_type_email", "model": "chatter.activity_type", "noupdate": true, "values": {"name": "Email", "category": "email", "icon": "mail", "default_days": 1, "sequence": 4}},
+  {"id": "activity_type_upload", "model": "chatter.activity_type", "noupdate": true, "values": {"name": "Upload document", "category": "upload", "icon": "upload", "default_days": 5, "sequence": 5}}
+]

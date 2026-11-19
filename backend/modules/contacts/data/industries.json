@@ -1,0 +1,10 @@
+[
+  {"id": "industry_software", "model": "contacts.industry", "noupdate": true, "values": {"name": "Software & IT"}},
+  {"id": "industry_manufacturing", "model": "contacts.industry", "noupdate": true, "values": {"name": "Manufacturing"}},
+  {"id": "industry_retail", "model": "contacts.industry", "noupdate": true, "values": {"name": "Retail & wholesale"}},
+  {"id": "industry_services", "model": "contacts.industry", "noupdate": true, "values": {"name": "Professional services"}},
+  {"id": "industry_health", "model": "contacts.industry", "noupdate": true, "values": {"name": "Health care"}},
+  {"id": "industry_education", "model": "contacts.industry", "noupdate": true, "values": {"name": "Education"}},
+  {"id": "industry_public", "model": "contacts.industry", "noupdate": true, "values": {"name": "Public sector"}},
+  {"id": "industry_finance", "model": "contacts.industry", "noupdate": true, "values": {"name": "Finance & insurance"}}
+]

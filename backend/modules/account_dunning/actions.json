@@ -1,0 +1,8 @@
+[
+  {"id": "action_dunning_runs", "name": "Payment reminders", "model": "account.dunning_run", "views": ["list", "form"],
+   "view_refs": {"list": "account_dunning.view_dunning_run_list", "form": "account_dunning.view_dunning_run_form"}},
+  {"id": "action_dunning_lines", "name": "Reminders sent", "model": "account.dunning_run_line", "views": ["list", "form"],
+   "view_refs": {"list": "account_dunning.view_dunning_line_list", "form": "account_dunning.view_dunning_line_form"}},
+  {"id": "action_dunning_levels", "name": "Dunning levels", "model": "account.dunning_level", "views": ["list", "form"],
+   "view_refs": {"list": "account_dunning.view_dunning_level_list", "form": "account_dunning.view_dunning_level_form"}}
+]

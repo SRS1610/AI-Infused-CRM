@@ -1,0 +1,4 @@
+[
+ {"id": "action_tax_report", "name": "Tax report", "kind": "client", "client_tag": "account_reports.viewer", "context": {"report": "tax"}},
+ {"id": "action_tax_returns", "name": "Tax returns", "model": "account.tax_return", "views": ["list", "form"]}
+]

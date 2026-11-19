@@ -1,0 +1,97 @@
+{
+ "gold": {
+  "amount_tax": 0.0,
+  "amount_total": 216.09,
+  "amount_untaxed": 216.09,
+  "currency": "EUR",
+  "due_date": "2026-08-20",
+  "iban": "IE69AIBK14266219389369",
+  "invoice_date": "2026-08-05",
+  "invoice_number": "R202606838",
+  "lines": [
+   {
+    "account": "software",
+    "amount": 216.09,
+    "description": "SaaS-Abonnement Team",
+    "quantity": 1.0,
+    "tax": "purchase_vat_20_rc",
+    "tax_rate": 0.0,
+    "unit_price": 216.09
+   }
+  ],
+  "move_type": "in_invoice",
+  "needs_review": false,
+  "partner_name": "Brightwave Software Ltd",
+  "partner_vat": "IE3704551E"
+ },
+ "spec": {
+  "amount_tax": 0.0,
+  "amount_total": 216.09,
+  "amount_untaxed": 216.09,
+  "buyer": {
+   "city": "75001 Paris",
+   "country": "France",
+   "name": "My Company (Europe)",
+   "street": "8 avenue de l'Opéra",
+   "vat": "FR32123456789"
+  },
+  "credit_note": false,
+  "currency": "EUR",
+  "due_date": "2026-08-20",
+  "id": "b011",
+  "invoice_date": "2026-08-05",
+  "invoice_number": "R202606838",
+  "kind": "digital",
+  "lang": "de",
+  "layout": "compact",
+  "lines": [
+   {
+    "amount": 216.09,
+    "description": "SaaS-Abonnement Team",
+    "quantity": 1.0,
+    "tax_rate": 0.0,
+    "unit_price": 216.09
+   }
+  ],
+  "move_type": "in_invoice",
+  "notes": "",
+  "reverse_charge": true,
+  "seed": 565861,
+  "seller": {
+   "address": "12 Grand Parade, Cork",
+   "country": "IE",
+   "iban": "IE69 AIBK 1426 6219 3893 69",
+   "name": "Brightwave Software Ltd",
+   "vat": "IE3704551E"
+  },
+  "tax_lines": [
+   {
+    "amount": 0.0,
+    "base": 216.09,
+    "rate": 0.0
+   }
+  ]
+ },
+ "world": {
+  "history": [
+   {
+    "date": "2026-07-01",
+    "lines": [
+     {
+      "account": "software",
+      "description": "Cloud hosting - monthly plan",
+      "quantity": 3.0,
+      "tax": "purchase_vat_20_rc",
+      "unit_price": 244.34
+     }
+    ]
+   }
+  ],
+  "vendor": {
+   "iban": "IE69 AIBK 1426 6219 3893 69",
+   "known": true,
+   "name": "Brightwave Software Ltd",
+   "vat": "IE3704551E"
+  }
+ }
+}

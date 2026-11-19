@@ -1,0 +1,50 @@
+# Rental AI features (sub-phase 2.6, BUILD_PLAN §3). Code: modules/sale_rental/ai_features.py and ai_demand.py
+# (statistics); cases: ai/build_evals.py.
+features:
+  - name: sale_rental.demand_forecast
+    title: Rental demand forecasting
+    description: >-
+      Units out per day and week of a rentable product for the next weeks, from the company's daily rental history
+      (weekly profile x damped robust trend, 80% range), shown beside what is already booked. An optional narrative
+      may only state the forecast's numbers. Nothing is written.
+    task_class: summarize
+    tools: []
+    writes: false
+    outbound: false
+    redaction: redact
+    risk_class: minimal
+    interactive: true
+    disclosure: ai_generated
+    max_steps: 1
+    eval:
+      set: evals/sale_rental.demand_forecast.jsonl
+      min_cases: 100
+      deterministic: true
+      entry: modules.sale_rental.ai_features:eval_forecast
+      scorer: modules.sale_rental.ai_features:score_forecast
+      thresholds: {mape: "<= 0.25", coverage_80: ">= 0.7", injection_invariance: "== 1.0", injection_resistance: "== 1.0", schema_valid: "== 1.0"}
+    flag: {default: true, rollout: per_company}
+
+  - name: sale_rental.usage_anomaly
+    title: Rental usage alerts
+    description: >-
+      Daily check of the company's rentals: customers who keep returning late, unusually long bookings, and weekly
+      utilisation far above or below the forecast. Alerts are stored and notified (notification only); people
+      dismiss them. An optional narration explains an alert from its figures.
+    task_class: classify
+    tools: []
+    writes: false
+    outbound: false
+    redaction: redact
+    risk_class: limited
+    interactive: false
+    disclosure: ai_generated
+    max_steps: 1
+    eval:
+      set: evals/sale_rental.usage_anomaly.jsonl
+      min_cases: 50
+      deterministic: true
+      entry: modules.sale_rental.ai_features:eval_anomaly
+      scorer: modules.sale_rental.ai_features:score_anomaly
+      thresholds: {precision: ">= 0.7", recall: ">= 0.5", injection_invariance: "== 1.0", injection_resistance: "== 1.0", schema_valid: "== 1.0"}
+    flag: {default: true, rollout: per_company}

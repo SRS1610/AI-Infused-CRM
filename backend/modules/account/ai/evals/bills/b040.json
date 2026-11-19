@@ -1,0 +1,132 @@
+{
+ "gold": {
+  "amount_tax": 0.0,
+  "amount_total": 717.81,
+  "amount_untaxed": 717.81,
+  "currency": "EUR",
+  "due_date": null,
+  "iban": "IE66AIBK19962682922592",
+  "invoice_date": "2026-08-05",
+  "invoice_number": "KC342-4745",
+  "lines": [
+   {
+    "account": "cogs",
+    "amount": 82.98,
+    "description": "Stainless steel bolts M8",
+    "quantity": 1.0,
+    "tax": "purchase_vat_20_rc",
+    "tax_rate": 0.0,
+    "unit_price": 82.98
+   },
+   {
+    "account": "cogs",
+    "amount": 146.96,
+    "description": "Packaging cartons",
+    "quantity": 2.0,
+    "tax": "purchase_vat_20_rc",
+    "tax_rate": 0.0,
+    "unit_price": 73.48
+   },
+   {
+    "account": "cogs",
+    "amount": 313.98,
+    "description": "Aluminium profiles 2 m",
+    "quantity": 2.0,
+    "tax": "purchase_vat_20_rc",
+    "tax_rate": 0.0,
+    "unit_price": 156.99
+   },
+   {
+    "account": "cogs",
+    "amount": 173.89,
+    "description": "Circuit boards rev. B",
+    "quantity": 1.0,
+    "tax": "purchase_vat_20_rc",
+    "tax_rate": 0.0,
+    "unit_price": 173.89
+   }
+  ],
+  "move_type": "in_invoice",
+  "needs_review": false,
+  "partner_name": "Kildare Components Ltd",
+  "partner_vat": "IE9230436F"
+ },
+ "spec": {
+  "amount_tax": 0.0,
+  "amount_total": 717.81,
+  "amount_untaxed": 717.81,
+  "buyer": {
+   "city": "75001 Paris",
+   "country": "France",
+   "name": "My Company (Europe)",
+   "street": "8 avenue de l'Opéra",
+   "vat": "FR32123456789"
+  },
+  "credit_note": false,
+  "currency": "EUR",
+  "due_date": null,
+  "id": "b040",
+  "invoice_date": "2026-08-05",
+  "invoice_number": "KC342-4745",
+  "kind": "digital",
+  "lang": "en",
+  "layout": "letter",
+  "lines": [
+   {
+    "amount": 82.98,
+    "description": "Stainless steel bolts M8",
+    "quantity": 1.0,
+    "tax_rate": 0.0,
+    "unit_price": 82.98
+   },
+   {
+    "amount": 146.96,
+    "description": "Packaging cartons",
+    "quantity": 2.0,
+    "tax_rate": 0.0,
+    "unit_price": 73.48
+   },
+   {
+    "amount": 313.98,
+    "description": "Aluminium profiles 2 m",
+    "quantity": 2.0,
+    "tax_rate": 0.0,
+    "unit_price": 156.99
+   },
+   {
+    "amount": 173.89,
+    "description": "Circuit boards rev. B",
+    "quantity": 1.0,
+    "tax_rate": 0.0,
+    "unit_price": 173.89
+   }
+  ],
+  "move_type": "in_invoice",
+  "notes": "",
+  "reverse_charge": true,
+  "seed": 377492,
+  "seller": {
+   "address": "12 Grand Parade, Cork",
+   "country": "IE",
+   "iban": "IE66 AIBK 1996 2682 9225 92",
+   "name": "Kildare Components Ltd",
+   "vat": "IE9230436F"
+  },
+  "tax_lines": [
+   {
+    "amount": 0.0,
+    "base": 717.81,
+    "rate": 0.0
+   }
+  ]
+ },
+ "world": {
+  "history": [],
+  "vendor": {
+   "iban": "IE66 AIBK 1996 2682 9225 92",
+   "known": false,
+   "name": "Kildare Components Ltd",
+   "vat": "IE9230436F"
+  }
+ }
+}

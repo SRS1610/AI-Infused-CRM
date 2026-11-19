@@ -1,0 +1,16 @@
+name = "sale_subscription"
+version = "1.0.0"
+summary = "Subscriptions: plans, recurring invoicing with saved payment methods, proration, renewals, pause and churn analytics"
+category = "Sales"
+phase = 2
+depends = ["sale", "payment"]
+license = "Apache-2.0"
+installable = true
+
+[load]
+security = ["security/access.json"]
+data = ["data/close_reasons.json", "data/plans.json", "data/scheduled_jobs.json"]
+demo = ["data/demo/products.json"]
+views = ["views.json"]
+actions = "actions.json"
+menus = "menus.json"

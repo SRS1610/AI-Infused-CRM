@@ -1,0 +1,27 @@
+{
+  "id": "chatcmpl-CZf0dV6g7jOo5",
+  "object": "chat.completion",
+  "created": 1762761600,
+  "model": "meta-llama/Llama-3.3-70B-Instruct",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "{\"title\": \"Contract renewal\", \"sentiment\": \"positive\", \"next_step\": \"Schedule the Q3 pricing review\"}",
+        "reasoning_content": null,
+        "tool_calls": []
+      },
+      "logprobs": null,
+      "finish_reason": "stop",
+      "stop_reason": null
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 220,
+    "completion_tokens": 24,
+    "total_tokens": 244,
+    "prompt_tokens_details": null
+  },
+  "prompt_logprobs": null
+}

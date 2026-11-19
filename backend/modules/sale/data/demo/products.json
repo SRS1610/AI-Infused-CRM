@@ -1,0 +1,7 @@
+[
+  {"id": "product.product_robot_arm", "model": "product.product", "values": {"invoice_policy": "delivery", "optional_product_ids": ["product.product_sensor"], "accessory_product_ids": ["product.product_gripper"]}},
+  {"id": "product.product_gripper", "model": "product.product", "values": {"invoice_policy": "delivery"}},
+  {"id": "product.product_sensor", "model": "product.product", "values": {"invoice_policy": "delivery"}},
+  {"id": "product.product_onboarding", "model": "product.product", "values": {"invoice_policy": "delivery", "service_policy": "milestones", "optional_product_ids": ["product.product_support"]}},
+  {"id": "product.product_consulting", "model": "product.product", "values": {"invoice_policy": "delivery", "service_policy": "manual"}}
+]

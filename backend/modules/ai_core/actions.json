@@ -1,0 +1,13 @@
+[
+  {"id": "action_dashboard", "name": "AI usage and cost", "kind": "client", "client_tag": "ai.dashboard"},
+  {"id": "action_features", "name": "AI features", "model": "ai_core.feature", "views": ["list", "form"]},
+  {"id": "action_providers", "name": "AI providers", "model": "ai_core.provider", "views": ["list", "form"]},
+  {"id": "action_routes", "name": "AI routing", "model": "ai_core.route", "views": ["list", "form"]},
+  {"id": "action_budgets", "name": "AI budgets and quotas", "model": "ai_core.budget", "views": ["list", "form"]},
+  {"id": "action_company_settings", "name": "AI settings per company", "model": "ai_core.company_setting", "views": ["list", "form"]},
+  {"id": "action_prompts", "name": "Prompts", "model": "ai_core.prompt_version", "views": ["list", "form"]},
+  {"id": "action_runs", "name": "AI runs (audit)", "model": "ai_core.run", "views": ["list", "form"]},
+  {"id": "action_proposals", "name": "AI proposals", "model": "ai_core.proposal", "views": ["list", "form"]},
+  {"id": "action_feedback", "name": "AI feedback", "model": "ai_core.feedback", "views": ["list", "form"]},
+  {"id": "action_eval_runs", "name": "Evaluation runs", "model": "ai_core.eval_run", "views": ["list", "form"]}
+]

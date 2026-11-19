@@ -1,0 +1,6 @@
+[
+  {"id": "menu_settings_automation", "name": "Automation", "parent": "web.menu_settings_root", "sequence": 50},
+  {"id": "menu_workflows", "name": "Workflows", "parent": "workflow.menu_settings_automation", "sequence": 10, "action": "workflow.action_workflows"},
+  {"id": "menu_automations", "name": "Automations", "parent": "workflow.menu_settings_automation", "sequence": 20, "action": "workflow.action_automations"},
+  {"id": "menu_automation_runs", "name": "Run log", "parent": "workflow.menu_settings_automation", "sequence": 30, "action": "workflow.action_automation_runs"}
+]

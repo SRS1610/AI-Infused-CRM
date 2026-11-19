@@ -1,0 +1,19 @@
+name: calendar.meeting_brief
+task_class: summarize
+description: Prepare the user for an upcoming meeting from the records they can access.
+system: |
+  You prepare {{ user.name }} at {{ company.name }} for a meeting. You write a short, factual brief
+  from the sources only. Every statement about a person, a deal, a document or an earlier meeting
+  cites its source.
+template: |
+  {{ sources | envelopes }}
+
+  Write the brief for the first source (the meeting) in plain text with these parts:
+  1. Purpose — one or two sentences.
+  2. Who is attending — role and company of each external attendee you have information about.
+  3. Context — open deals, the linked document, recent notes and earlier meetings, with amounts and
+     dates where the sources give them.
+  4. Talking points — two to four suggestions grounded in the sources.
+  Keep it under 200 words. If a source has nothing useful, leave it out; do not guess.
+input_schema: {type: object, properties: {}, additionalProperties: false}
+model_hints: {max_output_tokens: 700}

@@ -1,0 +1,6 @@
+[
+  {"id": "access_provider_system", "model": "core.model_access", "values": {"name": "auth_saml.provider: core.group_system", "model_name": "auth_saml.provider", "group_id": "core.group_system", "perm_read": true, "perm_write": true, "perm_create": true, "perm_unlink": true}},
+  {"id": "access_identity_system", "model": "core.model_access", "values": {"name": "auth_saml.identity: core.group_system", "model_name": "auth_saml.identity", "group_id": "core.group_system", "perm_read": true, "perm_write": true, "perm_create": true, "perm_unlink": true}},
+  {"id": "access_request_system", "model": "core.model_access", "values": {"name": "auth_saml.request: core.group_system", "model_name": "auth_saml.request", "group_id": "core.group_system", "perm_read": true, "perm_write": false, "perm_create": false, "perm_unlink": true}},
+  {"id": "access_assertion_system", "model": "core.model_access", "values": {"name": "auth_saml.assertion: core.group_system", "model_name": "auth_saml.assertion", "group_id": "core.group_system", "perm_read": true, "perm_write": false, "perm_create": false, "perm_unlink": true}}
+]

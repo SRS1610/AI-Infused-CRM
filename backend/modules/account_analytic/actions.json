@@ -1,0 +1,22 @@
+[
+  {"id": "action_analytic_lines", "name": "Analytic items", "model": "account.analytic_line",
+   "views": ["list", "pivot", "graph", "form"],
+   "view_refs": {"list": "account_analytic.view_analytic_line_list", "form": "account_analytic.view_analytic_line_form", "pivot": "account_analytic.view_analytic_line_pivot", "graph": "account_analytic.view_analytic_line_graph"},
+   "search_view": "account_analytic.view_analytic_line_search"},
+  {"id": "action_analytic_report", "name": "Analytic report", "model": "account.analytic_line",
+   "views": ["pivot", "graph", "list"],
+   "view_refs": {"list": "account_analytic.view_analytic_line_list", "pivot": "account_analytic.view_analytic_line_pivot", "graph": "account_analytic.view_analytic_line_graph"},
+   "search_view": "account_analytic.view_analytic_line_search",
+   "help": "Analytic items by analytic account and month: revenue is positive, costs are negative."},
+  {"id": "action_analytic_accounts", "name": "Analytic accounts", "model": "account.analytic_account",
+   "views": ["list", "form"],
+   "view_refs": {"list": "account_analytic.view_analytic_account_list", "form": "account_analytic.view_analytic_account_form"},
+   "search_view": "account_analytic.view_analytic_account_search"},
+  {"id": "action_analytic_plans", "name": "Analytic plans", "model": "account.analytic_plan",
+   "views": ["list", "form"],
+   "view_refs": {"list": "account_analytic.view_analytic_plan_list", "form": "account_analytic.view_analytic_plan_form"}},
+  {"id": "action_distribution_models", "name": "Analytic distribution models", "model": "account.analytic_distribution_model",
+   "views": ["list", "form"],
+   "view_refs": {"list": "account_analytic.view_distribution_model_list", "form": "account_analytic.view_distribution_model_form"},
+   "help": "New invoice and bill lines without a distribution get the one of the most specific matching model."}
+]

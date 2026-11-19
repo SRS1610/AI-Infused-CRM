@@ -1,0 +1,7 @@
+[
+  {"id": "group_account_invoice", "model": "core.group", "noupdate": true, "values": {"name": "Accounting / Billing", "category": "Accounting", "comment": "Create, send and collect customer invoices and vendor bills; register payments", "implied_ids": ["core.group_user"]}},
+  {"id": "group_account_readonly", "model": "core.group", "noupdate": true, "values": {"name": "Accounting / Read-only", "category": "Accounting", "comment": "See every accounting document and report (auditors)", "implied_ids": ["core.group_user"]}},
+  {"id": "group_account_user", "model": "core.group", "noupdate": true, "values": {"name": "Accounting / Accountant", "category": "Accounting", "comment": "Journal entries, reconciliation, every accounting document", "implied_ids": ["account.group_account_invoice", "account.group_account_readonly"]}},
+  {"id": "group_account_manager", "model": "core.group", "noupdate": true, "values": {"name": "Accounting / Adviser", "category": "Accounting", "comment": "Configure accounting; post in locked periods for non-advisers; change lock dates", "implied_ids": ["account.group_account_user"]}},
+  {"id": "core.group_system", "model": "core.group", "values": {"implied_ids": {"$add": ["account.group_account_manager"]}}}
+]

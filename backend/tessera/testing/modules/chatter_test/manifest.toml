@@ -1,0 +1,6 @@
+name = "chatter_test"
+version = "1.0.0"
+summary = "Test module: gives the kernel test books a discussion thread with tracked fields"
+category = "Testing"
+phase = 0
+depends = ["chatter", "kernel_test_b"]

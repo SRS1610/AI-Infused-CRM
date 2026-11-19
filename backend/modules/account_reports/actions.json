@@ -1,0 +1,11 @@
+[
+ {"id": "action_balance_sheet", "name": "Balance sheet", "kind": "client", "client_tag": "account_reports.viewer", "context": {"report": "balance_sheet"}},
+ {"id": "action_profit_loss", "name": "Profit and loss", "kind": "client", "client_tag": "account_reports.viewer", "context": {"report": "profit_loss"}},
+ {"id": "action_cash_flow", "name": "Cash flow statement", "kind": "client", "client_tag": "account_reports.viewer", "context": {"report": "cash_flow"}},
+ {"id": "action_trial_balance", "name": "Trial balance", "kind": "client", "client_tag": "account_reports.viewer", "context": {"report": "trial_balance"}},
+ {"id": "action_general_ledger", "name": "General ledger", "kind": "client", "client_tag": "account_reports.viewer", "context": {"report": "general_ledger"}},
+ {"id": "action_partner_ledger", "name": "Partner ledger", "kind": "client", "client_tag": "account_reports.viewer", "context": {"report": "partner_ledger"}},
+ {"id": "action_aged_receivable", "name": "Aged receivable", "kind": "client", "client_tag": "account_reports.viewer", "context": {"report": "aged_receivable"}},
+ {"id": "action_aged_payable", "name": "Aged payable", "kind": "client", "client_tag": "account_reports.viewer", "context": {"report": "aged_payable"}},
+ {"id": "action_report_definitions", "name": "Financial report definitions", "model": "account.report", "views": ["list", "form"]}
+]

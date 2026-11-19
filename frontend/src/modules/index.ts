@@ -1,0 +1,27 @@
+// Client code contributed by application modules. Each import registers its extensions.
+import "./ai_core/AiDashboard";
+import "./calendar/CalendarAi";
+import "./contacts/ContactsAi";
+import "./studio/StudioApp";
+import "./contacts/MergeDialog";
+import "./account_reports/ReportViewer";
+import "./crm/CrmReports";
+import "./crm/AiInsights";
+import "./crm/AiAssist";
+import "./discuss/DiscussApp";
+import "./account_bank/BankReconcile";
+import "./sale/SaleAi";
+import "./product/ProductAi";
+import "./account/BillImport";
+import "./account/BillAnomalies";
+import "./account/CashflowForecast";
+import "./sale_subscription/SubscriptionAi";
+import "./sale_rental/RentalAi";
+import "./sale_commission/CommissionAi";
+import "./account_asset/AssetAi";
+import "./payment/PaymentAi";
+import "./account_tax/TaxAi";
+import "./account_analytic/AnalyticAi";
+import "./account_einvoice/EinvoiceAi";
+import "./account_dunning/DunningAi";
+import "./account_budget/BudgetAi";

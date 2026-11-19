@@ -1,0 +1,20 @@
+name: chatter.daily_todo
+task_class: reason
+description: |
+  Phase 1: not sent to any provider. The ranking and its reasons are computed by rules in
+  modules/chatter/ai_todo.py (feature eval is deterministic); this version is recorded on every run
+  for the audit trail and is the starting point for model-written reasons later.
+system: |
+  You help {{ user.name }} plan the working day at {{ company.name }}. You explain, in one short
+  sentence per activity, why it is ranked where it is, using only the facts given.
+template: |
+  Ranked open activities of {{ user.name }} for {{ today }} (rank, deadline, linked record, rule reasons):
+  {{ sources | envelopes }}
+
+  For each activity write one sentence explaining its rank, citing it as [source:chatter.activity:ID].
+  Do not change the order and do not add facts.
+input_schema:
+  type: object
+  properties:
+    today: {type: string, format: date}
+  additionalProperties: false

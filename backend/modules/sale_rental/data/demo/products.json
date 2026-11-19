@@ -1,0 +1,14 @@
+[
+  {"id": "product_projector", "model": "product.product", "values": {"name": "Event projector", "default_code": "RENT-PROJ", "type": "goods", "category_id": "product.category_goods",
+    "list_price": 90, "rent_ok": true, "rental_units": 3, "extra_hourly": 15, "extra_daily": 120, "rental_deposit": 200,
+    "description_sale": "Full HD laser projector with screen and cables"}},
+  {"id": "pricing_projector_4h", "model": "sale.rental_pricing", "values": {"product_id": "sale_rental.product_projector", "duration": 4, "unit": "hour", "price": 40, "currency_id": "core.USD"}},
+  {"id": "pricing_projector_day", "model": "sale.rental_pricing", "values": {"product_id": "sale_rental.product_projector", "duration": 1, "unit": "day", "price": 90, "currency_id": "core.USD"}},
+  {"id": "pricing_projector_week", "model": "sale.rental_pricing", "values": {"product_id": "sale_rental.product_projector", "duration": 1, "unit": "week", "price": 450, "currency_id": "core.USD"}},
+  {"id": "pricing_projector_month", "model": "sale.rental_pricing", "values": {"product_id": "sale_rental.product_projector", "duration": 1, "unit": "month", "price": 1500, "currency_id": "core.USD"}},
+  {"id": "product_demo_robot", "model": "product.product", "values": {"name": "Robot arm demo unit", "default_code": "RENT-ARM", "type": "goods", "category_id": "product.category_goods",
+    "list_price": 300, "rent_ok": true, "rental_units": 1, "extra_daily": 350, "rental_deposit": 1000,
+    "description_sale": "Collaborative robot arm for trials and trade fairs"}},
+  {"id": "pricing_demo_robot_day", "model": "sale.rental_pricing", "values": {"product_id": "sale_rental.product_demo_robot", "duration": 1, "unit": "day", "price": 300, "currency_id": "core.USD"}},
+  {"id": "pricing_demo_robot_week", "model": "sale.rental_pricing", "values": {"product_id": "sale_rental.product_demo_robot", "duration": 1, "unit": "week", "price": 1500, "currency_id": "core.USD"}}
+]

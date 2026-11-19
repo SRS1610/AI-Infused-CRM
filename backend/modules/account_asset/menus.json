@@ -1,0 +1,10 @@
+[
+  {"id": "menu_assets_root", "name": "Assets", "parent": "account.menu_root", "sequence": 45,
+   "groups": ["account.group_account_user", "account.group_account_readonly"]},
+  {"id": "menu_assets", "name": "Assets", "parent": "account_asset.menu_assets_root", "sequence": 10,
+   "action": "account_asset.action_assets"},
+  {"id": "menu_depreciation_entries", "name": "Depreciation entries", "parent": "account_asset.menu_assets_root", "sequence": 20,
+   "action": "account_asset.action_depreciation_entries"},
+  {"id": "menu_asset_models", "name": "Asset models", "parent": "account_asset.menu_assets_root", "sequence": 30,
+   "action": "account_asset.action_asset_models", "groups": ["account.group_account_user"]}
+]

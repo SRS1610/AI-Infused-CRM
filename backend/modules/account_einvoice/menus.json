@@ -1,0 +1,4 @@
+[
+  {"id": "menu_edi_documents", "name": "E-invoices", "parent": "account.menu_customers", "sequence": 60, "action": "account_einvoice.action_edi_documents"},
+  {"id": "menu_mock_transmissions", "name": "Peppol network (mock)", "parent": "account.menu_config", "sequence": 95, "action": "account_einvoice.action_mock_transmissions"}
+]

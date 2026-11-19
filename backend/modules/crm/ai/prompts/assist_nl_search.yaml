@@ -1,0 +1,51 @@
+name: crm.nl_search
+task_class: nl_query
+description: Turn a natural-language search into filter conditions on leads and opportunities.
+system: |
+  You translate a salesperson's search into filter conditions on leads and opportunities. Use only the field paths,
+  values, regions and date ranges listed in the source. Answer with conditions, each a field path, an operator and
+  a value:
+  - operators: = != > >= < <= in not_in ilike not_ilike is_set is_not_set (is_set and is_not_set take null).
+  - "me"/"my"/"mine" → user_id = "$uid". Use "$today" for "today", "overdue" (date_deadline < "$today") and similar.
+  - Amounts: "over 10k" → expected_revenue > 10000; "at least" → >=; "between a and b" → >= a and <= b.
+  - Periods ("this quarter", "next month"…) → two conditions on the date field with the listed bounds (>= and <=).
+  - Regions → country_id.code in the listed codes. Names of stages, teams, tags and sources → their ".name" path
+    with "=", people → user_id.name with ilike, customers → partner_id.display_name with ilike.
+  match is "all" unless the search clearly asks for alternatives across different fields ("any").
+  Keep only conditions the search asks for. If the search asks for something no field can express, leave it out
+  and say so in the explanation. Never add conditions about companies or access: the system applies those.
+template: |
+  {{ sources | envelopes }}
+
+  Search: <message>{{ inputs.get('query', '') | e }}</message>
+input_schema:
+  type: object
+  properties:
+    query: {type: string, minLength: 2, maxLength: 500}
+  required: [query]
+  additionalProperties: false
+output_schema:
+  type: object
+  properties:
+    match: {type: string, enum: [all, any]}
+    conditions:
+      type: array
+      maxItems: 12
+      items:
+        type: object
+        properties:
+          field: {type: string}
+          operator: {type: string, enum: ["=", "!=", ">", ">=", "<", "<=", "in", "not_in", "ilike", "not_ilike", "is_set", "is_not_set"]}
+          value:
+            anyOf:
+              - {type: string}
+              - {type: number}
+              - {type: boolean}
+              - {type: "null"}
+              - {type: array, items: {anyOf: [{type: string}, {type: number}]}}
+        required: [field, operator, value]
+        additionalProperties: false
+    explanation: {type: string}
+  required: [match, conditions, explanation]
+  additionalProperties: false
+model_hints: {max_output_tokens: 600}

@@ -1,0 +1,54 @@
+name: crm.call_summary
+task_class: summarize
+description: Summarise call or meeting notes and suggest lead field updates.
+system: |
+  You summarise sales call and meeting notes for the salesperson who took them. Be faithful: state only what the
+  notes say, attribute statements to the right party, and never add facts. Then suggest updates to the lead.
+  - summary: 2 to 4 sentences. key_points: up to 5 short bullet points (needs, objections, decisions).
+  - next_step: the next action agreed in the notes with its due date (YYYY-MM-DD) when one is given; null if none.
+  - fields: only values the notes give that differ from the lead's current values; null for everything else.
+    stage: one of the pipeline stage names, only if the notes clearly move the deal. expected_revenue: a budget or
+    deal value stated in the notes. probability: only if a percentage is stated. date_deadline: the stated closing
+    or decision date (YYYY-MM-DD). priority: "3" only when the notes say it is urgent or top priority.
+    contact_name, function, phone: a new or corrected contact person, job title or phone number.
+  Relative dates ("next Friday") are resolved from today's date.
+template: |
+  Today is {{ today }}.
+
+  {{ sources | envelopes }}
+
+  Summarise the call notes on {{ record.display_name }} and suggest lead updates.
+input_schema:
+  type: object
+  properties:
+    notes: {type: string, minLength: 1, maxLength: 20000}
+  required: [notes]
+  additionalProperties: false
+output_schema:
+  type: object
+  properties:
+    summary: {type: string}
+    key_points: {type: array, items: {type: string}, maxItems: 6}
+    next_step:
+      type: [object, "null"]
+      properties:
+        summary: {type: string}
+        due_date: {type: [string, "null"]}
+      required: [summary, due_date]
+      additionalProperties: false
+    fields:
+      type: object
+      properties:
+        stage: {type: [string, "null"]}
+        expected_revenue: {type: [number, "null"]}
+        probability: {type: [number, "null"]}
+        date_deadline: {type: [string, "null"]}
+        priority: {type: [string, "null"], enum: ["0", "1", "2", "3", null]}
+        contact_name: {type: [string, "null"]}
+        function: {type: [string, "null"]}
+        phone: {type: [string, "null"]}
+      required: [stage, expected_revenue, probability, date_deadline, priority, contact_name, function, phone]
+      additionalProperties: false
+  required: [summary, key_points, next_step, fields]
+  additionalProperties: false
+model_hints: {max_output_tokens: 1200}

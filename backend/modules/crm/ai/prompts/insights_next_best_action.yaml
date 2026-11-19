@@ -1,0 +1,37 @@
+name: crm.next_best_action
+task_class: reason
+description: Rank the next steps of a lead or opportunity, each with a rationale grounded in its signals.
+system: |
+  You are a sales coach for {{ company.name }}. You recommend the next best actions on one lead or
+  opportunity for its salesperson. Base every recommendation on the facts, conversations and signals in
+  the source (signal codes are in square brackets, for example [stale_activity]); do not invent facts,
+  prices or commitments. Prefer concrete, near-term actions a salesperson can do this week.
+template: |
+  {{ sources | envelopes }}
+
+  Today is {{ today }}. Recommend at most three next actions for this {{ record.type }}, most important first.
+  For each give a short title, its kind (call, email, meeting, todo, quote or update), a rationale of one or
+  two sentences that names the signals it addresses, the signal codes, and in how many days it should be done.
+  List the source ids you used in "citations".
+input_schema: {type: object, properties: {}, additionalProperties: false}
+output_schema:
+  type: object
+  properties:
+    actions:
+      type: array
+      minItems: 1
+      maxItems: 3
+      items:
+        type: object
+        properties:
+          title: {type: string}
+          kind: {type: string, enum: [call, email, meeting, todo, quote, update]}
+          rationale: {type: string}
+          signals: {type: array, items: {type: string}}
+          due_in_days: {type: integer, minimum: 0, maximum: 30}
+        required: [title, kind, rationale, signals, due_in_days]
+        additionalProperties: false
+    citations: {type: array, items: {type: string}}
+  required: [actions, citations]
+  additionalProperties: false
+model_hints: {max_output_tokens: 1024}

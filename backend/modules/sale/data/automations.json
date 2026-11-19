@@ -1,0 +1,7 @@
+[
+  {"id": "auto_expire", "model": "workflow.automation", "noupdate": true, "values": {
+    "name": "Expire quotations after their validity date", "model_name": "sale.quotation", "trigger": "on_time",
+    "date_field": "validity_date", "offset_days": 1, "filter_domain": [["state", "=", "sent"]],
+    "actions": [{"type": "call_method", "method": "action_expire"}]
+  }}
+]

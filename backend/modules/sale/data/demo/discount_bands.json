@@ -1,0 +1,6 @@
+[
+  {"id": "band_goods", "model": "sale.discount_band", "values": {"name": "Hardware", "sequence": 10, "company_id": "core.main_company", "category_id": "product.category_goods", "min_discount": 0, "max_discount": 10, "min_margin": 20}},
+  {"id": "band_goods_volume", "model": "sale.discount_band", "values": {"name": "Hardware, 5 units or more", "sequence": 20, "company_id": "core.main_company", "category_id": "product.category_goods", "min_quantity": 5, "min_discount": 3, "max_discount": 15, "min_margin": 15}},
+  {"id": "band_services", "model": "sale.discount_band", "values": {"name": "Services", "sequence": 30, "company_id": "core.main_company", "category_id": "product.category_services", "min_discount": 0, "max_discount": 8, "min_margin": 30}},
+  {"id": "band_eu_all", "model": "sale.discount_band", "values": {"name": "Europe: all products", "sequence": 10, "company_id": "core.demo_company_eu", "min_discount": 0, "max_discount": 12, "min_margin": 15}}
+]

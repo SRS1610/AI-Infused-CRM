@@ -1,0 +1,142 @@
+import { useQuery } from "@tanstack/react-query";
+import { Icon } from "../icons";
+import { useState } from "react";
+import { api, ApiError } from "../api/client";
+import { useSession } from "../session";
+import { t } from "../i18n";
+
+export function LoginPage() {
+  const { setSession } = useSession();
+  const [login, setLogin] = useState("");
+  const [password, setPassword] = useState("");
+  const [preAuth, setPreAuth] = useState<string | null>(null);
+  const [code, setCode] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
+  const providers = useQuery({ queryKey: ["providers"], queryFn: api.providers, retry: false });
+  const samlProviders = useQuery({ queryKey: ["saml-providers"], queryFn: api.samlProviders, retry: false });
+  const sso = [
+    ...(providers.data ?? []).map((p) => ({
+      key: `oidc:${p.code}`,
+      name: p.name,
+      href: `/api/v1/auth/oidc/${encodeURIComponent(p.code)}/start`,
+    })),
+    ...(samlProviders.data ?? []).map((p) => ({
+      key: `saml:${p.id}`,
+      name: p.name,
+      href: `/api/v1/auth/saml/${encodeURIComponent(p.id)}/login`,
+    })),
+  ];
+
+  const submit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setBusy(true);
+    setError(null);
+    try {
+      if (preAuth) {
+        setSession(await api.loginTotp(preAuth, code));
+        return;
+      }
+      const result = await api.login(login, password);
+      if ("totp_required" in result) {
+        setPreAuth(result.pre_auth_token);
+        setPassword("");
+      } else {
+        setSession(result);
+      }
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : t("Cannot reach the server"));
+      if (preAuth && err instanceof ApiError && /expired/i.test(err.message)) setPreAuth(null);
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <main className="login">
+      <aside className="login-brand" aria-hidden="true">
+        <div className="brand-mark">
+          <img src="/icon.svg" alt="" width={30} height={30} />
+          Tessera
+        </div>
+        <div>
+          <h2>{t("Customers, sales and finance in one place")}</h2>
+          <ul>
+            <li>
+              <Icon name="trending-up" /> {t("Pipeline, quotations and subscriptions")}
+            </li>
+            <li>
+              <Icon name="landmark" /> {t("Invoicing, bank and financial reports")}
+            </li>
+            <li>
+              <Icon name="sparkles" /> {t("AI that proposes, never commits")}
+            </li>
+          </ul>
+        </div>
+        <small>{t("Open, modular business suite")}</small>
+      </aside>
+      <div className="login-pane">
+        <form className="login-card" onSubmit={submit} aria-labelledby="login-title">
+          <img src="/icon.svg" alt="" width={48} height={48} />
+          <h1 id="login-title">{preAuth ? t("Two-factor authentication") : t("Sign in to Tessera")}</h1>
+          {error && (
+            <div className="alert error" role="alert">
+              {error}
+            </div>
+          )}
+          {!preAuth ? (
+            <>
+              <label htmlFor="login">{t("Login")}</label>
+              <input
+                id="login"
+                className="input"
+                autoComplete="username"
+                autoFocus
+                required
+                value={login}
+                onChange={(e) => setLogin(e.target.value)}
+              />
+              <label htmlFor="password">{t("Password")}</label>
+              <input
+                id="password"
+                className="input"
+                type="password"
+                autoComplete="current-password"
+                required
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
+            </>
+          ) : (
+            <>
+              <label htmlFor="code">{t("Authentication code or recovery code")}</label>
+              <input
+                id="code"
+                className="input"
+                inputMode="text"
+                autoComplete="one-time-code"
+                autoFocus
+                required
+                value={code}
+                onChange={(e) => setCode(e.target.value)}
+              />
+            </>
+          )}
+          <button type="submit" className="btn primary block" disabled={busy}>
+            {busy ? t("Signing in…") : preAuth ? t("Verify") : t("Sign in")}
+          </button>
+          {!preAuth && sso.length > 0 && (
+            <div className="sso">
+              <p className="muted">{t("or continue with")}</p>
+              {sso.map((p) => (
+                <a key={p.key} className="btn block" href={p.href}>
+                  {p.name}
+                </a>
+              ))}
+            </div>
+          )}
+        </form>
+      </div>
+    </main>
+  );
+}

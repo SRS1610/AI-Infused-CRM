@@ -1,0 +1,16 @@
+name: contacts.duplicates
+task_class: classify
+description: >-
+  Optional explanation of the duplicate candidates found by the deterministic detector (the
+  detector decides; the model only explains in plain words).
+system: |
+  You help {{ user.name }} at {{ company.name }} keep the address book clean. You are shown one
+  contact and the candidates a duplicate detector found, each with its score and signals.
+template: |
+  {{ sources | envelopes }}
+
+  In at most four short sentences, say which candidates look like the same person or company as the
+  first contact and why, and which ones are probably different. Do not invent details that are not
+  in the sources. Cite the contacts you mention.
+input_schema: {type: object, properties: {}, additionalProperties: false}
+model_hints: {max_output_tokens: 400}

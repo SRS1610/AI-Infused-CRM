@@ -1,0 +1,9 @@
+[
+  {"id": "view_partner_form_portal", "model": "contacts.partner", "type": "form", "name": "contacts.partner.form.portal", "inherit": "contacts.view_partner_form",
+   "operations": [
+     {"op": "prepend", "anchor": {"path": "/root"}, "node": {"kind": "buttons", "name": "portal_buttons", "children": [
+       {"kind": "button", "method": "action_grant_portal", "label": "Grant portal access", "invisible": ["has_portal_access", "=", true]},
+       {"kind": "button", "method": "action_revoke_portal", "label": "Revoke portal access", "invisible": ["has_portal_access", "=", false]}
+     ]}}
+   ]}
+]

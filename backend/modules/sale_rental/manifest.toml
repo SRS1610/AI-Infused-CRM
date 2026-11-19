@@ -1,0 +1,17 @@
+name = "sale_rental"
+version = "1.0.0"
+summary = "Rentals: prices by duration, unit reservations without double booking, pickup and return, late fees, deposits"
+category = "Sales"
+phase = 2
+depends = ["sale"]
+license = "Apache-2.0"
+installable = true
+post_init = "hooks:post_init"
+
+[load]
+security = ["security/access.json"]
+data = ["data/products.json", "data/scheduled_jobs.json"]
+demo = ["data/demo/products.json"]
+views = ["views.json"]
+actions = "actions.json"
+menus = "menus.json"

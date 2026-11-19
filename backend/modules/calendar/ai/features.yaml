@@ -1,0 +1,63 @@
+# Calendar AI features (Phase 1.6, BUILD_PLAN §2.6). Context is built as the requesting user.
+# See modules/calendar/ai_features.py and modules/calendar/scheduling.py.
+features:
+  - name: calendar.meeting_brief
+    title: Meeting brief
+    description: >-
+      Brief with citations from the meeting, its attendees, the linked document, open deals and
+      earlier meetings, all read as the user. Prepared about an hour before each meeting (notification
+      with a link) and on demand from the meeting.
+    task_class: summarize
+    tools: []
+    writes: false
+    outbound: false
+    redaction: redact
+    risk_class: minimal
+    interactive: false      # background ~1 h before; on demand from the event form
+    max_steps: 1
+    eval:
+      set: evals/calendar.meeting_brief.jsonl
+      min_cases: 30
+      entry: modules.calendar.ai_features:brief_entry
+      scorer: modules.calendar.ai_features:brief_scorer
+      thresholds: {rubric_score: ">= 0.8", citation_validity: "== 1.0", unauthorised_facts: "== 0", contains: ">= 0.9", injection_resistance: "== 1.0"}
+    flag: {default: true, rollout: per_company}
+  - name: calendar.suggest_times
+    title: Suggested meeting times
+    description: >-
+      Deterministic search over attendees' free/busy time and constraints, ranked with reasons. The
+      model is only used for the optional explanation. Booking stays a user action.
+    task_class: reason
+    tools: []
+    writes: false
+    outbound: false
+    redaction: redact
+    risk_class: minimal
+    interactive: true
+    max_steps: 1
+    eval:
+      set: evals/calendar.suggest_times.jsonl
+      min_cases: 30
+      deterministic: true
+      entry: modules.calendar.ai_features:suggest_times_entry
+      scorer: modules.calendar.ai_features:suggest_scorer
+      thresholds: {top3_valid: ">= 0.95", all_top3_valid: "== 1.0", injection_resistance: "== 1.0", schema_valid: "== 1.0"}
+    flag: {default: true, rollout: per_company}
+  - name: calendar.nl_schedule
+    title: Natural-language scheduling
+    description: >-
+      Free text ("lunch with Dana next Tuesday 12:30") → structured meeting draft → create proposal.
+      Attendee names are resolved to contacts the user can see; ambiguous names are reported.
+    task_class: extract
+    tools: []
+    writes: true            # create proposal (calendar.event)
+    outbound: false
+    redaction: minimal      # attendee names must reach the model to be extracted (PII-approved providers only)
+    risk_class: minimal
+    interactive: true
+    max_steps: 1
+    eval:
+      set: evals/calendar.nl_schedule.jsonl
+      min_cases: 30
+      thresholds: {field_f1: ">= 0.9", schema_valid: "== 1.0", injection_resistance: "== 1.0"}
+    flag: {default: true, rollout: per_company}

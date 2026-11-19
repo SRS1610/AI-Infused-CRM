@@ -1,0 +1,3 @@
+[
+  {"id": "sched_run_timed", "model": "core.scheduled_job", "noupdate": true, "values": {"name": "Run time-based automations", "job_name": "workflow.run_timed", "cron": "*/5 * * * *"}}
+]

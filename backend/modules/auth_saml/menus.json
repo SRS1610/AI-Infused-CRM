@@ -1,0 +1,4 @@
+[
+  {"id": "menu_providers", "name": "SAML providers", "parent": "web.menu_settings_users", "sequence": 45, "action": "auth_saml.action_providers"},
+  {"id": "menu_identities", "name": "SAML account links", "parent": "web.menu_settings_users", "sequence": 46, "action": "auth_saml.action_identities"}
+]

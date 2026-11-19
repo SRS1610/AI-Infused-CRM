@@ -1,0 +1,3 @@
+[
+  {"id": "enrichment_source_fixture", "model": "contacts.enrichment_source", "values": {"name": "Offline company registry (demo)", "adapter": "fixture", "approved": true, "note": "Offline fixture adapter shipped for the demo and tests: no data leaves the deployment."}}
+]

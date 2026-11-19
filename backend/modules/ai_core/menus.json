@@ -1,0 +1,14 @@
+[
+  {"id": "menu_ai", "name": "AI", "parent": "web.menu_settings_root", "sequence": 50},
+  {"id": "menu_ai_dashboard", "name": "Usage and cost", "parent": "ai_core.menu_ai", "sequence": 5, "action": "ai_core.action_dashboard"},
+  {"id": "menu_ai_features", "name": "Features and kill switches", "parent": "ai_core.menu_ai", "sequence": 10, "action": "ai_core.action_features"},
+  {"id": "menu_ai_providers", "name": "Providers", "parent": "ai_core.menu_ai", "sequence": 20, "action": "ai_core.action_providers"},
+  {"id": "menu_ai_routes", "name": "Routing", "parent": "ai_core.menu_ai", "sequence": 30, "action": "ai_core.action_routes"},
+  {"id": "menu_ai_budgets", "name": "Budgets and quotas", "parent": "ai_core.menu_ai", "sequence": 40, "action": "ai_core.action_budgets"},
+  {"id": "menu_ai_company", "name": "Company settings", "parent": "ai_core.menu_ai", "sequence": 50, "action": "ai_core.action_company_settings"},
+  {"id": "menu_ai_prompts", "name": "Prompts", "parent": "ai_core.menu_ai", "sequence": 60, "action": "ai_core.action_prompts"},
+  {"id": "menu_ai_runs", "name": "Runs (audit)", "parent": "ai_core.menu_ai", "sequence": 70, "action": "ai_core.action_runs"},
+  {"id": "menu_ai_proposals", "name": "Proposals", "parent": "ai_core.menu_ai", "sequence": 80, "action": "ai_core.action_proposals"},
+  {"id": "menu_ai_feedback", "name": "Feedback", "parent": "ai_core.menu_ai", "sequence": 90, "action": "ai_core.action_feedback"},
+  {"id": "menu_ai_evals", "name": "Evaluation runs", "parent": "ai_core.menu_ai", "sequence": 100, "action": "ai_core.action_eval_runs"}
+]

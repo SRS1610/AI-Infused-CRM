@@ -1,0 +1,24 @@
+# Activities AI features (BUILD_PLAN §2.6). The daily to-do is ranked by rules (modules/chatter/ai_todo.py):
+# no provider is called, so it is evaluated directly (deterministic: true, no cassettes) and the rank
+# correlation below is computed for real against hand-labelled orders.
+features:
+  - name: chatter.daily_todo
+    title: AI-ranked daily to-do
+    description: The user's open activities ranked by deadline, linked record value, priority and kind, with reasons.
+    task_class: reason
+    tools: []
+    writes: false
+    outbound: false
+    redaction: redact
+    risk_class: limited                # a recommendation: ships its reasons (explainability), labelled AI in the UI
+    interactive: true                  # on demand; plus a morning job that notifies each user with a link
+    disclosure: ai_generated
+    eval:
+      set: evals/chatter.daily_todo.jsonl
+      min_cases: 30
+      deterministic: true
+      entry: modules.chatter.ai_todo:eval_entry
+      scorer: modules.chatter.ai_todo:spearman_scorer
+      # rank correlation (Spearman) with manager-labelled orders ≥ 0.6; reasons and no leaks checked by `contains`
+      thresholds: {rank_correlation: ">= 0.6", contains: "== 1.0", injection_resistance: "== 1.0"}
+    flag: {default: true, rollout: per_company}

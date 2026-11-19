@@ -416,7 +416,7 @@ Responsive layouts with mobile-first variants for CRM kanban, activities, field 
 
 ### 5.3 Realtime
 
-Clients subscribe to channels (`user:<id>`, `thread:<model>:<id>`, `channel:<id>`, `job:<uuid>`, `ai:<run_id>`). Server publishes to Redis; the WebSocket hub fans out. AI responses stream token deltas on `ai:<run_id>`.
+Clients subscribe to channels (`user:<id>`, `thread:<model>:<id>`, `channel:<id>`, `job:<uuid>`, `ai:<run_id>`). Server publishes to Redis; the WebSocket hub fans out. AI responses stream token deltas on `ai:<run_id>`. Presence is shared the same way: each process records its connections in a Redis sorted set (`tessera:presence:<db>`, scored by expiry, refreshed by a heartbeat), so any process can answer who is online.
 
 ---
 

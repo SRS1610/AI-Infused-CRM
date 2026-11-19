@@ -1,0 +1,6 @@
+[
+  {"id": "action_calendar", "name": "Calendar", "model": "calendar.event", "views": ["calendar", "list", "form"], "search_view": "calendar.view_event_search"},
+  {"id": "action_rooms", "name": "Rooms", "model": "calendar.room", "views": ["list", "form"]},
+  {"id": "action_booking_links", "name": "Scheduling links", "model": "calendar.booking_link", "views": ["list", "form"]},
+  {"id": "action_sync_accounts", "name": "External calendars", "model": "calendar.sync_account", "views": ["list", "form"]}
+]

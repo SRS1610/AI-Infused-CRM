@@ -1,0 +1,113 @@
+{
+ "gold": {
+  "amount_tax": 115.98,
+  "amount_total": 695.9,
+  "amount_untaxed": 579.92,
+  "currency": "EUR",
+  "due_date": "2026-09-14",
+  "iban": "FR8230006936913291879326026",
+  "invoice_date": "2026-08-30",
+  "invoice_number": "003135/26",
+  "lines": [
+   {
+    "account": "cogs",
+    "amount": 508.66,
+    "description": "Cartons d'emballage",
+    "quantity": 2.0,
+    "tax": "purchase_vat_20",
+    "tax_rate": 20.0,
+    "unit_price": 254.33
+   },
+   {
+    "account": "cogs",
+    "amount": 71.26,
+    "description": "Vis inox M8",
+    "quantity": 1.0,
+    "tax": "purchase_vat_20",
+    "tax_rate": 20.0,
+    "unit_price": 71.26
+   }
+  ],
+  "move_type": "in_invoice",
+  "needs_review": false,
+  "partner_name": "Métaux Rhône SAS",
+  "partner_vat": "FR20508195212"
+ },
+ "spec": {
+  "amount_tax": 115.98,
+  "amount_total": 695.9,
+  "amount_untaxed": 579.92,
+  "buyer": {
+   "city": "75001 Paris",
+   "country": "France",
+   "name": "My Company (Europe)",
+   "street": "8 avenue de l'Opéra",
+   "vat": "FR32123456789"
+  },
+  "credit_note": false,
+  "currency": "EUR",
+  "due_date": "2026-09-14",
+  "id": "b077",
+  "invoice_date": "2026-08-30",
+  "invoice_number": "003135/26",
+  "kind": "scan",
+  "lang": "fr",
+  "layout": "modern",
+  "lines": [
+   {
+    "amount": 508.66,
+    "description": "Cartons d'emballage",
+    "quantity": 2.0,
+    "tax_rate": 20.0,
+    "unit_price": 254.33
+   },
+   {
+    "amount": 71.26,
+    "description": "Vis inox M8",
+    "quantity": 1.0,
+    "tax_rate": 20.0,
+    "unit_price": 71.26
+   }
+  ],
+  "move_type": "in_invoice",
+  "notes": "",
+  "reverse_charge": false,
+  "seed": 3382,
+  "seller": {
+   "address": "27 quai de la Fosse, 44000 Nantes",
+   "country": "FR",
+   "iban": "FR82 3000 6936 9132 9187 9326 026",
+   "name": "Métaux Rhône SAS",
+   "vat": "FR20508195212"
+  },
+  "tax_lines": [
+   {
+    "amount": 115.98,
+    "base": 579.92,
+    "rate": 20.0
+   }
+  ]
+ },
+ "world": {
+  "history": [
+   {
+    "date": "2026-07-26",
+    "lines": [
+     {
+      "account": "cogs",
+      "description": "Cartes électroniques rév. B",
+      "quantity": 3.0,
+      "tax": "purchase_vat_20",
+      "unit_price": 78.15
+     }
+    ]
+   }
+  ],
+  "vendor": {
+   "iban": "FR82 3000 6936 9132 9187 9326 026",
+   "known": true,
+   "name": "Métaux Rhône SAS",
+   "vat": "FR20508195212"
+  }
+ }
+}

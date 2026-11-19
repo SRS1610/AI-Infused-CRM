@@ -1,0 +1,16 @@
+name = "product"
+version = "2.0.1"
+summary = "Products and services: categories, units with conversion, variants from attributes, pricelists"
+category = "Sales"
+phase = 1
+depends = ["core", "web"]
+license = "Apache-2.0"
+installable = true
+
+[load]
+security = ["security/groups.json", "security/access.json"]
+data = ["data/uom.json", "data/categories.json"]
+demo = ["data/demo/products.json", "data/demo/variants.json", "data/demo/pricelists.json"]
+views = ["views.json"]
+actions = "actions.json"
+menus = "menus.json"

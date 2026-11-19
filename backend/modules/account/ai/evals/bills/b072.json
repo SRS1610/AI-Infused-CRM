@@ -1,0 +1,84 @@
+{
+ "gold": {
+  "amount_tax": 0.0,
+  "amount_total": 58.33,
+  "amount_untaxed": 58.33,
+  "currency": "EUR",
+  "due_date": "2026-06-27",
+  "iban": "ES9021009965562291555777",
+  "invoice_date": "2026-05-13",
+  "invoice_number": "004323/26",
+  "lines": [
+   {
+    "account": "cogs",
+    "amount": 58.33,
+    "description": "Perfiles de aluminio 2 m",
+    "quantity": 1.0,
+    "tax": "purchase_vat_20_rc",
+    "tax_rate": 0.0,
+    "unit_price": 58.33
+   }
+  ],
+  "move_type": "in_invoice",
+  "needs_review": false,
+  "partner_name": "Embalajes Levante SA",
+  "partner_vat": "ESB24582328"
+ },
+ "spec": {
+  "amount_tax": 0.0,
+  "amount_total": 58.33,
+  "amount_untaxed": 58.33,
+  "buyer": {
+   "city": "75001 Paris",
+   "country": "France",
+   "name": "My Company (Europe)",
+   "street": "8 avenue de l'Opéra",
+   "vat": "FR32123456789"
+  },
+  "credit_note": false,
+  "currency": "EUR",
+  "due_date": "2026-06-27",
+  "id": "b072",
+  "invoice_date": "2026-05-13",
+  "invoice_number": "004323/26",
+  "kind": "digital",
+  "lang": "es",
+  "layout": "letter",
+  "lines": [
+   {
+    "amount": 58.33,
+    "description": "Perfiles de aluminio 2 m",
+    "quantity": 1.0,
+    "tax_rate": 0.0,
+    "unit_price": 58.33
+   }
+  ],
+  "move_type": "in_invoice",
+  "notes": "",
+  "reverse_charge": true,
+  "seed": 542056,
+  "seller": {
+   "address": "Calle de Alcalá 85, 28009 Madrid",
+   "country": "ES",
+   "iban": "ES90 2100 9965 5622 9155 5777",
+   "name": "Embalajes Levante SA",
+   "vat": "ESB24582328"
+  },
+  "tax_lines": [
+   {
+    "amount": 0.0,
+    "base": 58.33,
+    "rate": 0.0
+   }
+  ]
+ },
+ "world": {
+  "history": [],
+  "vendor": {
+   "iban": "ES90 2100 9965 5622 9155 5777",
+   "known": false,
+   "name": "Embalajes Levante SA",
+   "vat": "ESB24582328"
+  }
+ }
+}

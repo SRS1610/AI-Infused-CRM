@@ -1,0 +1,6 @@
+[
+  {"id": "lost_price", "model": "crm.lost_reason", "noupdate": true, "values": {"name": "Too expensive"}},
+  {"id": "lost_competitor", "model": "crm.lost_reason", "noupdate": true, "values": {"name": "Chose a competitor"}},
+  {"id": "lost_no_need", "model": "crm.lost_reason", "noupdate": true, "values": {"name": "No longer needed"}},
+  {"id": "lost_no_answer", "model": "crm.lost_reason", "noupdate": true, "values": {"name": "Stopped responding"}}
+]

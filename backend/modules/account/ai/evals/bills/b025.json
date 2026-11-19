@@ -1,0 +1,97 @@
+{
+ "gold": {
+  "amount_tax": 0.0,
+  "amount_total": 288.76,
+  "amount_untaxed": 288.76,
+  "currency": "EUR",
+  "due_date": "2026-09-16",
+  "iban": "ES1421006647091372538507",
+  "invoice_date": "2026-08-17",
+  "invoice_number": "SO-2026-7778",
+  "lines": [
+   {
+    "account": "expense",
+    "amount": 288.76,
+    "description": "Cápsulas de café",
+    "quantity": 1.0,
+    "tax": "purchase_vat_20_rc",
+    "tax_rate": 0.0,
+    "unit_price": 288.76
+   }
+  ],
+  "move_type": "in_invoice",
+  "needs_review": false,
+  "partner_name": "Suministros Oficina Norte SL",
+  "partner_vat": "ESA41532726"
+ },
+ "spec": {
+  "amount_tax": 0.0,
+  "amount_total": 288.76,
+  "amount_untaxed": 288.76,
+  "buyer": {
+   "city": "75001 Paris",
+   "country": "France",
+   "name": "My Company (Europe)",
+   "street": "8 avenue de l'Opéra",
+   "vat": "FR32123456789"
+  },
+  "credit_note": false,
+  "currency": "EUR",
+  "due_date": "2026-09-16",
+  "id": "b025",
+  "invoice_date": "2026-08-17",
+  "invoice_number": "SO-2026-7778",
+  "kind": "digital",
+  "lang": "es",
+  "layout": "classic",
+  "lines": [
+   {
+    "amount": 288.76,
+    "description": "Cápsulas de café",
+    "quantity": 1.0,
+    "tax_rate": 0.0,
+    "unit_price": 288.76
+   }
+  ],
+  "move_type": "in_invoice",
+  "notes": "",
+  "reverse_charge": true,
+  "seed": 62265,
+  "seller": {
+   "address": "Calle de Alcalá 85, 28009 Madrid",
+   "country": "ES",
+   "iban": "ES14 2100 6647 0913 7253 8507",
+   "name": "Suministros Oficina Norte SL",
+   "vat": "ESA41532726"
+  },
+  "tax_lines": [
+   {
+    "amount": 0.0,
+    "base": 288.76,
+    "rate": 0.0
+   }
+  ]
+ },
+ "world": {
+  "history": [
+   {
+    "date": "2026-07-13",
+    "lines": [
+     {
+      "account": "expense",
+      "description": "Cápsulas de café",
+      "quantity": 1.0,
+      "tax": "purchase_vat_20_rc",
+      "unit_price": 296.49
+     }
+    ]
+   }
+  ],
+  "vendor": {
+   "iban": "ES14 2100 6647 0913 7253 8507",
+   "known": true,
+   "name": "Suministros Oficina Norte SL",
+   "vat": "ESA41532726"
+  }
+ }
+}

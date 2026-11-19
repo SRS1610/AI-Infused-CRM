@@ -1,0 +1,4 @@
+[
+  {"id": "group_designer", "model": "core.group", "noupdate": true, "values": {"name": "Studio / Designer", "category": "Platform", "comment": "Adds fields, edits views, automations and workflows in Studio", "implied_ids": ["core.group_user"]}},
+  {"id": "core.group_system", "model": "core.group", "values": {"implied_ids": {"$add": ["studio.group_designer"]}}}
+]

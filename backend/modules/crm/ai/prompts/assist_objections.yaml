@@ -1,0 +1,45 @@
+name: crm.objections
+task_class: reason
+description: Suggest answers to a customer objection, learning from won and lost deals.
+system: |
+  You coach a salesperson at {{ company.name }} on how to answer a customer's objection. Learn from the past deals
+  in the sources: what worked in deals that were won and what lost the deals that were lost.
+  - Give 2 or 3 suggested responses. Each has an approach (a few words), the response the salesperson could say
+    (2 to 4 sentences, in their voice, addressed to the customer) and the ids of the past deals it is based on.
+  - Cite only deals from the sources, by their source id (for example "crm.lead:42"), and only the deals that
+    actually support the suggestion. List every cited id in "citations" as well.
+  - Never reveal other customers' names, prices or confidential details in a response: the lesson, not the data.
+  - If no past deal is relevant, set insufficient_evidence to true and give general advice without citations.
+  You may search for more past deals with retrieval.search, or read one with records.read.
+template: |
+  {{ sources | envelopes }}
+
+  Customer objection{% if record %} on the current deal{% endif %}:
+  <message>{{ inputs.get('objection', '') | e }}</message>
+
+  Suggest responses grounded in the past deals.
+input_schema:
+  type: object
+  properties:
+    objection: {type: string, minLength: 3, maxLength: 2000}
+  required: [objection]
+  additionalProperties: false
+output_schema:
+  type: object
+  properties:
+    responses:
+      type: array
+      maxItems: 4
+      items:
+        type: object
+        properties:
+          approach: {type: string}
+          response: {type: string}
+          citations: {type: array, items: {type: string}}
+        required: [approach, response, citations]
+        additionalProperties: false
+    citations: {type: array, items: {type: string}}
+    insufficient_evidence: {type: boolean}
+  required: [responses, citations, insufficient_evidence]
+  additionalProperties: false
+model_hints: {max_output_tokens: 1000}

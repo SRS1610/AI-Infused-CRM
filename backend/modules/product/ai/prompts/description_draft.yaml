@@ -1,0 +1,28 @@
+name: product.description_draft
+task_class: draft
+description: Sales description of a product from its catalogue facts, in the user's language.
+system: |
+  You write sales descriptions for the product catalogue of {{ company.name }}. Write two to four sentences a
+  customer reads on a quotation: what the product is, what it is for and the options it comes in.
+  Use only the facts given (name, category, attributes and their values, variants, current description).
+  Never add a specification that is not in the facts: no dimensions, weights, durations, ratings, materials,
+  certifications, warranties or performance figures, and no prices. Plain text, no headings or lists.
+  Write in the user's language: {{ inputs.get('language') or user.lang or 'en_US' }} (a locale code such as
+  fr_FR means French).
+template: |
+  {{ sources | envelopes('product') }}
+
+  Draft the sales description of this product.
+input_schema:
+  type: object
+  properties:
+    language: {type: string, maxLength: 40}
+  additionalProperties: false
+output_schema:
+  type: object
+  properties:
+    description: {type: string, maxLength: 1500}
+    facts_used: {type: array, items: {type: string}}
+  required: [description, facts_used]
+  additionalProperties: false
+model_hints: {max_output_tokens: 600}

@@ -1,0 +1,15 @@
+[
+  {"id": "access_subtype_user", "model": "core.model_access", "values": {"name": "subtype: user read", "model_name": "chatter.subtype", "group_id": "core.group_user", "perm_read": true}},
+  {"id": "access_subtype_system", "model": "core.model_access", "values": {"name": "subtype: admin", "model_name": "chatter.subtype", "group_id": "core.group_system", "perm_read": true, "perm_write": true, "perm_create": true, "perm_unlink": true}},
+  {"id": "access_message_system", "model": "core.model_access", "values": {"name": "message: admin (users go through the chatter API, which checks the record)", "model_name": "chatter.message", "group_id": "core.group_system", "perm_read": true, "perm_write": true, "perm_unlink": true}},
+  {"id": "access_follower_system", "model": "core.model_access", "values": {"name": "follower: admin", "model_name": "chatter.follower", "group_id": "core.group_system", "perm_read": true, "perm_write": true, "perm_unlink": true}},
+  {"id": "access_tracking_system", "model": "core.model_access", "values": {"name": "tracking value: admin", "model_name": "chatter.tracking_value", "group_id": "core.group_system", "perm_read": true}},
+  {"id": "access_reaction_system", "model": "core.model_access", "values": {"name": "reaction: admin", "model_name": "chatter.reaction", "group_id": "core.group_system", "perm_read": true, "perm_unlink": true}},
+  {"id": "access_activity_type_user", "model": "core.model_access", "values": {"name": "activity type: user read", "model_name": "chatter.activity_type", "group_id": "core.group_user", "perm_read": true}},
+  {"id": "access_activity_type_system", "model": "core.model_access", "values": {"name": "activity type: admin", "model_name": "chatter.activity_type", "group_id": "core.group_system", "perm_read": true, "perm_write": true, "perm_create": true, "perm_unlink": true}},
+  {"id": "access_activity_user", "model": "core.model_access", "values": {"name": "activity: user (own)", "model_name": "chatter.activity", "group_id": "core.group_user", "perm_read": true, "perm_write": true, "perm_unlink": true}},
+  {"id": "access_activity_system", "model": "core.model_access", "values": {"name": "activity: admin", "model_name": "chatter.activity", "group_id": "core.group_system", "perm_read": true, "perm_write": true, "perm_create": true, "perm_unlink": true}},
+  {"id": "rule_activity_own", "model": "core.record_rule", "values": {"name": "Users manage the activities assigned to them", "model_name": "chatter.activity", "group_ids": ["core.group_user"], "domain": [["user_id", "=", "$uid"]]}},
+  {"id": "rule_activity_admin", "model": "core.record_rule", "values": {"name": "Administrators see every activity", "model_name": "chatter.activity", "group_ids": ["core.group_system"], "domain": {"all": []}}},
+  {"id": "access_fetch_server_system", "model": "core.model_access", "values": {"name": "fetch server: admin", "model_name": "chatter.fetch_server", "group_id": "core.group_system", "perm_read": true, "perm_write": true, "perm_create": true, "perm_unlink": true}}
+]

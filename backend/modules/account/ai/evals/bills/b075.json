@@ -1,0 +1,84 @@
+{
+ "gold": {
+  "amount_tax": 0.0,
+  "amount_total": 1410.0,
+  "amount_untaxed": 1410.0,
+  "currency": "EUR",
+  "due_date": "2026-10-15",
+  "iban": "DE40370400442864722456",
+  "invoice_date": "2026-09-15",
+  "invoice_number": "BB-2026-1599",
+  "lines": [
+   {
+    "account": "expense",
+    "amount": 1410.0,
+    "description": "Rechtsberatung Vertragsprüfung",
+    "quantity": 1.0,
+    "tax": "purchase_vat_20_rc",
+    "tax_rate": 0.0,
+    "unit_price": 1410.0
+   }
+  ],
+  "move_type": "in_invoice",
+  "needs_review": false,
+  "partner_name": "Becker Beratung AG",
+  "partner_vat": "DE712071365"
+ },
+ "spec": {
+  "amount_tax": 0.0,
+  "amount_total": 1410.0,
+  "amount_untaxed": 1410.0,
+  "buyer": {
+   "city": "75001 Paris",
+   "country": "France",
+   "name": "My Company (Europe)",
+   "street": "8 avenue de l'Opéra",
+   "vat": "FR32123456789"
+  },
+  "credit_note": false,
+  "currency": "EUR",
+  "due_date": "2026-10-15",
+  "id": "b075",
+  "invoice_date": "2026-09-15",
+  "invoice_number": "BB-2026-1599",
+  "kind": "scan",
+  "lang": "de",
+  "layout": "letter",
+  "lines": [
+   {
+    "amount": 1410.0,
+    "description": "Rechtsberatung Vertragsprüfung",
+    "quantity": 1.0,
+    "tax_rate": 0.0,
+    "unit_price": 1410.0
+   }
+  ],
+  "move_type": "in_invoice",
+  "notes": "",
+  "reverse_charge": true,
+  "seed": 257131,
+  "seller": {
+   "address": "Leopoldstraße 40, 80802 München",
+   "country": "DE",
+   "iban": "DE40 3704 0044 2864 7224 56",
+   "name": "Becker Beratung AG",
+   "vat": "DE712071365"
+  },
+  "tax_lines": [
+   {
+    "amount": 0.0,
+    "base": 1410.0,
+    "rate": 0.0
+   }
+  ]
+ },
+ "world": {
+  "history": [],
+  "vendor": {
+   "iban": "DE40 3704 0044 2864 7224 56",
+   "known": false,
+   "name": "Becker Beratung AG",
+   "vat": "DE712071365"
+  }
+ }
+}

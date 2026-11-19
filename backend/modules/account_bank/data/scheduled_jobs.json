@@ -1,0 +1,3 @@
+[
+  {"id": "sched_auto_reconcile", "model": "core.scheduled_job", "noupdate": true, "values": {"name": "Bank: apply automatic reconciliation rules", "job_name": "account_bank.auto_reconcile", "cron": "40 * * * *"}}
+]

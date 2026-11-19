@@ -1,0 +1,8 @@
+[
+  {"id": "rule_reader_published_only", "model": "core.record_rule",
+   "values": {"name": "Readers see published books only", "model_name": "ktest.book", "group_ids": ["kernel_test_a.group_reader"],
+              "domain": {"any": [["status", "=", "published"], ["create_uid", "=", "$uid"]]}, "perm_read": true, "perm_write": true, "perm_create": true, "perm_unlink": true}},
+  {"id": "rule_librarian_all", "model": "core.record_rule",
+   "values": {"name": "Librarians see every book", "model_name": "ktest.book", "group_ids": ["kernel_test_a.group_librarian"],
+              "domain": {"all": []}, "perm_read": true, "perm_write": true, "perm_create": true, "perm_unlink": true}}
+]

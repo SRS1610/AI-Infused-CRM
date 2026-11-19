@@ -1,0 +1,9 @@
+[
+  {"id": "term_immediate", "model": "account.payment_term", "noupdate": true, "values": {"name": "Immediate payment", "sequence": 1, "line_ids": [{"value": "balance", "nb_days": 0}]}},
+  {"id": "term_15", "model": "account.payment_term", "noupdate": true, "values": {"name": "15 days", "sequence": 2, "line_ids": [{"value": "balance", "nb_days": 15}]}},
+  {"id": "term_30", "model": "account.payment_term", "noupdate": true, "values": {"name": "30 days", "sequence": 3, "line_ids": [{"value": "balance", "nb_days": 30}]}},
+  {"id": "term_45", "model": "account.payment_term", "noupdate": true, "values": {"name": "45 days", "sequence": 4, "line_ids": [{"value": "balance", "nb_days": 45}]}},
+  {"id": "term_end_following_month", "model": "account.payment_term", "noupdate": true, "values": {"name": "End of following month", "sequence": 5, "line_ids": [{"value": "balance", "nb_days": 31, "delay_type": "days_end_of_month_on_the", "days_next_month": 31}]}},
+  {"id": "term_30_now_balance_60", "model": "account.payment_term", "noupdate": true, "values": {"name": "30% now, balance in 60 days", "sequence": 6, "line_ids": [{"value": "percent", "value_amount": 30, "nb_days": 0, "sequence": 1}, {"value": "balance", "nb_days": 60, "sequence": 2}]}},
+  {"id": "term_2_10_net_30", "model": "account.payment_term", "noupdate": true, "values": {"name": "2% 10 days, net 30", "sequence": 7, "early_discount": true, "discount_percentage": 2, "discount_days": 10, "early_pay_discount_computation": "included", "line_ids": [{"value": "balance", "nb_days": 30}]}}
+]
