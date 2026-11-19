@@ -9,6 +9,8 @@ x-backend-env: &backend-env
   TESSERA_SECRET_KEY: ${TESSERA_SECRET_KEY:-dev-only-secret-key-change-me-please-32b}
   TESSERA_MASTER_KEY: ${TESSERA_MASTER_KEY:-ZGV2LW9ubHktbWFzdGVyLWtleS1jaGFuZ2UtbWUtMzItYnl0ZXMh}
   TESSERA_BASE_URL: ${TESSERA_BASE_URL:-http://localhost:8000}
+  # base of links in e-mails (portal, password reset): the address people open the web client at
+  TESSERA_PUBLIC_URL: ${TESSERA_PUBLIC_URL:-http://localhost:5173}
   TESSERA_STORAGE_BACKEND: s3
   TESSERA_S3_ENDPOINT: http://objectstore:8333
   TESSERA_S3_BUCKET: tessera
@@ -165,6 +167,8 @@ services:
     environment:
       # the dev server proxies /api and the websocket to the API container
       VITE_API_URL: http://server:8000
+      # extra public host names for the dev server, e.g. a Cloudflare named tunnel (docs/admin/cloudflare-tunnel.md)
+      VITE_ALLOWED_HOSTS: ${VITE_ALLOWED_HOSTS:-}
     ports:
       - "5173:5173"
     volumes:

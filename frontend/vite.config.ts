@@ -4,12 +4,22 @@ import { fileURLToPath, URL } from "node:url";
 import { defineConfig } from "vite";
 
 const backend = process.env.VITE_API_URL ?? "http://localhost:8000";
+// hosts the dev server answers besides localhost: Cloudflare quick tunnels, plus any listed in
+// VITE_ALLOWED_HOSTS (comma-separated, e.g. "crm.example.com") — see docs/admin/cloudflare-tunnel.md
+const allowedHosts = [
+  ".trycloudflare.com",
+  ...(process.env.VITE_ALLOWED_HOSTS ?? "")
+    .split(",")
+    .map((h) => h.trim())
+    .filter(Boolean),
+];
 
 export default defineConfig({
   plugins: [react()],
   resolve: { alias: { "@": fileURLToPath(new URL("./src", import.meta.url)) } },
   server: {
     port: 5173,
+    allowedHosts,
     proxy: {
       "/api/v1/ws": { target: backend.replace(/^http/, "ws"), ws: true },
       "/api": { target: backend, changeOrigin: false },

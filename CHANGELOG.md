@@ -6,6 +6,13 @@ All notable changes are recorded here, grouped by phase. Format follows [Keep a 
 
 Summary of what works, what is stubbed and the known gaps: [docs/phase-2-summary.md](docs/phase-2-summary.md).
 
+### Sharing a test instance (D-104)
+- **Cloudflare Tunnel.** The web dev server answers `*.trycloudflare.com` and the host names in
+  `VITE_ALLOWED_HOSTS`, so `cloudflared tunnel --url http://localhost:5173` shares a running stack over
+  HTTPS; Compose passes `TESSERA_PUBLIC_URL` to the API so e-mail links use the public address (it was
+  ignored before, and `.env.example` pointed it at an unused port). Guide:
+  [docs/admin/cloudflare-tunnel.md](docs/admin/cloudflare-tunnel.md).
+
 ### Sub-phase 2.1 — Accounting core
 - **Ledger (`account` 1.0.0, D-072, D-073, D-077).** Charts of accounts for the US, EU-style VAT and a
   generic chart, installed on every company (and on companies created later) with tax grids, fiscal

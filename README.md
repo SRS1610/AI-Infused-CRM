@@ -52,6 +52,9 @@ guided tour of every feature, or to run without Docker, follow [docs/demos/phase
 (Phase 1: [docs/demos/phase-1.md](docs/demos/phase-1.md)). No AI provider key is needed for the demo: a
 deterministic test provider answers until you configure one under **Settings → AI**.
 
+To let other people try your running copy over the internet, publish it with Cloudflare Tunnel:
+[docs/admin/cloudflare-tunnel.md](docs/admin/cloudflare-tunnel.md).
+
 ## Repository
 
 | Path | What it holds |
