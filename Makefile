@@ -5,7 +5,7 @@ BACKEND := cd backend && uv run
 FRONTEND := cd frontend && npm run
 
 .PHONY: help setup up down logs ps db-init db-migrate seed serve worker scheduler gateway web \
-        test test-backend test-frontend e2e lint format typecheck ci clean
+        test test-backend test-frontend e2e lint format typecheck ci clean demo
 
 help: ## Show this help
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-16s\033[0m %s\n", $$1, $$2}'
