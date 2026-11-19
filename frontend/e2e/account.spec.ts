@@ -76,8 +76,11 @@ test("Accounting: invoice list and form, confirm, partial payment, credit note",
   await page.getByRole("button", { name: "Credit note", exact: true }).click();
   const reverse = page.getByRole("dialog", { name: "Create a credit note" });
   await reverse.getByLabel("Reason").fill("Duplicate order");
+  // the dialog closes before the request ends: wait for the credit note to exist before opening the list
+  const reversed = page.waitForResponse((r) => r.url().includes("/call/action_reverse") && r.ok());
   await reverse.getByRole("button", { name: "Create" }).click();
   await expect(reverse).toBeHidden();
+  await reversed;
   await page.goto("/a/account.action_refunds");
   await expect(page.getByRole("heading", { name: "Customer credit notes" })).toBeVisible();
   await expect(page.getByRole("row").filter({ hasText: "Draft" }).first()).toBeVisible();
