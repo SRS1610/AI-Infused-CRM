@@ -122,6 +122,8 @@ jobs:
     steps:
       - name: Provider key configured?
         if: env.GATEWAY_ANTHROPIC_API_KEY == ''
+        # the checkout is skipped without a key, so backend/ does not exist yet
+        working-directory: .
         run: echo "::notice::ANTHROPIC_API_KEY secret not set; the live evaluation is skipped"
       - uses: actions/checkout@v4
         if: env.GATEWAY_ANTHROPIC_API_KEY != ''
@@ -135,7 +137,7 @@ jobs:
       - if: env.GATEWAY_ANTHROPIC_API_KEY != ''
         run: PGPASSWORD=tessera psql -h localhost -U tessera -d tessera_eval -c "CREATE EXTENSION IF NOT EXISTS vector; CREATE EXTENSION IF NOT EXISTS pg_trgm;"
       - if: env.GATEWAY_ANTHROPIC_API_KEY != ''
-        run: uv run tessera seed demo --phase 1
+        run: uv run tessera seed demo --phase 2
       - name: Route the default task classes to the provider (D-016 tiers)
         if: env.GATEWAY_ANTHROPIC_API_KEY != ''
         run: uv run tessera ai provider --kind anthropic
