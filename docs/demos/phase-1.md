@@ -14,7 +14,7 @@ docker compose -f deploy/compose/docker-compose.yml up -d
 ```
 
 ```bash
-docker compose -f deploy/compose/docker-compose.yml exec api tessera seed demo --phase 1
+docker compose -f deploy/compose/docker-compose.yml exec server tessera seed demo --phase 1
 ```
 
 Without Docker: start PostgreSQL with pgvector, then from `backend/` run `tessera seed demo` and

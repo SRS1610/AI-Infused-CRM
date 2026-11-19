@@ -15,8 +15,14 @@ setup: ## Install backend and frontend dependencies, copy .env
 	cd backend && uv sync
 	@test -d frontend && (cd frontend && npm ci) || true
 
-up: ## Start the full stack with Docker Compose
+.env:
+	cp .env.example .env
+
+up: .env ## Start the full stack with Docker Compose
 	$(COMPOSE) up -d --build
+
+demo: .env ## Load the Phase 2 demo data into the running stack (after `make up`)
+	$(COMPOSE) exec server tessera seed demo --phase 2
 
 down: ## Stop the stack
 	$(COMPOSE) down

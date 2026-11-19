@@ -13,25 +13,44 @@ An open, modular, multi-company business suite with a CRM at its core that grows
 
 ## Try it
 
-With Docker:
+You need [Docker](https://docs.docker.com/get-docker/) (Docker Desktop on Windows and macOS) and Git. No
+Python or Node.js install is needed: everything runs in containers.
 
 ```bash
-make setup
+git clone https://github.com/SRS1610/AI-Infused-CRM.git
+```
+
+```bash
+cd AI-Infused-CRM
 ```
 
 ```bash
 make up
 ```
 
+Wait until `make up` returns and the containers are healthy (the first build takes a few minutes), then load
+the demo data:
+
 ```bash
-docker compose -f deploy/compose/docker-compose.yml exec api tessera seed demo --phase 2
+make demo
 ```
 
-Open http://localhost:5173 and sign in as `admin` / `admin1234`. Without Docker, or for the guided
-tour of every feature, follow [docs/demos/phase-2.md](docs/demos/phase-2.md) (Phase 1:
-[docs/demos/phase-1.md](docs/demos/phase-1.md)). No AI provider key is
-needed for the demo: a deterministic test provider answers until you configure one under
-**Settings → AI**.
+Open http://localhost:5173 and sign in as `admin` / `admin1234` (also `demo` / `demo1234`, a salesperson,
+and `marie` / `demo1234`, who works in French). Without `make` (for example on Windows), run the same steps
+with Docker Compose:
+
+```bash
+docker compose -f deploy/compose/docker-compose.yml up -d --build
+```
+
+```bash
+docker compose -f deploy/compose/docker-compose.yml exec server tessera seed demo --phase 2
+```
+
+Stop everything with `make down` (or `docker compose -f deploy/compose/docker-compose.yml down`). For the
+guided tour of every feature, or to run without Docker, follow [docs/demos/phase-2.md](docs/demos/phase-2.md)
+(Phase 1: [docs/demos/phase-1.md](docs/demos/phase-1.md)). No AI provider key is needed for the demo: a
+deterministic test provider answers until you configure one under **Settings → AI**.
 
 ## Repository
 

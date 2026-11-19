@@ -12,7 +12,7 @@ docker compose -f deploy/compose/docker-compose.yml up -d
 ```
 
 ```bash
-docker compose -f deploy/compose/docker-compose.yml exec api tessera seed demo --phase 2
+docker compose -f deploy/compose/docker-compose.yml exec server tessera seed demo --phase 2
 ```
 
 Without Docker: start PostgreSQL 16 with the `vector`, `pg_trgm`, `unaccent` and `btree_gist` extensions,
